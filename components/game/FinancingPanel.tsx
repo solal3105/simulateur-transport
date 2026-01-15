@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/gameStore'
-import { FinancingLevers } from '@/lib/types'
+import { FinancingLevers, MandatPeriod } from '@/lib/types'
 import { BASE_PRICES } from '@/lib/data'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
@@ -83,9 +83,9 @@ const leverInfos: Record<string, LeverInfo> = {
   },
   versementMobilite: {
     title: "Versement Mobilité",
-    description: "Taxe payée par les entreprises de +11 salariés.",
+    description: "Taxation des entreprises de plus de 11 salariés pour financer les transports en commun. Baisser le taux peut se faire sans loi, mais l'augmenter nécessite une loi nationale.",
     impact: "±700 M€ par ±25%",
-    warning: "⚖️ Nécessite une loi nationale pour modifier le taux.",
+    warning: "⚖️ Augmenter le taux nécessite une loi nationale.",
     icon: Building2,
     color: "from-green-500 to-emerald-600",
     requiresLaw: true,
@@ -101,12 +101,22 @@ const leverInfos: Record<string, LeverInfo> = {
     requiresLaw: true,
     lawType: "TVA réduite",
   },
+  electrificationBus: {
+    title: "Électrification des Bus",
+    description: "Conversion de la flotte de bus thermiques vers l'électrique. Réduction des émissions et du bruit, mais coût initial important.",
+    impact: "460 M€ total",
+    warning: "⚠️ Désactiver augmentera les coûts de maintenance, de carburant et la pollution sur le long terme. C'est perdant économiquement et écologiquement.",
+    icon: Building2,
+    color: "from-green-500 to-teal-600",
+  },
 }
 
 export function GameFinancingPanel() {
   const { financingLevers, setFinancingLever, getBudgetState } = useGameStore()
   const [expandedLever, setExpandedLever] = useState<string | null>(null)
   const [lawPopup, setLawPopup] = useState<{ show: boolean; lawType: string; onConfirm: () => void } | null>(null)
+  const [budgetWarning, setBudgetWarning] = useState<{ show: boolean; deficit: number } | null>(null)
+  const [electrificationWarning, setElectrificationWarning] = useState<{ show: boolean; onConfirm: () => void } | null>(null)
   const budget = getBudgetState()
 
   const totalLeverImpact = calculateTotalImpact(financingLevers)
@@ -215,11 +225,114 @@ export function GameFinancingPanel() {
         )}
       </AnimatePresence>
 
-      {/* Section Politiques Publiques */}
+      {/* Budget Warning Popup */}
+      <AnimatePresence>
+        {budgetWarning?.show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            onClick={() => setBudgetWarning(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-800 rounded-2xl border border-red-500/50 p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg">Budget en déficit !</h3>
+                  <p className="text-red-400 text-sm">Financement insuffisant</p>
+                </div>
+              </div>
+              <p className="text-gray-300 mb-4">
+                Votre budget passerait en <strong className="text-red-400">déficit de {formatCurrency(Math.abs(budgetWarning.deficit))}</strong>.
+              </p>
+              <p className="text-gray-300 mb-6">
+                Les 2 milliards de base par mandat représentent déjà l&apos;équilibre très endetté du Sytral. 
+                <strong className="text-white"> Vous devez trouver des financements supplémentaires</strong> avant de valider ce projet.
+              </p>
+              <button
+                onClick={() => setBudgetWarning(null)}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold hover:opacity-90 transition-opacity"
+              >
+                Compris, je vais ajuster mon budget
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Electrification Warning Popup */}
+      <AnimatePresence>
+        {electrificationWarning?.show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            onClick={() => setElectrificationWarning(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-800 rounded-2xl border border-orange-500/50 p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg">Attention !</h3>
+                  <p className="text-orange-400 text-sm">Désactivation de l&apos;électrification</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-6">
+                <p className="text-gray-300">
+                  <strong className="text-white">Impacts écologiques :</strong> Maintien des émissions de CO2 et de particules fines, aggravation de la pollution de l&apos;air.
+                </p>
+                <p className="text-gray-300">
+                  <strong className="text-white">Coûts de maintenance :</strong> Les bus thermiques nécessitent plus d&apos;entretien (moteur, échappement, filtres).
+                </p>
+                <p className="text-gray-300">
+                  <strong className="text-white">Coûts de carburant :</strong> Dépendance au diesel dont le prix est volatile et en hausse.
+                </p>
+                <p className="text-red-400 font-bold">
+                  Sur le long terme, c&apos;est perdant économiquement et écologiquement.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setElectrificationWarning(null)}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={electrificationWarning.onConfirm}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold hover:opacity-90 transition-opacity"
+                >
+                  Désactiver quand même
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Section Tarification Sociale */}
       <div className="p-4 border-b border-gray-700/50">
         <h3 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
           <Users className="w-4 h-4 text-purple-400" />
-          Politiques Publiques
+          Tarification Sociale
         </h3>
         <div className="space-y-3">
           {/* Gratuité Totale */}
@@ -282,7 +395,7 @@ export function GameFinancingPanel() {
             info={leverInfos.tarifAbonnements}
             value={financingLevers.tarifAbonnements}
             onChange={(val) => setFinancingLever('tarifAbonnements', val)}
-            min={-30}
+            min={0}
             max={50}
             basePrice={BASE_PRICES.abonnement}
             impactPerPercent={12}
@@ -297,7 +410,7 @@ export function GameFinancingPanel() {
             info={leverInfos.tarifTickets}
             value={financingLevers.tarifTickets}
             onChange={(val) => setFinancingLever('tarifTickets', val)}
-            min={-30}
+            min={0}
             max={50}
             basePrice={BASE_PRICES.ticket}
             impactPerPercent={8}
@@ -322,8 +435,8 @@ export function GameFinancingPanel() {
           info={leverInfos.versementMobilite}
           value={financingLevers.versementMobilite}
           onChange={(val) => {
-            if (val !== 0) {
-              handleLawLeverChange('versementMobilite', val as -25 | 0 | 25 | 50, 'Modification du Versement Mobilité')
+            if (val > 0) {
+              handleLawLeverChange('versementMobilite', val as -25 | 0 | 25 | 50, 'Augmentation du Versement Mobilité')
             } else {
               setFinancingLever('versementMobilite', val as -25 | 0 | 25 | 50)
             }
@@ -347,6 +460,28 @@ export function GameFinancingPanel() {
           expanded={expandedLever === 'tva55'}
           onToggleExpand={() => setExpandedLever(expandedLever === 'tva55' ? null : 'tva55')}
           showLawBadge
+        />
+
+        {/* Électrification des Bus */}
+        <LeverPeriodSelect
+          lever="electrificationBus"
+          info={leverInfos.electrificationBus}
+          value={financingLevers.electrificationBus}
+          onChange={(val) => {
+            if (val === null && financingLevers.electrificationBus !== null) {
+              setElectrificationWarning({
+                show: true,
+                onConfirm: () => {
+                  setFinancingLever('electrificationBus', null)
+                  setElectrificationWarning(null)
+                }
+              })
+            } else {
+              setFinancingLever('electrificationBus', val)
+            }
+          }}
+          expanded={expandedLever === 'electrificationBus'}
+          onToggleExpand={() => setExpandedLever(expandedLever === 'electrificationBus' ? null : 'electrificationBus')}
         />
       </div>
 
@@ -634,6 +769,90 @@ function LeverSelect({
   )
 }
 
+function LeverPeriodSelect({
+  lever,
+  info,
+  value,
+  onChange,
+  expanded,
+  onToggleExpand,
+}: {
+  lever: string
+  info: LeverInfo
+  value: MandatPeriod
+  onChange: (val: MandatPeriod) => void
+  expanded: boolean
+  onToggleExpand: () => void
+}) {
+  const Icon = info.icon
+  const options: { value: MandatPeriod; label: string }[] = [
+    { value: null, label: 'Désactivé' },
+    { value: 'M1', label: 'Mandat 1' },
+    { value: 'M2', label: 'Mandat 2' },
+    { value: 'M1+M2', label: 'M1+M2' },
+  ]
+
+  return (
+    <div className={cn(
+      "rounded-xl border transition-all",
+      value !== null ? "border-blue-500/50 bg-blue-500/10" : "border-gray-700/50 bg-gray-900/30"
+    )}>
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br",
+              info.color
+            )}>
+              <Icon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-white font-medium text-sm">{info.title}</p>
+              <p className="text-gray-500 text-xs">{info.impact}</p>
+            </div>
+          </div>
+          <button onClick={onToggleExpand} className="p-1 text-gray-400 hover:text-white">
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2">
+          {options.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                "py-2 px-2 rounded-lg text-xs font-medium transition-all",
+                value === opt.value
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                  : "bg-gray-900/50 text-gray-400 hover:text-white hover:bg-gray-700/50"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-3 pt-3 border-t border-gray-700/50"
+          >
+            <p className="text-gray-400 text-sm mb-2">{info.description}</p>
+            {info.warning && (
+              <div className="flex gap-2 text-yellow-500/80 text-xs">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{info.warning}</span>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function calculateTotalImpact(levers: FinancingLevers): number {
   let impact = 0
   if (levers.gratuiteTotale) impact -= 1925
@@ -648,5 +867,6 @@ function calculateTotalImpact(levers: FinancingLevers): number {
   const vmImpacts: Record<string, number> = { '-25': -700, '0': 0, '25': 700, '50': 1400 }
   impact += vmImpacts[levers.versementMobilite.toString()] || 0
   if (levers.tva55) impact += 96
+  // electrificationBus is now handled as a project cost, not a lever impact
   return impact
 }

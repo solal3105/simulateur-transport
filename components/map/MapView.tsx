@@ -95,7 +95,7 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
   // Determine line style based on selection state
   const getLineStyle = () => {
     const isSelected = selectedPeriod !== null
-    const baseWeight = isActive ? 8 : isSelected ? 6 : 4
+    const baseWeight = isActive ? 10 : isSelected ? 8 : 6
     const baseOpacity = isActive ? 1 : isSelected ? 0.9 : 0.6
     
     return {
@@ -122,7 +122,7 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
             data={geojsonData}
             style={() => ({
               color: color,
-              weight: isActive ? 16 : 12,
+              weight: isActive ? 20 : 16,
               opacity: 0.3,
               fillOpacity: 0,
             })}
@@ -138,9 +138,10 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
               onClick()
             },
             mouseover: (e) => {
+              // Apply hover effect on all lines
               const layer = e.target
               layer.setStyle({
-                weight: 8,
+                weight: isActive ? 12 : 10,
                 opacity: 1,
               })
             },
@@ -188,6 +189,7 @@ export function MapView() {
   const [showFinancing, setShowFinancing] = useState(false)
 
   const handleProjectClick = (project: Project) => {
+    // Always open the panel, even if project is already selected (allows deselection)
     setSelectedProject(project)
   }
 

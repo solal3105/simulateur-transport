@@ -10,8 +10,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'metro-e-part-dieu',
-    name: 'Métro E Part-Dieu',
-    cost: 2400,
+    name: 'Extension Métro E Part-Dieu',
+    cost: 600,
     impact: 102000,
     description: "Nouvelle ligne E reliant Alaï à Part-Dieu via Point du Jour et Bellecour. Tracé Est-Ouest structurant pour la métropole.",
   },
@@ -38,7 +38,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 't13-souterrain',
-    name: 'T13 C2 en T13 Souterrain',
+    name: 'Tram du Nord',
     cost: 1200,
     impact: 60000,
     description: "Tracé: Grange Blanche → Part-Dieu → Charpennes → Campus. Passage en souterrain pour un temps de parcours réduit et une meilleure régularité.",
@@ -73,30 +73,17 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 't10-c6',
-    name: 'T10 C6 Tramway',
+    name: 'Tram de l\'Ouest',
     cost: 600,
     impact: 25000,
-    description: "Tracé: Vénissieux → Saint-Fons → Feyzin → Solaize. Nouvelle ligne de tramway desservant le sud-est de la métropole.",
+    description: "Tramway sur le tracé du C6. Tracé: Vénissieux → Saint-Fons → Feyzin → Solaize. Nouvelle ligne de tramway desservant le sud-est de la métropole.",
   },
   {
     id: 't12-c3',
-    name: 'T12 C3 Tramway',
+    name: 'Tram du Centre',
     cost: 540,
     impact: 75000,
     description: "Tracé: Part-Dieu → Villeurbanne → Vaulx-en-Velin → Décines. Conversion de la ligne C3 en tramway pour plus de capacité.",
-  },
-  {
-    id: 't9-c2',
-    name: 'T9 C2 Tramway Surface',
-    cost: 480,
-    impact: 45000,
-    description: "Tracé: Charpennes → Tonkin → Gratte-Ciel → Grand Clément. Tramway en surface reprenant le tracé du C2.",
-  },
-  {
-    id: 'electrif-bus',
-    name: 'Électrification Bus',
-    cost: 460,
-    description: "Conversion de la flotte de bus thermiques vers l'électrique. Réduction des émissions et du bruit sur l'ensemble du réseau.",
   },
   {
     id: 'modern-d',
@@ -142,16 +129,22 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 't11',
-    name: 'T11 Tram T11',
+    name: 'Tram du Rhône',
     cost: 120,
     impact: 25000,
     description: "Tracé: Décines Grand Large → Meyzieu. Extension du réseau tramway vers l'est de la métropole.",
   },
   {
-    id: 't9-t10-final',
-    name: 'T9/T10 Finalisation',
-    cost: 100,
-    description: "Achèvement des travaux et connexions des lignes T9 et T10. Mise en cohérence du réseau tramway sud.",
+    id: 't9-final',
+    name: 'T9 Finalisation',
+    cost: 50,
+    description: "Achèvement des travaux et connexions de la ligne T9. Mise en cohérence du réseau tramway sud.",
+  },
+  {
+    id: 't10-final',
+    name: 'T10 Finalisation',
+    cost: 50,
+    description: "Achèvement des travaux et connexions de la ligne T10. Mise en cohérence du réseau tramway sud.",
   },
   {
     id: 'bhns-parilly',
@@ -207,6 +200,7 @@ export const FINANCING_IMPACTS = {
     '50': 1400,
   },
   tva55: 96,
+  electrificationBus: -460, // Coût de conversion de la flotte
 }
 
 // Prix de base pour affichage

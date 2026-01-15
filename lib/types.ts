@@ -32,6 +32,7 @@ export interface FinancingLevers {
   tarifTickets: number
   versementMobilite: -25 | 0 | 25 | 50
   tva55: boolean
+  electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
 }
 
 export interface BudgetState {

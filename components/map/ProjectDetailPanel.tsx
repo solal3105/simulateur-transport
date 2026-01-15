@@ -1,9 +1,11 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Project, MandatPeriod } from '@/lib/types'
 import { PROJECT_GEO_DATA, PROJECT_TYPE_COLORS } from '@/lib/projectsGeo'
 import { formatCurrency, formatNumber, cn } from '@/lib/utils'
+import { useGameStore } from '@/lib/gameStore'
 import { 
   X, 
   Users, 
@@ -14,7 +16,8 @@ import {
   MapPin,
   Euro,
   Check,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react'
 
 interface ProjectDetailPanelProps {
@@ -50,12 +53,27 @@ export function ProjectDetailPanel({
   onSelectPeriod, 
   onClose 
 }: ProjectDetailPanelProps) {
+  const { projectSelections } = useGameStore()
+  const [showDependencyWarning, setShowDependencyWarning] = useState(false)
   const geoData = PROJECT_GEO_DATA[project.id]
   const projectType = geoData?.type || 'other'
   const Icon = getProjectIcon(projectType)
   const typeColor = PROJECT_TYPE_COLORS[projectType]
   const efficiency = project.impact ? Math.round(project.impact / project.cost) : 0
   const isLocked = project.mandatOnly === 'M1+M2'
+
+  // Check if metro-e-bellecour is selected (required for metro-e-part-dieu)
+  const isBellecourSelected = projectSelections.some(s => s.projectId === 'metro-e-bellecour')
+  const requiresBellecour = project.id === 'metro-e-part-dieu'
+  const canSelect = !requiresBellecour || isBellecourSelected
+
+  const handlePeriodSelect = (period: MandatPeriod) => {
+    if (requiresBellecour && !isBellecourSelected && period !== null) {
+      setShowDependencyWarning(true)
+      return
+    }
+    onSelectPeriod(period)
+  }
 
   const periods: { value: MandatPeriod; label: string; sublabel: string }[] = isLocked 
     ? [{ value: 'M1+M2', label: 'M1+M2', sublabel: '2026-2038' }]
@@ -176,7 +194,7 @@ export function ProjectDetailPanel({
                   return (
                     <motion.button
                       key={period.value}
-                      onClick={() => onSelectPeriod(isSelected ? null : period.value)}
+                      onClick={() => handlePeriodSelect(isSelected ? null : period.value)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={cn(
@@ -235,10 +253,68 @@ export function ProjectDetailPanel({
                 ⚠️ Projet obligatoirement étalé sur les deux mandats
               </p>
             )}
+
+            {/* Dependency Notice */}
+            {requiresBellecour && !isBellecourSelected && (
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                <p className="text-orange-400 text-xs">
+                  <strong>Prérequis :</strong> Vous devez d'abord sélectionner le Métro E Bellecour (section centrale)
+                </p>
+              </div>
+            )}
           </div>
         </div>
         </motion.div>
       </div>
+
+      {/* Dependency Warning Modal */}
+      <AnimatePresence>
+        {showDependencyWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            onClick={() => setShowDependencyWarning(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-800 rounded-2xl border border-orange-500/50 p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg">Prérequis manquant</h3>
+                  <p className="text-orange-400 text-sm">Dépendance de projet</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-6">
+                <p className="text-gray-300">
+                  <strong className="text-white">Extension Métro E Part-Dieu</strong> est une extension de la ligne E.
+                </p>
+                <p className="text-gray-300">
+                  Vous devez d'abord sélectionner <strong className="text-orange-400">Métro E Bellecour</strong> (la section centrale de la ligne) avant de pouvoir ajouter cette extension.
+                </p>
+                <p className="text-gray-400 text-sm">
+                  💡 La ligne E se construit par étapes : d'abord la section centrale (Bellecour), puis les extensions peuvent être ajoutées.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDependencyWarning(false)}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:opacity-90 transition-opacity"
+              >
+                Compris
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

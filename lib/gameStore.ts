@@ -61,6 +61,7 @@ const initialFinancingLevers: FinancingLevers = {
   tarifTickets: 0,
   versementMobilite: 0,
   tva55: false,
+  electrificationBus: 'M1+M2',
 }
 
 export const useGameStore = create<GameState>()(
@@ -148,6 +149,16 @@ export const useGameStore = create<GameState>()(
             totalImpact += project.impact
           }
         })
+
+        // Add electrification bus cost (460M total)
+        if (financingLevers.electrificationBus === 'M1') {
+          m1Cost += 460
+        } else if (financingLevers.electrificationBus === 'M2') {
+          m2Cost += 460
+        } else if (financingLevers.electrificationBus === 'M1+M2') {
+          m1Cost += 230
+          m2Cost += 230
+        }
 
         const leverImpact = calculateLeverImpact(financingLevers)
         const totalCost = m1Cost + m2Cost
@@ -284,10 +295,10 @@ export const useGameStore = create<GameState>()(
           {
             id: 'eco-friendly',
             name: 'Écolo',
-            description: 'Financer l\'électrification des bus',
+            description: 'Activer l\'électrification des bus',
             icon: '🌱',
-            unlocked: projectSelections.some(s => s.projectId === 'electrif-bus'),
-            condition: () => projectSelections.some(s => s.projectId === 'electrif-bus'),
+            unlocked: financingLevers.electrificationBus !== null,
+            condition: () => financingLevers.electrificationBus !== null,
           },
           {
             id: 'big-spender',
@@ -377,6 +388,8 @@ function calculateLeverImpact(levers: FinancingLevers): number {
   if (levers.tva55) {
     impact += FINANCING_IMPACTS.tva55
   }
+
+  // electrificationBus is now handled as a project cost in getBudgetState, not as a lever impact
 
   return impact
 }

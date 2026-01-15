@@ -88,12 +88,6 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     type: 'tram',
     geojsonFile: 't9-c2.geojson',
   },
-  'electrif-bus': {
-    id: 'electrif-bus',
-    coordinates: [45.7500, 4.8300], // Centre maintenance
-    type: 'bus',
-    geojsonFile: 'electrif-bus.geojson',
-  },
   'modern-d': {
     id: 'modern-d',
     coordinates: [45.7450, 4.8420], // Ligne D
@@ -136,11 +130,17 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     type: 'tram',
     geojsonFile: 't11.geojson',
   },
-  't9-t10-final': {
-    id: 't9-t10-final',
-    coordinates: [45.7200, 4.8700], // Sud
+  't9-final': {
+    id: 't9-final',
+    coordinates: [45.7180, 4.8650], // Sud T9
     type: 'tram',
-    geojsonFile: 't9-t10-final.geojson',
+    geojsonFile: 't9-final.geojson',
+  },
+  't10-final': {
+    id: 't10-final',
+    coordinates: [45.7220, 4.8750], // Sud T10
+    type: 'tram',
+    geojsonFile: 't10-final.geojson',
   },
   'bhns-parilly': {
     id: 'bhns-parilly',

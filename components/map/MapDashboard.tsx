@@ -25,15 +25,17 @@ interface MapDashboardProps {
   onCloseFinancing: () => void
 }
 
-function getValidationMessage(totalProjects: number, totalImpact: number, financingLevers: any): { title: string; subtitle: string; emoji: string } {
+function getValidationMessage(totalProjects: number, totalImpact: number, financingLevers: any, budget: any): { title: string; subtitle: string; emoji: string } {
   const hasGratuite = financingLevers?.gratuiteTotale
   const hasHighImpact = totalImpact > 200000
   const hasManyProjects = totalProjects >= 10
+  const isBalanced = budget.m1 >= 0 && budget.m2 >= 0
+  const hasSmallDeficit = (budget.m1 < 0 && budget.m1 >= -100) || (budget.m2 < 0 && budget.m2 >= -100)
   
   if (hasGratuite && hasManyProjects) {
     return {
       title: "Vision ambitieuse et sociale !",
-      subtitle: "Gratuité + investissements massifs",
+      subtitle: isBalanced ? "Budget équilibré" : "Ajuster le financement",
       emoji: "🌟"
     }
   }
@@ -41,7 +43,7 @@ function getValidationMessage(totalProjects: number, totalImpact: number, financ
   if (hasHighImpact && hasManyProjects) {
     return {
       title: "Programme très ambitieux !",
-      subtitle: `${totalProjects} projets majeurs`,
+      subtitle: isBalanced ? "Budget maîtrisé" : hasSmallDeficit ? "Léger déficit" : "Financement à ajuster",
       emoji: "🚀"
     }
   }
@@ -49,14 +51,14 @@ function getValidationMessage(totalProjects: number, totalImpact: number, financ
   if (totalProjects < 5) {
     return {
       title: "Programme ciblé",
-      subtitle: "Quelques projets stratégiques",
+      subtitle: isBalanced ? "Budget excédentaire" : "Quelques projets stratégiques",
       emoji: "🎯"
     }
   }
   
   return {
-    title: "Programme équilibré",
-    subtitle: `${totalProjects} projets sélectionnés`,
+    title: `${totalProjects} projets sélectionnés`,
+    subtitle: isBalanced ? "Budget équilibré" : hasSmallDeficit ? "Déficit acceptable" : "Financement insuffisant",
     emoji: "✅"
   }
 }
@@ -71,8 +73,8 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing 
   
   const budget = getBudgetState()
   const totalProjects = projectSelections.length
-  const isValid = budget.m1 >= -1000 && budget.m2 >= -1000
-  const hasExcessiveDebt = budget.m1 < -1000 || budget.m2 < -1000
+  const isValid = budget.m1 >= -100 && budget.m2 >= -100
+  const hasExcessiveDebt = budget.m1 < -100 || budget.m2 < -100
   const hasProjects = totalProjects > 0
 
   const totalInvestment = projectSelections.reduce((acc, sel) => {
@@ -80,7 +82,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing 
     return acc + (project?.cost || 0)
   }, 0)
 
-  const validationMsg = getValidationMessage(totalProjects, budget.totalImpact, financingLevers)
+  const validationMsg = getValidationMessage(totalProjects, budget.totalImpact, financingLevers, budget)
 
   return (
     <>
@@ -191,7 +193,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing 
                 className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2 w-fit"
               >
                 <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <p className="text-red-400 font-medium text-sm">Dette excessive ! Max 1 Md€/mandat</p>
+                <p className="text-red-400 font-medium text-sm">Déficit maximum : 100 M€/mandat</p>
               </motion.div>
             )}
           </div>
