@@ -1,5 +1,13 @@
 export type MandatPeriod = 'M1' | 'M2' | 'M1+M2' | null
 
+export interface UpgradeOption {
+  id: string
+  name: string
+  description: string
+  cost: number
+  impact: number
+}
+
 export interface Project {
   id: string
   name: string
@@ -7,6 +15,14 @@ export interface Project {
   impact?: number
   mandatOnly?: 'M1+M2'
   description?: string
+  upgrade?: {
+    name: string
+    description: string
+    additionalCost: number
+    additionalImpact?: number
+  }
+  upgradeOptions?: UpgradeOption[] // Pour les projets avec choix multiples (ex: Ligne du Nord)
+  requires?: string // ID du projet requis
 }
 
 export interface PublicPolicy {
@@ -21,6 +37,8 @@ export interface PublicPolicy {
 export interface ProjectSelection {
   projectId: string
   period: MandatPeriod
+  upgraded?: boolean // Pour les projets avec upgrade simple
+  selectedUpgradeOptionId?: string // Pour les projets avec choix multiples (upgradeOptions)
 }
 
 export interface FinancingLevers {
@@ -33,6 +51,7 @@ export interface FinancingLevers {
   versementMobilite: -25 | 0 | 25 | 50
   tva55: boolean
   electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
+  entretienBus: MandatPeriod // Entretien et renouvellement de la flotte de bus - 800M€ total
 }
 
 export interface BudgetState {

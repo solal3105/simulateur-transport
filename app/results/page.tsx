@@ -87,7 +87,7 @@ export default function ResultsPage() {
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="w-8 h-8" />
                 <div>
-                  <p className="text-sm opacity-90">Budget M1</p>
+                  <p className="text-sm opacity-90">Mandat 1</p>
                   <p className="text-2xl md:text-3xl font-bold">
                     {formatCurrency(budget.m1)}
                   </p>
@@ -102,7 +102,7 @@ export default function ResultsPage() {
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="w-8 h-8" />
                 <div>
-                  <p className="text-sm opacity-90">Budget M2</p>
+                  <p className="text-sm opacity-90">Mandat 2</p>
                   <p className="text-2xl md:text-3xl font-bold">
                     {formatCurrency(budget.m2)}
                   </p>
@@ -146,7 +146,7 @@ export default function ResultsPage() {
                             {formatCurrency(period === 'M1+M2' ? project.cost / 2 : project.cost)}
                           </p>
                           {period === 'M1+M2' && (
-                            <span className="text-xs text-muted-foreground">M1+M2</span>
+                            <span className="text-xs text-muted-foreground">Étalé</span>
                           )}
                         </div>
                       </div>
@@ -189,7 +189,7 @@ export default function ResultsPage() {
                             {formatCurrency(period === 'M1+M2' ? project.cost / 2 : project.cost)}
                           </p>
                           {period === 'M1+M2' && (
-                            <span className="text-xs text-muted-foreground">M1+M2</span>
+                            <span className="text-xs text-muted-foreground">Étalé</span>
                           )}
                         </div>
                       </div>

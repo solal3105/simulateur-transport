@@ -23,6 +23,8 @@ const initialFinancingLevers: FinancingLevers = {
   tarifTickets: 0,
   versementMobilite: 0,
   tva55: false,
+  electrificationBus: null,
+  entretienBus: null,
 }
 
 export const useSimulatorStore = create<SimulatorState>((set, get) => ({

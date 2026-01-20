@@ -10,10 +10,10 @@ export interface ProjectGeoData {
 // Coordonnées des projets dans la région lyonnaise
 // Format: [latitude, longitude]
 export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
-  'ext-b-nord': {
-    id: 'ext-b-nord',
+  'ligne-du-nord': {
+    id: 'ligne-du-nord',
     coordinates: [45.8142, 4.8823], // Rillieux-la-Pape
-    type: 'metro',
+    type: 'tram',
     geojsonFile: 'ext-b-nord.geojson',
   },
   'metro-e-part-dieu': {
@@ -40,12 +40,6 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     type: 'metro',
     geojsonFile: 'ext-d.geojson',
   },
-  't13-souterrain': {
-    id: 't13-souterrain',
-    coordinates: [45.7445, 4.8795], // Grange Blanche
-    type: 'tram',
-    geojsonFile: 't13-souterrain.geojson',
-  },
   'teol-enterre': {
     id: 'teol-enterre',
     coordinates: [45.7667, 4.8050], // Alaï/Gorge de Loup
@@ -57,12 +51,6 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     coordinates: [45.7650, 4.8100], // Alaï/Gorge de Loup variante
     type: 'tram',
     geojsonFile: 'teol-semi-enterre.geojson',
-  },
-  'entretien-bus': {
-    id: 'entretien-bus',
-    coordinates: [45.7484, 4.8467], // Centre Lyon (dépôt)
-    type: 'bus',
-    geojsonFile: 'entretien-bus.geojson',
   },
   'modern-a': {
     id: 'modern-a',
@@ -105,12 +93,6 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     coordinates: [45.7100, 4.8450], // Sud Est
     type: 'bus',
     geojsonFile: 'c6-bhns.geojson',
-  },
-  'c2-bhns': {
-    id: 'c2-bhns',
-    coordinates: [45.7700, 4.8750], // Villeurbanne
-    type: 'bus',
-    geojsonFile: 'c2-bhns.geojson',
   },
   'modern-c': {
     id: 'modern-c',

@@ -31,6 +31,7 @@ interface GameState {
   score: number
   projectSelections: ProjectSelection[]
   financingLevers: FinancingLevers
+  busOfferConfirmed: boolean
   showTutorial: boolean
   selectedCategory: string | null
   animatingBudget: boolean
@@ -41,6 +42,8 @@ interface GameState {
   nextOnboardingStep: () => void
   skipOnboarding: () => void
   setProjectPeriod: (projectId: string, period: MandatPeriod) => void
+  setProjectUpgrade: (projectId: string, upgraded: boolean) => void
+  setProjectUpgradeOption: (projectId: string, optionId: string | null) => void
   setFinancingLever: <K extends keyof FinancingLevers>(lever: K, value: FinancingLevers[K]) => void
   getBudgetState: () => { m1: number; m2: number; totalImpact: number; efficiency: number; leverImpact: number }
   getScore: () => number
@@ -50,6 +53,7 @@ interface GameState {
   setSelectedCategory: (cat: string | null) => void
   setAnimatingBudget: (val: boolean) => void
   setLastAction: (action: string | null) => void
+  setBusOfferConfirmed: (val: boolean) => void
 }
 
 const initialFinancingLevers: FinancingLevers = {
@@ -61,7 +65,8 @@ const initialFinancingLevers: FinancingLevers = {
   tarifTickets: 0,
   versementMobilite: 0,
   tva55: false,
-  electrificationBus: 'M1+M2',
+  electrificationBus: null,
+  entretienBus: 'M1+M2',
 }
 
 export const useGameStore = create<GameState>()(
@@ -73,6 +78,7 @@ export const useGameStore = create<GameState>()(
       score: 0,
       projectSelections: [],
       financingLevers: initialFinancingLevers,
+      busOfferConfirmed: false,
       showTutorial: true,
       selectedCategory: null,
       animatingBudget: false,
@@ -97,7 +103,11 @@ export const useGameStore = create<GameState>()(
           let newSelections: ProjectSelection[]
           
           if (period === null) {
-            newSelections = state.projectSelections.filter((s) => s.projectId !== projectId)
+            // Remove project and any projects that depend on it
+            newSelections = state.projectSelections.filter((s) => {
+              const p = PROJECTS.find(pr => pr.id === s.projectId)
+              return s.projectId !== projectId && p?.requires !== projectId
+            })
             set({ lastAction: project ? `❌ ${project.name} retiré` : null })
           } else {
             const existing = state.projectSelections.find((s) => s.projectId === projectId)
@@ -114,6 +124,26 @@ export const useGameStore = create<GameState>()(
           return { projectSelections: newSelections, animatingBudget: true }
         })
         
+        setTimeout(() => set({ animatingBudget: false }), 600)
+      },
+
+      setProjectUpgrade: (projectId, upgraded) => {
+        set((state) => ({
+          projectSelections: state.projectSelections.map((s) =>
+            s.projectId === projectId ? { ...s, upgraded } : s
+          ),
+          animatingBudget: true,
+        }))
+        setTimeout(() => set({ animatingBudget: false }), 600)
+      },
+
+      setProjectUpgradeOption: (projectId, optionId) => {
+        set((state) => ({
+          projectSelections: state.projectSelections.map((s) =>
+            s.projectId === projectId ? { ...s, selectedUpgradeOptionId: optionId || undefined } : s
+          ),
+          animatingBudget: true,
+        }))
         setTimeout(() => set({ animatingBudget: false }), 600)
       },
 
@@ -136,18 +166,33 @@ export const useGameStore = create<GameState>()(
           const project = PROJECTS.find((p) => p.id === selection.projectId)
           if (!project) return
 
-          if (selection.period === 'M1') {
-            m1Cost += project.cost
-          } else if (selection.period === 'M2') {
-            m2Cost += project.cost
-          } else if (selection.period === 'M1+M2') {
-            m1Cost += project.cost / 2
-            m2Cost += project.cost / 2
+          let projectCost = project.cost
+          let projectImpact = project.impact || 0
+
+          // Handle upgradeOptions (multiple choice like Ligne du Nord)
+          if (project.upgradeOptions && selection.selectedUpgradeOptionId) {
+            const selectedOption = project.upgradeOptions.find(o => o.id === selection.selectedUpgradeOptionId)
+            if (selectedOption) {
+              projectCost = selectedOption.cost
+              projectImpact = selectedOption.impact
+            }
+          }
+          // Handle simple upgrade (like TEOL)
+          else if (selection.upgraded && project.upgrade) {
+            projectCost += project.upgrade.additionalCost
+            projectImpact += project.upgrade.additionalImpact || 0
           }
 
-          if (project.impact) {
-            totalImpact += project.impact
+          if (selection.period === 'M1') {
+            m1Cost += projectCost
+          } else if (selection.period === 'M2') {
+            m2Cost += projectCost
+          } else if (selection.period === 'M1+M2') {
+            m1Cost += projectCost / 2
+            m2Cost += projectCost / 2
           }
+
+          totalImpact += projectImpact
         })
 
         // Add electrification bus cost (460M total)
@@ -158,6 +203,16 @@ export const useGameStore = create<GameState>()(
         } else if (financingLevers.electrificationBus === 'M1+M2') {
           m1Cost += 230
           m2Cost += 230
+        }
+
+        // Add bus fleet maintenance cost (800M total)
+        if (financingLevers.entretienBus === 'M1') {
+          m1Cost += 800
+        } else if (financingLevers.entretienBus === 'M2') {
+          m2Cost += 800
+        } else if (financingLevers.entretienBus === 'M1+M2') {
+          m1Cost += 400
+          m2Cost += 400
         }
 
         const leverImpact = calculateLeverImpact(financingLevers)
@@ -347,12 +402,14 @@ export const useGameStore = create<GameState>()(
       setSelectedCategory: (cat) => set({ selectedCategory: cat }),
       setAnimatingBudget: (val) => set({ animatingBudget: val }),
       setLastAction: (action) => set({ lastAction: action }),
+      setBusOfferConfirmed: (val) => set({ busOfferConfirmed: val }),
     }),
     {
       name: 'tcl-game-storage',
       partialize: (state) => ({
         projectSelections: state.projectSelections,
         financingLevers: state.financingLevers,
+        busOfferConfirmed: state.busOfferConfirmed,
       }),
     }
   )

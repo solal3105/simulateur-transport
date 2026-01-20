@@ -10,6 +10,8 @@ import { PROJECT_GEO_DATA, SELECTION_COLORS } from '@/lib/projectsGeo'
 import { Project, MandatPeriod } from '@/lib/types'
 import { ProjectDetailPanel } from './ProjectDetailPanel'
 import { MapDashboard } from './MapDashboard'
+import { ProjectTooltip } from './ProjectTooltip'
+import { useTheme } from '@/contexts/ThemeContext'
 import 'leaflet/dist/leaflet.css'
 
 // Lyon center coordinates
@@ -65,10 +67,11 @@ interface ProjectMarkerProps {
   geoData: typeof PROJECT_GEO_DATA[string]
   selectedPeriod: MandatPeriod
   onClick: () => void
+  onHover: (project: Project | null) => void
   isActive: boolean
 }
 
-function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: ProjectMarkerProps) {
+function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isActive }: ProjectMarkerProps) {
   const color = getMarkerColor(selectedPeriod)
   const icon = createMarkerIcon(color, isActive || selectedPeriod !== null, geoData.type)
   const [geojsonData, setGeojsonData] = useState<GeoJSON.GeoJsonObject | null>(null)
@@ -95,18 +98,21 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
   // Determine line style based on selection state
   const getLineStyle = () => {
     const isSelected = selectedPeriod !== null
-    const baseWeight = isActive ? 10 : isSelected ? 8 : 6
-    const baseOpacity = isActive ? 1 : isSelected ? 0.9 : 0.6
+    const baseWeight = isActive ? 10 : isSelected ? 7 : 5
+    const baseOpacity = isActive ? 1 : isSelected ? 0.95 : 0.7
+    
+    // Unselected lines: subtle but visible with soft color
+    const lineColor = isActive ? '#ffffff' : isSelected ? color : '#94a3b8'
     
     return {
-      color: isActive ? '#ffffff' : color,
+      color: lineColor,
       weight: baseWeight,
       opacity: baseOpacity,
       fillColor: color,
-      fillOpacity: isSelected ? 0.3 : 0.1,
+      fillOpacity: isSelected ? 0.3 : 0.05,
       lineCap: 'round' as const,
       lineJoin: 'round' as const,
-      dashArray: isSelected ? undefined : '5, 10',
+      dashArray: isSelected ? undefined : '8, 6',
       className: `geojson-line ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}`,
     }
   }
@@ -115,10 +121,29 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
   if (hasGeojson && geojsonData) {
     return (
       <>
+        {/* Invisible thick trace for easier clicking */}
+        <GeoJSON
+          key={`${project.id}-hitbox-${selectedPeriod}-${isActive}`}
+          data={geojsonData}
+          style={() => ({
+            color: 'transparent',
+            weight: 30,
+            opacity: 0,
+            fillOpacity: 0,
+          })}
+          eventHandlers={{
+            click: (e) => {
+              L.DomEvent.stopPropagation(e)
+              onClick()
+            },
+            mouseover: () => onHover(project),
+            mouseout: () => onHover(null),
+          }}
+        />
         {/* Glow effect for selected lines */}
         {(selectedPeriod || isActive) && (
           <GeoJSON
-            key={`${project.id}-glow`}
+            key={`${project.id}-glow-${selectedPeriod}-${isActive}`}
             data={geojsonData}
             style={() => ({
               color: color,
@@ -129,7 +154,7 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
           />
         )}
         <GeoJSON
-          key={project.id}
+          key={`${project.id}-${selectedPeriod}-${isActive}`}
           data={geojsonData}
           style={getLineStyle}
           eventHandlers={{
@@ -138,16 +163,17 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
               onClick()
             },
             mouseover: (e) => {
-              // Apply hover effect on all lines
               const layer = e.target
               layer.setStyle({
                 weight: isActive ? 12 : 10,
                 opacity: 1,
               })
+              onHover(project)
             },
             mouseout: (e) => {
               const layer = e.target
               layer.setStyle(getLineStyle())
+              onHover(null)
             },
           }}
         />
@@ -161,6 +187,8 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, isActive }: 
       icon={icon}
       eventHandlers={{
         click: onClick,
+        mouseover: () => onHover(project),
+        mouseout: () => onHover(null),
       }}
     />
   )
@@ -183,14 +211,69 @@ function MapEventHandler({ onMapClick }: { onMapClick: () => void }) {
   return null
 }
 
+// Map tile providers
+const MAP_STYLES = {
+  light: {
+    name: 'Clair',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
+  dark: {
+    name: 'Sombre',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
+  satellite: {
+    name: 'Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri',
+  },
+  streets: {
+    name: 'Classique',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
+}
+
+export type MapStyleKey = keyof typeof MAP_STYLES
+
 export function MapView() {
-  const { projectSelections, setProjectPeriod } = useGameStore()
+  const { projectSelections, setProjectPeriod, setProjectUpgrade, setProjectUpgradeOption } = useGameStore()
+  const { resolvedTheme } = useTheme()
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [showFinancing, setShowFinancing] = useState(false)
+  const [showBusOffer, setShowBusOffer] = useState(false)
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>(resolvedTheme === 'dark' ? 'dark' : 'light')
+
+  // Sync map style with theme on initial load
+  useEffect(() => {
+    if (mapStyle === 'light' || mapStyle === 'dark') {
+      setMapStyle(resolvedTheme === 'dark' ? 'dark' : 'light')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedTheme])
+
+  // Track mouse position for tooltip
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
+  const currentMapStyle = MAP_STYLES[mapStyle]
 
   const handleProjectClick = (project: Project) => {
-    // Always open the panel, even if project is already selected (allows deselection)
-    setSelectedProject(project)
+    // If clicking on already selected project, close and reopen to force refresh
+    if (selectedProject?.id === project.id) {
+      setSelectedProject(null)
+      setTimeout(() => setSelectedProject(project), 0)
+    } else {
+      setSelectedProject(project)
+    }
   }
 
   const handleMapClick = () => {
@@ -207,18 +290,19 @@ export function MapView() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gray-900">
+    <div className="relative w-full h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Map Container */}
       <MapContainer
         center={LYON_CENTER}
         zoom={DEFAULT_ZOOM}
         className="w-full h-full z-0"
-        style={{ background: '#1a1a2e' }}
+        style={{ background: 'var(--map-bg)' }}
         zoomControl={false}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          key={mapStyle}
+          attribution={currentMapStyle.attribution}
+          url={currentMapStyle.url}
         />
         
         <MapEventHandler onMapClick={handleMapClick} />
@@ -235,6 +319,7 @@ export function MapView() {
               geoData={geoData}
               selectedPeriod={getProjectSelection(project.id)}
               onClick={() => handleProjectClick(project)}
+              onHover={setHoveredProject}
               isActive={selectedProject?.id === project.id}
             />
           )
@@ -246,6 +331,12 @@ export function MapView() {
         onOpenFinancing={() => setShowFinancing(true)}
         showFinancing={showFinancing}
         onCloseFinancing={() => setShowFinancing(false)}
+        onOpenBusOffer={() => setShowBusOffer(true)}
+        showBusOffer={showBusOffer}
+        onCloseBusOffer={() => setShowBusOffer(false)}
+        mapStyle={mapStyle}
+        onMapStyleChange={setMapStyle}
+        mapStyles={MAP_STYLES}
       />
 
 
@@ -257,6 +348,21 @@ export function MapView() {
             selectedPeriod={getProjectSelection(selectedProject.id)}
             onSelectPeriod={(period: MandatPeriod) => handleSelectPeriod(selectedProject.id, period)}
             onClose={() => setSelectedProject(null)}
+            isUpgraded={projectSelections.find(s => s.projectId === selectedProject.id)?.upgraded || false}
+            onToggleUpgrade={(upgraded) => setProjectUpgrade(selectedProject.id, upgraded)}
+            selectedUpgradeOptionId={projectSelections.find(s => s.projectId === selectedProject.id)?.selectedUpgradeOptionId}
+            onSelectUpgradeOption={(optionId) => setProjectUpgradeOption(selectedProject.id, optionId)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Project Tooltip on Hover */}
+      <AnimatePresence>
+        {hoveredProject && !selectedProject && (
+          <ProjectTooltip
+            project={hoveredProject}
+            projectType={PROJECT_GEO_DATA[hoveredProject.id]?.type || 'other'}
+            mousePosition={mousePosition}
           />
         )}
       </AnimatePresence>

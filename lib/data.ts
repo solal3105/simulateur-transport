@@ -2,11 +2,34 @@ import { Project, PublicPolicy } from './types'
 
 export const PROJECTS: Project[] = [
   {
-    id: 'ext-b-nord',
-    name: 'Extension Ligne B Nord',
-    cost: 3300,
-    impact: 71500,
-    description: "Prolongement de la ligne B vers le nord jusqu'à Rillieux-la-Pape, desservant les quartiers de Caluire et les zones denses du nord lyonnais.",
+    id: 'ligne-du-nord',
+    name: 'Ligne du Nord',
+    cost: 350,
+    impact: 60000,
+    description: "Nouvelle desserte du nord lyonnais vers Rillieux-la-Pape. Choisissez le mode de transport adapté à vos ambitions.",
+    upgradeOptions: [
+      {
+        id: 'tram-surface',
+        name: 'Tram en surface',
+        description: 'Tramway classique en surface. Solution économique avec bonne capacité.',
+        cost: 350,
+        impact: 60000,
+      },
+      {
+        id: 'tram-enterre',
+        name: 'Tram enterré',
+        description: 'Tramway en souterrain. Temps de parcours réduit et meilleure régularité.',
+        cost: 900,
+        impact: 60000,
+      },
+      {
+        id: 'metro',
+        name: 'Métro',
+        description: 'Extension de la ligne B en métro. Capacité maximale et performances optimales.',
+        cost: 3300,
+        impact: 71500,
+      },
+    ],
   },
   {
     id: 'metro-e-part-dieu',
@@ -14,6 +37,7 @@ export const PROJECTS: Project[] = [
     cost: 600,
     impact: 102000,
     description: "Nouvelle ligne E reliant Alaï à Part-Dieu via Point du Jour et Bellecour. Tracé Est-Ouest structurant pour la métropole.",
+    requires: 'metro-e-bellecour',
   },
   {
     id: 'ext-a-est',
@@ -37,13 +61,6 @@ export const PROJECTS: Project[] = [
     description: "Prolongement de la ligne D au-delà de son terminus actuel pour améliorer la desserte du sud de l'agglomération.",
   },
   {
-    id: 't13-souterrain',
-    name: 'Tram du Nord',
-    cost: 1200,
-    impact: 60000,
-    description: "Tracé: Grange Blanche → Part-Dieu → Charpennes → Campus. Passage en souterrain pour un temps de parcours réduit et une meilleure régularité.",
-  },
-  {
     id: 'teol-enterre',
     name: 'TEOL Enterré',
     cost: 1100,
@@ -56,13 +73,12 @@ export const PROJECTS: Project[] = [
     cost: 800,
     impact: 55000,
     description: "Tramway Express de l'Ouest Lyonnais en version semi-enterrée. Tracé: Alaï → Gorge de Loup → Part-Dieu. Compromis entre coût et performance.",
-  },
-  {
-    id: 'entretien-bus',
-    name: 'Entretiens flotte bus',
-    cost: 800,
-    mandatOnly: 'M1+M2',
-    description: "Maintenance et renouvellement de la flotte de bus TCL. Indispensable pour maintenir la qualité de service sur l'ensemble du réseau.",
+    upgrade: {
+      name: 'TEOL Complètement Enterré',
+      description: "Passage en version complètement enterrée, pas seulement sous les pentes de l'ouest. Améliore la régularité mais renonce à la requalification urbaine du tracé en surface.",
+      additionalCost: 300,
+      additionalImpact: 0,
+    },
   },
   {
     id: 'modern-a',
@@ -105,13 +121,6 @@ export const PROJECTS: Project[] = [
     cost: 240,
     impact: 20000,
     description: "Bus à Haut Niveau de Service sur le tracé du C6. Fréquence élevée et voies dédiées sans investissement lourd.",
-  },
-  {
-    id: 'c2-bhns',
-    name: 'C2 BHNS',
-    cost: 240,
-    impact: 25000,
-    description: "Bus à Haut Niveau de Service sur le tracé du C2. Alternative moins coûteuse au tramway avec un bon niveau de service.",
   },
   {
     id: 'modern-c',

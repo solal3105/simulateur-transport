@@ -40,7 +40,7 @@ const leverInfos: Record<string, LeverInfo> = {
   gratuiteTotale: {
     title: "Gratuité Totale",
     description: "Rendre tous les transports gratuits pour tous les usagers. Active cette option pour bloquer les modifications de tarifs et les remettre à zéro.",
-    impact: "-1 925 Millions €/mandat",
+    impact: "-1 925 M€/mandat",
     warning: "⚠️ Bloque la possibilité de jouer avec les tarifs et remet les prix à leur valeur initiale.",
     icon: Users,
     color: "from-red-500 to-rose-600",
@@ -48,7 +48,7 @@ const leverInfos: Record<string, LeverInfo> = {
   gratuiteConditionnee: {
     title: "Gratuité Conditionnée (Proposition Aulas)",
     description: "Gratuité réservée aux habitants de Lyon uniquement (pas les autres communes de la métropole) et dont les revenus sont inférieurs à 2 500€/mois.",
-    impact: "-300 Millions €/mandat",
+    impact: "-300 M€/mandat",
     warning: "Mesure sociale ciblée excluant les non-lyonnais et les revenus supérieurs à 2 500€.",
     icon: Users,
     color: "from-orange-500 to-amber-600",
@@ -56,35 +56,35 @@ const leverInfos: Record<string, LeverInfo> = {
   gratuiteJeunesAbonnes: {
     title: "Gratuité 11-18 ans enfants d'abonnés",
     description: "Gratuité des transports TCL pour les jeunes de 11 à 18 ans dont au moins un parent est abonné TCL.",
-    impact: "-48 Millions €/mandat",
+    impact: "-48 M€/mandat",
     icon: GraduationCap,
     color: "from-pink-500 to-rose-600",
   },
   metro24hWeekend: {
     title: "Métro 24h/24 les weekends",
     description: "Ouverture du métro toute la nuit les vendredis et samedis soirs pour faciliter les sorties nocturnes.",
-    impact: "-24 Millions €/mandat",
+    impact: "-24 M€/mandat",
     icon: Moon,
     color: "from-indigo-500 to-purple-600",
   },
   tarifAbonnements: {
     title: "Tarif Abonnements",
     description: "Ajuster le prix des abonnements mensuels.",
-    impact: "+12 Millions € par +1%",
+    impact: "+12 M€ par +1%",
     icon: CreditCard,
     color: "from-blue-500 to-cyan-600",
   },
   tarifTickets: {
     title: "Tarif Tickets",
     description: "Ajuster le prix du ticket unitaire.",
-    impact: "+8 Millions € par +1%",
+    impact: "+8 M€ par +1%",
     icon: CreditCard,
     color: "from-purple-500 to-pink-600",
   },
   versementMobilite: {
     title: "Versement Mobilité",
     description: "Taxation des entreprises de plus de 11 salariés pour financer les transports en commun. Baisser le taux peut se faire sans loi, mais l'augmenter nécessite une loi nationale.",
-    impact: "±700 Millions € par ±25%",
+    impact: "±700 M€ par ±25%",
     warning: "⚖️ Augmenter le taux nécessite une loi nationale.",
     icon: Building2,
     color: "from-green-500 to-emerald-600",
@@ -94,7 +94,7 @@ const leverInfos: Record<string, LeverInfo> = {
   tva55: {
     title: "TVA à 5,5%",
     description: "Passage de la TVA de 10% à 5,5% sur les transports publics.",
-    impact: "+96 Millions €/mandat",
+    impact: "+96 M€/mandat",
     warning: "⚖️ Nécessite une décision gouvernementale.",
     icon: Percent,
     color: "from-teal-500 to-cyan-600",
@@ -104,7 +104,7 @@ const leverInfos: Record<string, LeverInfo> = {
   electrificationBus: {
     title: "Électrification des Bus",
     description: "Conversion de la flotte de bus thermiques vers l'électrique. Réduction des émissions et du bruit, mais coût initial important.",
-    impact: "460 Millions € total",
+    impact: "460 M€ total",
     warning: "⚠️ Désactiver augmentera les coûts de maintenance, de carburant et la pollution sur le long terme. C'est perdant économiquement et écologiquement.",
     icon: Building2,
     color: "from-green-500 to-teal-600",
@@ -112,7 +112,7 @@ const leverInfos: Record<string, LeverInfo> = {
   entretienBus: {
     title: "Entretien Flotte de Bus",
     description: "Maintenance et renouvellement de la flotte de bus TCL. Indispensable pour maintenir la qualité de service sur l'ensemble du réseau.",
-    impact: "800 Millions € total",
+    impact: "800 M€ total",
     warning: "⚠️ Désactiver dégradera la qualité de service et augmentera les pannes. Obligatoire pour un réseau fonctionnel.",
     icon: Building2,
     color: "from-orange-500 to-red-600",
@@ -154,35 +154,33 @@ export function GameFinancingPanel() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="bg-white dark:bg-gray-800  rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
     >
-      {/* Header Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
-            <Coins className="w-7 h-7 text-white" />
+      {/* Header */}
+      <div className="p-4 bg-gradient-to-r from-green-600/100 to-emerald-600/100 border-b border-gray-700/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+            <Coins className="w-5 h-5 text-gray-900 dark:text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Leviers de Financement</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Équilibrez votre budget avec les bonnes sources de revenus</p>
+            <h2 className="text-gray-900 dark:text-white font-bold">Leviers de Financement</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Ajustez vos sources de revenus</p>
           </div>
         </div>
         
         {/* Total impact indicator */}
         <div className={cn(
-          "px-5 py-4 rounded-xl flex items-center justify-between",
-          totalLeverImpact >= 0 
-            ? "bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700" 
-            : "bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700"
+          "mt-3 px-3 py-2 rounded-xl flex items-center justify-between",
+          totalLeverImpact >= 0 ? "bg-green-500/20" : "bg-red-500/20"
         )}>
-          <span className="text-gray-700 dark:text-gray-300 font-medium">Impact total des leviers</span>
+          <span className="text-gray-700 dark:text-gray-300 text-sm">Impact total leviers</span>
           <span className={cn(
-            "text-xl font-bold",
-            totalLeverImpact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+            "font-bold",
+            totalLeverImpact >= 0 ? "text-green-400" : "text-red-400"
           )}>
-            {totalLeverImpact >= 0 ? '+' : ''}{formatCurrency(totalLeverImpact)} / mandat
+            {totalLeverImpact >= 0 ? '+' : ''}{formatCurrency(totalLeverImpact)}/mandat
           </span>
         </div>
       </div>
@@ -194,39 +192,39 @@ export function GameFinancingPanel() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/100  z-[100] flex items-center justify-center p-4"
             onClick={() => setLawPopup(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-amber-400 dark:border-amber-500 p-6 max-w-md w-full shadow-2xl"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-yellow-500/100 p-6 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg">
-                  <Gavel className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                  <Gavel className="w-6 h-6 text-gray-900 dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold text-xl">Loi requise</h3>
-                  <p className="text-amber-600 dark:text-amber-400 font-medium">{lawPopup.lawType}</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-lg">Loi requise</h3>
+                  <p className="text-yellow-400 text-sm">{lawPopup.lawType}</p>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Cette mesure nécessite un <strong className="text-gray-900 dark:text-white">changement législatif au niveau national</strong>. 
                 Vous devrez convaincre le gouvernement et le parlement d&apos;adopter cette loi.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setLawPopup(null)}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-400 dark:bg-gray-600 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={lawPopup.onConfirm}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 dark:text-white font-bold hover:opacity-90 transition-opacity"
                 >
                   J&apos;assume !
                 </button>
@@ -243,35 +241,35 @@ export function GameFinancingPanel() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/100  z-[100] flex items-center justify-center p-4"
             onClick={() => setBudgetWarning(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-red-400 dark:border-red-500 p-6 max-w-md w-full shadow-2xl"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-red-500/100 p-6 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg">
-                  <AlertTriangle className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-gray-900 dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold text-xl">Budget en déficit !</h3>
-                  <p className="text-red-600 dark:text-red-400 font-medium">Financement insuffisant</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-lg">Budget en déficit !</h3>
+                  <p className="text-red-400 text-sm">Financement insuffisant</p>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                Votre budget passerait en <strong className="text-red-600 dark:text-red-400">déficit de {formatCurrency(Math.abs(budgetWarning.deficit))}</strong>.
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Votre budget passerait en <strong className="text-red-400">déficit de {formatCurrency(Math.abs(budgetWarning.deficit))}</strong>.
               </p>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Les 2 milliards de base par mandat représentent déjà l&apos;équilibre très endetté du Sytral. 
                 <strong className="text-gray-900 dark:text-white"> Vous devez trouver des financements supplémentaires</strong> avant de valider ce projet.
               </p>
               <button
                 onClick={() => setBudgetWarning(null)}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold hover:from-red-600 hover:to-rose-700 transition-all shadow-lg"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-gray-900 dark:text-white font-bold hover:opacity-90 transition-opacity"
               >
                 Compris, je vais ajuster mon budget
               </button>
@@ -287,49 +285,49 @@ export function GameFinancingPanel() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/100  z-[100] flex items-center justify-center p-4"
             onClick={() => setElectrificationWarning(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-orange-400 dark:border-orange-500 p-6 max-w-md w-full shadow-2xl"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-orange-500/100 p-6 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
-                  <AlertTriangle className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-gray-900 dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold text-xl">Attention !</h3>
-                  <p className="text-orange-600 dark:text-orange-400 font-medium">Désactivation de l&apos;électrification</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-lg">Attention !</h3>
+                  <p className="text-orange-400 text-sm">Désactivation de l&apos;électrification</p>
                 </div>
               </div>
               <div className="space-y-3 mb-6">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Impacts écologiques :</strong> Maintien des émissions de CO2 et de particules fines, aggravation de la pollution de l&apos;air.
                 </p>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Coûts de maintenance :</strong> Les bus thermiques nécessitent plus d&apos;entretien (moteur, échappement, filtres).
                 </p>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Coûts de carburant :</strong> Dépendance au diesel dont le prix est volatile et en hausse.
                 </p>
-                <p className="text-red-600 dark:text-red-400 font-bold">
+                <p className="text-red-400 font-bold">
                   Sur le long terme, c&apos;est perdant économiquement et écologiquement.
                 </p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setElectrificationWarning(null)}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-400 dark:bg-gray-600 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={electrificationWarning.onConfirm}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-gray-900 dark:text-white font-bold hover:opacity-90 transition-opacity"
                 >
                   Désactiver quand même
                 </button>
@@ -346,49 +344,49 @@ export function GameFinancingPanel() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/100  z-[100] flex items-center justify-center p-4"
             onClick={() => setEntretienBusWarning(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-red-400 dark:border-red-500 p-6 max-w-md w-full shadow-2xl"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-red-500/100 p-6 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg">
-                  <AlertTriangle className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-gray-900 dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold text-xl">Danger !</h3>
-                  <p className="text-red-600 dark:text-red-400 font-medium">Désactivation de l&apos;entretien de la flotte</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-lg">Danger !</h3>
+                  <p className="text-red-400 text-sm">Désactivation de l&apos;entretien de la flotte</p>
                 </div>
               </div>
               <div className="space-y-3 mb-6">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Sécurité des usagers :</strong> Augmentation drastique des risques de pannes et d&apos;accidents. Mise en danger des voyageurs.
                 </p>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Qualité de service :</strong> Multiplication des retards, annulations et interruptions de service. Dégradation de l&apos;image du réseau TCL.
                 </p>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong className="text-gray-900 dark:text-white">Coûts exponentiels :</strong> Les réparations d&apos;urgence coûtent 3 à 5 fois plus cher que l&apos;entretien préventif.
                 </p>
-                <p className="text-red-600 dark:text-red-400 font-bold">
+                <p className="text-red-400 font-bold">
                   Sans entretien, le réseau de bus s&apos;effondrera en quelques mois. C&apos;est irresponsable et intenable.
                 </p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setEntretienBusWarning(null)}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-400 dark:bg-gray-600 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={entretienBusWarning.onConfirm}
-                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold hover:from-red-600 hover:to-rose-700 transition-all shadow-lg"
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-gray-900 dark:text-white font-bold hover:opacity-90 transition-opacity"
                 >
                   Désactiver quand même
                 </button>
@@ -399,14 +397,12 @@ export function GameFinancingPanel() {
       </AnimatePresence>
 
       {/* Section Tarification Sociale */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-            <Users className="w-5 h-5 text-white" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tarification Sociale</h3>
-        </div>
-        <div className="space-y-4">
+      <div className="p-4 border-b border-gray-700/50">
+        <h3 className="text-gray-900 dark:text-white font-bold text-sm mb-3 flex items-center gap-2">
+          <Users className="w-4 h-4 text-purple-400" />
+          Tarification Sociale
+        </h3>
+        <div className="space-y-3">
           {/* Gratuité Totale */}
           <LeverToggle
             lever="gratuiteTotale"
@@ -452,19 +448,15 @@ export function GameFinancingPanel() {
       </div>
 
       {/* Section Tarification */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
-              <CreditCard className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tarification</h3>
-          </div>
+      <div className="p-4 border-b border-gray-700/50">
+        <h3 className="text-gray-900 dark:text-white font-bold text-sm mb-3 flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-blue-400" />
+          Tarification
           {financingLevers.gratuiteTotale && (
-            <span className="px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 text-xs font-semibold">Bloqué - Gratuité active</span>
+            <span className="text-xs text-red-400 ml-2">(Bloqué - Gratuité totale active)</span>
           )}
-        </div>
-        <div className="space-y-4">
+        </h3>
+        <div className="space-y-3">
           {/* Tarif Abonnements */}
           <LeverSlider
             lever="tarifAbonnements"
@@ -498,20 +490,12 @@ export function GameFinancingPanel() {
       </div>
 
       {/* Section Fiscalité */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Fiscalité & Investissements</h3>
-          </div>
-          <span className="px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 text-xs font-semibold flex items-center gap-1.5">
-            <Gavel className="w-3.5 h-3.5" />
-            Loi requise
-          </span>
-        </div>
-        <div className="space-y-4">
+      <div className="p-4 space-y-3">
+        <h3 className="text-gray-900 dark:text-white font-bold text-sm mb-3 flex items-center gap-2">
+          <Building2 className="w-4 h-4 text-green-400" />
+          Fiscalité
+          <span className="text-xs text-yellow-400/100 ml-2">(Nécessite une loi)</span>
+        </h3>
 
         {/* Versement Mobilité */}
         <LeverSelect
@@ -545,21 +529,59 @@ export function GameFinancingPanel() {
           onToggleExpand={() => setExpandedLever(expandedLever === 'tva55' ? null : 'tva55')}
           showLawBadge
         />
-        </div>
+
+        {/* Électrification des Bus */}
+        <LeverPeriodSelect
+          lever="electrificationBus"
+          info={leverInfos.electrificationBus}
+          value={financingLevers.electrificationBus}
+          onChange={(val) => {
+            if (val === null && financingLevers.electrificationBus !== null) {
+              setElectrificationWarning({
+                show: true,
+                onConfirm: () => {
+                  setFinancingLever('electrificationBus', null)
+                  setElectrificationWarning(null)
+                }
+              })
+            } else {
+              setFinancingLever('electrificationBus', val)
+            }
+          }}
+          expanded={expandedLever === 'electrificationBus'}
+          onToggleExpand={() => setExpandedLever(expandedLever === 'electrificationBus' ? null : 'electrificationBus')}
+        />
+
+        {/* Entretien Flotte de Bus */}
+        <LeverPeriodSelect
+          lever="entretienBus"
+          info={leverInfos.entretienBus}
+          value={financingLevers.entretienBus}
+          onChange={(val) => {
+            if (val === null && financingLevers.entretienBus !== null) {
+              setEntretienBusWarning({
+                show: true,
+                onConfirm: () => {
+                  setFinancingLever('entretienBus', null)
+                  setEntretienBusWarning(null)
+                }
+              })
+            } else {
+              setFinancingLever('entretienBus', val)
+            }
+          }}
+          expanded={expandedLever === 'entretienBus'}
+          onToggleExpand={() => setExpandedLever(expandedLever === 'entretienBus' ? null : 'entretienBus')}
+        />
       </div>
 
       {/* Educational tip */}
-      <div className="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl border-2 border-sky-200 dark:border-sky-700 p-5 shadow-lg">
-        <div className="flex gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
-            <Lightbulb className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h4 className="font-bold text-gray-900 dark:text-white mb-1">Conseil stratégique</h4>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              Équilibrez augmentation des tarifs et aides sociales pour maintenir l&apos;attractivité du réseau tout en finançant vos projets ambitieux.
-            </p>
-          </div>
+      <div className="p-4 bg-green-500/100 border-t border-green-500/20">
+        <div className="flex gap-3">
+          <Lightbulb className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+          <p className="text-green-300/100 text-sm">
+            <strong>Conseil :</strong> Équilibrez augmentation des tarifs et aides sociales pour maintenir l&apos;attractivité du réseau tout en finançant vos projets.
+          </p>
         </div>
       </div>
     </motion.div>
@@ -589,30 +611,27 @@ function LeverToggle({
 
   return (
     <div className={cn(
-      "rounded-xl border-2 transition-all",
-      checked 
-        ? "border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" 
-        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50",
-      showLawBadge && !checked ? "border-amber-300 dark:border-amber-600" : "",
-      disabled ? "opacity-50" : ""
+      "rounded-xl border transition-all",
+      checked ? "border-blue-500/100 bg-blue-500/10" : "border-gray-700/100 bg-gray-900/30",
+      showLawBadge && !checked ? "border-yellow-500/30" : ""
     )}>
-      <div className="p-4">
+      <div className="p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-md",
+              "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br",
               info.color
             )}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon className="w-4 h-4 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <p className="text-gray-900 dark:text-white font-semibold">{info.title}</p>
-              <p className="text-red-600 dark:text-red-400 text-sm font-medium">{info.impact}</p>
+              <p className="text-gray-900 dark:text-white font-medium text-sm">{info.title}</p>
+              <p className="text-red-400 text-xs font-medium">{info.impact}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={onToggleExpand} className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-              {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          <div className="flex items-center gap-2">
+            <button onClick={onToggleExpand} className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
             <Switch 
               checked={checked} 
@@ -626,13 +645,13 @@ function LeverToggle({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            className="mt-3 pt-3 border-t border-gray-700/50"
           >
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">{info.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{info.description}</p>
             {info.warning && (
-              <div className="flex gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <span className="text-amber-700 dark:text-amber-300 text-sm">{info.warning}</span>
+              <div className="flex gap-2 text-yellow-500/100 text-xs">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{info.warning}</span>
               </div>
             )}
           </motion.div>
@@ -673,49 +692,47 @@ function LeverSlider({
 
   return (
     <div className={cn(
-      "rounded-xl border-2 transition-all",
+      "rounded-xl border transition-all",
       disabled ? "opacity-50 pointer-events-none" : "",
-      value !== 0 
-        ? "border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20" 
-        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+      value !== 0 ? "border-blue-500/100 bg-blue-500/10" : "border-gray-700/100 bg-gray-900/30"
     )}>
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-md",
+              "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br",
               info.color
             )}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon className="w-4 h-4 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <p className="text-gray-900 dark:text-white font-semibold">{info.title}</p>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Base: {basePrice.toFixed(2)}€</p>
+              <p className="text-gray-900 dark:text-white font-medium text-sm">{info.title}</p>
+              <p className="text-gray-500 text-xs">Base: {basePrice.toFixed(2)}€</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className={cn(
-                "text-lg font-bold",
-                value > 0 ? "text-emerald-600 dark:text-emerald-400" : value < 0 ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-gray-400"
+                "font-bold",
+                value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-gray-600 dark:text-gray-400"
               )}>
                 {value > 0 ? '+' : ''}{value}%
               </p>
               <p className={cn(
-                "text-sm font-medium",
-                value !== 0 ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+                "text-xs font-medium",
+                value !== 0 ? "text-yellow-400" : "text-gray-500"
               )}>
                 → {currentPrice.toFixed(2)}€
               </p>
               <p className={cn(
-                "text-xs font-medium",
-                impact > 0 ? "text-emerald-600 dark:text-emerald-400" : impact < 0 ? "text-red-600 dark:text-red-400" : "text-gray-500"
+                "text-xs",
+                impact > 0 ? "text-green-400/70" : impact < 0 ? "text-red-400/70" : "text-gray-500"
               )}>
                 {impact > 0 ? '+' : ''}{formatCurrency(impact)}
               </p>
             </div>
-            <button onClick={onToggleExpand} className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-              {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            <button onClick={onToggleExpand} className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -734,19 +751,17 @@ function LeverSlider({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            className="mt-3 pt-3 border-t border-gray-700/50"
           >
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">{info.description}</p>
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <p className="text-gray-700 dark:text-gray-300 text-sm">
-                Prix actuel: <span className="text-gray-900 dark:text-white font-bold">{currentPrice.toFixed(2)}€</span>
-                {value !== 0 && (
-                  <span className={value > 0 ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-red-600 dark:text-red-400 font-medium"}>
-                    {' '}({value > 0 ? '+' : ''}{(currentPrice - basePrice).toFixed(2)}€)
-                  </span>
-                )}
-              </p>
-            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">{info.description}</p>
+            <p className="text-gray-500 text-xs mt-2">
+              Prix actuel: <span className="text-gray-900 dark:text-white font-medium">{currentPrice.toFixed(2)}€</span>
+              {value !== 0 && (
+                <span className={value > 0 ? "text-green-400" : "text-red-400"}>
+                  {' '}({value > 0 ? '+' : ''}{(currentPrice - basePrice).toFixed(2)}€)
+                </span>
+              )}
+            </p>
           </motion.div>
         )}
       </div>
@@ -772,34 +787,32 @@ function LeverSelect({
   const Icon = info.icon
   const options = [
     { value: -25, label: '-25%', impact: '-700 M€' },
-    { value: 0, label: 'Actuel', impact: '0' },
+    { value: 0, label: 'Actuel', impact: '0 M€' },
     { value: 25, label: '+25%', impact: '+700 M€' },
-    { value: 50, label: '+50%', impact: '+1.4 Md€' },
+    { value: 50, label: '+50%', impact: '+1 400 M€' },
   ]
 
   return (
     <div className={cn(
-      "rounded-xl border-2 transition-all",
-      value !== 0 
-        ? "border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" 
-        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+      "rounded-xl border transition-all",
+      value !== 0 ? "border-blue-500/100 bg-blue-500/10" : "border-gray-700/100 bg-gray-900/30"
     )}>
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-md",
+              "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br",
               info.color
             )}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon className="w-4 h-4 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <p className="text-gray-900 dark:text-white font-semibold">{info.title}</p>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">{info.impact}</p>
+              <p className="text-gray-900 dark:text-white font-medium text-sm">{info.title}</p>
+              <p className="text-gray-500 text-xs">{info.impact}</p>
             </div>
           </div>
-          <button onClick={onToggleExpand} className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-            {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          <button onClick={onToggleExpand} className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
 
@@ -809,16 +822,16 @@ function LeverSelect({
               key={opt.value}
               onClick={() => onChange(opt.value)}
               className={cn(
-                "py-3 px-2 rounded-xl text-sm font-semibold transition-all",
+                "py-2 px-2 rounded-lg text-xs font-medium transition-all",
                 value === opt.value
-                  ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-gray-900 dark:text-white"
+                  : "bg-gray-900/100 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white hover:bg-gray-300 dark:bg-gray-700/50"
               )}
             >
-              <span className="block font-bold">{opt.label}</span>
+              <span className="block">{opt.label}</span>
               <span className={cn(
-                "block text-xs mt-0.5",
-                value === opt.value ? "text-white/80" : opt.value > 0 ? "text-emerald-600 dark:text-emerald-400" : opt.value < 0 ? "text-red-600 dark:text-red-400" : "text-gray-500"
+                "block text-xs",
+                opt.value > 0 ? "text-green-400/70" : opt.value < 0 ? "text-red-400/70" : ""
               )}>
                 {opt.impact}
               </span>
@@ -830,13 +843,13 @@ function LeverSelect({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            className="mt-3 pt-3 border-t border-gray-700/50"
           >
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">{info.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{info.description}</p>
             {info.warning && (
-              <div className="flex gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <span className="text-amber-700 dark:text-amber-300 text-sm">{info.warning}</span>
+              <div className="flex gap-2 text-yellow-500/100 text-xs">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{info.warning}</span>
               </div>
             )}
           </motion.div>
@@ -866,32 +879,30 @@ function LeverPeriodSelect({
     { value: null, label: 'Désactivé' },
     { value: 'M1', label: 'Mandat 1' },
     { value: 'M2', label: 'Mandat 2' },
-    { value: 'M1+M2', label: 'Étalé' },
+    { value: 'M1+M2', label: 'M1+M2' },
   ]
 
   return (
     <div className={cn(
-      "rounded-xl border-2 transition-all",
-      value !== null 
-        ? "border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20" 
-        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+      "rounded-xl border transition-all",
+      value !== null ? "border-blue-500/100 bg-blue-500/10" : "border-gray-700/100 bg-gray-900/30"
     )}>
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-md",
+              "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br",
               info.color
             )}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon className="w-4 h-4 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <p className="text-gray-900 dark:text-white font-semibold">{info.title}</p>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">{info.impact}</p>
+              <p className="text-gray-900 dark:text-white font-medium text-sm">{info.title}</p>
+              <p className="text-gray-500 text-xs">{info.impact}</p>
             </div>
           </div>
-          <button onClick={onToggleExpand} className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-            {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          <button onClick={onToggleExpand} className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
 
@@ -901,10 +912,10 @@ function LeverPeriodSelect({
               key={opt.label}
               onClick={() => onChange(opt.value)}
               className={cn(
-                "py-3 px-2 rounded-xl text-sm font-semibold transition-all",
+                "py-2 px-2 rounded-lg text-xs font-medium transition-all",
                 value === opt.value
-                  ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-gray-900 dark:text-white"
+                  : "bg-gray-900/100 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white hover:bg-gray-300 dark:bg-gray-700/50"
               )}
             >
               {opt.label}
@@ -916,13 +927,13 @@ function LeverPeriodSelect({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            className="mt-3 pt-3 border-t border-gray-700/50"
           >
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">{info.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{info.description}</p>
             {info.warning && (
-              <div className="flex gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <span className="text-amber-700 dark:text-amber-300 text-sm">{info.warning}</span>
+              <div className="flex gap-2 text-yellow-500/100 text-xs">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{info.warning}</span>
               </div>
             )}
           </motion.div>
