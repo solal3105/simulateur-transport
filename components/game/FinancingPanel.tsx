@@ -130,14 +130,15 @@ export function GameFinancingPanel() {
 
   const totalLeverImpact = calculateTotalImpact(financingLevers)
 
-  // Handle gratuité totale toggle - reset tariffs when enabled
+  // Handle gratuité totale toggle - reset tariffs and disable incompatible options
   const handleGratuiteTotaleChange = (checked: boolean) => {
     if (checked) {
       setFinancingLever('tarifAbonnements', 0)
       setFinancingLever('tarifTickets', 0)
+      setFinancingLever('gratuiteConditionnee', false)
+      setFinancingLever('gratuiteJeunesAbonnes', false) // Already included in total gratuity
     }
     setFinancingLever('gratuiteTotale', checked)
-    if (checked) setFinancingLever('gratuiteConditionnee', false)
   }
 
   // Handle levers that require a law
@@ -158,6 +159,41 @@ export function GameFinancingPanel() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* Budget Summary - Sticky */}
+      <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 -mt-3 mb-3 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              "px-4 py-2 rounded-xl border-2",
+              budget.m1 >= 0 ? "bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-700"
+            )}>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Mandat 1</p>
+              <p className={cn("text-lg font-bold", budget.m1 >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
+                {formatCurrency(budget.m1)}
+              </p>
+            </div>
+            <div className={cn(
+              "px-4 py-2 rounded-xl border-2",
+              budget.m2 >= 0 ? "bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-700"
+            )}>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Mandat 2</p>
+              <p className={cn("text-lg font-bold", budget.m2 >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
+                {formatCurrency(budget.m2)}
+              </p>
+            </div>
+          </div>
+          <div className={cn(
+            "px-4 py-2 rounded-xl border-2",
+            totalLeverImpact >= 0 ? "bg-emerald-50 dark:bg-emerald-900 border-emerald-300 dark:border-emerald-700" : "bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-700"
+          )}>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Leviers</p>
+            <p className={cn("text-lg font-bold", totalLeverImpact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
+              {totalLeverImpact >= 0 ? '+' : ''}{formatCurrency(totalLeverImpact)}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header Card */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
         <div className="flex items-center gap-4 mb-5">
@@ -174,8 +210,8 @@ export function GameFinancingPanel() {
         <div className={cn(
           "px-5 py-4 rounded-xl flex items-center justify-between",
           totalLeverImpact >= 0 
-            ? "bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700" 
-            : "bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700"
+            ? "bg-emerald-50 dark:bg-gray-800 border-2 border-emerald-200 dark:border-emerald-600" 
+            : "bg-red-50 dark:bg-gray-800 border-2 border-red-200 dark:border-red-500"
         )}>
           <span className="text-gray-700 dark:text-gray-300 font-medium">Impact total des leviers</span>
           <span className={cn(
@@ -430,14 +466,25 @@ export function GameFinancingPanel() {
           />
 
           {/* Gratuité 11-18 ans */}
-          <LeverToggle
-            lever="gratuiteJeunesAbonnes"
-            info={leverInfos.gratuiteJeunesAbonnes}
-            checked={financingLevers.gratuiteJeunesAbonnes}
-            onChange={(checked) => setFinancingLever('gratuiteJeunesAbonnes', checked)}
-            expanded={expandedLever === 'gratuiteJeunesAbonnes'}
-            onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteJeunesAbonnes' ? null : 'gratuiteJeunesAbonnes')}
-          />
+          <div className="relative">
+            <LeverToggle
+              lever="gratuiteJeunesAbonnes"
+              info={leverInfos.gratuiteJeunesAbonnes}
+              checked={financingLevers.gratuiteJeunesAbonnes}
+              disabled={financingLevers.gratuiteTotale}
+              onChange={(checked) => setFinancingLever('gratuiteJeunesAbonnes', checked)}
+              expanded={expandedLever === 'gratuiteJeunesAbonnes'}
+              onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteJeunesAbonnes' ? null : 'gratuiteJeunesAbonnes')}
+            />
+            {financingLevers.gratuiteTotale && (
+              <div className="mt-2 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                <p className="text-purple-700 dark:text-purple-300 text-xs flex items-center gap-2">
+                  <Info className="w-4 h-4 flex-shrink-0" />
+                  <span>Déjà inclus dans la gratuité totale - inutile de l&apos;activer séparément</span>
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Métro 24h/24 weekends */}
           <LeverToggle

@@ -17,9 +17,9 @@ import {
 const onboardingSteps = [
   {
     icon: TramFront,
-    title: "Bienvenue, Directeur",
+    title: "Bienvenue, Président(e)",
     subtitle: "Votre mission commence",
-    content: "Vous êtes le nouveau directeur des transports de la Métropole de Lyon. Votre mission : transformer le réseau TCL pour les 12 prochaines années.",
+    content: "Vous êtes le nouveau Président(e) de la Métropole de Lyon. Votre mission : transformer le réseau TCL pour les 12 prochaines années.",
     tip: "Chaque décision que vous prendrez aura un impact sur des millions de Lyonnais.",
     color: "from-blue-500 to-cyan-500",
   },

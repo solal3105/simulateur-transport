@@ -13,14 +13,14 @@ export const PROJECTS: Project[] = [
         name: 'Tram en surface',
         description: 'Tramway classique en surface. Solution économique avec bonne capacité.',
         cost: 350,
-        impact: 60000,
+        impact: 40000,
       },
       {
         id: 'tram-enterre',
         name: 'Tram enterré',
         description: 'Tramway en souterrain. Temps de parcours réduit et meilleure régularité.',
         cost: 900,
-        impact: 60000,
+        impact: 55000,
       },
       {
         id: 'metro',
@@ -54,21 +54,22 @@ export const PROJECTS: Project[] = [
     description: "Section centrale de la ligne E passant par Bellecour, créant un nouveau hub de correspondances au cœur de Lyon.",
   },
   {
+    id: 'grande-dorsale',
+    name: 'Grande Dorsale - Ouest Est',
+    cost: 6000,
+    impact: 182000,
+    description: "S’ils sont élus, Jean‑Michel Aulas et Véronique Sarselli souhaitent engager un débat sur la création d’une dorsale de métro Est-Ouest, qui serait portée lors des Assises métropolitaines de la mobilité en septembre 2026.",
+  },
+  {
     id: 'ext-d',
     name: 'Extension Ligne D',
     cost: 1400,
     impact: 40000,
-    description: "Prolongement de la ligne D au-delà de son terminus actuel pour améliorer la desserte du sud de l'agglomération.",
+    description: "Prolongement de la ligne D au-delà de son terminus actuel pour améliorer la desserte de la duchère.",
   },
+
   {
-    id: 'teol-enterre',
-    name: 'TEOL Enterré',
-    cost: 1100,
-    impact: 55000,
-    description: "Tramway Express de l'Ouest Lyonnais en version enterrée. Tracé: Alaï → Gorge de Loup → Part-Dieu. Dessert l'ouest lyonnais avec des performances métro.",
-  },
-  {
-    id: 'teol-semi-enterre',
+    id: 'teol',
     name: 'TEOL Semi-enterré',
     cost: 800,
     impact: 55000,
@@ -88,11 +89,27 @@ export const PROJECTS: Project[] = [
     description: "Automatisation complète de la ligne A (comme la ligne D). Augmentation de la fréquence et de la capacité sur l'axe Est-Ouest historique.",
   },
   {
-    id: 't10-c6',
-    name: 'Tram de l\'Ouest',
+    id: 'ligne-ouest',
+    name: 'Ligne de l\'Ouest',
     cost: 600,
     impact: 25000,
-    description: "Tramway sur le tracé du C6. Tracé: Vénissieux → Saint-Fons → Feyzin → Solaize. Nouvelle ligne de tramway desservant le sud-est de la métropole.",
+    description: "Nouvelle desserte de l'ouest lyonnais. Choisissez entre un tramway performant ou un bus à haut niveau de service.",
+    upgradeOptions: [
+      {
+        id: 'bhns',
+        name: 'BHNS',
+        description: 'Bus à Haut Niveau de Service. Solution économique avec voies dédiées.',
+        cost: 240,
+        impact: 20000,
+      },
+      {
+        id: 'tram',
+        name: 'Tram',
+        description: 'Tramway classique. Capacité élevée et confort optimal.',
+        cost: 600,
+        impact: 25000,
+      }
+    ],
   },
   {
     id: 't12-c3',
@@ -116,13 +133,6 @@ export const PROJECTS: Project[] = [
     description: "Tracé: Bellecour → Confluence → Gerland → États-Unis. Nouvelle ligne reliant le centre-ville aux quartiers sud en développement.",
   },
   {
-    id: 'c6-bhns',
-    name: 'C6 BHNS',
-    cost: 240,
-    impact: 20000,
-    description: "Bus à Haut Niveau de Service sur le tracé du C6. Fréquence élevée et voies dédiées sans investissement lourd.",
-  },
-  {
     id: 'modern-c',
     name: 'Modernisation Ligne C',
     cost: 239,
@@ -137,23 +147,18 @@ export const PROJECTS: Project[] = [
     description: "Tracé actuel: Gare Part-Dieu → Villeurbanne → Meyzieu. Renforcement des fréquences et ajout de rames sur la ligne T3 existante.",
   },
   {
-    id: 't11',
-    name: 'Tram du Rhône',
-    cost: 120,
-    impact: 25000,
-    description: "Tracé: Décines Grand Large → Meyzieu. Extension du réseau tramway vers l'est de la métropole.",
-  },
-  {
     id: 't9-final',
     name: 'T9 Finalisation',
     cost: 50,
-    description: "Achèvement des travaux et connexions de la ligne T9. Mise en cohérence du réseau tramway sud.",
+    impact: 38000,
+    description: "Achèvement des travaux et connexions de la ligne T9.",
   },
   {
     id: 't10-final',
     name: 'T10 Finalisation',
     cost: 50,
-    description: "Achèvement des travaux et connexions de la ligne T10. Mise en cohérence du réseau tramway sud.",
+    impact: 22000,
+    description: "Achèvement des travaux et connexions de la ligne T10.",
   },
   {
     id: 'bhns-parilly',

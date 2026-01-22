@@ -3,7 +3,7 @@ import { Project } from './types'
 export interface ProjectGeoData {
   id: string
   coordinates: [number, number] // [lat, lng]
-  type: 'metro' | 'tram' | 'bus' | 'other'
+  type: 'metro' | 'tram' | 'bus' | 'other' | 'metro-new' | 'metro-modern' | 'fluvial' | 'upgrade'
   geojsonFile?: string // Pour les tracés complets plus tard
 }
 
@@ -13,56 +13,56 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
   'ligne-du-nord': {
     id: 'ligne-du-nord',
     coordinates: [45.8142, 4.8823], // Rillieux-la-Pape
-    type: 'tram',
+    type: 'upgrade',
     geojsonFile: 'ext-b-nord.geojson',
   },
   'metro-e-part-dieu': {
     id: 'metro-e-part-dieu',
     coordinates: [45.7607, 4.8595], // Part-Dieu
-    type: 'metro',
+    type: 'metro-new',
     geojsonFile: 'metro-e-part-dieu.geojson',
   },
   'ext-a-est': {
     id: 'ext-a-est',
     coordinates: [45.7678, 4.9205], // Vaulx-en-Velin Est
-    type: 'metro',
+    type: 'metro-new',
     geojsonFile: 'ext-a-est.geojson',
   },
   'metro-e-bellecour': {
     id: 'metro-e-bellecour',
     coordinates: [45.7578, 4.8320], // Bellecour
-    type: 'metro',
+    type: 'metro-new',
     geojsonFile: 'metro-e-bellecour.geojson',
   },
   'ext-d': {
     id: 'ext-d',
     coordinates: [45.6989, 4.8364], // Sud Lyon
-    type: 'metro',
+    type: 'metro-new',
     geojsonFile: 'ext-d.geojson',
   },
-  'teol-enterre': {
-    id: 'teol-enterre',
-    coordinates: [45.7667, 4.8050], // Alaï/Gorge de Loup
-    type: 'tram',
-    geojsonFile: 'teol-enterre.geojson',
+  'grande-dorsale': {
+    id: 'grande-dorsale',
+    coordinates: [45.7600, 4.8400], // Centre Lyon
+    type: 'metro-new',
+    geojsonFile: 'grande-dorsale.geojson',
   },
-  'teol-semi-enterre': {
-    id: 'teol-semi-enterre',
-    coordinates: [45.7650, 4.8100], // Alaï/Gorge de Loup variante
+  'teol': {
+    id: 'teol',
+    coordinates: [45.7650, 4.8100], // Alaï/Gorge de Loup
     type: 'tram',
-    geojsonFile: 'teol-semi-enterre.geojson',
+    geojsonFile: 'teol.geojson',
   },
   'modern-a': {
     id: 'modern-a',
     coordinates: [45.7580, 4.8590], // Ligne A centrale
-    type: 'metro',
+    type: 'metro-modern',
     geojsonFile: 'modern-a.geojson',
   },
-  't10-c6': {
-    id: 't10-c6',
-    coordinates: [45.7050, 4.8600], // Vénissieux/Saint-Fons
-    type: 'tram',
-    geojsonFile: 't10-c6.geojson',
+  'ligne-ouest': {
+    id: 'ligne-ouest',
+    coordinates: [45.7050, 4.8600], // Ouest lyonnais
+    type: 'upgrade',
+    geojsonFile: 'ligne-ouest.geojson',
   },
   't12-c3': {
     id: 't12-c3',
@@ -74,12 +74,11 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     id: 't9-c2',
     coordinates: [45.7720, 4.8680], // Charpennes/Tonkin
     type: 'tram',
-    geojsonFile: 't9-c2.geojson',
   },
   'modern-d': {
     id: 'modern-d',
     coordinates: [45.7450, 4.8420], // Ligne D
-    type: 'metro',
+    type: 'metro-modern',
     geojsonFile: 'modern-d.geojson',
   },
   't8': {
@@ -88,16 +87,10 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     type: 'tram',
     geojsonFile: 't8.geojson',
   },
-  'c6-bhns': {
-    id: 'c6-bhns',
-    coordinates: [45.7100, 4.8450], // Sud Est
-    type: 'bus',
-    geojsonFile: 'c6-bhns.geojson',
-  },
   'modern-c': {
     id: 'modern-c',
     coordinates: [45.7740, 4.8280], // Croix-Rousse
-    type: 'metro',
+    type: 'metro-modern',
     geojsonFile: 'modern-c.geojson',
   },
   't3-renf': {
@@ -105,12 +98,6 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     coordinates: [45.7850, 4.9200], // Part-Dieu → Meyzieu
     type: 'tram',
     geojsonFile: 't3-renf.geojson',
-  },
-  't11': {
-    id: 't11',
-    coordinates: [45.7680, 4.9700], // Décines/Meyzieu
-    type: 'tram',
-    geojsonFile: 't11.geojson',
   },
   't9-final': {
     id: 't9-final',
@@ -133,7 +120,7 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
   'navette-fluv': {
     id: 'navette-fluv',
     coordinates: [45.7550, 4.8380], // Confluence fluviale
-    type: 'other',
+    type: 'fluvial',
     geojsonFile: 'navette-fluv.geojson',
   },
   'bhns-rive-droite': {
@@ -146,10 +133,26 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
 
 // Couleurs selon le type de projet
 export const PROJECT_TYPE_COLORS = {
-  metro: '#3B82F6', // Bleu
-  tram: '#10B981', // Vert
-  bus: '#F97316', // Orange
-  other: '#8B5CF6', // Violet
+  'metro-new': '#DC2626', // Rouge (nouveaux métros)
+  'metro-modern': '#1E3A8A', // Bleu nuit (modernisation métro)
+  'metro': '#8B4513', // Marron (métro par défaut)
+  tram: '#7C3AED', // Violet foncé
+  bus: '#EA580C', // Orange foncé (bus rapide/BHNS)
+  fluvial: '#3B82F6', // Bleu (navette fluviale)
+  upgrade: '#A855F7', // Violet vif (projets avec upgrades)
+  other: '#A855F7', // Violet vif (fallback)
+}
+
+// Couleurs non sélectionnées (pour affichage sur la carte)
+export const UNSELECTED_COLORS = {
+  'metro-new': '#F87171', // Rouge clair (nouveaux métros)
+  'metro-modern': '#3B82F6', // Bleu clair (modernisation métro)
+  'metro': '#A0826D', // Marron clair (métro par défaut)
+  tram: '#A78BFA', // Violet clair
+  bus: '#FB923C', // Orange clair (bus rapide/BHNS)
+  fluvial: '#60A5FA', // Bleu clair (navette fluviale)
+  upgrade: '#C084FC', // Violet vif clair (projets avec upgrades)
+  other: '#C084FC', // Violet vif clair (fallback)
 }
 
 // Couleurs selon la sélection

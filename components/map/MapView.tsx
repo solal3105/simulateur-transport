@@ -6,11 +6,12 @@ import L from 'leaflet'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/gameStore'
 import { PROJECTS } from '@/lib/data'
-import { PROJECT_GEO_DATA, SELECTION_COLORS } from '@/lib/projectsGeo'
+import { PROJECT_GEO_DATA, SELECTION_COLORS, PROJECT_TYPE_COLORS, UNSELECTED_COLORS } from '@/lib/projectsGeo'
 import { Project, MandatPeriod } from '@/lib/types'
 import { ProjectDetailPanel } from './ProjectDetailPanel'
 import { MapDashboard } from './MapDashboard'
 import { ProjectTooltip } from './ProjectTooltip'
+import { TutorialOverlay } from '@/components/game/TutorialOverlay'
 import { useTheme } from '@/contexts/ThemeContext'
 import 'leaflet/dist/leaflet.css'
 
@@ -57,8 +58,28 @@ function createMarkerIcon(color: string, isSelected: boolean, projectType: strin
   })
 }
 
-function getMarkerColor(period: MandatPeriod): string {
-  if (!period) return SELECTION_COLORS.none
+function getMarkerColor(period: MandatPeriod, projectType: string, colorMode: 'mode' | 'impact' | 'cost' = 'mode', efficiency: number = 0, cost: number = 0): string {
+  if (colorMode === 'impact') {
+    // Color based on efficiency (impact per M€) - green = efficient, red = expensive
+    // Based on project data: best ~455 (modern-a), worst ~21 (metro-e-bellecour)
+    if (efficiency >= 300) return '#166534' // green-800 (excellent)
+    if (efficiency >= 150) return '#22c55e' // green-500 (very good)
+    if (efficiency >= 80) return '#84cc16' // lime-500 (good)
+    if (efficiency >= 50) return '#facc15' // yellow-400 (average)
+    if (efficiency >= 30) return '#f97316' // orange-500 (below average)
+    return '#dc2626' // red-600 (expensive)
+  }
+  if (colorMode === 'cost') {
+    // Color based on absolute cost - green = cheap, red = expensive
+    // Based on project data: 35M€ (T3) to 6000M€ (Grande Dorsale)
+    if (cost <= 100) return '#166534' // green-800 (very cheap)
+    if (cost <= 300) return '#22c55e' // green-500 (cheap)
+    if (cost <= 600) return '#84cc16' // lime-500 (moderate)
+    if (cost <= 1000) return '#facc15' // yellow-400 (expensive)
+    if (cost <= 2000) return '#f97316' // orange-500 (very expensive)
+    return '#dc2626' // red-600 (mega project)
+  }
+  if (!period) return UNSELECTED_COLORS[projectType as keyof typeof UNSELECTED_COLORS] || UNSELECTED_COLORS.other
   return SELECTION_COLORS[period]
 }
 
@@ -69,10 +90,14 @@ interface ProjectMarkerProps {
   onClick: () => void
   onHover: (project: Project | null) => void
   isActive: boolean
+  colorMode: 'mode' | 'impact' | 'cost'
 }
 
-function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isActive }: ProjectMarkerProps) {
-  const color = getMarkerColor(selectedPeriod)
+function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isActive, colorMode }: ProjectMarkerProps) {
+  // Calculate efficiency for impact color mode
+  const efficiency = project.impact && project.cost ? Math.round(project.impact / project.cost) : 0
+  const cost = project.cost || 0
+  const color = getMarkerColor(selectedPeriod, geoData.type, colorMode, efficiency, cost)
   const icon = createMarkerIcon(color, isActive || selectedPeriod !== null, geoData.type)
   const [geojsonData, setGeojsonData] = useState<GeoJSON.GeoJsonObject | null>(null)
   const [hasGeojson, setHasGeojson] = useState(false)
@@ -95,14 +120,17 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isA
     }
   }, [geoData.geojsonFile])
 
-  // Determine line style based on selection state
+  // Determine line style based on selection state and color mode
   const getLineStyle = () => {
     const isSelected = selectedPeriod !== null
     const baseWeight = isActive ? 10 : isSelected ? 7 : 5
-    const baseOpacity = isActive ? 1 : isSelected ? 0.95 : 0.7
+    const baseOpacity = isActive ? 1 : isSelected ? 0.95 : 0.8
     
-    // Unselected lines: subtle but visible with soft color
-    const lineColor = isActive ? '#ffffff' : isSelected ? color : '#94a3b8'
+    // Use impact/cost-based color or type-specific color based on colorMode
+    const unselectedColor = (colorMode === 'impact' || colorMode === 'cost')
+      ? color // Use impact/cost-based color even when not selected
+      : (UNSELECTED_COLORS[geoData.type as keyof typeof UNSELECTED_COLORS] || UNSELECTED_COLORS.other)
+    const lineColor = isActive ? '#ffffff' : isSelected ? color : unselectedColor
     
     return {
       color: lineColor,
@@ -246,6 +274,16 @@ export function MapView() {
   const [showFinancing, setShowFinancing] = useState(false)
   const [showBusOffer, setShowBusOffer] = useState(false)
   const [mapStyle, setMapStyle] = useState<MapStyleKey>(resolvedTheme === 'dark' ? 'dark' : 'light')
+  const [isMobile, setIsMobile] = useState(false)
+  const [colorMode, setColorMode] = useState<'mode' | 'impact' | 'cost'>('cost') // Default to cost mode
+
+  // Detect mobile devices
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Sync map style with theme on initial load
   useEffect(() => {
@@ -319,8 +357,9 @@ export function MapView() {
               geoData={geoData}
               selectedPeriod={getProjectSelection(project.id)}
               onClick={() => handleProjectClick(project)}
-              onHover={setHoveredProject}
+              onHover={isMobile ? () => {} : setHoveredProject}
               isActive={selectedProject?.id === project.id}
+              colorMode={colorMode}
             />
           )
         })}
@@ -328,15 +367,29 @@ export function MapView() {
 
       {/* Dashboard Overlay - Top */}
       <MapDashboard 
-        onOpenFinancing={() => setShowFinancing(true)}
+        onOpenFinancing={() => {
+          setHoveredProject(null)
+          setSelectedProject(null)
+          setShowFinancing(true)
+        }}
         showFinancing={showFinancing}
         onCloseFinancing={() => setShowFinancing(false)}
-        onOpenBusOffer={() => setShowBusOffer(true)}
+        onOpenBusOffer={() => {
+          setHoveredProject(null)
+          setSelectedProject(null)
+          setShowBusOffer(true)
+        }}
         showBusOffer={showBusOffer}
         onCloseBusOffer={() => setShowBusOffer(false)}
         mapStyle={mapStyle}
         onMapStyleChange={setMapStyle}
         mapStyles={MAP_STYLES}
+        colorMode={colorMode}
+        onColorModeChange={setColorMode}
+        onClearHover={() => {
+          setHoveredProject(null)
+          setSelectedProject(null)
+        }}
       />
 
 
@@ -356,9 +409,9 @@ export function MapView() {
         )}
       </AnimatePresence>
 
-      {/* Project Tooltip on Hover */}
+      {/* Project Tooltip on Hover - Desktop only */}
       <AnimatePresence>
-        {hoveredProject && !selectedProject && (
+        {!isMobile && hoveredProject && !selectedProject && (
           <ProjectTooltip
             project={hoveredProject}
             projectType={PROJECT_GEO_DATA[hoveredProject.id]?.type || 'other'}
@@ -366,6 +419,9 @@ export function MapView() {
           />
         )}
       </AnimatePresence>
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay />
     </div>
   )
 }

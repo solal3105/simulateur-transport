@@ -39,7 +39,7 @@ export function GameHeader() {
               </div>
               <div className="hidden md:block">
                 <h1 className="text-white font-bold">TCL Simulator</h1>
-                <p className="text-gray-400 text-xs">Mode Directeur</p>
+                <p className="text-gray-400 text-xs">Mode Président(e)</p>
               </div>
             </div>
 

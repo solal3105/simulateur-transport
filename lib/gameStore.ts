@@ -33,6 +33,7 @@ interface GameState {
   financingLevers: FinancingLevers
   busOfferConfirmed: boolean
   showTutorial: boolean
+  tutorialStep: number
   selectedCategory: string | null
   animatingBudget: boolean
   lastAction: string | null
@@ -41,6 +42,8 @@ interface GameState {
   setPhase: (phase: GamePhase) => void
   nextOnboardingStep: () => void
   skipOnboarding: () => void
+  nextTutorialStep: () => void
+  skipTutorial: () => void
   setProjectPeriod: (projectId: string, period: MandatPeriod) => void
   setProjectUpgrade: (projectId: string, upgraded: boolean) => void
   setProjectUpgradeOption: (projectId: string, optionId: string | null) => void
@@ -80,6 +83,7 @@ export const useGameStore = create<GameState>()(
       financingLevers: initialFinancingLevers,
       busOfferConfirmed: false,
       showTutorial: true,
+      tutorialStep: 0,
       selectedCategory: null,
       animatingBudget: false,
       lastAction: null,
@@ -96,6 +100,17 @@ export const useGameStore = create<GameState>()(
       },
 
       skipOnboarding: () => set({ phase: 'playing' }),
+      
+      nextTutorialStep: () => {
+        const { tutorialStep } = get()
+        if (tutorialStep < 4) {
+          set({ tutorialStep: tutorialStep + 1 })
+        } else {
+          set({ showTutorial: false, tutorialStep: 0 })
+        }
+      },
+      
+      skipTutorial: () => set({ showTutorial: false, tutorialStep: 0 }),
 
       setProjectPeriod: (projectId, period) => {
         set((state) => {
@@ -391,12 +406,14 @@ export const useGameStore = create<GameState>()(
       },
 
       reset: () => set({
-        phase: 'intro',
+        phase: 'playing',
         onboardingStep: 0,
         projectSelections: [],
         financingLevers: initialFinancingLevers,
+        busOfferConfirmed: false,
         selectedCategory: null,
         lastAction: null,
+        animatingBudget: false,
       }),
 
       setSelectedCategory: (cat) => set({ selectedCategory: cat }),

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/lib/gameStore'
 import { MandatPeriod } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { 
   Bus,
   Zap,
@@ -15,7 +15,8 @@ import {
 import { useState } from 'react'
 
 export function BusOfferPanel() {
-  const { financingLevers, setFinancingLever, setBusOfferConfirmed, busOfferConfirmed } = useGameStore()
+  const { financingLevers, setFinancingLever, setBusOfferConfirmed, busOfferConfirmed, getBudgetState } = useGameStore()
+  const budget = getBudgetState()
   const [showElectrificationWarning, setShowElectrificationWarning] = useState(false)
   const [showEntretienWarning, setShowEntretienWarning] = useState(false)
 

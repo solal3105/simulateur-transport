@@ -63,15 +63,24 @@ export function ProjectDetailPanel({
 }: ProjectDetailPanelProps) {
   const { projectSelections } = useGameStore()
   const [showDependencyWarning, setShowDependencyWarning] = useState(false)
+  
+  // Local state for upgrade option selection (for new projects not yet in store)
+  const hasUpgradeOptions = project.upgradeOptions && project.upgradeOptions.length > 0
+  const [localUpgradeOptionId, setLocalUpgradeOptionId] = useState<string | undefined>(
+    selectedUpgradeOptionId || (hasUpgradeOptions ? project.upgradeOptions?.[0]?.id : undefined)
+  )
+  
   const geoData = PROJECT_GEO_DATA[project.id]
-  const projectType = geoData?.type || 'other'
+  const projectType = hasUpgradeOptions ? 'other' : (geoData?.type || 'other')
   const Icon = getProjectIcon(projectType)
   const typeColor = PROJECT_TYPE_COLORS[projectType]
   
+  // Use local state for upgrade option selection
+  const effectiveUpgradeOptionId = localUpgradeOptionId || selectedUpgradeOptionId
+  
   // For projects with upgradeOptions, use the selected option's cost/impact
-  const hasUpgradeOptions = project.upgradeOptions && project.upgradeOptions.length > 0
-  const selectedOption = hasUpgradeOptions && selectedUpgradeOptionId 
-    ? project.upgradeOptions?.find(o => o.id === selectedUpgradeOptionId) 
+  const selectedOption = hasUpgradeOptions && effectiveUpgradeOptionId 
+    ? project.upgradeOptions?.find(o => o.id === effectiveUpgradeOptionId) 
     : (hasUpgradeOptions ? project.upgradeOptions?.[0] : null)
   
   const totalCost = hasUpgradeOptions && selectedOption 
@@ -116,45 +125,50 @@ export function ProjectDetailPanel({
       />
       
       {/* Popup */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="w-full max-w-lg max-h-[90vh] pointer-events-auto"
+          className="w-full sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] pointer-events-auto"
         >
           <div 
-            className="bg-white dark:bg-gray-800 rounded-3xl border-2 border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl border-2 border-b-0 sm:border-b-2 border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden max-h-[85vh] sm:max-h-[90vh] overflow-y-auto"
             style={{ boxShadow: `0 25px 80px -20px ${typeColor}40` }}
           >
+          {/* Drag Handle - Mobile only */}
+          <div className="sm:hidden flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+          </div>
+
           {/* Header */}
           <div 
-            className="relative p-5"
+            className="relative p-4 sm:p-5"
             style={{ background: `linear-gradient(135deg, ${typeColor}25, transparent)` }}
           >
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-all shadow-md"
+              className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-all shadow-md"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
                 style={{ background: `linear-gradient(135deg, ${typeColor}, ${typeColor}80)` }}
               >
-                <Icon className="w-7 h-7 text-white" />
+                <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
               <div className="flex-1 min-w-0 pr-8">
                 <div 
-                  className="inline-block px-2 py-0.5 rounded-full text-xs font-bold mb-1"
+                  className="inline-block px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold mb-1"
                   style={{ background: `${typeColor}30`, color: typeColor }}
                 >
                   {getProjectTypeLabel(projectType)}
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">
                   {project.name}
                 </h2>
               </div>
@@ -162,60 +176,62 @@ export function ProjectDetailPanel({
           </div>
 
           {/* Content */}
-          <div className="p-5 pt-0 space-y-4">
+          <div className="p-4 sm:p-5 pt-0 space-y-3 sm:space-y-4">
             {/* Description */}
             {project.description && (
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">
                 {project.description}
               </p>
             )}
 
             {/* Stats Row */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               {/* Cost */}
-              <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-xl p-3 text-center shadow-sm">
-                <Euro className="w-4 h-4 text-yellow-400 mx-auto mb-1" />
-                <p className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center shadow-sm">
+                <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 mx-auto mb-0.5 sm:mb-1" />
+                <p className="text-base sm:text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                   {formatCurrency(totalCost)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500">Coût</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-500">Coût</p>
               </div>
 
               {/* Impact */}
               {totalImpact > 0 && (
-                <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-xl p-3 text-center shadow-sm">
-                  <Users className="w-4 h-4 text-purple-500 dark:text-purple-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center shadow-sm">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 dark:text-purple-400 mx-auto mb-0.5 sm:mb-1" />
+                  <p className="text-base sm:text-xl font-bold text-gray-900 dark:text-white">
                     +{formatNumber(totalImpact)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">voy/jour</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-500">voy/jour</p>
                 </div>
               )}
 
               {/* Efficiency */}
               {totalImpact > 0 && (
-                <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-xl p-3 text-center shadow-sm">
-                  <Zap className="w-4 h-4 text-green-500 dark:text-green-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{efficiency}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">voy/M€</p>
+                <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center shadow-sm">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 dark:text-green-400 mx-auto mb-0.5 sm:mb-1" />
+                  <p className="text-base sm:text-xl font-bold text-gray-900 dark:text-white">{efficiency}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-500">voy/M€</p>
                 </div>
               )}
             </div>
 
-            {/* Upgrade Options (Multiple choice like Ligne du Nord) */}
-            {hasUpgradeOptions && selectedPeriod && onSelectUpgradeOption && (
+            {/* Upgrade Options (Multiple choice like Ligne du Nord) - BEFORE period selection */}
+            {hasUpgradeOptions && (
               <div className="space-y-2">
                 <p className="text-gray-600 dark:text-gray-400 text-xs font-medium">
                   🚇 Choisissez le mode de transport :
                 </p>
                 <div className="space-y-2">
                   {project.upgradeOptions?.map((option) => {
-                    const isOptionSelected = selectedUpgradeOptionId === option.id || 
-                      (!selectedUpgradeOptionId && option.id === project.upgradeOptions?.[0]?.id)
+                    const isOptionSelected = effectiveUpgradeOptionId === option.id
                     return (
                       <motion.button
                         key={option.id}
-                        onClick={() => onSelectUpgradeOption(option.id)}
+                        onClick={() => {
+                          setLocalUpgradeOptionId(option.id)
+                          if (onSelectUpgradeOption) onSelectUpgradeOption(option.id)
+                        }}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
                         className={cn(
@@ -251,8 +267,8 @@ export function ProjectDetailPanel({
               </div>
             )}
 
-            {/* Upgrade Option (Simple toggle like TEOL) - Harmonized design */}
-            {project.upgrade && !hasUpgradeOptions && selectedPeriod && onToggleUpgrade && (
+            {/* Upgrade Option (Simple toggle like TEOL) - BEFORE period selection */}
+            {project.upgrade && !hasUpgradeOptions && onToggleUpgrade && (
               <div className="space-y-2">
                 <p className="text-gray-600 dark:text-gray-400 text-xs font-medium">
                   🔧 Option d&apos;amélioration :
@@ -324,14 +340,15 @@ export function ProjectDetailPanel({
               </div>
             )}
 
-            {/* Period Selection - Horizontal */}
+            {/* Period Selection - Horizontal - AFTER upgrade selection */}
+            {(hasUpgradeOptions ? effectiveUpgradeOptionId : true) && (
             <div className="space-y-2">
-              <p className="text-gray-600 dark:text-gray-400 text-xs font-medium flex items-center gap-1">
+              <p className="text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs font-medium flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Quand réaliser ce projet ?
               </p>
               
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 {periods.map((period) => {
                   const isSelected = selectedPeriod === period.value
                   return (
@@ -341,18 +358,18 @@ export function ProjectDetailPanel({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={cn(
-                        "flex-1 py-3 px-3 rounded-xl font-semibold text-sm transition-all duration-200 relative shadow-md",
+                        "flex-1 py-2 sm:py-3 px-2 sm:px-3 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 relative shadow-md",
                         isSelected 
                           ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
                       )}
                     >
                       {isSelected && (
-                        <Check className="w-4 h-4 absolute top-2 right-2" />
+                        <Check className="w-3 h-3 sm:w-4 sm:h-4 absolute top-1.5 sm:top-2 right-1.5 sm:right-2" />
                       )}
-                      <span className="block text-base">{period.label}</span>
+                      <span className="block text-sm sm:text-base">{period.label}</span>
                       <span className={cn(
-                        "block text-xs",
+                        "block text-[10px] sm:text-xs",
                         isSelected ? "text-white" : "text-gray-500"
                       )}>
                         {period.sublabel}
@@ -362,20 +379,21 @@ export function ProjectDetailPanel({
                 })}
               </div>
             </div>
+            )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
+            {/* Action Buttons - Always visible */}
+            <div className="flex gap-2 pt-2 pb-2 sm:pb-0">
               {selectedPeriod ? (
                 <>
                   <button
                     onClick={() => onSelectPeriod(null)}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border-2 border-red-300 dark:border-red-500 transition-all shadow-md"
+                    className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border-2 border-red-300 dark:border-red-500 transition-all shadow-md"
                   >
                     Retirer
                   </button>
                   <button
                     onClick={onClose}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all"
+                    className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all"
                   >
                     ✓ Confirmer
                   </button>
@@ -383,7 +401,7 @@ export function ProjectDetailPanel({
               ) : (
                 <button
                   onClick={onClose}
-                  className="w-full py-3 px-4 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all shadow-md"
+                  className="w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all shadow-md"
                 >
                   Fermer
                 </button>
