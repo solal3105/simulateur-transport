@@ -46,12 +46,20 @@ const leverInfos: Record<string, LeverInfo> = {
     color: "from-red-500 to-rose-600",
   },
   gratuiteConditionnee: {
-    title: "Gratuité Conditionnée (Proposition Aulas)",
+    title: "Gratuité Conditionnée - Que pour les habitants de Lyon",
     description: "Gratuité réservée aux habitants de Lyon uniquement (pas les autres communes de la métropole) et dont les revenus sont inférieurs à 2 500€/mois.",
     impact: "-300 Millions €/mandat",
     warning: "Mesure sociale ciblée excluant les non-lyonnais et les revenus supérieurs à 2 500€.",
     icon: Users,
     color: "from-orange-500 to-amber-600",
+  },
+  suppressionTarifSocial: {
+    title: "Supprimer la tarification sociale",
+    description: "Fin de la gratuité pour les plus précaires, fin des abonnements solidaires. Mesure impopulaire mais qui génère des revenus supplémentaires.",
+    impact: "+240 Millions €/mandat",
+    warning: "⚠️ Mesure socialement contestable. Impacte les personnes les plus vulnérables. Bloqué si gratuité totale active.",
+    icon: Users,
+    color: "from-red-600 to-rose-700",
   },
   gratuiteJeunesAbonnes: {
     title: "Gratuité 11-18 ans enfants d'abonnés",
@@ -137,6 +145,7 @@ export function GameFinancingPanel() {
       setFinancingLever('tarifTickets', 0)
       setFinancingLever('gratuiteConditionnee', false)
       setFinancingLever('gratuiteJeunesAbonnes', false) // Already included in total gratuity
+      setFinancingLever('suppressionTarifSocial', false) // Incompatible avec gratuité totale
     }
     setFinancingLever('gratuiteTotale', checked)
   }
@@ -495,6 +504,27 @@ export function GameFinancingPanel() {
             expanded={expandedLever === 'metro24hWeekend'}
             onToggleExpand={() => setExpandedLever(expandedLever === 'metro24hWeekend' ? null : 'metro24hWeekend')}
           />
+
+          {/* Supprimer la tarification sociale */}
+          <div className="relative">
+            <LeverToggle
+              lever="suppressionTarifSocial"
+              info={leverInfos.suppressionTarifSocial}
+              checked={financingLevers.suppressionTarifSocial}
+              disabled={financingLevers.gratuiteTotale}
+              onChange={(checked) => setFinancingLever('suppressionTarifSocial', checked)}
+              expanded={expandedLever === 'suppressionTarifSocial'}
+              onToggleExpand={() => setExpandedLever(expandedLever === 'suppressionTarifSocial' ? null : 'suppressionTarifSocial')}
+            />
+            {financingLevers.gratuiteTotale && (
+              <div className="mt-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+                <p className="text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                  <Info className="w-4 h-4 flex-shrink-0" />
+                  <span>Incompatible avec la gratuité totale - remis à 0€</span>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -821,7 +851,7 @@ function LeverSelect({
     { value: -25, label: '-25%', impact: '-700 M€' },
     { value: 0, label: 'Actuel', impact: '0' },
     { value: 25, label: '+25%', impact: '+700 M€' },
-    { value: 50, label: '+50%', impact: '+1.4 Md€' },
+    { value: 50, label: '+50%', impact: '+1.4 Milliards €' },
   ]
 
   return (
@@ -985,6 +1015,8 @@ function calculateTotalImpact(levers: FinancingLevers): number {
   if (levers.gratuiteConditionnee) impact -= 300
   if (levers.gratuiteJeunesAbonnes) impact -= 48
   if (levers.metro24hWeekend) impact -= 24
+  // Suppression tarification sociale ne s'applique pas si gratuité totale
+  if (levers.suppressionTarifSocial && !levers.gratuiteTotale) impact += 240
   // Les tarifs ne s'appliquent pas si gratuité totale
   if (!levers.gratuiteTotale) {
     impact += levers.tarifAbonnements * 12

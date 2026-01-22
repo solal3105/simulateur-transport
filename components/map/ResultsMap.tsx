@@ -8,10 +8,28 @@ import { PROJECTS } from '@/lib/data'
 
 interface ResultsMapProps {
   projectIds: string[]
+  isDarkMode?: boolean
 }
 
-export default function ResultsMap({ projectIds }: ResultsMapProps) {
+export default function ResultsMap({ projectIds, isDarkMode = true }: ResultsMapProps) {
   const [geoJsonData, setGeoJsonData] = useState<Record<string, any>>({})
+  const [darkMode, setDarkMode] = useState(isDarkMode)
+
+  // Detect system/document dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      setDarkMode(isDark)
+    }
+    
+    checkDarkMode()
+    
+    // Watch for changes
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const loadGeoJson = async () => {
@@ -37,6 +55,11 @@ export default function ResultsMap({ projectIds }: ResultsMapProps) {
     loadGeoJson()
   }, [projectIds])
 
+  // Tile layer URLs for light and dark modes
+  const tileUrl = darkMode
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+
   const getProjectColor = (projectId: string) => {
     const geoData = PROJECT_GEO_DATA[projectId]
     if (!geoData) return '#A855F7'
@@ -57,7 +80,7 @@ export default function ResultsMap({ projectIds }: ResultsMapProps) {
       attributionControl={false}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        url={tileUrl}
       />
 
       {projectIds.map(projectId => {

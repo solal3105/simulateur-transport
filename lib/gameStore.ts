@@ -63,6 +63,7 @@ const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
   gratuiteConditionnee: false,
   gratuiteJeunesAbonnes: false,
+  suppressionTarifSocial: false,
   metro24hWeekend: false,
   tarifAbonnements: 0,
   tarifTickets: 0,
@@ -320,12 +321,12 @@ export const useGameStore = create<GameState>()(
             reward: 300,
           },
           {
-            id: 'projects-15',
+            id: 'projects-10',
             name: 'Grand bâtisseur',
-            description: 'Sélectionner 15 projets',
-            target: 15,
+            description: 'Sélectionner 10 projets (c\'est déjà énorme !)',
+            target: 10,
             current: projectSelections.length,
-            completed: projectSelections.length >= 15,
+            completed: projectSelections.length >= 10,
             reward: 150,
           },
           {
@@ -340,11 +341,29 @@ export const useGameStore = create<GameState>()(
           {
             id: 'social-policy',
             name: 'Politique sociale',
-            description: 'Activer la gratuité totale ou conditionnée',
+            description: 'Activer la gratuité totale, conditionnée, ou pour les enfants d\'abonnés',
             target: 1,
-            current: (financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee) ? 1 : 0,
-            completed: financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee,
+            current: (financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee || financingLevers.gratuiteJeunesAbonnes) ? 1 : 0,
+            completed: financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee || financingLevers.gratuiteJeunesAbonnes,
             reward: 250,
+          },
+          {
+            id: 'no-law-dependency',
+            name: 'Indépendant',
+            description: 'Ne pas dépendre d\'une loi nationale (pas de VM+ ni TVA 5.5%)',
+            target: 1,
+            current: (financingLevers.versementMobilite <= 0 && !financingLevers.tva55) ? 1 : 0,
+            completed: financingLevers.versementMobilite <= 0 && !financingLevers.tva55,
+            reward: 200,
+          },
+          {
+            id: 'price-stability',
+            name: 'Pouvoir d\'achat préservé',
+            description: 'Augmentation des tarifs ≤ 10% (inflation naturelle)',
+            target: 1,
+            current: (financingLevers.tarifAbonnements <= 10 && financingLevers.tarifTickets <= 10) ? 1 : 0,
+            completed: financingLevers.tarifAbonnements <= 10 && financingLevers.tarifTickets <= 10,
+            reward: 150,
           },
         ]
       },
@@ -373,7 +392,7 @@ export const useGameStore = create<GameState>()(
           {
             id: 'big-spender',
             name: 'Mégalomane',
-            description: 'Dépenser plus de 5 Md€',
+            description: 'Dépenser plus de 5 milliards d\'euros',
             icon: '💰',
             unlocked: budget.totalImpact > 0 && (4000 - budget.m1 - budget.m2) > 5000,
             condition: () => (4000 - budget.m1 - budget.m2) > 5000,
@@ -445,6 +464,11 @@ function calculateLeverImpact(levers: FinancingLevers): number {
 
   if (levers.gratuiteJeunesAbonnes) {
     impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+  }
+
+  // Suppression tarification sociale ne s'applique pas si gratuité totale
+  if (levers.suppressionTarifSocial && !levers.gratuiteTotale) {
+    impact += FINANCING_IMPACTS.suppressionTarifSocial
   }
 
   if (levers.metro24hWeekend) {

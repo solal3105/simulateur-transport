@@ -17,9 +17,9 @@ import {
 const onboardingSteps = [
   {
     icon: TramFront,
-    title: "Bienvenue, Président(e)",
-    subtitle: "Votre mission commence",
-    content: "Vous êtes le nouveau Président(e) de la Métropole de Lyon. Votre mission : transformer le réseau TCL pour les 12 prochaines années.",
+    title: "22 mars 2026",
+    subtitle: "Vous venez d'être élu(e)",
+    content: "L'élection métropolitaine a eu lieu. Vous êtes le nouveau Président(e) de la Métropole de Lyon. Votre mission : transformer le réseau TCL pour les 12 prochaines années.",
     tip: "Chaque décision que vous prendrez aura un impact sur des millions de Lyonnais.",
     color: "from-blue-500 to-cyan-500",
   },
@@ -27,7 +27,7 @@ const onboardingSteps = [
     icon: Coins,
     title: "Votre Budget",
     subtitle: "4 milliards d'euros",
-    content: "Vous disposez de 2 Md€ par mandat (2026-2032 et 2032-2038). Ce budget peut être ajusté grâce aux leviers de financement.",
+    content: "Vous disposez de 2 milliards d'euros par mandat (2026-2032 et 2032-2038). Ce budget peut être ajusté grâce aux leviers de financement.",
     tip: "Attention : vous ne pouvez pas valider un budget avec plus de 1 milliard d'euros de dette par mandat. Un déficit modéré est acceptable, mais une dette excessive est insoutenable !",
     color: "from-yellow-500 to-orange-500",
   },

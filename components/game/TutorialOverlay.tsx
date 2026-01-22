@@ -42,7 +42,7 @@ const TUTORIAL_STEPS = [
     id: 'budget',
     title: 'Gérez vos ressources',
     subtitle: '💰 Trésorerie métropolitaine',
-    description: 'Surveillez vos 2 Md€ par mandat. Un déficit modéré est toléré (max 100M€), mais attention à ne pas ruiner les finances publiques !',
+    description: 'Surveillez vos 2 milliards d\'euros par mandat. Un déficit modéré est toléré (max 100 millions d\'euros), mais attention à ne pas ruiner les finances publiques !',
     icon: Coins,
     position: 'top',
     highlight: 'budget',

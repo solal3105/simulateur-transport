@@ -141,7 +141,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 't3-renf',
-    name: 'T3 Renforcement',
+    name: 'T3 en Express',
     cost: 35,
     impact: 12000,
     description: "Tracé actuel: Gare Part-Dieu → Villeurbanne → Meyzieu. Renforcement des fréquences et ajout de rames sur la ligne T3 existante.",
@@ -204,6 +204,7 @@ export const FINANCING_IMPACTS = {
   gratuiteTotale: -1925,
   gratuiteConditionnee: -300, // Proposition Aulas: Lyonnais + revenus < 2500€
   gratuiteJeunesAbonnes: -48, // 48M€/mandat
+  suppressionTarifSocial: 240, // Suppression tarification sociale = +240M€/mandat
   metro24hWeekend: -24, // 24M€/mandat
   tarifAbonnementsPerPercent: 12,
   tarifTicketsPerPercent: 8,
@@ -221,4 +222,35 @@ export const FINANCING_IMPACTS = {
 export const BASE_PRICES = {
   ticket: 2.10,
   abonnement: 74.10,
+}
+
+// Durée de réalisation des projets en années
+export const PROJECT_DURATIONS: Record<string, number | Record<string, number>> = {
+  'modern-a': 9,
+  'modern-c': 9,
+  'modern-d': 4,
+  't9-final': 1,
+  't10-final': 1,
+  't8': 4,
+  't3-renf': 2,
+  'grande-dorsale': 30,
+  'ext-a-est': 8,
+  'ext-d': 7,
+  'ligne-du-nord': {
+    'metro': 15,
+    'tram-enterre': 14,
+    'tram-surface': 8,
+  },
+  't12-c3': 6,
+  'ligne-ouest': {
+    'bhns': 6,
+    'tram': 8,
+  },
+  'bhns-parilly': 3,
+  'navette-fluv': 4,
+  'bhns-rive-droite': 3,
+  'teol': 6, // Semi-enterré de base
+  'teol-enterre': 8, // Upgrade complètement enterré
+  'metro-e-bellecour': 14,
+  'metro-e-part-dieu': 4,
 }

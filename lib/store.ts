@@ -18,6 +18,7 @@ const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
   gratuiteConditionnee: false,
   gratuiteJeunesAbonnes: false,
+  suppressionTarifSocial: false,
   metro24hWeekend: false,
   tarifAbonnements: 0,
   tarifTickets: 0,

@@ -3,7 +3,7 @@
 import { useRef, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/lib/gameStore'
-import { PROJECTS } from '@/lib/data'
+import { PROJECTS, BASE_PRICES } from '@/lib/data'
 import { formatCurrency, formatNumber, cn } from '@/lib/utils'
 import {
   Users,
@@ -20,10 +20,15 @@ import {
   Bus,
   Target,
   Euro,
-  Building2
+  Building2,
+  AlertTriangle,
+  Ticket,
+  CreditCard,
+  Wrench
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import html2canvas from 'html2canvas'
+import { ProjectTimeline } from './ProjectTimeline'
 
 const ResultsMap = dynamic(() => import('@/components/map/ResultsMap'), { ssr: false })
 
@@ -116,6 +121,20 @@ export function ResultsScreen() {
     const project = PROJECTS.find(p => p.id === selection.projectId)!
     return { ...selection, project }
   })
+
+  // Calculate final prices
+  const ticketPriceChange = financingLevers.gratuiteTotale ? -100 : financingLevers.tarifTickets
+  const abonnementPriceChange = financingLevers.gratuiteTotale ? -100 : financingLevers.tarifAbonnements
+  const finalTicketPrice = financingLevers.gratuiteTotale ? 0 : BASE_PRICES.ticket * (1 + ticketPriceChange / 100)
+  const finalAbonnementPrice = financingLevers.gratuiteTotale ? 0 : BASE_PRICES.abonnement * (1 + abonnementPriceChange / 100)
+
+  // Check for degraded network (missing bus maintenance or metro modernizations)
+  const hasEntretienBus = financingLevers.entretienBus !== null
+  const hasModernA = projectSelections.some(s => s.projectId === 'modern-a')
+  const hasModernC = projectSelections.some(s => s.projectId === 'modern-c')
+  const hasModernD = projectSelections.some(s => s.projectId === 'modern-d')
+  const modernizationsCount = [hasModernA, hasModernC, hasModernD].filter(Boolean).length
+  const isNetworkDegraded = !hasEntretienBus || modernizationsCount < 3
 
   const totalInvestment = selectedProjects.reduce((acc, s) => acc + s.project.cost, 0)
   const impactPercentage = Math.min((budget.totalImpact / MAX_THEORETICAL_IMPACT) * 100, 100)
@@ -331,11 +350,148 @@ export function ResultsScreen() {
                   data={[
                     { label: "Mandat 1 (2026-32)", value: m1Projects.length },
                     { label: "Mandat 2 (2032-38)", value: m2Projects.length },
-                    { label: "Étalé (M1+M2)", value: spreadProjects.length },
+                    { label: "Étalé (2026-2038)", value: spreadProjects.length },
                   ]}
                   maxValue={Math.max(m1Projects.length, m2Projects.length, spreadProjects.length, 1)}
                   colorClass="bg-gradient-to-r from-green-500 to-emerald-500"
                 />
+              </div>
+            </div>
+
+            {/* Degraded Network Warning */}
+            {isNetworkDegraded && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border-2 border-red-500/30"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-red-600 dark:text-red-400 font-bold text-lg mb-1">⚠️ Réseau Dégradé</h3>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
+                      Votre réseau TCL risque une dégradation importante de la qualité de service :
+                    </p>
+                    <ul className="space-y-1.5 text-sm">
+                      {!hasEntretienBus && (
+                        <li className="flex items-center gap-2 text-red-500 dark:text-red-400">
+                          <XCircle className="w-4 h-4" />
+                          <span>Entretien des bus non prévu — flotte vieillissante</span>
+                        </li>
+                      )}
+                      {!hasModernA && (
+                        <li className="flex items-center gap-2 text-red-500 dark:text-red-400">
+                          <XCircle className="w-4 h-4" />
+                          <span>Modernisation Ligne A manquante</span>
+                        </li>
+                      )}
+                      {!hasModernC && (
+                        <li className="flex items-center gap-2 text-red-500 dark:text-red-400">
+                          <XCircle className="w-4 h-4" />
+                          <span>Modernisation Ligne C manquante</span>
+                        </li>
+                      )}
+                      {!hasModernD && (
+                        <li className="flex items-center gap-2 text-red-500 dark:text-red-400">
+                          <XCircle className="w-4 h-4" />
+                          <span>Modernisation Ligne D manquante</span>
+                        </li>
+                      )}
+                    </ul>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-3 italic">
+                      Sans ces investissements essentiels, le réseau existant se dégradera progressivement.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Pricing Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-5 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Ticket className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-gray-900 dark:text-white font-bold">Ticket TCL</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Prix unitaire en 2038</p>
+                  </div>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs line-through">
+                      Actuel : {BASE_PRICES.ticket.toFixed(2)}€
+                    </p>
+                    <p className={cn(
+                      "text-2xl font-black",
+                      financingLevers.gratuiteTotale ? "text-green-500" : 
+                      ticketPriceChange <= 10 ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"
+                    )}>
+                      {financingLevers.gratuiteTotale ? 'GRATUIT' : `${finalTicketPrice.toFixed(2)}€`}
+                    </p>
+                  </div>
+                  {!financingLevers.gratuiteTotale && (
+                    <span className={cn(
+                      "text-sm font-medium px-2 py-1 rounded-full",
+                      ticketPriceChange <= 10 
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" 
+                        : "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                    )}>
+                      {ticketPriceChange >= 0 ? '+' : ''}{ticketPriceChange}%
+                    </span>
+                  )}
+                </div>
+                {!financingLevers.gratuiteTotale && ticketPriceChange <= 10 && (
+                  <p className="text-green-600 dark:text-green-400 text-xs mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    L&apos;inflation (~2%/an) absorbe cette hausse
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-5 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-gray-900 dark:text-white font-bold">Abonnement TCL</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">Prix mensuel en 2038</p>
+                  </div>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs line-through">
+                      Actuel : {BASE_PRICES.abonnement.toFixed(2)}€
+                    </p>
+                    <p className={cn(
+                      "text-2xl font-black",
+                      financingLevers.gratuiteTotale ? "text-green-500" : 
+                      abonnementPriceChange <= 10 ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"
+                    )}>
+                      {financingLevers.gratuiteTotale ? 'GRATUIT' : `${finalAbonnementPrice.toFixed(2)}€`}
+                    </p>
+                  </div>
+                  {!financingLevers.gratuiteTotale && (
+                    <span className={cn(
+                      "text-sm font-medium px-2 py-1 rounded-full",
+                      abonnementPriceChange <= 10 
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" 
+                        : "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                    )}>
+                      {abonnementPriceChange >= 0 ? '+' : ''}{abonnementPriceChange}%
+                    </span>
+                  )}
+                </div>
+                {!financingLevers.gratuiteTotale && abonnementPriceChange <= 10 && (
+                  <p className="text-green-600 dark:text-green-400 text-xs mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Pouvoir d&apos;achat préservé
+                  </p>
+                )}
               </div>
             </div>
 
@@ -383,42 +539,124 @@ export function ResultsScreen() {
               ))}
             </div>
 
-            {/* Objectives */}
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 mb-8">
-              <h3 className="text-gray-900 dark:text-white font-bold mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5 text-purple-500" />
-                Objectifs ({completedObjectives}/{objectives.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {objectives.map((obj) => (
-                  <div
-                    key={obj.id}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-xl",
-                      obj.completed 
-                        ? "bg-green-100 dark:bg-green-900/30" 
-                        : "bg-gray-100 dark:bg-gray-800"
-                    )}
-                  >
-                    {obj.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex-shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className={cn(
-                        "text-sm font-medium truncate",
-                        obj.completed ? "text-green-700 dark:text-green-400" : "text-gray-600 dark:text-gray-400"
-                      )}>
-                        {obj.name}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {obj.current}/{obj.target}
-                      </p>
-                    </div>
+            {/* Objectives - Enhanced Design */}
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-5 border border-purple-200 dark:border-purple-900/50 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <Target className="w-4 h-4 text-white" />
                   </div>
-                ))}
+                  Objectifs atteints
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "text-2xl font-black",
+                    completedObjectives === objectives.length ? "text-green-500" : "text-purple-600 dark:text-purple-400"
+                  )}>
+                    {completedObjectives}
+                  </span>
+                  <span className="text-gray-400 dark:text-gray-500 text-lg">/</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-lg font-bold">{objectives.length}</span>
+                </div>
               </div>
+              
+              {/* Progress bar global */}
+              <div className="mb-4">
+                <div className="h-3 bg-white dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(completedObjectives / objectives.length) * 100}%` }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className={cn(
+                      "h-full rounded-full",
+                      completedObjectives === objectives.length 
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500" 
+                        : "bg-gradient-to-r from-purple-500 to-indigo-500"
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {objectives.map((obj, i) => {
+                  const progress = Math.min((obj.current / obj.target) * 100, 100)
+                  return (
+                    <motion.div
+                      key={obj.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * i }}
+                      className={cn(
+                        "p-4 rounded-xl border-2 transition-all",
+                        obj.completed 
+                          ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" 
+                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                          obj.completed 
+                            ? "bg-gradient-to-br from-green-500 to-emerald-600" 
+                            : "bg-gray-100 dark:bg-gray-700"
+                        )}>
+                          {obj.completed ? (
+                            <CheckCircle2 className="w-5 h-5 text-white" />
+                          ) : (
+                            <Target className="w-5 h-5 text-gray-400" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn(
+                            "font-semibold text-sm mb-1",
+                            obj.completed ? "text-green-700 dark:text-green-400" : "text-gray-900 dark:text-white"
+                          )}>
+                            {obj.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            {obj.description}
+                          </p>
+                          {/* Progress bar individual */}
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                              <div 
+                                className={cn(
+                                  "h-full rounded-full transition-all duration-500",
+                                  obj.completed 
+                                    ? "bg-gradient-to-r from-green-500 to-emerald-500" 
+                                    : "bg-gradient-to-r from-purple-500 to-indigo-500"
+                                )}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <span className={cn(
+                              "text-xs font-bold min-w-[60px] text-right",
+                              obj.completed ? "text-green-600 dark:text-green-400" : "text-gray-500"
+                            )}>
+                              {formatNumber(obj.current)}/{formatNumber(obj.target)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+              
+              {/* Reward summary */}
+              {completedObjectives > 0 && (
+                <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800/50 flex items-center justify-between">
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Bonus total débloqué</span>
+                  <span className="text-green-600 dark:text-green-400 font-bold text-lg">
+                    +{formatCurrency(objectives.filter(o => o.completed).reduce((acc, o) => acc + o.reward, 0))}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Timeline */}
+            <div className="mb-8">
+              <ProjectTimeline />
             </div>
 
             {/* Map */}

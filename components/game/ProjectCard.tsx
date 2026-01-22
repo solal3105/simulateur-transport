@@ -59,11 +59,11 @@ export function GameProjectCard({ project, selectedPeriod, onSelectPeriod, index
   const isSelected = selectedPeriod !== null
 
   const periods: { value: MandatPeriod; label: string }[] = isLocked 
-    ? [{ value: 'M1+M2', label: 'M1+M2' }]
+    ? [{ value: 'M1+M2', label: 'Étalé' }]
     : [
-        { value: 'M1', label: 'M1' },
-        { value: 'M2', label: 'M2' },
-        { value: 'M1+M2', label: 'M1+M2' },
+        { value: 'M1', label: 'Mandat 1' },
+        { value: 'M2', label: 'Mandat 2' },
+        { value: 'M1+M2', label: 'Étalé' },
       ]
 
   const efficiency = project.impact ? Math.round(project.impact / project.cost) : 0
@@ -106,7 +106,7 @@ export function GameProjectCard({ project, selectedPeriod, onSelectPeriod, index
         {isLocked && (
           <div className="absolute top-0 left-0 px-2 py-1 bg-yellow-500/20 text-yellow-500 text-xs font-medium rounded-br-xl flex items-center gap-1">
             <Lock className="w-3 h-3" />
-            M1+M2 uniquement
+            Étalé uniquement
           </div>
         )}
 
