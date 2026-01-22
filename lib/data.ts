@@ -176,10 +176,26 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'bhns-rive-droite',
-    name: 'BHNS Rive Droite',
+    name: 'Ligne du Rhône Rive Droite',
     cost: 36,
     impact: 20000,
-    description: "Tracé: Perrache → Confluence → Oullins → Pierre-Bénite. Desserte de la rive droite du Rhône en BHNS.",
+    description: "Tracé: Perrache → Confluence → Oullins → Pierre-Bénite. Desserte de la rive droite du Rhône. Choisissez entre BHNS ou tramway.",
+    upgradeOptions: [
+      {
+        id: 'bhns',
+        name: 'BHNS Rive Droite',
+        description: 'Bus à Haut Niveau de Service. Solution économique avec voies dédiées.',
+        cost: 36,
+        impact: 20000,
+      },
+      {
+        id: 'tram',
+        name: 'Tram Rive Droite',
+        description: 'Tramway moderne. Meilleure capacité et attractivité que le BHNS.',
+        cost: 120,
+        impact: 25000,
+      },
+    ],
   },
 ]
 

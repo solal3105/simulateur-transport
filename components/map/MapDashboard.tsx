@@ -29,35 +29,44 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { Bus } from 'lucide-react'
 import { ProjectTimeline } from '@/components/game/ProjectTimeline'
 
-// Circular gauge component for budget display
-function BudgetGauge({ 
+// Circular gauge component with value BELOW the circle
+function CircularGauge({ 
   value, 
   maxValue = 2000, 
-  label, 
-  size = 60 
+  label,
+  unit = 'M€',
+  size = 48,
+  colorScheme = 'budget'
 }: { 
   value: number
   maxValue?: number
   label: string
-  size?: number 
+  unit?: string
+  size?: number
+  colorScheme?: 'budget' | 'impact'
 }) {
   const percentage = Math.max(0, Math.min(value / maxValue, 1))
-  const radius = (size - 8) / 2
+  const radius = (size - 6) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference * (1 - percentage)
   
   const getColor = () => {
-    if (value < -100) return { stroke: '#ef4444', text: 'text-red-500', bg: 'stroke-red-200 dark:stroke-red-900' }
-    if (value < 0) return { stroke: '#f59e0b', text: 'text-amber-500', bg: 'stroke-amber-200 dark:stroke-amber-900' }
-    if (percentage > 0.5) return { stroke: '#22c55e', text: 'text-green-500', bg: 'stroke-green-200 dark:stroke-green-900' }
-    return { stroke: '#eab308', text: 'text-yellow-500', bg: 'stroke-yellow-200 dark:stroke-yellow-900' }
+    if (colorScheme === 'impact') {
+      return { stroke: '#a855f7', text: 'text-purple-600 dark:text-purple-400', bg: 'stroke-purple-200 dark:stroke-purple-900' }
+    }
+    if (value < -100) return { stroke: '#ef4444', text: 'text-red-600 dark:text-red-400', bg: 'stroke-red-200 dark:stroke-red-900' }
+    if (value < 0) return { stroke: '#f59e0b', text: 'text-amber-600 dark:text-amber-400', bg: 'stroke-amber-200 dark:stroke-amber-900' }
+    if (percentage > 0.5) return { stroke: '#22c55e', text: 'text-green-600 dark:text-green-400', bg: 'stroke-green-200 dark:stroke-green-900' }
+    return { stroke: '#eab308', text: 'text-yellow-600 dark:text-yellow-400', bg: 'stroke-yellow-200 dark:stroke-yellow-900' }
   }
   
   const colors = getColor()
-  const displayValue = value < 0 ? `-${Math.abs(value)}` : `${value}`
+  const displayValue = colorScheme === 'impact' 
+    ? `+${formatNumber(value)}` 
+    : (value < 0 ? `-${Math.abs(value)}` : `${value}`)
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-1">
       <div className="relative" style={{ width: size, height: size }}>
         <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
           <circle
@@ -65,7 +74,7 @@ function BudgetGauge({
             cy={size / 2}
             r={radius}
             fill="none"
-            strokeWidth={6}
+            strokeWidth={5}
             className={colors.bg}
           />
           <circle
@@ -73,7 +82,7 @@ function BudgetGauge({
             cy={size / 2}
             r={radius}
             fill="none"
-            strokeWidth={6}
+            strokeWidth={5}
             strokeLinecap="round"
             stroke={colors.stroke}
             strokeDasharray={circumference}
@@ -81,12 +90,12 @@ function BudgetGauge({
             className="transition-all duration-700"
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("font-bold text-[10px]", colors.text)}>{displayValue}</span>
-          <span className="text-gray-400 text-[8px]">M€</span>
-        </div>
       </div>
-      <p className="text-gray-500 dark:text-gray-400 text-[9px] mt-0.5 font-medium">{label}</p>
+      <div className="text-center">
+        <p className={cn("font-bold text-sm leading-tight", colors.text)}>{displayValue}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-[10px]">{unit}</p>
+        <p className="text-gray-600 dark:text-gray-300 text-[10px] font-medium">{label}</p>
+      </div>
     </div>
   )
 }
@@ -105,8 +114,8 @@ function BudgetBarGauge({ value, maxValue = 2000, label, sublabel }: { value: nu
   const colors = getColors()
 
   return (
-    <div className="min-w-[140px]">
-      <div className="flex items-center justify-between mb-1">
+    <div className="min-w-[160px]">
+      <div className="flex items-center justify-between mb-1.5">
         <span className="text-gray-600 dark:text-gray-400 text-xs font-medium">{label}</span>
         <span className={cn("font-bold text-sm", colors.text)}>
           {value < 0 ? '-' : ''}{formatCurrency(Math.abs(value))}
@@ -118,7 +127,7 @@ function BudgetBarGauge({ value, maxValue = 2000, label, sublabel }: { value: nu
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <p className="text-gray-500 dark:text-gray-500 text-[10px] mt-0.5">{sublabel}</p>
+      <p className="text-gray-500 dark:text-gray-500 text-[10px] mt-1">{sublabel}</p>
     </div>
   )
 }
@@ -184,6 +193,7 @@ function getValidationMessage(totalProjects: number, totalImpact: number, financ
 
 export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing, onOpenBusOffer, showBusOffer, onCloseBusOffer, mapStyle, onMapStyleChange, mapStyles, colorMode, onColorModeChange, onClearHover }: MapDashboardProps) {
   const [showMapStyleMenu, setShowMapStyleMenu] = useState(false)
+  const [showColorModeMenu, setShowColorModeMenu] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   const [showBusOfferWarning, setShowBusOfferWarning] = useState(false)
   const [showDeficitWarning, setShowDeficitWarning] = useState(false)
@@ -194,6 +204,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
     projectSelections, 
     financingLevers,
     busOfferConfirmed,
+    setBusOfferConfirmed,
     setPhase,
     reset
   } = useGameStore()
@@ -239,45 +250,40 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-3 shadow-xl"
               >
-                {/* Row 1: Logo + Title + Controls */}
+                {/* Row 1: Logo + Controls */}
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                      <span className="text-base">🚇</span>
-                    </div>
-                    <h1 className="text-gray-900 dark:text-white font-bold text-base">TCL 2040</h1>
-                  </div>
+                  <img 
+                    src="/logo-rectangle-white.png" 
+                    alt="TCL 2040" 
+                    className="h-8 w-auto dark:invert"
+                  />
                   {/* Mobile Controls */}
                   <div className="flex items-center gap-1">
-                    {/* Color Mode Toggle - 3 modes */}
-                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                    {/* Color Mode Dropdown */}
+                    <div className="relative">
                       <button
-                        onClick={() => onColorModeChange('cost')}
-                        className={cn(
-                          "px-1.5 py-0.5 rounded text-[9px] font-bold transition-colors",
-                          colorMode === 'cost' ? "bg-orange-500 text-white" : "text-gray-500"
-                        )}
+                        onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
-                        €
+                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                          {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Eff.' : 'Type'}
+                        </span>
+                        <ChevronDown className="w-3 h-3 text-gray-400" />
                       </button>
-                      <button
-                        onClick={() => onColorModeChange('impact')}
-                        className={cn(
-                          "px-1.5 py-0.5 rounded text-[9px] font-bold transition-colors",
-                          colorMode === 'impact' ? "bg-green-500 text-white" : "text-gray-500"
+                      <AnimatePresence>
+                        {showColorModeMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[100px] z-50"
+                          >
+                            <button onClick={() => { onColorModeChange('cost'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'cost' ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Coût</button>
+                            <button onClick={() => { onColorModeChange('impact'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'impact' ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Efficacité</button>
+                            <button onClick={() => { onColorModeChange('mode'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'mode' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Type</button>
+                          </motion.div>
                         )}
-                      >
-                        Eff
-                      </button>
-                      <button
-                        onClick={() => onColorModeChange('mode')}
-                        className={cn(
-                          "px-1.5 py-0.5 rounded text-[9px] font-bold transition-colors",
-                          colorMode === 'mode' ? "bg-blue-500 text-white" : "text-gray-500"
-                        )}
-                      >
-                        Type
-                      </button>
+                      </AnimatePresence>
                     </div>
                     <button
                       onClick={() => setShowResetModal(true)}
@@ -325,32 +331,41 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   </div>
                 </div>
                 
-                {/* Row 2: Budget Gauges */}
-                <div className="flex items-center justify-center gap-4 mb-2 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                  <BudgetGauge value={budget.m1} label="Mandat 1" size={56} />
-                  <div className="w-px h-10 bg-gray-200 dark:bg-gray-600" />
-                  <BudgetGauge value={budget.m2} label="Mandat 2" size={56} />
-                </div>
-                
-                {/* Row 3: Impact with progress bar + Projects */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                      <Users className="w-3 h-3" />
-                      <span className="font-medium">+{formatNumber(budget.totalImpact)} voy/j</span>
+                {/* Row 2: 3 columns with horizontal bar gauges */}
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Mandat 1 */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-gray-500 dark:text-gray-400 text-[10px] font-medium">M1</span>
+                      <span className={cn("font-bold text-[10px]", budget.m1 >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>{formatCurrency(budget.m1)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                      <Target className="w-3 h-3" />
-                      <span className="font-medium">{totalProjects} projet{totalProjects > 1 ? 's' : ''}</span>
+                    <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", budget.m1 >= 0 ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gradient-to-r from-red-500 to-orange-500")}
+                        style={{ width: `${Math.min(100, Math.max(0, (budget.m1 / 2000) * 100))}%` }}
+                      />
                     </div>
                   </div>
-                  {/* Progress bar objectif voyageur */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400">
-                      <span>Objectif voyageurs</span>
-                      <span>{Math.round((budget.totalImpact / 899000) * 100)}%</span>
+                  {/* Mandat 2 */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-gray-500 dark:text-gray-400 text-[10px] font-medium">M2</span>
+                      <span className={cn("font-bold text-[10px]", budget.m2 >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400")}>{formatCurrency(budget.m2)}</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", budget.m2 >= 0 ? "bg-gradient-to-r from-blue-500 to-cyan-500" : "bg-gradient-to-r from-red-500 to-orange-500")}
+                        style={{ width: `${Math.min(100, Math.max(0, (budget.m2 / 2000) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+                  {/* Impact */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-gray-500 dark:text-gray-400 text-[10px] font-medium">Impact</span>
+                      <span className="font-bold text-[10px] text-purple-600 dark:text-purple-400">+{formatNumber(budget.totalImpact)}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, (budget.totalImpact / 899000) * 100)}%` }}
@@ -380,51 +395,61 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 shadow-xl"
               >
-                {/* Row 1: Logo + Budgets + Controls */}
-                <div className="flex items-center gap-4 mb-3">
+                {/* Row 1: Logo + Controls */}
+                <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                      <span className="text-lg">🚇</span>
-                    </div>
-                    <h1 className="text-gray-900 dark:text-white font-bold text-base">TCL 2040</h1>
-                  </div>
-                  
-                  <div className="flex-1 flex items-center gap-4 justify-center">
-                    <BudgetGauge value={budget.m1} label="Mandat 1" size={58} />
-                    <BudgetGauge value={budget.m2} label="Mandat 2" size={58} />
+                    <img 
+                      src="/logo-rectangle-white.png" 
+                      alt="TCL 2040" 
+                      className="h-10 w-auto dark:invert"
+                    />
                   </div>
 
                   {/* Tablet Controls */}
                   <div className="flex items-center gap-2">
-                    {/* Color Mode Toggle - 3 modes */}
-                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                    {/* Color Mode Dropdown */}
+                    <div className="relative">
                       <button
-                        onClick={() => onColorModeChange('cost')}
-                        className={cn(
-                          "px-2 py-1 rounded text-xs font-bold transition-colors",
-                          colorMode === 'cost' ? "bg-orange-500 text-white" : "text-gray-500"
-                        )}
+                        onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
-                        Coût
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Efficacité' : 'Type'}
+                        </span>
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", showColorModeMenu && "rotate-180")} />
                       </button>
-                      <button
-                        onClick={() => onColorModeChange('impact')}
-                        className={cn(
-                          "px-2 py-1 rounded text-xs font-bold transition-colors",
-                          colorMode === 'impact' ? "bg-green-500 text-white" : "text-gray-500"
+                      <AnimatePresence>
+                        {showColorModeMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[120px] z-50"
+                          >
+                            {[
+                              { key: 'cost', label: 'Coût', color: 'orange' },
+                              { key: 'impact', label: 'Efficacité', color: 'green' },
+                              { key: 'mode', label: 'Type', color: 'blue' }
+                            ].map((opt) => (
+                              <button
+                                key={opt.key}
+                                onClick={() => {
+                                  onColorModeChange(opt.key as 'cost' | 'impact' | 'mode')
+                                  setShowColorModeMenu(false)
+                                }}
+                                className={cn(
+                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all",
+                                  colorMode === opt.key
+                                    ? `bg-${opt.color}-50 dark:bg-${opt.color}-900/30 text-${opt.color}-600 dark:text-${opt.color}-400`
+                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                )}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </motion.div>
                         )}
-                      >
-                        Eff.
-                      </button>
-                      <button
-                        onClick={() => onColorModeChange('mode')}
-                        className={cn(
-                          "px-2 py-1 rounded text-xs font-bold transition-colors",
-                          colorMode === 'mode' ? "bg-blue-500 text-white" : "text-gray-500"
-                        )}
-                      >
-                        Type
-                      </button>
+                      </AnimatePresence>
                     </div>
                     <button
                       onClick={() => setShowResetModal(true)}
@@ -473,27 +498,46 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   </div>
                 </div>
                 
-                {/* Row 2: Stats + Progress bar */}
-                <div className="space-y-2 border-t border-gray-100 dark:border-gray-700 pt-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                      <Users className="w-3 h-3" />
-                      <span className="font-medium">+{formatNumber(budget.totalImpact)} voyageurs/jour</span>
+                {/* Row 2: 3 columns with horizontal bar gauges */}
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Mandat 1 */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">Mandat 1</span>
+                      <span className={cn("font-bold text-sm", budget.m1 >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>{formatCurrency(budget.m1)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                      <Target className="w-3 h-3" />
-                      <span className="font-medium">{totalProjects} projet{totalProjects > 1 ? 's' : ''} • {formatCurrency(totalInvestment)}</span>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", budget.m1 >= 0 ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gradient-to-r from-red-500 to-orange-500")}
+                        style={{ width: `${Math.min(100, Math.max(0, (budget.m1 / 2000) * 100))}%` }}
+                      />
                     </div>
                   </div>
-                  {/* Progress bar objectif voyageur */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  {/* Mandat 2 */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">Mandat 2</span>
+                      <span className={cn("font-bold text-sm", budget.m2 >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400")}>{formatCurrency(budget.m2)}</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", budget.m2 >= 0 ? "bg-gradient-to-r from-blue-500 to-cyan-500" : "bg-gradient-to-r from-red-500 to-orange-500")}
+                        style={{ width: `${Math.min(100, Math.max(0, (budget.m2 / 2000) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+                  {/* Impact */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">Impact</span>
+                      <span className="font-bold text-sm text-purple-600 dark:text-purple-400">+{formatNumber(budget.totalImpact)}/j</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, (budget.totalImpact / 899000) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">{Math.round((budget.totalImpact / 899000) * 100)}%</span>
                   </div>
                 </div>
               </motion.div>
@@ -514,81 +558,71 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
             {/* Desktop Layout (1500px+): Horizontal cards */}
             <div className="hidden desktop:block">
               <div className="flex items-stretch gap-3">
-                {/* Logo/Title */}
+                {/* Logo */}
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-3 flex items-center gap-3 shadow-xl"
+                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-3 flex items-center shadow-xl"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                    <span className="text-xl">🚇</span>
-                  </div>
-                  <div>
-                    <h1 className="text-gray-900 dark:text-white font-bold text-lg leading-tight">TCL 2040</h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-xs">Simulateur Transport</p>
-                  </div>
+                  <img 
+                    src="/logo-square-white.png" 
+                    alt="TCL 2040" 
+                    className="h-14 w-auto dark:invert"
+                  />
                 </motion.div>
 
-                {/* Budget Gauges Card */}
+                {/* Unified Stats Card - Budget + Impact + Projects */}
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-3 shadow-xl"
+                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-6 py-3 shadow-xl flex items-center gap-8"
                 >
-                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-2">
-                    <Wallet className="w-4 h-4" />
-                    <span className="text-xs font-medium">Budget restant</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <BudgetBarGauge value={budget.m1} label="Mandat 1" sublabel="2026-2032" />
-                    <div className="w-px h-12 bg-gray-200 dark:bg-gray-700" />
-                    <BudgetBarGauge value={budget.m2} label="Mandat 2" sublabel="2032-2038" />
-                  </div>
-                </motion.div>
-
-                {/* Total Impact with Progress Bar */}
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-3 min-w-[220px] shadow-xl"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2 text-purple-500 dark:text-purple-400">
-                      <Users className="w-4 h-4" />
-                      <span className="text-xs font-medium">Impact</span>
+                  {/* Budget Section */}
+                  <div>
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-3">
+                      <Wallet className="w-4 h-4" />
+                      <span className="text-xs font-medium">Budget restant</span>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-500">Max: 899k</span>
+                    <div className="flex items-center gap-6">
+                      <BudgetBarGauge value={budget.m1} label="Mandat 1" sublabel="2026-2032" />
+                      <BudgetBarGauge value={budget.m2} label="Mandat 2" sublabel="2032-2038" />
+                    </div>
                   </div>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                    +{formatNumber(budget.totalImpact)}
-                  </p>
-                  {/* Progress bar */}
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (budget.totalImpact / 899000) * 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
-                    {Math.round((budget.totalImpact / 899000) * 100)}% de l&apos;objectif
-                  </p>
-                </motion.div>
 
-                {/* Projects Count */}
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-3 shadow-xl"
-                >
-                  <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400 mb-1">
-                    <Target className="w-4 h-4" />
-                    <span className="text-xs font-medium">Projets</span>
+                  <div className="w-px h-20 bg-gray-200 dark:bg-gray-700" />
+
+                  {/* Impact Section */}
+                  <div className="min-w-[200px]">
+                    <div className="flex items-center gap-2 text-purple-500 dark:text-purple-400 mb-2">
+                      <Users className="w-4 h-4" />
+                      <span className="text-xs font-medium">Impact voyageurs</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      +{formatNumber(budget.totalImpact)}<span className="text-sm font-normal text-gray-500 ml-1">/jour</span>
+                    </p>
+                    <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, (budget.totalImpact / 899000) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1.5">
+                      {Math.round((budget.totalImpact / 899000) * 100)}% de l&apos;objectif max
+                    </p>
                   </div>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{totalProjects}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">{formatCurrency(totalInvestment)} inv.</p>
+
+                  <div className="w-px h-20 bg-gray-200 dark:bg-gray-700" />
+
+                  {/* Projects Section */}
+                  <div className="text-center px-2">
+                    <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400 mb-2">
+                      <Target className="w-4 h-4" />
+                      <span className="text-xs font-medium">Projets</span>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalProjects}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{formatCurrency(totalInvestment)}</p>
+                  </div>
                 </motion.div>
 
                 {/* Desktop Controls */}
@@ -598,41 +632,61 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   transition={{ delay: 0.3 }}
                   className="flex items-center gap-2 ml-auto"
                 >
-                  {/* Color Mode Switch - 3 modes */}
-                  <div className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl">
+                  {/* Color Mode Dropdown */}
+                  <div className="relative">
                     <button
-                      onClick={() => onColorModeChange('cost')}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                        colorMode === 'cost'
-                          ? "bg-orange-500 text-white"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      )}
+                      onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                     >
-                      Coût
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Efficacité' : 'Type'}
+                      </span>
+                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", showColorModeMenu && "rotate-180")} />
                     </button>
-                    <button
-                      onClick={() => onColorModeChange('impact')}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                        colorMode === 'impact'
-                          ? "bg-green-500 text-white"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    <AnimatePresence>
+                      {showColorModeMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[140px] z-50"
+                        >
+                          <button
+                            onClick={() => { onColorModeChange('cost'); setShowColorModeMenu(false) }}
+                            className={cn(
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              colorMode === 'cost'
+                                ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            )}
+                          >
+                            Coût
+                          </button>
+                          <button
+                            onClick={() => { onColorModeChange('impact'); setShowColorModeMenu(false) }}
+                            className={cn(
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              colorMode === 'impact'
+                                ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            )}
+                          >
+                            Efficacité
+                          </button>
+                          <button
+                            onClick={() => { onColorModeChange('mode'); setShowColorModeMenu(false) }}
+                            className={cn(
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              colorMode === 'mode'
+                                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            )}
+                          >
+                            Type
+                          </button>
+                        </motion.div>
                       )}
-                    >
-                      Efficacité
-                    </button>
-                    <button
-                      onClick={() => onColorModeChange('mode')}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                        colorMode === 'mode'
-                          ? "bg-blue-500 text-white"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      )}
-                    >
-                      Type
-                    </button>
+                    </AnimatePresence>
                   </div>
                   <button
                     onClick={() => setShowResetModal(true)}
@@ -704,7 +758,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
           <div className="pointer-events-auto">
             {/* Mobile Layout: Stacked vertical cards */}
             <div className="tablet:hidden space-y-2">
-              {/* Row 1: Bus + Financing + Timeline */}
+              {/* Row 1: Bus + Financing + Timeline - Unified style */}
               <div className="flex gap-2">
                 {/* Bus Offer */}
                 <motion.button
@@ -713,28 +767,33 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   onClick={onOpenBusOffer}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "flex-1 rounded-xl border-2 p-2.5 flex items-center gap-2 transition-all shadow-xl",
+                    "flex-1 rounded-xl border-2 p-2.5 flex items-center gap-2 transition-all shadow-xl relative backdrop-blur-md",
                     busOfferConfirmed
-                      ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 border-green-400"
-                      : "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-blue-400"
+                      ? "bg-green-50/80 dark:bg-green-900/60 border-green-400"
+                      : "bg-orange-50/80 dark:bg-orange-900/60 border-orange-400 animate-pulse"
                   )}
                 >
+                  {!busOfferConfirmed && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-[8px] font-bold">!</span>
+                    </div>
+                  )}
                   <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shadow-md flex-shrink-0",
-                    busOfferConfirmed ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-blue-500 to-indigo-600"
+                    "w-9 h-9 rounded-lg flex items-center justify-center shadow-md flex-shrink-0",
+                    busOfferConfirmed ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-orange-500 to-amber-600"
                   )}>
                     <Bus className="w-4 h-4 text-white" />
                   </div>
-                  <div className="text-left min-w-0">
+                  <div className="text-left min-w-0 flex-1">
                     <h3 className={cn(
-                      "font-bold text-xs truncate",
-                      busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"
-                    )}>Bus</h3>
+                      "font-bold text-[11px]",
+                      busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"
+                    )}>Offre Bus</h3>
                     <p className={cn(
-                      "text-[10px] truncate",
-                      busOfferConfirmed ? "text-green-600" : "text-blue-600"
+                      "text-[10px]",
+                      busOfferConfirmed ? "text-green-600 dark:text-green-500" : "text-orange-600 dark:text-orange-500"
                     )}>
-                      {busOfferConfirmed ? "✓" : "À faire"}
+                      {busOfferConfirmed ? "✓ Confirmée" : "⚠ À confirmer"}
                     </p>
                   </div>
                 </motion.button>
@@ -745,15 +804,15 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   animate={{ opacity: 1, y: 0 }}
                   onClick={onOpenFinancing}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-xl border-2 border-yellow-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
+                  className="flex-1 bg-yellow-50/80 dark:bg-yellow-900/60 backdrop-blur-md rounded-xl border-2 border-yellow-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center shadow-md flex-shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center shadow-md flex-shrink-0">
                     <Coins className="w-4 h-4 text-white" />
                   </div>
-                  <div className="text-left min-w-0">
-                    <h3 className="text-yellow-700 dark:text-yellow-400 font-bold text-xs truncate">€</h3>
-                    <p className="text-yellow-600 text-[10px] truncate">
-                      {financingLevers?.gratuiteTotale ? "Gratuit" : "Leviers"}
+                  <div className="text-left min-w-0 flex-1">
+                    <h3 className="text-yellow-700 dark:text-yellow-400 font-bold text-[11px]">Financement</h3>
+                    <p className="text-yellow-600 dark:text-yellow-500 text-[10px]">
+                      {financingLevers?.gratuiteTotale ? "Gratuité ✓" : "Ajuster leviers"}
                     </p>
                   </div>
                 </motion.button>
@@ -764,19 +823,19 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => setShowTimeline(true)}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-xl border-2 border-indigo-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
+                  className="flex-1 bg-indigo-50/80 dark:bg-indigo-900/60 backdrop-blur-md rounded-xl border-2 border-indigo-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
                     <Calendar className="w-4 h-4 text-white" />
                   </div>
-                  <div className="text-left min-w-0">
-                    <h3 className="text-indigo-700 dark:text-indigo-400 font-bold text-xs truncate">Planning</h3>
-                    <p className="text-indigo-600 text-[10px] truncate">{totalProjects} proj.</p>
+                  <div className="text-left min-w-0 flex-1">
+                    <h3 className="text-indigo-700 dark:text-indigo-400 font-bold text-[11px]">Planning</h3>
+                    <p className="text-indigo-600 dark:text-indigo-500 text-[10px]">{totalProjects} projets</p>
                   </div>
                 </motion.button>
               </div>
 
-              {/* Row 2: Validation button (full width) */}
+              {/* Row 2: Validation button (full width on mobile) */}
               {hasProjects && (
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
@@ -791,21 +850,21 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   whileTap={{ scale: 0.98 }}
                   disabled={!budgetValid}
                   className={cn(
-                    "w-full rounded-xl border-2 p-3 flex items-center justify-center gap-2 shadow-xl font-bold text-sm transition-all",
+                    "w-full rounded-xl border-2 p-4 flex items-center justify-center gap-3 shadow-xl font-bold text-base transition-all backdrop-blur-md",
                     budgetValid
                       ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 hover:from-green-600 hover:to-emerald-700"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
+                      : "bg-gray-100/80 dark:bg-gray-800/80 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
                   )}
                 >
-                  <Rocket className="w-4 h-4" />
+                  <Rocket className="w-5 h-5" />
                   Valider le projet
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-5 h-5" />
                 </motion.button>
               )}
             </div>
 
             {/* Tablet Layout (800px to 1500px): Compact horizontal */}
-            <div className="hidden tablet:flex desktop:hidden gap-2 justify-center items-stretch">
+            <div className="hidden tablet:flex desktop:hidden gap-3 justify-center items-stretch">
               {/* Bus Offer */}
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -813,28 +872,33 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 onClick={onOpenBusOffer}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "rounded-xl border-2 p-3 flex items-center gap-3 transition-all shadow-xl",
+                  "min-w-[140px] rounded-xl border-2 p-3 flex items-center gap-3 transition-all shadow-xl relative backdrop-blur-md",
                   busOfferConfirmed
-                    ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 border-green-400"
-                    : "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-blue-400"
+                    ? "bg-green-50/80 dark:bg-green-900/60 border-green-400"
+                    : "bg-orange-50/80 dark:bg-orange-900/60 border-orange-400 animate-pulse"
                 )}
               >
+                {!busOfferConfirmed && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-[9px] font-bold">!</span>
+                  </div>
+                )}
                 <div className={cn(
                   "w-10 h-10 rounded-lg flex items-center justify-center shadow-md",
-                  busOfferConfirmed ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-blue-500 to-indigo-600"
+                  busOfferConfirmed ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-orange-500 to-amber-600"
                 )}>
                   <Bus className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
                   <h3 className={cn(
                     "font-bold text-sm",
-                    busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"
-                  )}>Bus</h3>
+                    busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"
+                  )}>Offre Bus</h3>
                   <p className={cn(
                     "text-xs",
-                    busOfferConfirmed ? "text-green-600" : "text-blue-600"
+                    busOfferConfirmed ? "text-green-600 dark:text-green-500" : "text-orange-600 dark:text-orange-500"
                   )}>
-                    {busOfferConfirmed ? "✓" : "À faire"}
+                    {busOfferConfirmed ? "✓ Confirmée" : "⚠ À confirmer"}
                   </p>
                 </div>
               </motion.button>
@@ -845,15 +909,15 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 animate={{ opacity: 1, y: 0 }}
                 onClick={onOpenFinancing}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-xl border-2 border-yellow-400 p-3 flex items-center gap-3 transition-all shadow-xl"
+                className="min-w-[140px] bg-yellow-50/80 dark:bg-yellow-900/60 backdrop-blur-md rounded-xl border-2 border-yellow-400 p-3 flex items-center gap-3 transition-all shadow-xl"
               >
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center shadow-md">
                   <Coins className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
                   <h3 className="text-yellow-700 dark:text-yellow-400 font-bold text-sm">Financement</h3>
-                  <p className="text-yellow-600 text-xs">
-                    {financingLevers?.gratuiteTotale ? "Gratuité" : "Ajuster"}
+                  <p className="text-yellow-600 dark:text-yellow-500 text-xs">
+                    {financingLevers?.gratuiteTotale ? "Gratuité ✓" : "Ajuster leviers"}
                   </p>
                 </div>
               </motion.button>
@@ -864,14 +928,14 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => setShowTimeline(true)}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-xl border-2 border-indigo-400 p-3 flex items-center gap-3 transition-all shadow-xl"
+                className="min-w-[140px] bg-indigo-50/80 dark:bg-indigo-900/60 backdrop-blur-md rounded-xl border-2 border-indigo-400 p-3 flex items-center gap-3 transition-all shadow-xl"
               >
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
                   <h3 className="text-indigo-700 dark:text-indigo-400 font-bold text-sm">Planning</h3>
-                  <p className="text-indigo-600 text-xs">{totalProjects} projets</p>
+                  <p className="text-indigo-600 dark:text-indigo-500 text-xs">{totalProjects} projets</p>
                 </div>
               </motion.button>
 
@@ -890,20 +954,25 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   whileTap={{ scale: 0.98 }}
                   disabled={!budgetValid}
                   className={cn(
-                    "rounded-xl border-2 px-5 py-3 flex items-center gap-2 shadow-xl font-bold text-sm transition-all",
+                    "min-w-[140px] rounded-xl border-2 p-3 flex items-center gap-3 shadow-xl font-bold text-sm transition-all backdrop-blur-md",
                     budgetValid
-                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 hover:from-green-600 hover:to-emerald-700"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
+                      ? "bg-green-500/90 text-white border-green-400 hover:bg-green-600/90"
+                      : "bg-gray-100/80 dark:bg-gray-800/80 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
                   )}
                 >
-                  <Rocket className="w-5 h-5" />
-                  Valider le projet
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-600 to-emerald-700 flex items-center justify-center shadow-md">
+                    <Rocket className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-bold text-sm">Valider</h3>
+                    <p className="text-xs opacity-80">Voir résultats</p>
+                  </div>
                 </motion.button>
               )}
             </div>
 
             {/* Desktop Layout (1500px+): Full horizontal cards */}
-            <div className="hidden desktop:flex gap-3 justify-center items-end">
+            <div className="hidden desktop:flex gap-4 justify-center items-end">
               {/* Bus Offer Card */}
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -912,30 +981,35 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "rounded-2xl border-2 px-5 py-3 flex items-center gap-3 transition-all shadow-xl hover:shadow-2xl",
+                  "min-w-[160px] rounded-2xl border-2 px-5 py-3 flex items-center gap-3 transition-all shadow-xl hover:shadow-2xl relative backdrop-blur-md",
                   busOfferConfirmed
-                    ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 border-green-400 dark:border-green-500"
-                    : "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-blue-400 dark:border-blue-500"
+                    ? "bg-green-50/80 dark:bg-green-900/60 border-green-400 dark:border-green-500"
+                    : "bg-orange-50/80 dark:bg-orange-900/60 border-orange-400 dark:border-orange-500 animate-pulse"
                 )}
               >
+                {!busOfferConfirmed && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                )}
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center shadow-lg",
                   busOfferConfirmed
                     ? "bg-gradient-to-br from-green-500 to-emerald-600"
-                    : "bg-gradient-to-br from-blue-500 to-indigo-600"
+                    : "bg-gradient-to-br from-orange-500 to-amber-600"
                 )}>
                   <Bus className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
                   <h3 className={cn(
                     "font-bold text-sm",
-                    busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"
+                    busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"
                   )}>Offre Bus</h3>
                   <p className={cn(
                     "text-xs",
-                    busOfferConfirmed ? "text-green-600 dark:text-green-300" : "text-blue-600 dark:text-blue-300"
+                    busOfferConfirmed ? "text-green-600 dark:text-green-300" : "text-orange-600 dark:text-orange-300"
                   )}>
-                    {busOfferConfirmed ? "✓ Confirmé" : "À confirmer"}
+                    {busOfferConfirmed ? "✓ Confirmée" : "⚠ À confirmer"}
                   </p>
                 </div>
               </motion.button>
@@ -947,7 +1021,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 onClick={onOpenFinancing}
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-2xl border-2 border-yellow-400 dark:border-yellow-500 px-5 py-3 flex items-center gap-3 hover:border-yellow-500 dark:hover:border-yellow-400 transition-all shadow-xl hover:shadow-2xl"
+                className="min-w-[160px] bg-yellow-50/80 dark:bg-yellow-900/60 backdrop-blur-md rounded-2xl border-2 border-yellow-400 dark:border-yellow-500 px-5 py-3 flex items-center gap-3 hover:border-yellow-500 dark:hover:border-yellow-400 transition-all shadow-xl hover:shadow-2xl"
               >
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center shadow-lg">
                   <Coins className="w-5 h-5 text-white" />
@@ -955,7 +1029,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 <div className="text-left">
                   <h3 className="text-yellow-700 dark:text-yellow-400 font-bold text-sm">Financement</h3>
                   <p className="text-yellow-600 dark:text-yellow-300 text-xs">
-                    {financingLevers?.gratuiteTotale ? "Gratuité" : "Ajuster leviers"}
+                    {financingLevers?.gratuiteTotale ? "Gratuité ✓" : "Ajuster leviers"}
                   </p>
                 </div>
               </motion.button>
@@ -967,7 +1041,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                 onClick={() => setShowTimeline(true)}
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-2xl border-2 border-indigo-400 dark:border-indigo-500 px-5 py-3 flex items-center gap-3 hover:border-indigo-500 dark:hover:border-indigo-400 transition-all shadow-xl hover:shadow-2xl"
+                className="min-w-[160px] bg-indigo-50/80 dark:bg-indigo-900/60 backdrop-blur-md rounded-2xl border-2 border-indigo-400 dark:border-indigo-500 px-5 py-3 flex items-center gap-3 hover:border-indigo-500 dark:hover:border-indigo-400 transition-all shadow-xl hover:shadow-2xl"
               >
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
                   <Calendar className="w-5 h-5 text-white" />
@@ -994,36 +1068,32 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   whileTap={{ scale: 0.98 }}
                   disabled={!budgetValid}
                   className={cn(
-                    "rounded-2xl border-2 px-6 py-4 flex items-center gap-4 shadow-xl hover:shadow-2xl transition-all",
+                    "min-w-[160px] rounded-2xl border-2 px-5 py-3 flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all backdrop-blur-md",
                     budgetValid
-                      ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 border-green-400 dark:border-green-500"
-                      : "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-not-allowed"
+                      ? "bg-green-50/80 dark:bg-green-900/60 border-green-400 dark:border-green-500"
+                      : "bg-gray-100/80 dark:bg-gray-800/60 border-gray-300 dark:border-gray-600 cursor-not-allowed"
                   )}
                 >
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg",
+                    "w-10 h-10 rounded-xl flex items-center justify-center shadow-lg",
                     budgetValid
                       ? "bg-gradient-to-br from-green-500 to-emerald-600"
                       : "bg-gray-400 dark:bg-gray-600"
                   )}>
-                    <Rocket className="w-6 h-6 text-white" />
+                    <Rocket className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
                     <h3 className={cn(
-                      "font-bold text-lg",
+                      "font-bold text-sm",
                       budgetValid ? "text-green-700 dark:text-green-400" : "text-gray-400 dark:text-gray-500"
                     )}>Valider</h3>
                     <p className={cn(
-                      "text-sm",
+                      "text-xs",
                       budgetValid ? "text-green-600 dark:text-green-300" : "text-gray-400 dark:text-gray-500"
                     )}>
-                      {budgetValid ? "Voir les résultats" : "Budget invalide"}
+                      {budgetValid ? "Voir résultats" : "Budget invalide"}
                     </p>
                   </div>
-                  <ChevronRight className={cn(
-                    "w-5 h-5",
-                    budgetValid ? "text-green-700 dark:text-green-400" : "text-gray-400"
-                  )} />
                 </motion.button>
               )}
             </div>
@@ -1061,41 +1131,13 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
               </div>
             </div>
 
-            {/* Budget Summary Bar */}
-            <div className="bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-              <div className="container mx-auto max-w-4xl px-4 py-4">
-                <div className="flex items-center justify-center gap-8">
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Mandat 1</p>
-                    <p className={cn(
-                      "text-2xl font-bold",
-                      budget.m1 >= 0 ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"
-                    )}>{formatCurrency(budget.m1)}</p>
-                  </div>
-                  <div className="w-px h-12 bg-gray-300 dark:bg-gray-700" />
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Mandat 2</p>
-                    <p className={cn(
-                      "text-2xl font-bold",
-                      budget.m2 >= 0 ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"
-                    )}>{formatCurrency(budget.m2)}</p>
-                  </div>
-                  <div className="w-px h-12 bg-gray-300 dark:bg-gray-700" />
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Leviers</p>
-                    <p className="text-2xl font-bold text-yellow-500 dark:text-yellow-400">+{formatCurrency(budget.leverImpact)}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Content */}
-            <div className="container mx-auto max-w-4xl px-4 py-8">
+            <div className="container mx-auto max-w-4xl px-4 py-8 pb-24">
               <GameFinancingPanel />
             </div>
 
             {/* Sticky Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
               <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {isValid ? (
@@ -1130,7 +1172,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col min-h-screen"
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg">
@@ -1154,31 +1196,25 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
             </div>
 
             {/* Content */}
-            <div className="container mx-auto max-w-4xl px-4 py-8">
+            <div className="container mx-auto max-w-4xl px-4 py-8 pb-24 flex-1">
               <BusOfferPanel />
             </div>
 
-            {/* Sticky Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+            {/* Footer */}
+            <div className="mt-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
               <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {busOfferConfirmed ? (
-                    <>
-                      <CheckCircle2 className="w-6 h-6 text-green-500" />
-                      <span className="text-green-600 dark:text-green-400 font-medium">Choix confirmés</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="w-6 h-6 text-orange-500" />
-                      <span className="text-blue-600 dark:text-blue-400 font-medium">Confirmez vos choix</span>
-                    </>
-                  )}
+                  <CheckCircle2 className="w-6 h-6 text-green-500" />
+                  <span className="text-green-600 dark:text-green-400 font-medium">Vos choix seront validés automatiquement</span>
                 </div>
                 <button
-                  onClick={onCloseBusOffer}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                  onClick={() => {
+                    setBusOfferConfirmed(true)
+                    onCloseBusOffer()
+                  }}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold hover:opacity-90 transition-all flex items-center gap-2"
                 >
-                  Retour à la carte
+                  Valider et retour à la carte
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -1323,7 +1359,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col min-h-screen"
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg">
@@ -1347,7 +1383,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
             </div>
 
             {/* Content */}
-            <div className="container mx-auto max-w-6xl px-4 py-8">
+            <div className="container mx-auto max-w-6xl px-4 py-8 flex-1">
               {totalProjects > 0 ? (
                 <ProjectTimeline />
               ) : (
@@ -1361,8 +1397,8 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
               )}
             </div>
 
-            {/* Sticky Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+            {/* Footer */}
+            <div className="mt-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
               <div className="container mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Target className="w-5 h-5 text-indigo-500" />

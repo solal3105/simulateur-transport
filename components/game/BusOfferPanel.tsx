@@ -248,34 +248,6 @@ export function BusOfferPanel() {
         </div>
       </div>
 
-      {/* Confirmation Button */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <button
-          onClick={() => setBusOfferConfirmed(true)}
-          disabled={busOfferConfirmed}
-          className={cn(
-            "w-full py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2",
-            busOfferConfirmed
-              ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-2 border-green-300 dark:border-green-600"
-              : "bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg hover:from-orange-600 hover:to-amber-700"
-          )}
-        >
-          {busOfferConfirmed ? (
-            <>
-              <Check className="w-6 h-6" />
-              Choix confirmés
-            </>
-          ) : (
-            'Confirmer mes choix'
-          )}
-        </button>
-        
-        {!busOfferConfirmed && (
-          <p className="text-center text-gray-500 dark:text-gray-400 text-sm mt-3">
-            Vous devez confirmer vos choix pour valider votre simulation
-          </p>
-        )}
-      </div>
     </motion.div>
   )
 }

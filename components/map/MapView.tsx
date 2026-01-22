@@ -11,7 +11,6 @@ import { Project, MandatPeriod } from '@/lib/types'
 import { ProjectDetailPanel } from './ProjectDetailPanel'
 import { MapDashboard } from './MapDashboard'
 import { ProjectTooltip } from './ProjectTooltip'
-import { TutorialOverlay } from '@/components/game/TutorialOverlay'
 import { useTheme } from '@/contexts/ThemeContext'
 import 'leaflet/dist/leaflet.css'
 
@@ -420,8 +419,6 @@ export function MapView() {
         )}
       </AnimatePresence>
 
-      {/* Tutorial Overlay */}
-      <TutorialOverlay />
     </div>
   )
 }

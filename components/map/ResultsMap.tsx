@@ -90,7 +90,7 @@ export default function ResultsMap({ projectIds, isDarkMode = true }: ResultsMap
 
         return (
           <div key={projectId}>
-            {geojson && (
+            {geojson ? (
               <GeoJSON
                 data={geojson}
                 style={{
@@ -99,9 +99,8 @@ export default function ResultsMap({ projectIds, isDarkMode = true }: ResultsMap
                   opacity: 1,
                 }}
               />
-            )}
-            
-            {geoData && (
+            ) : geoData && (
+              // Fallback: only show marker if no GeoJSON available
               <CircleMarker
                 center={geoData.coordinates}
                 radius={8}

@@ -330,15 +330,6 @@ export const useGameStore = create<GameState>()(
             reward: 150,
           },
           {
-            id: 'metro-network',
-            name: 'Réseau métro étendu',
-            description: 'Financer 4 projets métro/extensions',
-            target: 4,
-            current: metroProjects,
-            completed: metroProjects >= 4,
-            reward: 200,
-          },
-          {
             id: 'social-policy',
             name: 'Politique sociale',
             description: 'Activer la gratuité totale, conditionnée, ou pour les enfants d\'abonnés',
@@ -350,7 +341,7 @@ export const useGameStore = create<GameState>()(
           {
             id: 'no-law-dependency',
             name: 'Indépendant',
-            description: 'Ne pas dépendre d\'une loi nationale (pas de VM+ ni TVA 5.5%)',
+            description: 'Ne pas dépendre d\'une loi nationale (pas de versement mobilité ni TVA 5.5%)',
             target: 1,
             current: (financingLevers.versementMobilite <= 0 && !financingLevers.tva55) ? 1 : 0,
             completed: financingLevers.versementMobilite <= 0 && !financingLevers.tva55,
