@@ -18,14 +18,14 @@ export const PROJECTS: Project[] = [
       {
         id: 'tram-enterre',
         name: 'Tram enterré',
-        description: 'Tramway en souterrain. Temps de parcours réduit et meilleure régularité.',
+        description: 'Tramway en souterrain. Bien plus coûteux mais plus performant.',
         cost: 900,
         impact: 55000,
       },
       {
         id: 'metro',
         name: 'Métro',
-        description: 'Extension de la ligne B en métro. Capacité maximale et performances optimales.',
+        description: 'Extension de la ligne B depuis Charpennes.',
         cost: 3300,
         impact: 71500,
       },
@@ -36,7 +36,7 @@ export const PROJECTS: Project[] = [
     name: 'Extension Métro E Part-Dieu',
     cost: 600,
     impact: 102000,
-    description: "Nouvelle ligne E reliant Alaï à Part-Dieu via Point du Jour et Bellecour. Tracé Est-Ouest structurant pour la métropole.",
+    description: "Extension de la ligne E reliant Alaï à Part-Dieu depuis Bellecour.",
     requires: 'metro-e-bellecour',
   },
   {
@@ -44,14 +44,14 @@ export const PROJECTS: Project[] = [
     name: 'Extension Ligne A Est',
     cost: 2000,
     impact: 48500,
-    description: "Prolongement de la ligne A vers l'est au-delà de Vaulx-en-Velin, pour desservir de nouveaux quartiers en développement.",
+    description: "Prolongement de la ligne A vers l'est au-delà de Vaulx-en-Velin, pour desservir Décines et le stade.",
   },
   {
     id: 'metro-e-bellecour',
     name: 'Métro E Bellecour',
     cost: 1800,
     impact: 64000,
-    description: "Section centrale de la ligne E passant par Bellecour, créant un nouveau hub de correspondances au cœur de Lyon.",
+    description: "Section principale de la ligne E avec terminus à Bellecour.",
   },
   {
     id: 'grande-dorsale',
@@ -73,7 +73,7 @@ export const PROJECTS: Project[] = [
     name: 'TEOL Semi-enterré',
     cost: 800,
     impact: 55000,
-    description: "Tramway Express de l'Ouest Lyonnais en version semi-enterrée. Tracé: Alaï → Gorge de Loup → Part-Dieu. Compromis entre coût et performance.",
+    description: "Tramway Express de l'Ouest Lyonnais en version semi-enterrée.",
     upgrade: {
       name: 'TEOL Complètement Enterré',
       description: "Passage en version complètement enterrée, pas seulement sous les pentes de l'ouest. Améliore la régularité mais renonce à la requalification urbaine du tracé en surface.",
@@ -86,14 +86,14 @@ export const PROJECTS: Project[] = [
     name: 'Modernisation Ligne A',
     cost: 686,
     impact: 312000,
-    description: "Automatisation complète de la ligne A (comme la ligne D). Augmentation de la fréquence et de la capacité sur l'axe Est-Ouest historique.",
+    description: "Automatisation complète de la ligne A et ajout de porte pallière. Augmentatio de la longueur des rames",
   },
   {
     id: 'ligne-ouest',
     name: 'Ligne de l\'Ouest',
     cost: 600,
     impact: 25000,
-    description: "Nouvelle desserte de l'ouest lyonnais. Choisissez entre un tramway performant ou un bus à haut niveau de service.",
+    description: "Nouvelle desserte de l'ouest lyonnais. Choisissez entre un tramway ou un bus à haut niveau de service.",
     upgradeOptions: [
       {
         id: 'bhns',
@@ -105,7 +105,7 @@ export const PROJECTS: Project[] = [
       {
         id: 'tram',
         name: 'Tram',
-        description: 'Tramway classique. Capacité élevée et confort optimal.',
+        description: 'Tramway classique. Capacité plus élevée mais coût plus élevé.',
         cost: 600,
         impact: 25000,
       }
@@ -116,35 +116,35 @@ export const PROJECTS: Project[] = [
     name: 'Tram du Centre',
     cost: 540,
     impact: 75000,
-    description: "Tracé: Part-Dieu → Villeurbanne → Vaulx-en-Velin → Décines. Conversion de la ligne C3 en tramway pour plus de capacité.",
+    description: "Conversion de la ligne C3 en tramway pour plus de capacité.",
   },
   {
     id: 'modern-d',
     name: 'Modernisation Ligne D',
     cost: 338,
     impact: 220500,
-    description: "Amélioration des équipements et augmentation de la capacité de la ligne D automatique. Optimisation des temps d'attente.",
+    description: "Renouvellement des équipements et du matériel pour fiabiliser l’exploitation et augmenter la capacité.",
   },
   {
     id: 't8',
     name: 'T8 Tram T8',
     cost: 245,
     impact: 30000,
-    description: "Tracé: Bellecour → Confluence → Gerland → États-Unis. Nouvelle ligne reliant le centre-ville aux quartiers sud en développement.",
+    description: "Ligne reliant Vaulx-en-Velin La Soie à la Gare de Vénissieux, pour renforcer le maillage de l’est lyonnais.",
   },
   {
     id: 'modern-c',
     name: 'Modernisation Ligne C',
     cost: 239,
     impact: 28000,
-    description: "Rénovation de la ligne C (crémaillère). Nouveaux équipements et amélioration de la fréquence vers Croix-Rousse et Cuire.",
+    description: "Rénovation des systèmes et des rames pour maintenir la sécurité et la fiabilité de la ligne à crémaillère.",
   },
   {
     id: 't3-renf',
     name: 'T3 en Express',
     cost: 35,
     impact: 12000,
-    description: "Tracé actuel: Gare Part-Dieu → Villeurbanne → Meyzieu. Renforcement des fréquences et ajout de rames sur la ligne T3 existante.",
+    description: "Modification du terminus, renforcement des fréquences et ajout de rames sur la ligne T3 existante.",
   },
   {
     id: 't9-final',
@@ -165,21 +165,21 @@ export const PROJECTS: Project[] = [
     name: 'BHNS Parilly',
     cost: 80,
     impact: 25000,
-    description: "Tracé: Parilly → Vénissieux → Saint-Priest. Liaison rapide en bus à haut niveau de service pour le sud-est.",
+    description: " Liaison rapide en bus à haut niveau de service pour le sud-est.",
   },
   {
     id: 'navette-fluv',
     name: 'Navette Fluviale',
     cost: 40,
     impact: 1500,
-    description: "Service de navettes sur le Rhône et la Saône. Mode de transport alternatif et touristique au cœur de Lyon.",
+    description: "Service de navettes sur le Rhône. Mode de transport alternatif et touristique au cœur de Lyon.",
   },
   {
     id: 'bhns-rive-droite',
     name: 'Ligne du Rhône Rive Droite',
     cost: 36,
     impact: 20000,
-    description: "Tracé: Perrache → Confluence → Oullins → Pierre-Bénite. Desserte de la rive droite du Rhône. Choisissez entre BHNS ou tramway.",
+    description: "Desserte de la rive droite du Rhône. Choisissez entre BHNS ou tramway.",
     upgradeOptions: [
       {
         id: 'bhns',

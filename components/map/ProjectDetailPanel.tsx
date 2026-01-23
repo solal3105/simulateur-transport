@@ -91,6 +91,9 @@ export function ProjectDetailPanel({
     : (project.impact || 0) + (isUpgraded && project.upgrade ? (project.upgrade.additionalImpact || 0) : 0)
   const efficiency = totalImpact ? Math.round(totalImpact / totalCost) : 0
   const isLocked = project.mandatOnly === 'M1+M2'
+  
+  // T9 and T10 finalisation can only be done in M1
+  const isM1Only = project.id === 't9-final' || project.id === 't10-final'
 
   // Check if metro-e-bellecour is selected (required for metro-e-part-dieu)
   const isBellecourSelected = projectSelections.some(s => s.projectId === 'metro-e-bellecour')
@@ -107,6 +110,8 @@ export function ProjectDetailPanel({
 
   const periods: { value: MandatPeriod; label: string; sublabel: string }[] = isLocked 
     ? [{ value: 'M1+M2', label: 'Étalé', sublabel: '2026-2038' }]
+    : isM1Only
+    ? [{ value: 'M1', label: 'Mandat 1', sublabel: '2026-32' }]
     : [
         { value: 'M1', label: 'Mandat 1', sublabel: '2026-32' },
         { value: 'M2', label: 'Mandat 2', sublabel: '2032-38' },

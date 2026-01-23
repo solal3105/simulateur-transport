@@ -214,29 +214,29 @@ export function ResultsScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-3 tablet:p-4 md:p-8 pb-20 tablet:pb-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6"
+          className="flex items-center justify-between mb-4 tablet:mb-6"
         >
           <button
             onClick={handleRestart}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800"
+            className="flex items-center gap-1.5 tablet:gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-2 tablet:px-3 py-1.5 tablet:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 text-sm tablet:text-base"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">Modifier</span>
+            <ArrowLeft className="w-4 h-4 tablet:w-5 tablet:h-5" />
+            <span className="hidden tablet:inline">Modifier</span>
           </button>
           
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 tablet:gap-2 px-3 tablet:px-4 py-1.5 tablet:py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg tablet:rounded-xl font-medium text-sm tablet:text-base transition-all disabled:opacity-50"
           >
-            <Download className="w-5 h-5" />
-            <span className="hidden sm:inline">{isDownloading ? 'Génération...' : 'Télécharger'}</span>
+            <Download className="w-4 h-4 tablet:w-5 tablet:h-5" />
+            <span className="hidden tablet:inline">{isDownloading ? 'Génération...' : 'Télécharger'}</span>
           </button>
         </motion.div>
 
@@ -245,9 +245,9 @@ export function ResultsScreen() {
           ref={cardRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-gray-800 rounded-2xl tablet:rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700"
         >
-          <div className="p-6 md:p-8">
+          <div className="p-4 tablet:p-6 md:p-8">
             {/* Logo + Title */}
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
@@ -701,12 +701,12 @@ export function ResultsScreen() {
           </div>
         </motion.div>
 
-        {/* Action buttons */}
+        {/* Action buttons - Desktop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 flex flex-col sm:flex-row gap-3 justify-center"
+          className="mt-6 hidden tablet:flex flex-col sm:flex-row gap-3 justify-center"
         >
           <button
             onClick={handleRestart}
@@ -716,6 +716,27 @@ export function ResultsScreen() {
             Modifier ma simulation
           </button>
         </motion.div>
+      </div>
+      
+      {/* Fixed Footer - Mobile only */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10 tablet:hidden">
+        <div className="px-3 py-2 flex items-center justify-center gap-3">
+          <button
+            onClick={handleRestart}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium text-xs transition-all border border-gray-200 dark:border-gray-700"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Modifier
+          </button>
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-xs transition-all disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {isDownloading ? 'Génération...' : 'Télécharger'}
+          </button>
+        </div>
       </div>
     </div>
   )

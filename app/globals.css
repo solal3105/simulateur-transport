@@ -64,6 +64,22 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Mobile viewport height fix - accounts for browser UI */
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  
+  .max-h-screen-safe {
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
 }
 
 @layer utilities {

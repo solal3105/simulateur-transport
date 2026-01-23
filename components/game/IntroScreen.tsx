@@ -277,7 +277,7 @@ export function IntroScreen() {
               className="flex-1 flex flex-col"
             >
               {/* Header */}
-              <div className="p-6 flex items-center justify-between">
+              <div className="p-3 tablet:p-6 flex items-center justify-between">
                 <motion.div 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -292,7 +292,7 @@ export function IntroScreen() {
                   <img 
                     src="/logo-rectangle-white.png" 
                     alt="TCL 2040" 
-                    className="lg:hidden h-12 w-auto invert"
+                    className="lg:hidden h-8 tablet:h-12 w-auto invert"
                   />
                 </motion.div>
                 <motion.button
@@ -300,23 +300,23 @@ export function IntroScreen() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2 }}
                   onClick={handleStart}
-                  className="text-gray-500 hover:text-white transition-colors text-sm"
+                  className="text-gray-500 hover:text-white transition-colors text-xs tablet:text-sm"
                 >
                   Passer →
                 </motion.button>
               </div>
 
               {/* Main content */}
-              <div className="flex-1 flex items-center justify-center px-6">
+              <div className="flex-1 flex items-center justify-center px-4 tablet:px-6 py-2 tablet:py-0">
                 <div className="max-w-3xl w-full text-center">
                   {/* Step 0: Date */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: landingStep >= 0 ? 1 : 0 }}
-                    className="mb-4"
+                    className="mb-2 tablet:mb-4"
                   >
-                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-gray-400 text-sm">
-                      <Sparkles className="w-4 h-4" />
+                    <span className="inline-flex items-center gap-1.5 tablet:gap-2 px-3 tablet:px-4 py-1.5 tablet:py-2 bg-white/5 border border-white/10 rounded-full text-gray-400 text-xs tablet:text-sm">
+                      <Sparkles className="w-3 h-3 tablet:w-4 tablet:h-4" />
                       <Typewriter 
                         text="22 mars 2026 — Élections métropolitaines" 
                         speed={40}
@@ -330,9 +330,9 @@ export function IntroScreen() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: landingStep >= 1 ? 1 : 0, y: landingStep >= 1 ? 0 : 20 }}
                     transition={{ duration: 0.8 }}
-                    className="mb-6"
+                    className="mb-3 tablet:mb-6"
                   >
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight">
+                    <h1 className="text-2xl tablet:text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight">
                       <span className="block">
                         <Typewriter 
                           text="Vous venez d'être"
@@ -367,16 +367,16 @@ export function IntroScreen() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: landingStep >= 3 ? 1 : 0, y: landingStep >= 3 ? 0 : 20 }}
                     transition={{ duration: 0.8 }}
-                    className="mb-8"
+                    className="mb-4 tablet:mb-8"
                   >
-                    <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-green-500/10 border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto">
-                      <p className="text-gray-300 text-lg md:text-xl mb-3">
+                    <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-green-500/10 border border-white/10 rounded-xl tablet:rounded-2xl p-3 tablet:p-6 max-w-2xl mx-auto">
+                      <p className="text-gray-300 text-sm tablet:text-lg md:text-xl mb-1 tablet:mb-3">
                         Votre mission pour les <strong className="text-white">12 prochaines années</strong> :
                       </p>
-                      <p className="text-2xl md:text-3xl font-black text-white">
+                      <p className="text-lg tablet:text-2xl md:text-3xl font-black text-white">
                         Transformer le réseau TCL
                       </p>
-                      <p className="text-gray-400 text-sm mt-3">
+                      <p className="text-gray-400 text-xs tablet:text-sm mt-1 tablet:mt-3 hidden tablet:block">
                         Métros, tramways, bus... Choisissez les projets à financer pour améliorer la mobilité de 1,4 million d&apos;habitants.
                       </p>
                     </div>
@@ -387,21 +387,21 @@ export function IntroScreen() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: landingStep >= 3 ? 1 : 0, y: landingStep >= 3 ? 0 : 20 }}
                     transition={{ duration: 0.8, delay: 0.3 }}
-                    className="flex flex-wrap justify-center gap-6 mb-10"
+                    className="flex flex-wrap justify-center gap-4 tablet:gap-6 mb-4 tablet:mb-10"
                   >
                     <div className="text-center">
-                      <p className="text-4xl md:text-5xl font-black text-green-400">4 Md€</p>
-                      <p className="text-gray-500 text-sm">Budget total</p>
+                      <p className="text-2xl tablet:text-4xl md:text-5xl font-black text-green-400">4 Md€</p>
+                      <p className="text-gray-500 text-xs tablet:text-sm">Budget</p>
                     </div>
-                    <div className="w-px h-16 bg-gray-800 hidden md:block" />
+                    <div className="w-px h-10 tablet:h-16 bg-gray-800 hidden tablet:block" />
                     <div className="text-center">
-                      <p className="text-4xl md:text-5xl font-black text-blue-400">2</p>
-                      <p className="text-gray-500 text-sm">Mandats (12 ans)</p>
+                      <p className="text-2xl tablet:text-4xl md:text-5xl font-black text-blue-400">2</p>
+                      <p className="text-gray-500 text-xs tablet:text-sm">Mandats</p>
                     </div>
-                    <div className="w-px h-16 bg-gray-800 hidden md:block" />
+                    <div className="w-px h-10 tablet:h-16 bg-gray-800 hidden tablet:block" />
                     <div className="text-center">
-                      <p className="text-4xl md:text-5xl font-black text-purple-400">25+</p>
-                      <p className="text-gray-500 text-sm">Projets possibles</p>
+                      <p className="text-2xl tablet:text-4xl md:text-5xl font-black text-purple-400">25+</p>
+                      <p className="text-gray-500 text-xs tablet:text-sm">Projets</p>
                     </div>
                   </motion.div>
 
@@ -410,20 +410,20 @@ export function IntroScreen() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: landingStep >= 3 ? 1 : 0, y: landingStep >= 3 ? 0 : 20 }}
                     transition={{ duration: 0.8, delay: 0.6 }}
-                    className="flex flex-col items-center gap-4"
+                    className="flex flex-col items-center gap-2 tablet:gap-4"
                   >
                     <button
                       onClick={() => setLocalPhase('tutorial')}
-                      className="group px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-white/25 flex items-center gap-3"
+                      className="group px-5 tablet:px-8 py-3 tablet:py-4 bg-white text-gray-900 rounded-full font-bold text-sm tablet:text-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-white/25 flex items-center gap-2 tablet:gap-3"
                     >
                       Découvrir comment jouer
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 tablet:w-5 tablet:h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
                       onClick={handleStart}
-                      className="text-gray-500 hover:text-white transition-colors text-sm"
+                      className="text-gray-500 hover:text-white transition-colors text-xs tablet:text-sm"
                     >
-                      Je connais déjà, commencer directement
+                      Commencer directement
                     </button>
                   </motion.div>
                 </div>
@@ -433,9 +433,9 @@ export function IntroScreen() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: landingStep >= 3 ? 0.5 : 0 }}
-                className="p-4 text-center"
+                className="p-2 tablet:p-4 text-center"
               >
-                <p className="text-gray-600 text-xs">
+                <p className="text-gray-600 text-[10px] tablet:text-xs">
                   Expérience pédagogique indépendante • Non affiliée au SYTRAL
                 </p>
               </motion.div>

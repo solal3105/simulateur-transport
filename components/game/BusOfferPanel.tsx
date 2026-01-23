@@ -70,7 +70,7 @@ export function BusOfferPanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      className="space-y-4 tablet:space-y-6"
     >
       {/* Warning Popups */}
       {showElectrificationWarning && (
@@ -142,40 +142,40 @@ export function BusOfferPanel() {
       )}
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
-            <Bus className="w-7 h-7 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center gap-3 tablet:gap-4 mb-4 tablet:mb-5">
+          <div className="w-10 h-10 tablet:w-14 tablet:h-14 rounded-xl tablet:rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
+            <Bus className="w-5 h-5 tablet:w-7 tablet:h-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Offre Bus</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Définissez votre stratégie pour la flotte de bus</p>
+            <h2 className="text-lg tablet:text-2xl font-bold text-gray-900 dark:text-white">Offre Bus</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-0.5 tablet:mt-1 text-xs tablet:text-base">Stratégie flotte de bus</p>
           </div>
         </div>
         
         {/* Total cost indicator */}
-        <div className="px-5 py-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-700 flex items-center justify-between">
-          <span className="text-gray-700 dark:text-gray-300 font-medium">Coût total par mandat</span>
-          <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
-            {totalBusCost} Millions € / mandat
+        <div className="px-3 tablet:px-5 py-3 tablet:py-4 rounded-lg tablet:rounded-xl bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-700 flex items-center justify-between">
+          <span className="text-gray-700 dark:text-gray-300 font-medium text-sm tablet:text-base">Coût/mandat</span>
+          <span className="text-base tablet:text-xl font-bold text-orange-600 dark:text-orange-400">
+            {totalBusCost}M€
           </span>
         </div>
       </div>
 
       {/* Entretien Bus */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
-            <Wrench className="w-5 h-5 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center gap-2 tablet:gap-3 mb-3 tablet:mb-4">
+          <div className="w-8 h-8 tablet:w-10 tablet:h-10 rounded-lg tablet:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
+            <Wrench className="w-4 h-4 tablet:w-5 tablet:h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Entretien de la flotte</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">800 Millions € sur 12 ans</p>
+            <h3 className="text-base tablet:text-lg font-bold text-gray-900 dark:text-white">Entretien flotte</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-xs tablet:text-sm">800M€ sur 12 ans</p>
           </div>
         </div>
         
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-          Maintenance et renouvellement des bus TCL. Indispensable pour la qualité de service.
+        <p className="text-gray-600 dark:text-gray-300 text-xs tablet:text-sm mb-3 tablet:mb-4">
+          Maintenance et renouvellement des bus TCL.
         </p>
 
         <div className="grid grid-cols-4 gap-2">
@@ -206,19 +206,19 @@ export function BusOfferPanel() {
       </div>
 
       {/* Électrification Bus */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
-            <Zap className="w-5 h-5 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center gap-2 tablet:gap-3 mb-3 tablet:mb-4">
+          <div className="w-8 h-8 tablet:w-10 tablet:h-10 rounded-lg tablet:rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
+            <Zap className="w-4 h-4 tablet:w-5 tablet:h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Électrification de la flotte</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">460 Millions € sur 12 ans</p>
+            <h3 className="text-base tablet:text-lg font-bold text-gray-900 dark:text-white">Électrification</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-xs tablet:text-sm">460M€ sur 12 ans</p>
           </div>
         </div>
         
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-          Conversion des bus thermiques vers l&apos;électrique. Réduit les émissions et le bruit.
+        <p className="text-gray-600 dark:text-gray-300 text-xs tablet:text-sm mb-3 tablet:mb-4">
+          Conversion vers l&apos;électrique.
         </p>
 
         <div className="grid grid-cols-4 gap-2">

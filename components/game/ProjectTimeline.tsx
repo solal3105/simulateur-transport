@@ -95,16 +95,16 @@ export function ProjectTimeline({ isModal = false, onClose }: { isModal?: boolea
   const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i)
 
   const content = (
-    <div className="space-y-6">
+    <div className="space-y-4 tablet:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <Calendar className="w-7 h-7 text-white" />
+        <div className="flex items-center gap-3 tablet:gap-4">
+          <div className="w-10 h-10 tablet:w-14 tablet:h-14 rounded-xl tablet:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <Calendar className="w-5 h-5 tablet:w-7 tablet:h-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Frise Chronologique</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Calendrier de réalisation des projets</p>
+            <h2 className="text-lg tablet:text-2xl font-bold text-gray-900 dark:text-white">Frise Chronologique</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-0.5 tablet:mt-1 text-xs tablet:text-base">Calendrier des projets</p>
           </div>
         </div>
         {isModal && onClose && (
@@ -118,14 +118,14 @@ export function ProjectTimeline({ isModal = false, onClose }: { isModal?: boolea
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-blue-500/30 border-2 border-blue-500" />
-          <span className="text-gray-600 dark:text-gray-400">Mandat 1 (2026-2032)</span>
+      <div className="flex flex-wrap gap-2 tablet:gap-4 text-xs tablet:text-sm">
+        <div className="flex items-center gap-1.5 tablet:gap-2">
+          <div className="w-3 h-3 tablet:w-4 tablet:h-4 rounded bg-blue-500/30 border-2 border-blue-500" />
+          <span className="text-gray-600 dark:text-gray-400">M1 (2026-32)</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-purple-500/30 border-2 border-purple-500" />
-          <span className="text-gray-600 dark:text-gray-400">Mandat 2 (2032-2038)</span>
+        <div className="flex items-center gap-1.5 tablet:gap-2">
+          <div className="w-3 h-3 tablet:w-4 tablet:h-4 rounded bg-purple-500/30 border-2 border-purple-500" />
+          <span className="text-gray-600 dark:text-gray-400">M2 (2032-38)</span>
         </div>
       </div>
 
@@ -265,30 +265,30 @@ export function ProjectTimeline({ isModal = false, onClose }: { isModal?: boolea
 
       {/* Stats summary */}
       {timelineProjects.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+        <div className="grid grid-cols-4 gap-2 tablet:gap-4 pt-3 tablet:pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-center p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-blue-50 dark:bg-blue-900/20">
+            <p className="text-lg tablet:text-2xl font-bold text-blue-600 dark:text-blue-400">
               {timelineProjects.filter((p) => p.period === 'M1').length}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Mandat 1</p>
+            <p className="text-[10px] tablet:text-xs text-gray-500 dark:text-gray-400">M1</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20">
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <div className="text-center p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-purple-50 dark:bg-purple-900/20">
+            <p className="text-lg tablet:text-2xl font-bold text-purple-600 dark:text-purple-400">
               {timelineProjects.filter((p) => p.period === 'M2').length}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Mandat 2</p>
+            <p className="text-[10px] tablet:text-xs text-gray-500 dark:text-gray-400">M2</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-green-50 dark:bg-green-900/20">
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="text-center p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-green-50 dark:bg-green-900/20">
+            <p className="text-lg tablet:text-2xl font-bold text-green-600 dark:text-green-400">
               {timelineProjects.filter((p) => p.period === 'M1+M2').length}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Projets étalés</p>
+            <p className="text-[10px] tablet:text-xs text-gray-500 dark:text-gray-400">Étalés</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20">
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+          <div className="text-center p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-amber-50 dark:bg-amber-900/20">
+            <p className="text-lg tablet:text-2xl font-bold text-amber-600 dark:text-amber-400">
               {Math.max(...timelineProjects.map((p) => p.endYear))}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Dernier projet</p>
+            <p className="text-[10px] tablet:text-xs text-gray-500 dark:text-gray-400">Fin</p>
           </div>
         </div>
       )}
@@ -308,7 +308,7 @@ export function ProjectTimeline({ isModal = false, onClose }: { isModal?: boolea
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          className="bg-white dark:bg-gray-900 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {content}
@@ -318,7 +318,7 @@ export function ProjectTimeline({ isModal = false, onClose }: { isModal?: boolea
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
+    <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
       {content}
     </div>
   )

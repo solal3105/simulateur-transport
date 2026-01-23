@@ -166,7 +166,7 @@ export function GameFinancingPanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      className="space-y-4 tablet:space-y-6"
     >
       {/* Budget Summary - Sticky */}
       <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 -mt-3 mb-3 border-b border-gray-200 dark:border-gray-700 shadow-sm">
@@ -204,30 +204,30 @@ export function GameFinancingPanel() {
       </div>
 
       {/* Header Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
-            <Coins className="w-7 h-7 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center gap-3 tablet:gap-4 mb-4 tablet:mb-5">
+          <div className="w-10 h-10 tablet:w-14 tablet:h-14 rounded-xl tablet:rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+            <Coins className="w-5 h-5 tablet:w-7 tablet:h-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Leviers de Financement</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Équilibrez votre budget avec les bonnes sources de revenus</p>
+            <h2 className="text-lg tablet:text-2xl font-bold text-gray-900 dark:text-white">Leviers de Financement</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-0.5 tablet:mt-1 text-xs tablet:text-base">Équilibrez votre budget</p>
           </div>
         </div>
         
         {/* Total impact indicator */}
         <div className={cn(
-          "px-5 py-4 rounded-xl flex items-center justify-between",
+          "px-3 tablet:px-5 py-3 tablet:py-4 rounded-lg tablet:rounded-xl flex items-center justify-between",
           totalLeverImpact >= 0 
             ? "bg-emerald-50 dark:bg-gray-800 border-2 border-emerald-200 dark:border-emerald-600" 
             : "bg-red-50 dark:bg-gray-800 border-2 border-red-200 dark:border-red-500"
         )}>
-          <span className="text-gray-700 dark:text-gray-300 font-medium">Impact total des leviers</span>
+          <span className="text-gray-700 dark:text-gray-300 font-medium text-sm tablet:text-base">Impact total</span>
           <span className={cn(
-            "text-xl font-bold",
+            "text-base tablet:text-xl font-bold",
             totalLeverImpact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
           )}>
-            {totalLeverImpact >= 0 ? '+' : ''}{formatCurrency(totalLeverImpact)} / mandat
+            {totalLeverImpact >= 0 ? '+' : ''}{formatCurrency(totalLeverImpact)}/mandat
           </span>
         </div>
       </div>
@@ -444,12 +444,12 @@ export function GameFinancingPanel() {
       </AnimatePresence>
 
       {/* Section Tarification Sociale */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-            <Users className="w-5 h-5 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center gap-2 tablet:gap-3 mb-3 tablet:mb-5">
+          <div className="w-8 h-8 tablet:w-10 tablet:h-10 rounded-lg tablet:rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+            <Users className="w-4 h-4 tablet:w-5 tablet:h-5 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tarification Sociale</h3>
+          <h3 className="text-base tablet:text-lg font-bold text-gray-900 dark:text-white">Tarification Sociale</h3>
         </div>
         <div className="space-y-4">
           {/* Gratuité Totale */}
@@ -529,13 +529,13 @@ export function GameFinancingPanel() {
       </div>
 
       {/* Section Tarification */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
-              <CreditCard className="w-5 h-5 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-3 tablet:mb-5">
+          <div className="flex items-center gap-2 tablet:gap-3">
+            <div className="w-8 h-8 tablet:w-10 tablet:h-10 rounded-lg tablet:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
+              <CreditCard className="w-4 h-4 tablet:w-5 tablet:h-5 text-white" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tarification</h3>
+            <h3 className="text-base tablet:text-lg font-bold text-gray-900 dark:text-white">Tarification</h3>
           </div>
           {financingLevers.gratuiteTotale && (
             <span className="px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 text-xs font-semibold">Bloqué - Gratuité active</span>
@@ -575,13 +575,13 @@ export function GameFinancingPanel() {
       </div>
 
       {/* Section Fiscalité */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
-              <Building2 className="w-5 h-5 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl tablet:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 tablet:p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-3 tablet:mb-5">
+          <div className="flex items-center gap-2 tablet:gap-3">
+            <div className="w-8 h-8 tablet:w-10 tablet:h-10 rounded-lg tablet:rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+              <Building2 className="w-4 h-4 tablet:w-5 tablet:h-5 text-white" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Fiscalité & Investissements</h3>
+            <h3 className="text-base tablet:text-lg font-bold text-gray-900 dark:text-white">Fiscalité</h3>
           </div>
           <span className="px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 text-xs font-semibold flex items-center gap-1.5">
             <Gavel className="w-3.5 h-3.5" />
@@ -797,15 +797,32 @@ function LeverSlider({
           </div>
         </div>
 
-        <Slider
-          value={[value]}
-          onValueChange={([val]) => onChange(val)}
-          min={min}
-          max={max}
-          step={1}
-          className="w-full"
-          disabled={disabled}
-        />
+        <div className="flex items-center gap-3">
+          <Slider
+            value={[value]}
+            onValueChange={([val]) => onChange(val)}
+            min={min}
+            max={max}
+            step={1}
+            className="flex-1"
+            disabled={disabled}
+          />
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              value={value}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 0
+                onChange(Math.max(min, Math.min(max, val)))
+              }}
+              min={min}
+              max={max}
+              disabled={disabled}
+              className="w-14 px-2 py-1.5 text-center text-sm font-semibold rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
+            />
+            <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">%</span>
+          </div>
+        </div>
 
         {expanded && (
           <motion.div

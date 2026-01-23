@@ -327,7 +327,7 @@ export function MapView() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <div className="relative w-full h-screen-safe overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Map Container */}
       <MapContainer
         center={LYON_CENTER}

@@ -757,9 +757,9 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
         <div className="p-2 tablet:p-4">
           <div className="pointer-events-auto">
             {/* Mobile Layout: Stacked vertical cards */}
-            <div className="tablet:hidden space-y-2">
-              {/* Row 1: Bus + Financing + Timeline - Unified style */}
-              <div className="flex gap-2">
+            <div className="tablet:hidden space-y-1.5">
+              {/* Row 1: Bus + Financing + Timeline - Compact horizontal buttons */}
+              <div className="flex gap-1.5">
                 {/* Bus Offer */}
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
@@ -767,35 +767,27 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   onClick={onOpenBusOffer}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "flex-1 rounded-xl border-2 p-2.5 flex items-center gap-2 transition-all shadow-xl relative backdrop-blur-md",
+                    "flex-1 rounded-lg border-2 py-2 px-1 flex items-center justify-center gap-1 transition-all shadow-lg relative backdrop-blur-md",
                     busOfferConfirmed
-                      ? "bg-green-50/80 dark:bg-green-900/60 border-green-400"
-                      : "bg-orange-50/80 dark:bg-orange-900/60 border-orange-400 animate-pulse"
+                      ? "bg-green-50/90 dark:bg-green-900/70 border-green-400"
+                      : "bg-orange-50/90 dark:bg-orange-900/70 border-orange-400 animate-pulse"
                   )}
                 >
                   {!busOfferConfirmed && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-[8px] font-bold">!</span>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-[7px] font-bold">!</span>
                     </div>
                   )}
-                  <div className={cn(
-                    "w-9 h-9 rounded-lg flex items-center justify-center shadow-md flex-shrink-0",
-                    busOfferConfirmed ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-orange-500 to-amber-600"
+                  <span className={cn(
+                    "font-semibold text-[11px]",
+                    busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"
+                  )}>Réseau Bus</span>
+                  <span className={cn(
+                    "text-[10px]",
+                    busOfferConfirmed ? "text-green-600" : "text-orange-600"
                   )}>
-                    <Bus className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-left min-w-0 flex-1">
-                    <h3 className={cn(
-                      "font-bold text-[11px]",
-                      busOfferConfirmed ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"
-                    )}>Offre Bus</h3>
-                    <p className={cn(
-                      "text-[10px]",
-                      busOfferConfirmed ? "text-green-600 dark:text-green-500" : "text-orange-600 dark:text-orange-500"
-                    )}>
-                      {busOfferConfirmed ? "✓ Confirmée" : "⚠ À confirmer"}
-                    </p>
-                  </div>
+                    {busOfferConfirmed ? "✓" : "⚠"}
+                  </span>
                 </motion.button>
 
                 {/* Financing */}
@@ -804,17 +796,9 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   animate={{ opacity: 1, y: 0 }}
                   onClick={onOpenFinancing}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-yellow-50/80 dark:bg-yellow-900/60 backdrop-blur-md rounded-xl border-2 border-yellow-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
+                  className="flex-1 bg-yellow-50/90 dark:bg-yellow-900/70 backdrop-blur-md rounded-lg border-2 border-yellow-400 py-2 px-1 flex items-center justify-center gap-1 transition-all shadow-lg"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center shadow-md flex-shrink-0">
-                    <Coins className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-left min-w-0 flex-1">
-                    <h3 className="text-yellow-700 dark:text-yellow-400 font-bold text-[11px]">Financement</h3>
-                    <p className="text-yellow-600 dark:text-yellow-500 text-[10px]">
-                      {financingLevers?.gratuiteTotale ? "Gratuité ✓" : "Ajuster leviers"}
-                    </p>
-                  </div>
+                  <span className="text-yellow-700 dark:text-yellow-400 font-semibold text-[11px]">Financement</span>
                 </motion.button>
 
                 {/* Timeline */}
@@ -823,15 +807,10 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => setShowTimeline(true)}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-indigo-50/80 dark:bg-indigo-900/60 backdrop-blur-md rounded-xl border-2 border-indigo-400 p-2.5 flex items-center gap-2 transition-all shadow-xl"
+                  className="flex-1 bg-indigo-50/90 dark:bg-indigo-900/70 backdrop-blur-md rounded-lg border-2 border-indigo-400 py-2 px-1 flex items-center justify-center gap-1 transition-all shadow-lg"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
-                    <Calendar className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-left min-w-0 flex-1">
-                    <h3 className="text-indigo-700 dark:text-indigo-400 font-bold text-[11px]">Planning</h3>
-                    <p className="text-indigo-600 dark:text-indigo-500 text-[10px]">{totalProjects} projets</p>
-                  </div>
+                  <span className="text-indigo-700 dark:text-indigo-400 font-semibold text-[11px]">Planning</span>
+                  <span className="text-indigo-600 dark:text-indigo-500 text-[10px] font-medium">{totalProjects}</span>
                 </motion.button>
               </div>
 
@@ -850,15 +829,13 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   whileTap={{ scale: 0.98 }}
                   disabled={!budgetValid}
                   className={cn(
-                    "w-full rounded-xl border-2 p-4 flex items-center justify-center gap-3 shadow-xl font-bold text-base transition-all backdrop-blur-md",
+                    "w-full rounded-lg border-2 py-2 flex items-center justify-center shadow-lg font-semibold text-xs transition-all backdrop-blur-md",
                     budgetValid
-                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 hover:from-green-600 hover:to-emerald-700"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400"
                       : "bg-gray-100/80 dark:bg-gray-800/80 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
                   )}
                 >
-                  <Rocket className="w-5 h-5" />
                   Valider le projet
-                  <ArrowRight className="w-5 h-5" />
                 </motion.button>
               )}
             </div>
@@ -1112,52 +1089,52 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg">
-              <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
-                    <Coins className="w-6 h-6 text-white" />
+              <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-2 tablet:py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 tablet:gap-4">
+                  <div className="w-8 h-8 tablet:w-12 tablet:h-12 rounded-lg tablet:rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
+                    <Coins className="w-4 h-4 tablet:w-6 tablet:h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financement</h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Ajustez vos leviers pour équilibrer le budget</p>
+                    <h1 className="text-base tablet:text-2xl font-bold text-gray-900 dark:text-white">Financement</h1>
+                    <p className="text-gray-600 dark:text-gray-400 text-[10px] tablet:text-sm hidden tablet:block">Ajustez vos leviers pour équilibrer le budget</p>
                   </div>
                 </div>
                 <button
                   onClick={onCloseFinancing}
-                  className="p-3 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-all"
+                  className="p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-all"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 tablet:w-6 tablet:h-6" />
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="container mx-auto max-w-4xl px-4 py-8 pb-24">
+            <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-4 tablet:py-8 pb-20 tablet:pb-24">
               <GameFinancingPanel />
             </div>
 
             {/* Sticky Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
-              <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
+              <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-2 tablet:py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 tablet:gap-3">
                   {isValid ? (
                     <>
-                      <CheckCircle2 className="w-6 h-6 text-green-500" />
-                      <span className="text-green-600 dark:text-green-400 font-medium">Budget équilibré</span>
+                      <CheckCircle2 className="w-4 h-4 tablet:w-6 tablet:h-6 text-green-500" />
+                      <span className="text-green-600 dark:text-green-400 font-medium text-xs tablet:text-base">Budget équilibré</span>
                     </>
                   ) : (
                     <>
-                      <AlertTriangle className="w-6 h-6 text-red-500" />
-                      <span className="text-red-600 dark:text-red-400 font-medium">Budget déséquilibré</span>
+                      <AlertTriangle className="w-4 h-4 tablet:w-6 tablet:h-6 text-red-500" />
+                      <span className="text-red-600 dark:text-red-400 font-medium text-xs tablet:text-base">Budget déséquilibré</span>
                     </>
                   )}
                 </div>
                 <button
                   onClick={onCloseFinancing}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                  className="px-3 tablet:px-6 py-2 tablet:py-3 rounded-lg tablet:rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-semibold tablet:font-bold text-xs tablet:text-base hover:opacity-90 transition-all flex items-center gap-1.5 tablet:gap-2"
                 >
-                  Retour à la carte
-                  <ArrowRight className="w-5 h-5" />
+                  Retour
+                  <ArrowRight className="w-4 h-4 tablet:w-5 tablet:h-5" />
                 </button>
               </div>
             </div>
@@ -1176,46 +1153,47 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg">
-              <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
-                    <Bus className="w-6 h-6 text-white" />
+              <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-2 tablet:py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 tablet:gap-4">
+                  <div className="w-8 h-8 tablet:w-12 tablet:h-12 rounded-lg tablet:rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
+                    <Bus className="w-4 h-4 tablet:w-6 tablet:h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Offre Bus</h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Définissez votre stratégie pour la flotte de bus</p>
+                    <h1 className="text-base tablet:text-2xl font-bold text-gray-900 dark:text-white">Réseau Bus</h1>
+                    <p className="text-gray-600 dark:text-gray-400 text-[10px] tablet:text-sm hidden tablet:block">Définissez votre stratégie pour la flotte de bus</p>
                   </div>
                 </div>
                 <button
                   onClick={onCloseBusOffer}
-                  className="p-3 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-all"
+                  className="p-2 tablet:p-3 rounded-lg tablet:rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition-all"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 tablet:w-6 tablet:h-6" />
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="container mx-auto max-w-4xl px-4 py-8 pb-24 flex-1">
+            <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-4 tablet:py-8 pb-20 tablet:pb-24 flex-1">
               <BusOfferPanel />
             </div>
 
             {/* Footer */}
-            <div className="mt-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
-              <div className="container mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-6 h-6 text-green-500" />
-                  <span className="text-green-600 dark:text-green-400 font-medium">Vos choix seront validés automatiquement</span>
+            <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
+              <div className="container mx-auto max-w-4xl px-3 tablet:px-4 py-2 tablet:py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 tablet:gap-3">
+                  <CheckCircle2 className="w-4 h-4 tablet:w-6 tablet:h-6 text-green-500" />
+                  <span className="text-green-600 dark:text-green-400 font-medium text-xs tablet:text-base hidden tablet:inline">Vos choix seront validés</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium text-xs tablet:hidden">Validé auto</span>
                 </div>
                 <button
                   onClick={() => {
                     setBusOfferConfirmed(true)
                     onCloseBusOffer()
                   }}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                  className="px-3 tablet:px-6 py-2 tablet:py-3 rounded-lg tablet:rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold tablet:font-bold text-xs tablet:text-base hover:opacity-90 transition-all flex items-center gap-1.5 tablet:gap-2"
                 >
-                  Valider et retour à la carte
-                  <ArrowRight className="w-5 h-5" />
+                  Valider
+                  <ArrowRight className="w-4 h-4 tablet:w-5 tablet:h-5" />
                 </button>
               </div>
             </div>
