@@ -28,6 +28,7 @@ import { BusOfferPanel } from '@/components/game/BusOfferPanel'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Bus } from 'lucide-react'
 import { ProjectTimeline } from '@/components/game/ProjectTimeline'
+import { PartySelector } from '@/components/game/PartySelector'
 
 // Circular gauge component with value BELOW the circle
 function CircularGauge({ 
@@ -194,7 +195,25 @@ function getValidationMessage(totalProjects: number, totalImpact: number, financ
 export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing, onOpenBusOffer, showBusOffer, onCloseBusOffer, mapStyle, onMapStyleChange, mapStyles, colorMode, onColorModeChange, onClearHover }: MapDashboardProps) {
   const [showMapStyleMenu, setShowMapStyleMenu] = useState(false)
   const [showColorModeMenu, setShowColorModeMenu] = useState(false)
+  const [showPartyMenu, setShowPartyMenu] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
+
+  // Close all other dropdowns when opening one
+  const openMapStyleMenu = () => {
+    setShowColorModeMenu(false)
+    setShowPartyMenu(false)
+    setShowMapStyleMenu(true)
+  }
+  const openColorModeMenu = () => {
+    setShowMapStyleMenu(false)
+    setShowPartyMenu(false)
+    setShowColorModeMenu(true)
+  }
+  const openPartyMenu = () => {
+    setShowMapStyleMenu(false)
+    setShowColorModeMenu(false)
+    setShowPartyMenu(true)
+  }
   const [showBusOfferWarning, setShowBusOfferWarning] = useState(false)
   const [showDeficitWarning, setShowDeficitWarning] = useState(false)
   const [showTimeline, setShowTimeline] = useState(false)
@@ -259,10 +278,12 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   />
                   {/* Mobile Controls */}
                   <div className="flex items-center gap-1">
+                    {/* Party Selector */}
+                    <PartySelector compact />
                     {/* Color Mode Dropdown */}
                     <div className="relative">
                       <button
-                        onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                        onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
                         className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
                         <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
@@ -293,7 +314,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                     </button>
                     <div className="relative">
                       <button
-                        onClick={() => setShowMapStyleMenu(!showMapStyleMenu)}
+                        onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
                         className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <Map className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -407,10 +428,12 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
 
                   {/* Tablet Controls */}
                   <div className="flex items-center gap-2">
+                    {/* Party Selector */}
+                    <PartySelector compact />
                     {/* Color Mode Dropdown */}
                     <div className="relative">
                       <button
-                        onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                        onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
                         <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -459,7 +482,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                     </button>
                     <div className="relative">
                       <button
-                        onClick={() => setShowMapStyleMenu(!showMapStyleMenu)}
+                        onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
                         className="flex items-center gap-1 px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
                         <Map className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -632,10 +655,17 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   transition={{ delay: 0.3 }}
                   className="flex items-center gap-2 ml-auto"
                 >
+                  {/* Party Selector */}
+                  <PartySelector 
+                    compact 
+                    desktopStyle 
+                    isOpen={showPartyMenu}
+                    onOpenChange={(open) => open ? openPartyMenu() : setShowPartyMenu(false)}
+                  />
                   {/* Color Mode Dropdown */}
                   <div className="relative">
                     <button
-                      onClick={() => setShowColorModeMenu(!showColorModeMenu)}
+                      onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
                       className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                     >
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -696,7 +726,7 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   </button>
                   <div className="relative">
                     <button
-                      onClick={() => setShowMapStyleMenu(!showMapStyleMenu)}
+                      onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
                       className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                     >
                       <Map className="w-5 h-5 text-gray-500 dark:text-gray-400" />

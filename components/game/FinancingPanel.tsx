@@ -1,8 +1,8 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore } from '@/lib/gameStore'
-import { FinancingLevers, MandatPeriod } from '@/lib/types'
+import { useGameStore, isLeverActive } from '@/lib/gameStore'
+import { FinancingLevers, MandatPeriod, FinancingLeverPeriod } from '@/lib/types'
 import { BASE_PRICES } from '@/lib/data'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
@@ -655,23 +655,25 @@ function LeverToggle({
 }: {
   lever: string
   info: LeverInfo
-  checked: boolean
-  disabled?: boolean
+  checked: FinancingLeverPeriod
+  disabled?: FinancingLeverPeriod
   onChange: (checked: boolean) => void
   expanded: boolean
   onToggleExpand: () => void
   showLawBadge?: boolean
 }) {
   const Icon = info.icon
+  const isChecked = isLeverActive(checked)
+  const isDisabled = disabled !== undefined ? isLeverActive(disabled) : false
 
   return (
     <div className={cn(
       "rounded-xl border-2 transition-all",
-      checked 
+      isChecked 
         ? "border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" 
         : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50",
-      showLawBadge && !checked ? "border-amber-300 dark:border-amber-600" : "",
-      disabled ? "opacity-50" : ""
+      showLawBadge && !isChecked ? "border-amber-300 dark:border-amber-600" : "",
+      isDisabled ? "opacity-50" : ""
     )}>
       <div className="p-4">
         <div className="flex items-center justify-between">
@@ -692,9 +694,9 @@ function LeverToggle({
               {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </button>
             <Switch 
-              checked={checked} 
+              checked={isChecked} 
               onCheckedChange={onChange}
-              disabled={disabled}
+              disabled={isDisabled}
             />
           </div>
         </div>
@@ -742,16 +744,17 @@ function LeverSlider({
   impactPerPercent: number
   expanded: boolean
   onToggleExpand: () => void
-  disabled?: boolean
+  disabled?: FinancingLeverPeriod
 }) {
   const Icon = info.icon
   const impact = value * impactPerPercent
   const currentPrice = basePrice * (1 + value / 100)
+  const isDisabled = disabled !== undefined ? isLeverActive(disabled) : false
 
   return (
     <div className={cn(
       "rounded-xl border-2 transition-all",
-      disabled ? "opacity-50 pointer-events-none" : "",
+      isDisabled ? "opacity-50 pointer-events-none" : "",
       value !== 0 
         ? "border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20" 
         : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
@@ -805,7 +808,7 @@ function LeverSlider({
             max={max}
             step={1}
             className="flex-1"
-            disabled={disabled}
+            disabled={isDisabled}
           />
           <div className="flex items-center gap-1">
             <input
@@ -817,7 +820,7 @@ function LeverSlider({
               }}
               min={min}
               max={max}
-              disabled={disabled}
+              disabled={isDisabled}
               className="w-14 px-2 py-1.5 text-center text-sm font-semibold rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
             />
             <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">%</span>

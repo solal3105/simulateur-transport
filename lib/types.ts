@@ -41,16 +41,20 @@ export interface ProjectSelection {
   selectedUpgradeOptionId?: string // Pour les projets avec choix multiples (upgradeOptions)
 }
 
+// Pour les leviers de financement pouvant être étalés sur les mandats
+// true = M1+M2, false/null = désactivé, 'M1'/'M2'/'M1+M2' = période spécifique
+export type FinancingLeverPeriod = boolean | MandatPeriod
+
 export interface FinancingLevers {
-  gratuiteTotale: boolean
-  gratuiteConditionnee: boolean // Proposition Aulas: Lyonnais uniquement + revenus < 2500€
-  gratuiteJeunesAbonnes: boolean // Gratuité 11-18 ans enfants d'abonnés TCL
-  suppressionTarifSocial: boolean // Supprimer la tarification sociale (fin gratuité précaires, fin abonnements solidaires) +240M
-  metro24hWeekend: boolean // Métro 24h/24 les weekends
+  gratuiteTotale: FinancingLeverPeriod
+  gratuiteConditionnee: FinancingLeverPeriod // Proposition Aulas: Lyonnais uniquement + revenus < 2500€
+  gratuiteJeunesAbonnes: FinancingLeverPeriod // Gratuité 11-18 ans enfants d'abonnés TCL
+  suppressionTarifSocial: FinancingLeverPeriod // Supprimer la tarification sociale (fin gratuité précaires, fin abonnements solidaires) +240M
+  metro24hWeekend: FinancingLeverPeriod // Métro 24h/24 les weekends
   tarifAbonnements: number
   tarifTickets: number
   versementMobilite: -25 | 0 | 25 | 50
-  tva55: boolean
+  tva55: FinancingLeverPeriod
   electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
   entretienBus: MandatPeriod // Entretien et renouvellement de la flotte de bus - 800M€ total
 }

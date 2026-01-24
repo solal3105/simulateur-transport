@@ -301,6 +301,25 @@ export function MapView() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
+  // Auto-clear stale hover state every second
+  useEffect(() => {
+    if (!hoveredProject) return
+    
+    const interval = setInterval(() => {
+      // Check if mouse is still over an element with project data
+      const elementsUnderMouse = document.elementsFromPoint(mousePosition.x, mousePosition.y)
+      const isOverMap = elementsUnderMouse.some(el => 
+        el.closest('.leaflet-container') && 
+        (el.closest('path') || el.closest('.leaflet-marker-icon'))
+      )
+      if (!isOverMap) {
+        setHoveredProject(null)
+      }
+    }, 500)
+    
+    return () => clearInterval(interval)
+  }, [hoveredProject, mousePosition])
+
   const currentMapStyle = MAP_STYLES[mapStyle]
 
   const handleProjectClick = (project: Project) => {

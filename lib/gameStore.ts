@@ -1,7 +1,69 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ProjectSelection, FinancingLevers, MandatPeriod } from './types'
+import { ProjectSelection, FinancingLevers, MandatPeriod, FinancingLeverPeriod } from './types'
 import { PROJECTS, BASE_BUDGET, FINANCING_IMPACTS } from './data'
+import { PoliticalParty, POLITICAL_PARTIES } from './politicalParties'
+
+// Helper to check if a financing lever is active (for any period)
+export function isLeverActive(lever: FinancingLeverPeriod): boolean {
+  return lever === true || lever === 'M1' || lever === 'M2' || lever === 'M1+M2'
+}
+
+// Helper to check if lever applies to a specific mandate
+function leverAppliesTo(lever: FinancingLeverPeriod, mandate: 'M1' | 'M2'): boolean {
+  if (lever === true || lever === 'M1+M2') return true
+  if (lever === mandate) return true
+  return false
+}
+
+// Calculate lever impact split by mandate
+function calculateLeverImpactByMandate(levers: FinancingLevers): { m1: number; m2: number } {
+  let m1Impact = 0
+  let m2Impact = 0
+
+  const gratuiteTotaleActive = isLeverActive(levers.gratuiteTotale)
+
+  // Gratuité totale
+  if (leverAppliesTo(levers.gratuiteTotale, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteTotale
+  if (leverAppliesTo(levers.gratuiteTotale, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteTotale
+
+  // Gratuité conditionnée
+  if (leverAppliesTo(levers.gratuiteConditionnee, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteConditionnee
+  if (leverAppliesTo(levers.gratuiteConditionnee, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteConditionnee
+
+  // Gratuité jeunes abonnés
+  if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+  if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+
+  // Suppression tarification sociale (ne s'applique pas si gratuité totale)
+  if (!gratuiteTotaleActive) {
+    if (leverAppliesTo(levers.suppressionTarifSocial, 'M1')) m1Impact += FINANCING_IMPACTS.suppressionTarifSocial
+    if (leverAppliesTo(levers.suppressionTarifSocial, 'M2')) m2Impact += FINANCING_IMPACTS.suppressionTarifSocial
+  }
+
+  // Métro 24h weekend
+  if (leverAppliesTo(levers.metro24hWeekend, 'M1')) m1Impact += FINANCING_IMPACTS.metro24hWeekend
+  if (leverAppliesTo(levers.metro24hWeekend, 'M2')) m2Impact += FINANCING_IMPACTS.metro24hWeekend
+
+  // Les tarifs ne s'appliquent pas si gratuité totale
+  if (!gratuiteTotaleActive) {
+    const tarifImpact = levers.tarifAbonnements * FINANCING_IMPACTS.tarifAbonnementsPerPercent +
+                        levers.tarifTickets * FINANCING_IMPACTS.tarifTicketsPerPercent
+    m1Impact += tarifImpact
+    m2Impact += tarifImpact
+  }
+
+  // Versement mobilité (applies to both mandates)
+  const vmImpact = FINANCING_IMPACTS.versementMobilite[levers.versementMobilite.toString() as keyof typeof FINANCING_IMPACTS.versementMobilite]
+  m1Impact += vmImpact
+  m2Impact += vmImpact
+
+  // TVA 5.5%
+  if (leverAppliesTo(levers.tva55, 'M1')) m1Impact += FINANCING_IMPACTS.tva55
+  if (leverAppliesTo(levers.tva55, 'M2')) m2Impact += FINANCING_IMPACTS.tva55
+
+  return { m1: m1Impact, m2: m2Impact }
+}
 
 export type GamePhase = 'intro' | 'onboarding' | 'playing' | 'results'
 
@@ -37,6 +99,7 @@ interface GameState {
   selectedCategory: string | null
   animatingBudget: boolean
   lastAction: string | null
+  selectedPartyId: string | null
   
   // Actions
   setPhase: (phase: GamePhase) => void
@@ -57,6 +120,7 @@ interface GameState {
   setAnimatingBudget: (val: boolean) => void
   setLastAction: (action: string | null) => void
   setBusOfferConfirmed: (val: boolean) => void
+  applyPartyPreselection: (partyId: string | null) => void
 }
 
 const initialFinancingLevers: FinancingLevers = {
@@ -88,6 +152,7 @@ export const useGameStore = create<GameState>()(
       selectedCategory: null,
       animatingBudget: false,
       lastAction: null,
+      selectedPartyId: null,
 
       setPhase: (phase) => set({ phase }),
       
@@ -231,16 +296,16 @@ export const useGameStore = create<GameState>()(
           m2Cost += 400
         }
 
-        const leverImpact = calculateLeverImpact(financingLevers)
+        const leverImpact = calculateLeverImpactByMandate(financingLevers)
         const totalCost = m1Cost + m2Cost
         const efficiency = totalCost > 0 ? totalImpact / totalCost : 0
 
         return {
-          m1: BASE_BUDGET + leverImpact - m1Cost,
-          m2: BASE_BUDGET + leverImpact - m2Cost,
+          m1: BASE_BUDGET + leverImpact.m1 - m1Cost,
+          m2: BASE_BUDGET + leverImpact.m2 - m2Cost,
           totalImpact,
           efficiency,
-          leverImpact,
+          leverImpact: leverImpact.m1 + leverImpact.m2,
         }
       },
 
@@ -262,7 +327,7 @@ export const useGameStore = create<GameState>()(
         score += Math.floor(budget.efficiency * 10)
         
         // Malus pour gratuité totale (choix politique controversé)
-        if (financingLevers.gratuiteTotale) {
+        if (isLeverActive(financingLevers.gratuiteTotale)) {
           score -= 200
         }
         
@@ -334,8 +399,8 @@ export const useGameStore = create<GameState>()(
             name: 'Politique sociale',
             description: 'Activer la gratuité totale, conditionnée, ou pour les enfants d\'abonnés',
             target: 1,
-            current: (financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee || financingLevers.gratuiteJeunesAbonnes) ? 1 : 0,
-            completed: financingLevers.gratuiteTotale || financingLevers.gratuiteConditionnee || financingLevers.gratuiteJeunesAbonnes,
+            current: (isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteConditionnee) || isLeverActive(financingLevers.gratuiteJeunesAbonnes)) ? 1 : 0,
+            completed: isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteConditionnee) || isLeverActive(financingLevers.gratuiteJeunesAbonnes),
             reward: 250,
           },
           {
@@ -343,8 +408,8 @@ export const useGameStore = create<GameState>()(
             name: 'Indépendant',
             description: 'Ne pas dépendre d\'une loi nationale (pas de versement mobilité ni TVA 5.5%)',
             target: 1,
-            current: (financingLevers.versementMobilite <= 0 && !financingLevers.tva55) ? 1 : 0,
-            completed: financingLevers.versementMobilite <= 0 && !financingLevers.tva55,
+            current: (financingLevers.versementMobilite <= 0 && !isLeverActive(financingLevers.tva55)) ? 1 : 0,
+            completed: financingLevers.versementMobilite <= 0 && !isLeverActive(financingLevers.tva55),
             reward: 200,
           },
           {
@@ -430,6 +495,33 @@ export const useGameStore = create<GameState>()(
       setAnimatingBudget: (val) => set({ animatingBudget: val }),
       setLastAction: (action) => set({ lastAction: action }),
       setBusOfferConfirmed: (val) => set({ busOfferConfirmed: val }),
+
+      applyPartyPreselection: (partyId) => {
+        if (partyId === null) {
+          // Reset to empty state
+          set({
+            selectedPartyId: null,
+            projectSelections: [],
+            financingLevers: initialFinancingLevers,
+            busOfferConfirmed: false,
+            lastAction: '🔄 Sélection réinitialisée',
+            animatingBudget: true,
+          })
+        } else {
+          const party = POLITICAL_PARTIES.find(p => p.id === partyId)
+          if (party) {
+            set({
+              selectedPartyId: partyId,
+              projectSelections: [...party.projectSelections],
+              financingLevers: { ...initialFinancingLevers, ...party.financingLevers },
+              busOfferConfirmed: party.financingLevers.entretienBus !== undefined,
+              lastAction: `${party.emoji} Programme ${party.shortName} appliqué`,
+              animatingBudget: true,
+            })
+          }
+        }
+        setTimeout(() => set({ animatingBudget: false }), 600)
+      },
     }),
     {
       name: 'tcl-game-storage',
@@ -437,48 +529,8 @@ export const useGameStore = create<GameState>()(
         projectSelections: state.projectSelections,
         financingLevers: state.financingLevers,
         busOfferConfirmed: state.busOfferConfirmed,
+        selectedPartyId: state.selectedPartyId,
       }),
     }
   )
 )
-
-function calculateLeverImpact(levers: FinancingLevers): number {
-  let impact = 0
-
-  if (levers.gratuiteTotale) {
-    impact += FINANCING_IMPACTS.gratuiteTotale
-  }
-
-  if (levers.gratuiteConditionnee) {
-    impact += FINANCING_IMPACTS.gratuiteConditionnee
-  }
-
-  if (levers.gratuiteJeunesAbonnes) {
-    impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
-  }
-
-  // Suppression tarification sociale ne s'applique pas si gratuité totale
-  if (levers.suppressionTarifSocial && !levers.gratuiteTotale) {
-    impact += FINANCING_IMPACTS.suppressionTarifSocial
-  }
-
-  if (levers.metro24hWeekend) {
-    impact += FINANCING_IMPACTS.metro24hWeekend
-  }
-
-  // Les tarifs ne s'appliquent pas si gratuité totale
-  if (!levers.gratuiteTotale) {
-    impact += levers.tarifAbonnements * FINANCING_IMPACTS.tarifAbonnementsPerPercent
-    impact += levers.tarifTickets * FINANCING_IMPACTS.tarifTicketsPerPercent
-  }
-
-  impact += FINANCING_IMPACTS.versementMobilite[levers.versementMobilite.toString() as keyof typeof FINANCING_IMPACTS.versementMobilite]
-
-  if (levers.tva55) {
-    impact += FINANCING_IMPACTS.tva55
-  }
-
-  // electrificationBus is now handled as a project cost in getBudgetState, not as a lever impact
-
-  return impact
-}

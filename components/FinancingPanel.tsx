@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useSimulatorStore } from '@/lib/store'
 import { RotateCcw } from 'lucide-react'
+import { FinancingLeverPeriod } from '@/lib/types'
+
+// Helper to convert FinancingLeverPeriod to boolean for Switch
+const isActive = (lever: FinancingLeverPeriod): boolean => 
+  lever === true || lever === 'M1' || lever === 'M2' || lever === 'M1+M2'
 
 export function FinancingPanel() {
   const { financingLevers, setFinancingLever, reset } = useSimulatorStore()
@@ -36,7 +41,7 @@ export function FinancingPanel() {
               <p className="text-xs text-muted-foreground">-1 925 M€/mandat</p>
             </div>
             <Switch
-              checked={financingLevers.gratuiteTotale}
+              checked={isActive(financingLevers.gratuiteTotale)}
               onCheckedChange={(checked) => setFinancingLever('gratuiteTotale', checked)}
             />
           </div>
@@ -49,7 +54,7 @@ export function FinancingPanel() {
               <p className="text-xs text-muted-foreground">-300 M€/mandat</p>
             </div>
             <Switch
-              checked={financingLevers.gratuiteConditionnee}
+              checked={isActive(financingLevers.gratuiteConditionnee)}
               onCheckedChange={(checked) => setFinancingLever('gratuiteConditionnee', checked)}
             />
           </div>
@@ -126,7 +131,7 @@ export function FinancingPanel() {
               <p className="text-xs text-muted-foreground">+96 M€/mandat</p>
             </div>
             <Switch
-              checked={financingLevers.tva55}
+              checked={isActive(financingLevers.tva55)}
               onCheckedChange={(checked) => setFinancingLever('tva55', checked)}
             />
           </div>
