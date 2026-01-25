@@ -17,6 +17,7 @@ interface SimulatorState {
 const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
   gratuiteConditionnee: false,
+  gratuiteMoins25ans: false,
   gratuiteJeunesAbonnes: false,
   suppressionTarifSocial: false,
   metro24hWeekend: false,

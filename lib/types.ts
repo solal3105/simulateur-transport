@@ -48,6 +48,7 @@ export type FinancingLeverPeriod = boolean | MandatPeriod
 export interface FinancingLevers {
   gratuiteTotale: FinancingLeverPeriod
   gratuiteConditionnee: FinancingLeverPeriod // Proposition Aulas: Lyonnais uniquement + revenus < 2500€
+  gratuiteMoins25ans: FinancingLeverPeriod // Gratuité -25 ans - 240M€/mandat
   gratuiteJeunesAbonnes: FinancingLeverPeriod // Gratuité 11-18 ans enfants d'abonnés TCL
   suppressionTarifSocial: FinancingLeverPeriod // Supprimer la tarification sociale (fin gratuité précaires, fin abonnements solidaires) +240M
   metro24hWeekend: FinancingLeverPeriod // Métro 24h/24 les weekends

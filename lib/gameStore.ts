@@ -27,13 +27,23 @@ function calculateLeverImpactByMandate(levers: FinancingLevers): { m1: number; m
   if (leverAppliesTo(levers.gratuiteTotale, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteTotale
   if (leverAppliesTo(levers.gratuiteTotale, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteTotale
 
-  // Gratuité conditionnée
-  if (leverAppliesTo(levers.gratuiteConditionnee, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteConditionnee
-  if (leverAppliesTo(levers.gratuiteConditionnee, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteConditionnee
+  // Gratuité conditionnée (ne s'applique pas si gratuité totale)
+  if (!gratuiteTotaleActive) {
+    if (leverAppliesTo(levers.gratuiteConditionnee, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteConditionnee
+    if (leverAppliesTo(levers.gratuiteConditionnee, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteConditionnee
+  }
 
-  // Gratuité jeunes abonnés
-  if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
-  if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+  // Gratuité -25 ans (ne s'applique pas si gratuité totale)
+  if (!gratuiteTotaleActive) {
+    if (leverAppliesTo(levers.gratuiteMoins25ans, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteMoins25ans
+    if (leverAppliesTo(levers.gratuiteMoins25ans, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteMoins25ans
+  }
+
+  // Gratuité jeunes abonnés (ne s'applique pas si gratuité totale)
+  if (!gratuiteTotaleActive) {
+    if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+    if (leverAppliesTo(levers.gratuiteJeunesAbonnes, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteJeunesAbonnes
+  }
 
   // Suppression tarification sociale (ne s'applique pas si gratuité totale)
   if (!gratuiteTotaleActive) {
@@ -126,6 +136,7 @@ interface GameState {
 const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
   gratuiteConditionnee: false,
+  gratuiteMoins25ans: false,
   gratuiteJeunesAbonnes: false,
   suppressionTarifSocial: false,
   metro24hWeekend: false,

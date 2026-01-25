@@ -207,6 +207,12 @@ export const PUBLIC_POLICIES: PublicPolicy[] = [
     costPerMandat: 48,
   },
   {
+    id: 'gratuite-moins-25ans',
+    name: 'Gratuité -25 ans',
+    description: 'Gratuité des transports pour tous les moins de 25 ans.',
+    costPerMandat: 240,
+  },
+  {
     id: 'metro-24h-weekend',
     name: 'Métro 24h/24 les weekends',
     description: 'Ouverture du métro toute la nuit les vendredis et samedis soir.',
@@ -219,6 +225,7 @@ export const BASE_BUDGET = 2000
 export const FINANCING_IMPACTS = {
   gratuiteTotale: -1925,
   gratuiteConditionnee: -300, // Proposition Aulas: Lyonnais + revenus < 2500€
+  gratuiteMoins25ans: -240, // 240M€/mandat
   gratuiteJeunesAbonnes: -48, // 48M€/mandat
   suppressionTarifSocial: 240, // Suppression tarification sociale = +240M€/mandat
   metro24hWeekend: -24, // 24M€/mandat

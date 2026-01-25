@@ -53,6 +53,14 @@ const leverInfos: Record<string, LeverInfo> = {
     icon: Users,
     color: "from-orange-500 to-amber-600",
   },
+  gratuiteMoins25ans: {
+    title: "Gratuité -25 ans",
+    description: "Gratuité des transports pour tous les moins de 25 ans.",
+    impact: "-240 Millions €/mandat",
+    warning: "⚠️ Non cumulable avec la gratuité totale.",
+    icon: GraduationCap,
+    color: "from-cyan-500 to-blue-600",
+  },
   suppressionTarifSocial: {
     title: "Supprimer la tarification sociale",
     description: "Fin de la gratuité pour les plus précaires, fin des abonnements solidaires. Mesure impopulaire mais qui génère des revenus supplémentaires.",
@@ -144,6 +152,7 @@ export function GameFinancingPanel() {
       setFinancingLever('tarifAbonnements', 0)
       setFinancingLever('tarifTickets', 0)
       setFinancingLever('gratuiteConditionnee', false)
+      setFinancingLever('gratuiteMoins25ans', false)
       setFinancingLever('gratuiteJeunesAbonnes', false) // Already included in total gratuity
       setFinancingLever('suppressionTarifSocial', false) // Incompatible avec gratuité totale
     }
@@ -472,6 +481,17 @@ export function GameFinancingPanel() {
             onChange={(checked) => setFinancingLever('gratuiteConditionnee', checked)}
             expanded={expandedLever === 'gratuiteConditionnee'}
             onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteConditionnee' ? null : 'gratuiteConditionnee')}
+          />
+
+          {/* Gratuité -25 ans */}
+          <LeverToggle
+            lever="gratuiteMoins25ans"
+            info={leverInfos.gratuiteMoins25ans}
+            checked={financingLevers.gratuiteMoins25ans}
+            disabled={financingLevers.gratuiteTotale}
+            onChange={(checked) => setFinancingLever('gratuiteMoins25ans', checked)}
+            expanded={expandedLever === 'gratuiteMoins25ans'}
+            onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteMoins25ans' ? null : 'gratuiteMoins25ans')}
           />
 
           {/* Gratuité 11-18 ans */}
@@ -1032,8 +1052,9 @@ function LeverPeriodSelect({
 function calculateTotalImpact(levers: FinancingLevers): number {
   let impact = 0
   if (levers.gratuiteTotale) impact -= 1925
-  if (levers.gratuiteConditionnee) impact -= 300
-  if (levers.gratuiteJeunesAbonnes) impact -= 48
+  if (levers.gratuiteConditionnee && !levers.gratuiteTotale) impact -= 300
+  if (levers.gratuiteMoins25ans && !levers.gratuiteTotale) impact -= 240
+  if (levers.gratuiteJeunesAbonnes && !levers.gratuiteTotale) impact -= 48
   if (levers.metro24hWeekend) impact -= 24
   // Suppression tarification sociale ne s'applique pas si gratuité totale
   if (levers.suppressionTarifSocial && !levers.gratuiteTotale) impact += 240

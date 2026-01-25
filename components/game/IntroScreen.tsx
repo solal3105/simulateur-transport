@@ -27,7 +27,9 @@ import {
   Star,
   AlertTriangle,
   Calendar,
-  BookOpen
+  BookOpen,
+  AlertCircle,
+  X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -182,6 +184,8 @@ export function IntroScreen() {
   const [mockMandat, setMockMandat] = useState<'m1' | 'm2' | 'both' | null>(null)
   const [mockBudget, setMockBudget] = useState({ m1: 2000, m2: 2000 })
   const [showFloatingCTA, setShowFloatingCTA] = useState(true)
+  const [showEmail, setShowEmail] = useState(false)
+  const [showLFIWarning, setShowLFIWarning] = useState(false)
   const footerRef = useRef<HTMLElement>(null)
   
   // 3 tutorial projects - real projects from the data
@@ -512,6 +516,7 @@ export function IntroScreen() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {POLITICAL_PARTIES.map((party, index) => {
                         const projectCount = party.projectSelections.length
+                        
                         // Calculate total cost including upgrade options
                         const projectsCost = party.projectSelections.reduce((acc, sel) => {
                           const project = PROJECTS.find(p => p.id === sel.projectId)
@@ -523,16 +528,46 @@ export function IntroScreen() {
                           }
                           return acc + project.cost
                         }, 0)
-                        // Add financing lever costs and social policies
+                        
+                        // Add financing lever costs (bus fleet)
                         const leversCost = 
                           (party.financingLevers.electrificationBus ? 460 : 0) +
-                          (party.financingLevers.entretienBus ? 200 : 0)
+                          (party.financingLevers.entretienBus ? 800 : 0)
+                        
                         // Add social policies costs (per mandat * 2 mandats)
+                        const gratuiteTotaleActive = isLeverActive(party.financingLevers.gratuiteTotale as any)
                         const socialPoliciesCost = 
-                          (isLeverActive(party.financingLevers.gratuiteTotale as any) ? 1925 * 2 : 0) +
-                          (isLeverActive(party.financingLevers.gratuiteJeunesAbonnes as any) ? 48 * 2 : 0) +
+                          (gratuiteTotaleActive ? 1925 * 2 : 0) +
+                          (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteConditionnee as any) ? 300 * 2 : 0) +
+                          (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteMoins25ans as any) ? 240 * 2 : 0) +
+                          (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteJeunesAbonnes as any) ? 48 * 2 : 0) +
                           (isLeverActive(party.financingLevers.metro24hWeekend as any) ? 24 * 2 : 0)
+                        
                         const totalCost = projectsCost + leversCost + socialPoliciesCost
+                        
+                        // Calculate financing revenues (per mandat * 2 mandats)
+                        const tarifRevenues = gratuiteTotaleActive ? 0 : 
+                          ((party.financingLevers.tarifAbonnements || 0) * 12 * 2) +
+                          ((party.financingLevers.tarifTickets || 0) * 8 * 2)
+                        
+                        const versementMobiliteRevenue = party.financingLevers.versementMobilite 
+                          ? (party.financingLevers.versementMobilite === 25 ? 700 * 2 : 
+                             party.financingLevers.versementMobilite === 50 ? 1400 * 2 : 
+                             party.financingLevers.versementMobilite === -25 ? -700 * 2 : 0)
+                          : 0
+                        
+                        const tva55Revenue = isLeverActive(party.financingLevers.tva55 as any) ? 96 * 2 : 0
+                        
+                        const suppressionTarifSocialRevenue = !gratuiteTotaleActive && isLeverActive(party.financingLevers.suppressionTarifSocial as any) 
+                          ? 240 * 2 
+                          : 0
+                        
+                        const totalRevenues = tarifRevenues + versementMobiliteRevenue + tva55Revenue + suppressionTarifSocialRevenue
+                        
+                        // Budget surplus/deficit: 4000M€ base - totalCost + totalRevenues
+                        const budgetBalance = 4000 - totalCost + totalRevenues
+                        const isPositive = budgetBalance >= 0
+                        
                         const levers = party.financingLevers
                         
                         return (
@@ -543,12 +578,20 @@ export function IntroScreen() {
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => {
-                              applyPartyPreselection(party.id)
-                              handleStart()
+                              if (party.id === 'lfi') {
+                                setShowLFIWarning(true)
+                              } else {
+                                applyPartyPreselection(party.id)
+                                handleStart()
+                              }
                             }}
-                            whileHover={{ scale: 1.03, y: -4 }}
+                            whileHover={{ 
+                              scale: 1.02, 
+                              y: -6,
+                              transition: { duration: 0.2, ease: "easeOut" }
+                            }}
                             whileTap={{ scale: 0.98 }}
-                            className="relative bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 border border-white/20 hover:border-white/40 rounded-2xl p-5 text-left transition-all group overflow-hidden"
+                            className="relative bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 border border-white/20 hover:border-white/40 rounded-2xl p-5 text-left transition-all duration-200 ease-out group overflow-hidden flex flex-col"
                             style={{
                               boxShadow: `0 0 0 1px ${party.color}20, 0 8px 24px -8px ${party.color}40`
                             }}
@@ -559,8 +602,8 @@ export function IntroScreen() {
                               style={{ backgroundColor: party.color }}
                             />
                             
-                            {/* Party header */}
-                            <div className="flex items-start gap-3 mb-4">
+                            {/* Party name at top */}
+                            <div className="flex items-center gap-3 mb-4">
                               <div 
                                 className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform"
                                 style={{ 
@@ -571,35 +614,32 @@ export function IntroScreen() {
                               >
                                 {party.emoji}
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-white font-bold text-base leading-tight mb-1">
+                              <div className="flex-1">
+                                <h3 className="text-white font-bold text-base leading-tight">
                                   {party.shortName}
                                 </h3>
-                                <p className="text-gray-400 text-xs line-clamp-2">
-                                  {party.description}
-                                </p>
+                                {party.id === 'lfi' && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <AlertCircle className="w-3 h-3 text-orange-400" />
+                                    <span className="text-orange-400 text-[10px] font-medium">En construction</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             
-                            {/* Stats */}
-                            <div className="space-y-2 mb-4">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-400 text-xs">Projets</span>
-                                <span 
-                                  className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                  style={{ 
-                                    backgroundColor: `${party.color}20`,
-                                    color: party.color
-                                  }}
-                                >
-                                  {projectCount}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-400 text-xs">Budget</span>
-                                <span className="text-white font-semibold text-sm">
-                                  {(totalCost / 1000).toFixed(1)} Md€
-                                </span>
+                            {/* Budget balance - prominent display */}
+                            <div className="mb-4 flex-1">
+                              <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+                                <p className="text-gray-400 text-xs mb-1">Excédent budgétaire</p>
+                                <p className={cn(
+                                  "text-2xl font-black mb-1",
+                                  isPositive ? "text-green-400" : "text-red-400"
+                                )}>
+                                  {isPositive ? '+' : ''}{budgetBalance} M€
+                                </p>
+                                <p className="text-gray-500 text-[10px]">
+                                  {projectCount} projet{projectCount > 1 ? 's' : ''}
+                                </p>
                               </div>
                             </div>
                             
@@ -639,8 +679,8 @@ export function IntroScreen() {
                               </div>
                             )}
                             
-                            {/* CTA */}
-                            <div className="flex items-center gap-2 text-gray-300 group-hover:text-white text-sm font-medium transition-colors">
+                            {/* CTA at bottom */}
+                            <div className="flex items-center gap-2 text-gray-300 group-hover:text-white text-sm font-medium transition-colors mt-auto">
                               <span>Charger ce programme</span>
                               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </div>
@@ -748,6 +788,19 @@ export function IntroScreen() {
                       >
                         LinkedIn
                       </a>
+                      {' '}ou par email :{' '}
+                      {showEmail ? (
+                        <span className="text-blue-400 font-mono">
+                          {['solal', '.', 'gendrin', '@', 'gmail', '.', 'com'].join('')}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setShowEmail(true)}
+                          className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+                        >
+                          [afficher l&apos;email]
+                        </button>
+                      )}
                       {' '}en me sourçant l&apos;information afin que je puisse corriger.
                     </p>
                   </div>
@@ -1054,6 +1107,71 @@ export function IntroScreen() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Modale de warning LFI */}
+      <AnimatePresence>
+        {showLFIWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowLFIWarning(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-gray-900 to-gray-800 border border-orange-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-orange-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">Programme en construction</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    Le programme de <strong className="text-purple-400">La France Insoumise</strong> est encore en cours d&apos;élaboration. Les données présentées ne sont pas exhaustives et peuvent évoluer.
+                  </p>
+                  <p className="text-orange-400 text-sm mt-3 font-medium">
+                    ⚠️ Prenez ces informations avec précaution.
+                  </p>
+                  <a 
+                    href="https://actu.fr/auvergne-rhone-alpes/lyon_69123/lyon-lfi-a-designe-son-candidat-pour-la-metropole-la-gratuite-des-tcl-pour-tous-promise_63744228.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-xs mt-3 inline-flex items-center gap-1 underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Source : Article Actu.fr
+                  </a>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowLFIWarning(false)}
+                  className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLFIWarning(false)
+                    applyPartyPreselection('lfi')
+                    handleStart()
+                  }}
+                  className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                  Continuer
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
