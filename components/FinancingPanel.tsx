@@ -48,19 +48,6 @@ export function FinancingPanel() {
 
           <Separator />
 
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium">Gratuité Conditionnée</label>
-              <p className="text-xs text-muted-foreground">-300 M€/mandat</p>
-            </div>
-            <Switch
-              checked={isActive(financingLevers.gratuiteConditionnee)}
-              onCheckedChange={(checked) => setFinancingLever('gratuiteConditionnee', checked)}
-            />
-          </div>
-
-          <Separator />
-
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Tarif Abonnements</label>

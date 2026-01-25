@@ -45,14 +45,6 @@ const leverInfos: Record<string, LeverInfo> = {
     icon: Users,
     color: "from-red-500 to-rose-600",
   },
-  gratuiteConditionnee: {
-    title: "Gratuité Conditionnée - Que pour les habitants de Lyon",
-    description: "Gratuité réservée aux habitants de Lyon uniquement (pas les autres communes de la métropole) et dont les revenus sont inférieurs à 2 500€/mois.",
-    impact: "-300 Millions €/mandat",
-    warning: "Mesure sociale ciblée excluant les non-lyonnais et les revenus supérieurs à 2 500€.",
-    icon: Users,
-    color: "from-orange-500 to-amber-600",
-  },
   gratuiteMoins25ans: {
     title: "Gratuité -25 ans",
     description: "Gratuité des transports pour tous les moins de 25 ans.",
@@ -151,7 +143,6 @@ export function GameFinancingPanel() {
     if (checked) {
       setFinancingLever('tarifAbonnements', 0)
       setFinancingLever('tarifTickets', 0)
-      setFinancingLever('gratuiteConditionnee', false)
       setFinancingLever('gratuiteMoins25ans', false)
       setFinancingLever('gratuiteJeunesAbonnes', false) // Already included in total gratuity
       setFinancingLever('suppressionTarifSocial', false) // Incompatible avec gratuité totale
@@ -466,21 +457,10 @@ export function GameFinancingPanel() {
             lever="gratuiteTotale"
             info={leverInfos.gratuiteTotale}
             checked={financingLevers.gratuiteTotale}
-            disabled={financingLevers.gratuiteConditionnee}
+            disabled={false}
             onChange={handleGratuiteTotaleChange}
             expanded={expandedLever === 'gratuiteTotale'}
             onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteTotale' ? null : 'gratuiteTotale')}
-          />
-
-          {/* Gratuité Conditionnée (Aulas) */}
-          <LeverToggle
-            lever="gratuiteConditionnee"
-            info={leverInfos.gratuiteConditionnee}
-            checked={financingLevers.gratuiteConditionnee}
-            disabled={financingLevers.gratuiteTotale}
-            onChange={(checked) => setFinancingLever('gratuiteConditionnee', checked)}
-            expanded={expandedLever === 'gratuiteConditionnee'}
-            onToggleExpand={() => setExpandedLever(expandedLever === 'gratuiteConditionnee' ? null : 'gratuiteConditionnee')}
           />
 
           {/* Gratuité -25 ans */}
@@ -1052,7 +1032,6 @@ function LeverPeriodSelect({
 function calculateTotalImpact(levers: FinancingLevers): number {
   let impact = 0
   if (levers.gratuiteTotale) impact -= 1925
-  if (levers.gratuiteConditionnee && !levers.gratuiteTotale) impact -= 300
   if (levers.gratuiteMoins25ans && !levers.gratuiteTotale) impact -= 240
   if (levers.gratuiteJeunesAbonnes && !levers.gratuiteTotale) impact -= 48
   if (levers.metro24hWeekend) impact -= 24

@@ -538,7 +538,6 @@ export function IntroScreen() {
                         const gratuiteTotaleActive = isLeverActive(party.financingLevers.gratuiteTotale as any)
                         const socialPoliciesCost = 
                           (gratuiteTotaleActive ? 1925 * 2 : 0) +
-                          (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteConditionnee as any) ? 300 * 2 : 0) +
                           (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteMoins25ans as any) ? 240 * 2 : 0) +
                           (!gratuiteTotaleActive && isLeverActive(party.financingLevers.gratuiteJeunesAbonnes as any) ? 48 * 2 : 0) +
                           (isLeverActive(party.financingLevers.metro24hWeekend as any) ? 24 * 2 : 0)

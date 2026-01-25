@@ -27,12 +27,6 @@ function calculateLeverImpactByMandate(levers: FinancingLevers): { m1: number; m
   if (leverAppliesTo(levers.gratuiteTotale, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteTotale
   if (leverAppliesTo(levers.gratuiteTotale, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteTotale
 
-  // Gratuité conditionnée (ne s'applique pas si gratuité totale)
-  if (!gratuiteTotaleActive) {
-    if (leverAppliesTo(levers.gratuiteConditionnee, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteConditionnee
-    if (leverAppliesTo(levers.gratuiteConditionnee, 'M2')) m2Impact += FINANCING_IMPACTS.gratuiteConditionnee
-  }
-
   // Gratuité -25 ans (ne s'applique pas si gratuité totale)
   if (!gratuiteTotaleActive) {
     if (leverAppliesTo(levers.gratuiteMoins25ans, 'M1')) m1Impact += FINANCING_IMPACTS.gratuiteMoins25ans
@@ -135,7 +129,6 @@ interface GameState {
 
 const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
-  gratuiteConditionnee: false,
   gratuiteMoins25ans: false,
   gratuiteJeunesAbonnes: false,
   suppressionTarifSocial: false,
@@ -408,10 +401,10 @@ export const useGameStore = create<GameState>()(
           {
             id: 'social-policy',
             name: 'Politique sociale',
-            description: 'Activer la gratuité totale, conditionnée, ou pour les enfants d\'abonnés',
+            description: 'Activer la gratuité totale ou pour les enfants d\'abonnés',
             target: 1,
-            current: (isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteConditionnee) || isLeverActive(financingLevers.gratuiteJeunesAbonnes)) ? 1 : 0,
-            completed: isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteConditionnee) || isLeverActive(financingLevers.gratuiteJeunesAbonnes),
+            current: (isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteJeunesAbonnes)) ? 1 : 0,
+            completed: isLeverActive(financingLevers.gratuiteTotale) || isLeverActive(financingLevers.gratuiteJeunesAbonnes),
             reward: 250,
           },
           {

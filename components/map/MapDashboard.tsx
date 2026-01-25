@@ -206,7 +206,6 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
   const [showBusOfferWarning, setShowBusOfferWarning] = useState(false)
   const [showDeficitWarning, setShowDeficitWarning] = useState(false)
   const [showTimeline, setShowTimeline] = useState(false)
-  const prevBudgetRef = useRef({ m1: 0, m2: 0 })
   const { 
     getBudgetState, 
     projectSelections, 
@@ -223,20 +222,6 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
   const isValid = budgetValid && busOfferConfirmed
   const hasExcessiveDebt = budget.m1 < -100 || budget.m2 < -100
   const hasProjects = totalProjects > 0
-  
-  // Detect when budget goes negative for the first time
-  useEffect(() => {
-    const wasPositiveM1 = prevBudgetRef.current.m1 >= 0
-    const wasPositiveM2 = prevBudgetRef.current.m2 >= 0
-    const isNegativeM1 = budget.m1 < 0
-    const isNegativeM2 = budget.m2 < 0
-    
-    if ((wasPositiveM1 && isNegativeM1) || (wasPositiveM2 && isNegativeM2)) {
-      setShowDeficitWarning(true)
-    }
-    
-    prevBudgetRef.current = { m1: budget.m1, m2: budget.m2 }
-  }, [budget.m1, budget.m2])
 
   const totalInvestment = projectSelections.reduce((acc, sel) => {
     const project = PROJECTS.find(p => p.id === sel.projectId)
@@ -1416,14 +1401,22 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
               className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-yellow-400 dark:border-yellow-500 p-6 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-gray-900 dark:text-white font-bold text-lg">Budget en déficit</h3>
+                    <p className="text-yellow-600 dark:text-yellow-400 text-sm">Attention requise</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold text-lg">Budget en déficit</h3>
-                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">Attention requise</p>
-                </div>
+                <button
+                  onClick={() => setShowDeficitWarning(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </button>
               </div>
               <div className="space-y-3 mb-6">
                 <p className="text-gray-700 dark:text-gray-300">

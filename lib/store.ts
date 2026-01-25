@@ -16,7 +16,6 @@ interface SimulatorState {
 
 const initialFinancingLevers: FinancingLevers = {
   gratuiteTotale: false,
-  gratuiteConditionnee: false,
   gratuiteMoins25ans: false,
   gratuiteJeunesAbonnes: false,
   suppressionTarifSocial: false,
@@ -120,10 +119,6 @@ function calculateLeverImpact(levers: FinancingLevers): number {
 
   if (levers.gratuiteTotale) {
     impact += FINANCING_IMPACTS.gratuiteTotale
-  }
-
-  if (levers.gratuiteConditionnee) {
-    impact += FINANCING_IMPACTS.gratuiteConditionnee
   }
 
   impact += levers.tarifAbonnements * FINANCING_IMPACTS.tarifAbonnementsPerPercent

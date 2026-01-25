@@ -224,7 +224,6 @@ export const BASE_BUDGET = 2000
 
 export const FINANCING_IMPACTS = {
   gratuiteTotale: -1925,
-  gratuiteConditionnee: -300, // Proposition Aulas: Lyonnais + revenus < 2500€
   gratuiteMoins25ans: -240, // 240M€/mandat
   gratuiteJeunesAbonnes: -48, // 48M€/mandat
   suppressionTarifSocial: 240, // Suppression tarification sociale = +240M€/mandat
