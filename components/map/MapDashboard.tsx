@@ -135,6 +135,7 @@ function BudgetBarGauge({ value, maxValue = 2000, label, sublabel }: { value: nu
 
 interface MapStyle {
   name: string
+  emoji: string
   url: string
   attribution: string
 }
@@ -193,27 +194,15 @@ function getValidationMessage(totalProjects: number, totalImpact: number, financ
 }
 
 export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing, onOpenBusOffer, showBusOffer, onCloseBusOffer, mapStyle, onMapStyleChange, mapStyles, colorMode, onColorModeChange, onClearHover }: MapDashboardProps) {
-  const [showMapStyleMenu, setShowMapStyleMenu] = useState(false)
-  const [showColorModeMenu, setShowColorModeMenu] = useState(false)
-  const [showPartyMenu, setShowPartyMenu] = useState(false)
+  // Centralized dropdown state - only one can be open at a time
+  const [activeDropdown, setActiveDropdown] = useState<'mapStyle' | 'colorMode' | 'party' | 'theme' | null>(null)
   const [showResetModal, setShowResetModal] = useState(false)
 
-  // Close all other dropdowns when opening one
-  const openMapStyleMenu = () => {
-    setShowColorModeMenu(false)
-    setShowPartyMenu(false)
-    setShowMapStyleMenu(true)
+  // Unified dropdown toggle - closes others when opening one
+  const toggleDropdown = (dropdown: 'mapStyle' | 'colorMode' | 'party' | 'theme') => {
+    setActiveDropdown(activeDropdown === dropdown ? null : dropdown)
   }
-  const openColorModeMenu = () => {
-    setShowMapStyleMenu(false)
-    setShowPartyMenu(false)
-    setShowColorModeMenu(true)
-  }
-  const openPartyMenu = () => {
-    setShowMapStyleMenu(false)
-    setShowColorModeMenu(false)
-    setShowPartyMenu(true)
-  }
+  const closeAllDropdowns = () => setActiveDropdown(null)
   const [showBusOfferWarning, setShowBusOfferWarning] = useState(false)
   const [showDeficitWarning, setShowDeficitWarning] = useState(false)
   const [showTimeline, setShowTimeline] = useState(false)
@@ -279,29 +268,30 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   {/* Mobile Controls */}
                   <div className="flex items-center gap-1">
                     {/* Party Selector */}
-                    <PartySelector compact />
+                    <PartySelector compact isOpen={activeDropdown === 'party'} onOpenChange={(open) => open ? toggleDropdown('party') : closeAllDropdowns()} />
                     {/* Color Mode Dropdown */}
                     <div className="relative">
                       <button
-                        onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
+                        onClick={() => toggleDropdown('colorMode')}
                         className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
+                        <Target className="w-3 h-3 text-gray-500 dark:text-gray-400" />
                         <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
                           {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Eff.' : 'Type'}
                         </span>
-                        <ChevronDown className="w-3 h-3 text-gray-400" />
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", activeDropdown === 'colorMode' && "rotate-180")} />
                       </button>
                       <AnimatePresence>
-                        {showColorModeMenu && (
+                        {activeDropdown === 'colorMode' && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[100px] z-50"
                           >
-                            <button onClick={() => { onColorModeChange('cost'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'cost' ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Coût</button>
-                            <button onClick={() => { onColorModeChange('impact'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'impact' ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Efficacité</button>
-                            <button onClick={() => { onColorModeChange('mode'); setShowColorModeMenu(false) }} className={cn("w-full px-3 py-2 text-left text-xs font-medium", colorMode === 'mode' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}>Type</button>
+                            <button onClick={() => { onColorModeChange('cost'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'cost' ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>💰</span>Coût</button>
+                            <button onClick={() => { onColorModeChange('impact'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'impact' ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>⚡</span>Efficacité</button>
+                            <button onClick={() => { onColorModeChange('mode'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'mode' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>🚊</span>Type</button>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -314,13 +304,13 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                     </button>
                     <div className="relative">
                       <button
-                        onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => toggleDropdown('mapStyle')}
+                        className={cn("p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors", activeDropdown === 'mapStyle' && "bg-gray-100 dark:bg-gray-700")}
                       >
                         <Map className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
                       <AnimatePresence>
-                        {showMapStyleMenu && (
+                        {activeDropdown === 'mapStyle' && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -332,23 +322,23 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                                 key={key}
                                 onClick={() => {
                                   onMapStyleChange(key)
-                                  setShowMapStyleMenu(false)
+                                  closeAllDropdowns()
                                 }}
                                 className={cn(
-                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all",
+                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all flex items-center gap-2",
                                   mapStyle === key
                                     ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
                                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 )}
                               >
-                                {style.name}
+                                <span>{style.emoji}</span>{style.name}
                               </button>
                             ))}
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
-                    <ThemeToggle />
+                    <ThemeToggle isOpen={activeDropdown === 'theme'} onToggle={() => toggleDropdown('theme')} />
                   </div>
                 </div>
                 
@@ -429,47 +419,30 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   {/* Tablet Controls */}
                   <div className="flex items-center gap-2">
                     {/* Party Selector */}
-                    <PartySelector compact />
+                    <PartySelector compact isOpen={activeDropdown === 'party'} onOpenChange={(open) => open ? toggleDropdown('party') : closeAllDropdowns()} />
                     {/* Color Mode Dropdown */}
                     <div className="relative">
                       <button
-                        onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
+                        onClick={() => toggleDropdown('colorMode')}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
+                        <Target className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                         <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                           {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Efficacité' : 'Type'}
                         </span>
-                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", showColorModeMenu && "rotate-180")} />
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", activeDropdown === 'colorMode' && "rotate-180")} />
                       </button>
                       <AnimatePresence>
-                        {showColorModeMenu && (
+                        {activeDropdown === 'colorMode' && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[120px] z-50"
                           >
-                            {[
-                              { key: 'cost', label: 'Coût', color: 'orange' },
-                              { key: 'impact', label: 'Efficacité', color: 'green' },
-                              { key: 'mode', label: 'Type', color: 'blue' }
-                            ].map((opt) => (
-                              <button
-                                key={opt.key}
-                                onClick={() => {
-                                  onColorModeChange(opt.key as 'cost' | 'impact' | 'mode')
-                                  setShowColorModeMenu(false)
-                                }}
-                                className={cn(
-                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all",
-                                  colorMode === opt.key
-                                    ? `bg-${opt.color}-50 dark:bg-${opt.color}-900/30 text-${opt.color}-600 dark:text-${opt.color}-400`
-                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                )}
-                              >
-                                {opt.label}
-                              </button>
-                            ))}
+                            <button onClick={() => { onColorModeChange('cost'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'cost' ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>💰</span>Coût</button>
+                            <button onClick={() => { onColorModeChange('impact'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'impact' ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>⚡</span>Efficacité</button>
+                            <button onClick={() => { onColorModeChange('mode'); closeAllDropdowns() }} className={cn("w-full px-3 py-2 text-left text-xs font-medium flex items-center gap-2", colorMode === 'mode' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700")}><span>🚊</span>Type</button>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -482,14 +455,14 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                     </button>
                     <div className="relative">
                       <button
-                        onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
-                        className="flex items-center gap-1 px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        onClick={() => toggleDropdown('mapStyle')}
+                        className={cn("flex items-center gap-1 px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors", activeDropdown === 'mapStyle' && "bg-gray-200 dark:bg-gray-600")}
                       >
                         <Map className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", showMapStyleMenu && "rotate-180")} />
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", activeDropdown === 'mapStyle' && "rotate-180")} />
                       </button>
                       <AnimatePresence>
-                        {showMapStyleMenu && (
+                        {activeDropdown === 'mapStyle' && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -501,23 +474,23 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                                 key={key}
                                 onClick={() => {
                                   onMapStyleChange(key)
-                                  setShowMapStyleMenu(false)
+                                  closeAllDropdowns()
                                 }}
                                 className={cn(
-                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all",
+                                  "w-full px-3 py-2 text-left text-xs font-medium transition-all flex items-center gap-2",
                                   mapStyle === key
                                     ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
                                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 )}
                               >
-                                {style.name}
+                                <span>{style.emoji}</span>{style.name}
                               </button>
                             ))}
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
-                    <ThemeToggle />
+                    <ThemeToggle isOpen={activeDropdown === 'theme'} onToggle={() => toggleDropdown('theme')} />
                   </div>
                 </div>
                 
@@ -659,22 +632,23 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   <PartySelector 
                     compact 
                     desktopStyle 
-                    isOpen={showPartyMenu}
-                    onOpenChange={(open) => open ? openPartyMenu() : setShowPartyMenu(false)}
+                    isOpen={activeDropdown === 'party'}
+                    onOpenChange={(open) => open ? toggleDropdown('party') : closeAllDropdowns()}
                   />
                   {/* Color Mode Dropdown */}
                   <div className="relative">
                     <button
-                      onClick={() => showColorModeMenu ? setShowColorModeMenu(false) : openColorModeMenu()}
+                      onClick={() => toggleDropdown('colorMode')}
                       className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                     >
+                      <Target className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {colorMode === 'cost' ? 'Coût' : colorMode === 'impact' ? 'Efficacité' : 'Type'}
                       </span>
-                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", showColorModeMenu && "rotate-180")} />
+                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", activeDropdown === 'colorMode' && "rotate-180")} />
                     </button>
                     <AnimatePresence>
-                      {showColorModeMenu && (
+                      {activeDropdown === 'colorMode' && (
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -682,37 +656,37 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                           className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden min-w-[140px] z-50"
                         >
                           <button
-                            onClick={() => { onColorModeChange('cost'); setShowColorModeMenu(false) }}
+                            onClick={() => { onColorModeChange('cost'); closeAllDropdowns() }}
                             className={cn(
-                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all flex items-center gap-2",
                               colorMode === 'cost'
                                 ? "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
                                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             )}
                           >
-                            Coût
+                            <span>💰</span>Coût
                           </button>
                           <button
-                            onClick={() => { onColorModeChange('impact'); setShowColorModeMenu(false) }}
+                            onClick={() => { onColorModeChange('impact'); closeAllDropdowns() }}
                             className={cn(
-                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all flex items-center gap-2",
                               colorMode === 'impact'
                                 ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             )}
                           >
-                            Efficacité
+                            <span>⚡</span>Efficacité
                           </button>
                           <button
-                            onClick={() => { onColorModeChange('mode'); setShowColorModeMenu(false) }}
+                            onClick={() => { onColorModeChange('mode'); closeAllDropdowns() }}
                             className={cn(
-                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                              "w-full px-4 py-2.5 text-left text-sm font-medium transition-all flex items-center gap-2",
                               colorMode === 'mode'
                                 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
                                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             )}
                           >
-                            Type
+                            <span>🚊</span>Type
                           </button>
                         </motion.div>
                       )}
@@ -726,15 +700,15 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                   </button>
                   <div className="relative">
                     <button
-                      onClick={() => showMapStyleMenu ? setShowMapStyleMenu(false) : openMapStyleMenu()}
+                      onClick={() => toggleDropdown('mapStyle')}
                       className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                     >
                       <Map className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{mapStyles[mapStyle]?.name}</span>
-                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", showMapStyleMenu && "rotate-180")} />
+                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", activeDropdown === 'mapStyle' && "rotate-180")} />
                     </button>
                     <AnimatePresence>
-                      {showMapStyleMenu && (
+                      {activeDropdown === 'mapStyle' && (
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -746,23 +720,23 @@ export function MapDashboard({ onOpenFinancing, showFinancing, onCloseFinancing,
                               key={key}
                               onClick={() => {
                                 onMapStyleChange(key)
-                                setShowMapStyleMenu(false)
+                                closeAllDropdowns()
                               }}
                               className={cn(
-                                "w-full px-4 py-2.5 text-left text-sm font-medium transition-all",
+                                "w-full px-4 py-2.5 text-left text-sm font-medium transition-all flex items-center gap-2",
                                 mapStyle === key
                                   ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
                                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                               )}
                             >
-                              {style.name}
+                              <span>{style.emoji}</span>{style.name}
                             </button>
                           ))}
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
-                  <ThemeToggle />
+                  <ThemeToggle isOpen={activeDropdown === 'theme'} onToggle={() => toggleDropdown('theme')} />
                 </motion.div>
               </div>
 

@@ -202,39 +202,96 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 shadow-xl">
         <div className="flex items-center gap-2 mb-3">
           <Vote className="w-5 h-5 text-blue-500" />
-          <h3 className="font-bold text-gray-900 dark:text-white">Programmes électoraux</h3>
+          <h3 className="font-bold text-gray-900 dark:text-white">Programmes 2026</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Chargez les propositions d&apos;un parti politique
         </p>
-        <div className="grid grid-cols-2 gap-2">
-          {POLITICAL_PARTIES.map((party) => (
-            <button
-              key={party.id}
-              onClick={() => handlePartyClick(party.id)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 transition-all text-left",
-                selectedPartyId === party.id
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-              )}
-            >
-              <span className="text-xl">{party.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className={cn(
-                  "text-sm font-medium truncate",
-                  selectedPartyId === party.id
-                    ? "text-blue-700 dark:text-blue-300"
-                    : "text-gray-900 dark:text-white"
-                )}>
-                  {party.shortName}
-                </p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                  {party.projectSelections.length} projets
-                </p>
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {POLITICAL_PARTIES.map((party) => {
+            const isSelected = selectedPartyId === party.id
+            return (
+              <motion.button
+                key={party.id}
+                onClick={() => handlePartyClick(party.id)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  "relative flex flex-col p-4 rounded-xl border-2 transition-all text-left overflow-hidden group",
+                  isSelected
+                    ? "border-transparent shadow-lg"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md"
+                )}
+                style={{
+                  background: isSelected 
+                    ? `linear-gradient(135deg, ${party.color}15, ${party.color}30)` 
+                    : undefined
+                }}
+              >
+                {/* Color accent bar */}
+                <div 
+                  className={cn(
+                    "absolute top-0 left-0 right-0 h-1 transition-all",
+                    isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-50"
+                  )}
+                  style={{ backgroundColor: party.color }}
+                />
+                
+                <div className="flex items-start gap-3">
+                  <div 
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 transition-all",
+                      isSelected ? "shadow-md" : "group-hover:scale-110"
+                    )}
+                    style={{ 
+                      backgroundColor: `${party.color}20`,
+                      border: `2px solid ${party.color}40`
+                    }}
+                  >
+                    {party.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn(
+                      "text-sm font-semibold leading-tight",
+                      isSelected
+                        ? "text-gray-900 dark:text-white"
+                        : "text-gray-800 dark:text-gray-200"
+                    )}>
+                      {party.shortName}
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                      {party.description}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: party.color }}
+                    >
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
+                  <span 
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                    style={{ 
+                      backgroundColor: `${party.color}20`,
+                      color: party.color
+                    }}
+                  >
+                    {party.projectSelections.length} projets
+                  </span>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                    {Object.keys(party.financingLevers).length > 0 
+                      ? `${Object.keys(party.financingLevers).length} leviers` 
+                      : 'Sans leviers'}
+                  </span>
+                </div>
+              </motion.button>
+            )
+          })}
         </div>
         {selectedPartyId && (
           <button

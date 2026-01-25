@@ -14,26 +14,26 @@ export interface PoliticalParty {
 export const POLITICAL_PARTIES: PoliticalParty[] = [
   {
     id: 'gauche-ecolo',
-    name: 'Union de la Gauche & des Écologistes',
-    shortName: 'Gauche & Écolos',
+    name: 'Avançons Ensemble - Union de la Gauche et des Écologistes',
+    shortName: 'Avançons Ensemble',
     color: '#22C55E', // green-500
     emoji: '🟢',
     description: 'Programme axé sur les transports en commun, la gratuité jeunes et l\'électrification.',
     projectSelections: [
       // Modernisation AC (2035) D (2030) - A et C en M2, D en M1
-      { projectId: 'modern-a', period: 'M2' },
-      { projectId: 'modern-c', period: 'M2' },
-      { projectId: 'modern-d', period: 'M1' },
+      { projectId: 'modern-a', period: 'M1+M2' },
+      { projectId: 'modern-c', period: 'M1+M2' },
+      { projectId: 'modern-d', period: 'M1+M2' },
       // TEOL (2032) - M2
-      { projectId: 'teol', period: 'M2' },
+      { projectId: 'teol', period: 'M1+M2' },
       // Tram Nord (2034) - M2
-      { projectId: 'ligne-du-nord', period: 'M2', selectedUpgradeOptionId: 'tram-surface' },
+      { projectId: 'ligne-du-nord', period: 'M1+M2', selectedUpgradeOptionId: 'tram-surface' },
       // BHNS Parilly (2029) - M1
-      { projectId: 'bhns-parilly', period: 'M1' },
+      { projectId: 'bhns-parilly', period: 'M1+M2' },
       // T8 (2030) - M1
-      { projectId: 't8', period: 'M1' },
+      { projectId: 't8', period: 'M1+M2' },
       // T3 Express (2028) - M1
-      { projectId: 't3-renf', period: 'M1' },
+      { projectId: 't3-renf', period: 'M1+M2' },
       // T9 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       // T10 (2027) - M1
@@ -55,18 +55,18 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
   },
   {
     id: 'rn',
-    name: 'Rassemblement National',
-    shortName: 'RN',
+    name: 'Rassemblement National et UDR',
+    shortName: 'RN & UDR',
     color: '#78716C', // stone-500
     emoji: '🟤',
     description: 'Programme centré sur la modernisation du métro et l\'entretien du réseau bus.',
     projectSelections: [
       // Modernisation AC (2035) D (2030) - A et C en M2, D en M1
-      { projectId: 'modern-a', period: 'M2' },
-      { projectId: 'modern-c', period: 'M2' },
-      { projectId: 'modern-d', period: 'M1' },
+      { projectId: 'modern-a', period: 'M1+M2' },
+      { projectId: 'modern-c', period: 'M1+M2' },
+      { projectId: 'modern-d', period: 'M1+M2' },
       // Metro E Bellecour (2040) - M2
-      { projectId: 'metro-e-bellecour', period: 'M2' },
+      { projectId: 'metro-e-bellecour', period: 'M1+M2' },
       // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
@@ -88,7 +88,7 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
     description: 'Programme axé sur la gratuité totale des transports.',
     projectSelections: [
       // TEOL (2032) - M2
-      { projectId: 'teol', period: 'M2' },
+      { projectId: 'teol', period: 'M1+M2' },
       // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
@@ -100,25 +100,25 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
   },
   {
     id: 'droite',
-    name: 'Union de la Droite',
-    shortName: 'Droite',
+    name: 'Grand Cœur Lyonnais - Union de la droite et du centre',
+    shortName: 'Grand Cœur Lyonnais',
     color: '#3B82F6', // blue-500
     emoji: '🔵',
     description: 'Programme incluant la Grande Dorsale Est-Ouest et la modernisation du métro.',
     projectSelections: [
       // Grande Dorsale (2056) - M2 (projet très long terme)
-      { projectId: 'grande-dorsale', period: 'M2' },
+      { projectId: 'grande-dorsale', period: 'M1+M2' },
       // T8 (2030) - M1
-      { projectId: 't8', period: 'M1' },
+      { projectId: 't8', period: 'M1+M2' },
       // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
       // BHNS Parilly (2029) - M1
-      { projectId: 'bhns-parilly', period: 'M1' },
+      { projectId: 'bhns-parilly', period: 'M1+M2' },
       // Modernisation AC (2035) D (2030) - A et C en M2, D en M1
-      { projectId: 'modern-a', period: 'M2' },
-      { projectId: 'modern-c', period: 'M2' },
-      { projectId: 'modern-d', period: 'M1' },
+      { projectId: 'modern-a', period: 'M1+M2' },
+      { projectId: 'modern-c', period: 'M1+M2' },
+      { projectId: 'modern-d', period: 'M1+M2' },
     ],
     financingLevers: {},
   },

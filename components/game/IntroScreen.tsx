@@ -177,33 +177,33 @@ export function IntroScreen() {
   const [phase, setLocalPhase] = useState<'landing' | 'tutorial' | 'ready'>('landing')
   const [landingStep, setLandingStep] = useState(0)
   const [tutorialStep, setTutorialStep] = useState(0)
-  const totalTutorialSteps = 5
-  const [selectedProjects, setSelectedProjects] = useState<string[]>([])
+  const totalTutorialSteps = 7
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [mockMandat, setMockMandat] = useState<'m1' | 'm2' | 'both' | null>(null)
   const [mockBudget, setMockBudget] = useState({ m1: 2000, m2: 2000 })
-  const [showMandatChoice, setShowMandatChoice] = useState(false)
   const [showFloatingCTA, setShowFloatingCTA] = useState(true)
   const footerRef = useRef<HTMLElement>(null)
   
-  // Tutorial step 3 toggles state - using real values from FINANCING_IMPACTS
+  // 3 tutorial projects - real projects from the data
+  const tutorialProjects = [
+    PROJECTS.find(p => p.id === 't8'),      // T8 - Tramway ~350M€
+    PROJECTS.find(p => p.id === 'ext-a-est'), // Extension Métro A ~600M€
+    PROJECTS.find(p => p.id === 'bhns-parilly') // BHNS Parilly ~85M€
+  ].filter(Boolean)
+  
+  // Get selected project data
+  const selectedProject = selectedProjectId ? PROJECTS.find(p => p.id === selectedProjectId) : null
+  
+  // Tutorial step 5 toggles state - using real values from FINANCING_IMPACTS
   const [tutorialToggles, setTutorialToggles] = useState({
     gratuiteJeunes: false, // -48M€/mandat
-    tarifHausse: false, // +120M€/mandat (10% increase)
+    tarifHausse: false, // +80M€/mandat (10% tickets increase)
     metro24h: false // -24M€/mandat
   })
   const tutorialBudgetImpact = 
     (tutorialToggles.gratuiteJeunes ? -48 : 0) +
-    (tutorialToggles.tarifHausse ? 120 : 0) +
+    (tutorialToggles.tarifHausse ? 80 : 0) +
     (tutorialToggles.metro24h ? -24 : 0)
-  
-  // Tutorial step titles for the stepper
-  const tutorialStepTitles = [
-    'Bienvenue',
-    'Vos projets',
-    'Budget',
-    'Financement',
-    'Simulation'
-  ]
   
   // Hide floating CTA when footer is visible
   useEffect(() => {
@@ -242,30 +242,25 @@ export function IntroScreen() {
   }, [tutorialStep])
 
   // Tutorial interaction handlers
-  const handleProjectToggle = useCallback((projectId: string) => {
-    setSelectedProjects(prev => {
-      if (prev.includes(projectId)) {
-        return prev.filter(id => id !== projectId)
-      }
-      return [...prev, projectId]
-    })
+  const handleProjectSelect = useCallback((projectId: string) => {
+    setSelectedProjectId(projectId)
+    // Auto-advance to step 2 (project detail)
+    setTimeout(() => setTutorialStep(2), 300)
   }, [])
 
   const handleMandatSelect = useCallback((mandat: 'm1' | 'm2' | 'both') => {
     setMockMandat(mandat)
-    setShowMandatChoice(false)
-    const selectedProject = selectedProjects[0]
-    const project = PROJECTS.find(p => p.id === selectedProject)
-    const cost = project?.cost || 500
+    const cost = selectedProject?.cost || 500
     if (mandat === 'm1') {
-      setMockBudget(prev => ({ ...prev, m1: prev.m1 - cost }))
+      setMockBudget({ m1: 2000 - cost, m2: 2000 })
     } else if (mandat === 'm2') {
-      setMockBudget(prev => ({ ...prev, m2: prev.m2 - cost }))
+      setMockBudget({ m1: 2000, m2: 2000 - cost })
     } else {
-      setMockBudget(prev => ({ m1: prev.m1 - cost/2, m2: prev.m2 - cost/2 }))
+      setMockBudget({ m1: 2000 - cost/2, m2: 2000 - cost/2 })
     }
-    setTimeout(() => setTutorialStep(2), 800)
-  }, [selectedProjects])
+    // Auto-advance to step 3 (budget gauges)
+    setTimeout(() => setTutorialStep(3), 500)
+  }, [selectedProject])
 
   return (
     <div className="fixed inset-0 bg-gray-950 overflow-y-auto overflow-x-hidden">
@@ -514,7 +509,7 @@ export function IntroScreen() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 tablet:grid-cols-4 gap-3 tablet:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {POLITICAL_PARTIES.map((party, index) => {
                         const projectCount = party.projectSelections.length
                         // Calculate total cost including upgrade options
@@ -553,51 +548,101 @@ export function IntroScreen() {
                             }}
                             whileHover={{ scale: 1.03, y: -4 }}
                             whileTap={{ scale: 0.98 }}
-                            className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 rounded-2xl p-4 tablet:p-5 text-left transition-all group"
+                            className="relative bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 border border-white/20 hover:border-white/40 rounded-2xl p-5 text-left transition-all group overflow-hidden"
+                            style={{
+                              boxShadow: `0 0 0 1px ${party.color}20, 0 8px 24px -8px ${party.color}40`
+                            }}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              <span className="text-3xl tablet:text-4xl">{party.emoji}</span>
-                              <div>
-                                <span className="text-white font-bold text-sm tablet:text-base block">{party.shortName}</span>
-                                <span className="text-gray-500 text-xs">{party.name}</span>
+                            {/* Color accent bar */}
+                            <div 
+                              className="absolute top-0 left-0 right-0 h-1 opacity-70 group-hover:opacity-100 transition-opacity"
+                              style={{ backgroundColor: party.color }}
+                            />
+                            
+                            {/* Party header */}
+                            <div className="flex items-start gap-3 mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform"
+                                style={{ 
+                                  backgroundColor: `${party.color}20`,
+                                  border: `2px solid ${party.color}40`,
+                                  boxShadow: `0 4px 12px ${party.color}30`
+                                }}
+                              >
+                                {party.emoji}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-bold text-base leading-tight mb-1">
+                                  {party.shortName}
+                                </h3>
+                                <p className="text-gray-400 text-xs line-clamp-2">
+                                  {party.description}
+                                </p>
                               </div>
                             </div>
                             
-                            <div className="space-y-1.5 mb-4">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Projets</span>
-                                <span className="text-white font-semibold">{projectCount}</span>
+                            {/* Stats */}
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400 text-xs">Projets</span>
+                                <span 
+                                  className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                  style={{ 
+                                    backgroundColor: `${party.color}20`,
+                                    color: party.color
+                                  }}
+                                >
+                                  {projectCount}
+                                </span>
                               </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Dépenses</span>
-                                <span className="text-green-400 font-semibold">{(totalCost / 1000).toFixed(1)} Md€</span>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400 text-xs">Budget</span>
+                                <span className="text-white font-semibold text-sm">
+                                  {(totalCost / 1000).toFixed(1)} Md€
+                                </span>
                               </div>
-                              
-                              {/* Social policies details */}
-                              <div className="pt-2 space-y-1">
+                            </div>
+                            
+                            {/* Social policies */}
+                            {(levers.gratuiteTotale || levers.gratuiteJeunesAbonnes || levers.metro24hWeekend || levers.electrificationBus || levers.entretienBus) && (
+                              <div className="space-y-1.5 mb-4 pb-4 border-b border-white/10">
                                 {levers.gratuiteTotale && isLeverActive(levers.gratuiteTotale as any) && (
-                                  <p className="text-purple-300 text-[10px] tablet:text-xs">🎫 Gratuité totale</p>
+                                  <div className="flex items-center gap-1.5 text-purple-300 text-xs">
+                                    <span>🎫</span>
+                                    <span>Gratuité totale</span>
+                                  </div>
                                 )}
                                 {levers.gratuiteJeunesAbonnes && isLeverActive(levers.gratuiteJeunesAbonnes as any) && (
-                                  <p className="text-green-300 text-[10px] tablet:text-xs">🎓 Gratuité 11-18 ans</p>
+                                  <div className="flex items-center gap-1.5 text-green-300 text-xs">
+                                    <span>🎓</span>
+                                    <span>Gratuité 11-18 ans</span>
+                                  </div>
                                 )}
                                 {levers.metro24hWeekend && isLeverActive(levers.metro24hWeekend as any) && (
-                                  <p className="text-blue-300 text-[10px] tablet:text-xs">🌙 Métro 24h weekend</p>
+                                  <div className="flex items-center gap-1.5 text-blue-300 text-xs">
+                                    <span>🌙</span>
+                                    <span>Métro 24h weekend</span>
+                                  </div>
                                 )}
                                 {levers.electrificationBus && (
-                                  <p className="text-yellow-300 text-[10px] tablet:text-xs">⚡ Électrification bus</p>
+                                  <div className="flex items-center gap-1.5 text-yellow-300 text-xs">
+                                    <span>⚡</span>
+                                    <span>Électrification bus</span>
+                                  </div>
                                 )}
                                 {levers.entretienBus && (
-                                  <p className="text-orange-300 text-[10px] tablet:text-xs">🚌 Entretien flotte bus</p>
+                                  <div className="flex items-center gap-1.5 text-orange-300 text-xs">
+                                    <span>🚌</span>
+                                    <span>Entretien flotte</span>
+                                  </div>
                                 )}
                               </div>
-                            </div>
+                            )}
                             
-                            <div className="pt-3 border-t border-white/10">
-                              <span className="text-gray-400 group-hover:text-white text-xs tablet:text-sm flex items-center gap-2 transition-colors">
-                                Charger ce programme
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </span>
+                            {/* CTA */}
+                            <div className="flex items-center gap-2 text-gray-300 group-hover:text-white text-sm font-medium transition-colors">
+                              <span>Charger ce programme</span>
+                              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </div>
                           </motion.button>
                         )
@@ -689,12 +734,29 @@ export function IntroScreen() {
                   <p className="text-gray-500 text-xs mt-2">
                     Les données sont issues de sources publiques et peuvent contenir des approximations.
                   </p>
+                  <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl max-w-xl mx-auto">
+                    <p className="text-blue-300 text-sm mb-2">
+                      🐛 <strong>Vous avez repéré une coquille ou une erreur de données ?</strong>
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      Merci de me prévenir rapidement sur{' '}
+                      <a 
+                        href="https://www.linkedin.com/in/solal-gendrin/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        LinkedIn
+                      </a>
+                      {' '}en me sourçant l&apos;information afin que je puisse corriger.
+                    </p>
+                  </div>
                 </div>
               </footer>
             </motion.div>
           )}
 
-          {/* ==================== PHASE 2: INTERACTIVE TUTORIAL ==================== */}
+          {/* ==================== PHASE 2: TUTORIEL 7 ÉTAPES ==================== */}
           {phase === 'tutorial' && (
             <motion.div
               key="tutorial"
@@ -703,509 +765,283 @@ export function IntroScreen() {
               exit={{ opacity: 0 }}
               className="flex-1 flex flex-col"
             >
-              {/* Tutorial Header - Compact Stepper */}
+              {/* Header Stepper */}
               <div className="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    {/* Stepper dots - always visible */}
-                    <div className="flex items-center gap-1.5">
-                      {tutorialStepTitles.map((title, i) => (
-                        <div 
-                          key={i} 
-                          className="group relative"
-                          title={title}
-                        >
-                          <div className={cn(
-                            "w-2.5 h-2.5 rounded-full transition-all",
-                            i < tutorialStep ? "bg-green-500" :
-                            i === tutorialStep ? "bg-blue-500 ring-2 ring-blue-500/30" :
-                            "bg-gray-700"
-                          )} />
-                        </div>
-                      ))}
-                      <span className="text-xs text-gray-500 ml-2">
-                        {tutorialStep + 1}/{totalTutorialSteps}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleStart}
-                      className="text-gray-500 hover:text-white transition-colors text-xs flex items-center gap-1"
-                    >
-                      Passer <ArrowRight className="w-3 h-3" />
-                    </button>
+                <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    {Array.from({ length: totalTutorialSteps }).map((_, i) => (
+                      <div key={i} className={cn("w-2.5 h-2.5 rounded-full transition-all", i < tutorialStep ? "bg-green-500" : i === tutorialStep ? "bg-blue-500 ring-2 ring-blue-500/30" : "bg-gray-700")} />
+                    ))}
+                    <span className="text-xs text-gray-500 ml-2">{tutorialStep + 1}/{totalTutorialSteps}</span>
                   </div>
+                  <button onClick={handleStart} className="text-gray-500 hover:text-white text-xs flex items-center gap-1">Passer <ArrowRight className="w-3 h-3" /></button>
                 </div>
               </div>
 
-              {/* Tutorial Content */}
               <div className="flex-1 overflow-y-auto">
                 <div className="max-w-3xl mx-auto px-4 py-8">
                   <AnimatePresence mode="wait">
                     
-                    {/* ===== STEP 0: BIENVENUE - Prise de fonction ===== */}
+                    {/* ÉTAPE 1: BIENVENUE */}
                     {tutorialStep === 0 && (
-                      <motion.div
-                        key="step0"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
+                      <motion.div key="s0" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                         <div className="text-center mb-8">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-medium mb-4">
-                            <Star className="w-3 h-3" />
-                            Étape 1 sur 5
-                          </div>
-                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                            Bienvenue, Président(e) du SYTRAL
-                          </h1>
-                          <p className="text-gray-400 max-w-xl mx-auto">
-                            Vous venez d&apos;être élu(e) à la tête du Syndicat des Transports de Lyon. 
-                            Votre mission : transformer le réseau TCL pour les 12 prochaines années.
-                          </p>
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-medium mb-4"><Star className="w-3 h-3" />Étape 1 sur 7</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">Madame/Monsieur le Président(e),</h1>
+                          <p className="text-gray-300 text-lg max-w-xl mx-auto">Vous venez d&apos;être élu(e) à la présidence du SYTRAL. Votre mandat : transformer le réseau TCL pour les <strong className="text-white">12 prochaines années</strong>.</p>
                         </div>
-
-                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 mb-6">
-                          <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                            <Euro className="w-4 h-4 text-green-400" />
-                            Votre enveloppe budgétaire
-                          </h3>
-                          <p className="text-gray-400 text-sm mb-4">
-                            Le SYTRAL dispose d&apos;un budget d&apos;investissement de <strong className="text-white">4 milliards d&apos;euros</strong> pour financer les nouveaux projets de transport. 
-                            Cette somme est répartie sur deux mandats de 6 ans, soit 2 milliards par mandat.
-                          </p>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-center">
-                              <p className="text-blue-400 text-xs mb-1">Mandat 1 (2026-2032)</p>
-                              <p className="text-white font-bold text-lg">2 Md€</p>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 mb-6">
+                          <h3 className="text-white font-semibold mb-4 flex items-center gap-2 text-lg"><Euro className="w-5 h-5 text-green-400" />Votre enveloppe : 4 milliards d&apos;euros</h3>
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center">
+                              <p className="text-blue-400 text-sm">Mandat 1</p>
+                              <p className="text-white font-bold text-2xl">2 Md€</p>
+                              <p className="text-gray-500 text-xs">2026 → 2032</p>
                             </div>
-                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
-                              <p className="text-purple-400 text-xs mb-1">Mandat 2 (2032-2038)</p>
-                              <p className="text-white font-bold text-lg">2 Md€</p>
+                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
+                              <p className="text-purple-400 text-sm">Mandat 2</p>
+                              <p className="text-white font-bold text-2xl">2 Md€</p>
+                              <p className="text-gray-500 text-xs">2032 → 2038</p>
                             </div>
                           </div>
+                          <p className="text-gray-400 text-sm text-center">Cette somme peut sembler colossale, mais elle ne suffira pas à tout financer. <strong className="text-white">Vous allez devoir faire des choix.</strong></p>
                         </div>
-
                         <div className="flex justify-center">
-                          <button
-                            onClick={nextTutorialStep}
-                            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all flex items-center gap-2"
-                          >
-                            Découvrir les projets
-                            <ArrowRight className="w-4 h-4" />
-                          </button>
+                          <button onClick={nextTutorialStep} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg flex items-center gap-2">Découvrir la carte<ArrowRight className="w-5 h-5" /></button>
                         </div>
                       </motion.div>
                     )}
 
-                    {/* ===== STEP 1: VOS PROJETS - Sélection interactive ===== */}
+                    {/* ÉTAPE 2: LES PROJETS - Choix parmi 3 */}
                     {tutorialStep === 1 && (
-                      <motion.div
-                        key="step1"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
+                      <motion.div key="s1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                         <div className="text-center mb-6">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-medium mb-4">
-                            <MousePointerClick className="w-3 h-3" />
-                            Étape 2 sur 5 — Interactif
-                          </div>
-                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                            Choisissez vos projets prioritaires
-                          </h1>
-                          <p className="text-gray-400 max-w-xl mx-auto">
-                            Plus de 25 projets sont sur la table : extensions de métro, nouvelles lignes de tram, bus express... 
-                            <strong className="text-white"> Cliquez sur les projets</strong> qui vous semblent prioritaires pour les sélectionner.
-                          </p>
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-medium mb-4"><MousePointerClick className="w-3 h-3" />Étape 2 sur 7 — Interactif</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">Voici quelques projets parmi lesquels vous aurez à choisir.</h1>
+                          <p className="text-gray-400">Commencez par en choisir un :</p>
                         </div>
-
-                        {/* Interactive project grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-                          {PROJECTS.slice(0, 8).map((project) => {
-                            const isSelected = selectedProjects.includes(project.id)
-                            const typeConfig = project.id.includes('metro') || project.id.includes('modern') 
-                              ? { icon: Train, color: 'from-blue-500 to-indigo-600', label: 'Métro' }
-                              : project.id.includes('t8') || project.id.includes('t9') || project.id.includes('t10') || project.id.includes('teol') || project.id.includes('t3') || project.id.includes('t12')
-                              ? { icon: TramFront, color: 'from-green-500 to-emerald-600', label: 'Tram' }
-                              : { icon: Bus, color: 'from-orange-500 to-red-600', label: 'BHNS' }
-                            const Icon = typeConfig.icon
-                            
+                        <div className="space-y-3 mb-6">
+                          {tutorialProjects.map((project) => {
+                            if (!project) return null
+                            const isSelected = selectedProjectId === project.id
+                            const typeConfig = project.id.includes('ext-a') ? { color: 'from-blue-500 to-indigo-600', label: 'Métro', emoji: '🚇' } : project.id.includes('t8') ? { color: 'from-green-500 to-emerald-600', label: 'Tramway', emoji: '🚊' } : { color: 'from-orange-500 to-red-600', label: 'Bus Express', emoji: '🚌' }
                             return (
-                              <motion.div
-                                key={project.id}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => handleProjectToggle(project.id)}
-                                className={cn(
-                                  "relative p-3 rounded-lg cursor-pointer transition-all border",
-                                  isSelected 
-                                    ? "bg-blue-500/20 border-blue-500" 
-                                    : "bg-gray-800/50 border-gray-700 hover:border-gray-600"
-                                )}
-                              >
-                                {isSelected && (
-                                  <motion.div 
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"
-                                  >
-                                    <CheckCircle2 className="w-3 h-3 text-white" />
-                                  </motion.div>
-                                )}
-                                <div className={cn("w-6 h-6 rounded bg-gradient-to-br flex items-center justify-center mb-1.5", typeConfig.color)}>
-                                  <Icon className="w-3 h-3 text-white" />
+                              <motion.div key={project.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} onClick={() => handleProjectSelect(project.id)}
+                                className={cn("relative p-4 rounded-xl cursor-pointer transition-all border", isSelected ? "bg-blue-500/20 border-blue-500 ring-2 ring-blue-500/30" : "bg-gray-800/50 border-gray-700 hover:border-gray-500")}>
+                                <div className="flex items-start gap-4">
+                                  <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 text-2xl", typeConfig.color)}>{typeConfig.emoji}</div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-bold text-white">{project.name}</h4>
+                                      <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold text-white bg-gradient-to-r", typeConfig.color)}>{typeConfig.label}</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm mb-2 line-clamp-2">{project.description}</p>
+                                    <div className="flex items-center gap-4 text-sm">
+                                      <span className="text-gray-400 flex items-center gap-1"><Euro className="w-3.5 h-3.5 text-green-400" /><strong className="text-white">{project.cost >= 1000 ? `${(project.cost/1000).toFixed(1)} Md€` : `${project.cost} M€`}</strong></span>
+                                      <span className="text-gray-400 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-purple-400" /><strong className="text-white">+{(project.impact || 0).toLocaleString()}</strong> voy/jour</span>
+                                    </div>
+                                  </div>
+                                  {isSelected && <CheckCircle2 className="w-6 h-6 text-blue-400 flex-shrink-0" />}
                                 </div>
-                                <p className="text-white text-xs font-medium truncate">{project.name}</p>
-                                <p className="text-gray-500 text-[10px]">{project.cost}M€</p>
                               </motion.div>
                             )
                           })}
                         </div>
-
-                        {selectedProjects.length > 0 ? (
-                          <div className="text-center">
-                            <p className="text-gray-400 text-sm mb-3">
-                              Vous avez sélectionné <strong className="text-white">{selectedProjects.length} projet{selectedProjects.length > 1 ? 's' : ''}</strong>. 
-                              Voyons maintenant quand les réaliser.
-                            </p>
-                            <button
-                              onClick={() => {
-                                setShowMandatChoice(true)
-                                setTutorialStep(2)
-                              }}
-                              className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all flex items-center gap-2 mx-auto"
-                            >
-                              Planifier le calendrier
-                              <ArrowRight className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <p className="text-center text-gray-500 text-sm">
-                            👆 Cliquez sur au moins un projet pour continuer
-                          </p>
-                        )}
+                        <p className="text-center text-gray-500 text-sm">👆 Cliquez sur un projet pour le découvrir en détail</p>
                       </motion.div>
                     )}
 
-                    {/* ===== STEP 2: BUDGET - Choix du mandat ===== */}
-                    {tutorialStep === 2 && (
-                      <motion.div
-                        key="step2"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
+                    {/* ÉTAPE 3: LE PANEL PROJET - Comprendre les indicateurs */}
+                    {tutorialStep === 2 && selectedProject && (
+                      <motion.div key="s2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                         <div className="text-center mb-6">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-medium mb-4">
-                            <Calendar className="w-3 h-3" />
-                            Étape 3 sur 5 — Interactif
-                          </div>
-                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                            Quand réaliser ce projet ?
-                          </h1>
-                          <p className="text-gray-400 max-w-xl mx-auto">
-                            Les grands projets de transport prennent du temps : études, enquêtes publiques, travaux... 
-                            Vous devez décider sur quel mandat affecter le coût de chaque projet.
-                          </p>
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-medium mb-4"><Target className="w-3 h-3" />Étape 3 sur 7 — Interactif</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">Chaque projet possède des caractéristiques clés</h1>
                         </div>
-
-                        {/* Selected project */}
-                        {selectedProjects[0] && (() => {
-                          const project = PROJECTS.find(p => p.id === selectedProjects[0])
-                          if (!project) return null
-                          return (
-                            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 mb-6 flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                <Train className="w-5 h-5 text-blue-400" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-white font-medium">{project.name}</p>
-                                <p className="text-gray-500 text-sm">Coût : {project.cost}M€</p>
-                              </div>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 mb-6">
+                          <h3 className="text-white font-bold text-lg mb-4">{selectedProject.name}</h3>
+                          <div className="grid grid-cols-3 gap-4 mb-4">
+                            <div className="bg-gray-900/50 rounded-lg p-3 text-center">
+                              <p className="text-gray-500 text-xs mb-1">1. Coût</p>
+                              <p className="text-white font-bold text-lg">{selectedProject.cost >= 1000 ? `${(selectedProject.cost/1000).toFixed(1)} Md€` : `${selectedProject.cost} M€`}</p>
                             </div>
-                          )
-                        })()}
-
-                        {/* Mandate choice */}
-                        {showMandatChoice && (
-                          <div className="space-y-3 mb-6">
-                            <p className="text-gray-400 text-sm text-center mb-4">
-                              Sur quel mandat souhaitez-vous imputer ce projet ? Chaque choix impacte différemment votre budget.
-                            </p>
+                            <div className="bg-gray-900/50 rounded-lg p-3 text-center">
+                              <p className="text-gray-500 text-xs mb-1">2. Impact voyageurs</p>
+                              <p className="text-purple-400 font-bold text-lg">+{(selectedProject.impact || 0).toLocaleString()}/j</p>
+                            </div>
+                            <div className="bg-gray-900/50 rounded-lg p-3 text-center">
+                              <p className="text-gray-500 text-xs mb-1">3. Efficacité</p>
+                              <p className="text-green-400 font-bold text-lg">{selectedProject.impact ? Math.round(selectedProject.impact / selectedProject.cost) : 0} voy/M€</p>
+                            </div>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-4">Plus l&apos;efficacité est élevée, meilleur sera le rapport impact/prix.</p>
+                          <div className="border-t border-gray-700 pt-4">
+                            <p className="text-white font-medium mb-3">Vous devez maintenant choisir <strong>QUAND</strong> réaliser ce projet.</p>
+                            <p className="text-gray-400 text-sm mb-4">👇 Trois options s&apos;offrent à vous :</p>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <button
-                                onClick={() => handleMandatSelect('m1')}
-                                className="p-4 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 hover:border-blue-400 text-white rounded-xl transition-all text-left"
-                              >
+                              <button onClick={() => handleMandatSelect('m1')} className={cn("p-4 border rounded-xl transition-all text-left", mockMandat === 'm1' ? "bg-blue-600/30 border-blue-500" : "bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 hover:border-blue-400")}>
                                 <p className="font-bold text-blue-400 text-sm">Mandat 1</p>
                                 <p className="text-white font-bold">2026 → 2032</p>
-                                <p className="text-gray-400 text-xs mt-1">Budget restant : 2 000 M€</p>
+                                <p className="text-gray-400 text-xs mt-1">Projet livré entre 2026-2032</p>
                               </button>
-                              <button
-                                onClick={() => handleMandatSelect('m2')}
-                                className="p-4 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 hover:border-purple-400 text-white rounded-xl transition-all text-left"
-                              >
+                              <button onClick={() => handleMandatSelect('m2')} className={cn("p-4 border rounded-xl transition-all text-left", mockMandat === 'm2' ? "bg-purple-600/30 border-purple-500" : "bg-purple-600/10 hover:bg-purple-600/20 border-purple-500/30 hover:border-purple-400")}>
                                 <p className="font-bold text-purple-400 text-sm">Mandat 2</p>
                                 <p className="text-white font-bold">2032 → 2038</p>
-                                <p className="text-gray-400 text-xs mt-1">Budget restant : 2 000 M€</p>
+                                <p className="text-gray-400 text-xs mt-1">Projet livré entre 2032-2038</p>
                               </button>
-                              <button
-                                onClick={() => handleMandatSelect('both')}
-                                className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 border border-indigo-500/50 hover:border-indigo-400 text-white rounded-xl transition-all text-left"
-                              >
+                              <button onClick={() => handleMandatSelect('both')} className={cn("p-4 border rounded-xl transition-all text-left", mockMandat === 'both' ? "bg-indigo-600/30 border-indigo-500" : "bg-gradient-to-r from-blue-600/10 to-purple-600/10 hover:from-blue-600/20 hover:to-purple-600/20 border-indigo-500/30 hover:border-indigo-400")}>
                                 <p className="font-bold text-indigo-400 text-sm">Étalé</p>
                                 <p className="text-white font-bold">2026 → 2038</p>
-                                <p className="text-gray-400 text-xs mt-1">50% sur chaque mandat</p>
+                                <p className="text-gray-400 text-xs mt-1">Coût réparti sur les 2 mandats</p>
                               </button>
                             </div>
                           </div>
-                        )}
-
-                        {/* Budget gauges if mandate selected */}
-                        {mockMandat && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <p className="text-gray-400 text-sm text-center mb-4">
-                              Voici l&apos;impact sur vos budgets. Les jauges se mettent à jour en temps réel à chaque décision.
-                            </p>
-                            <div className="space-y-3 mb-6">
-                              <MockBudgetGauge value={mockBudget.m1} label="Mandat 1 (2026-2032)" color="text-blue-400" />
-                              <MockBudgetGauge value={mockBudget.m2} label="Mandat 2 (2032-2038)" color="text-purple-400" />
-                            </div>
-                            <div className="flex justify-center">
-                              <button
-                                onClick={() => setTutorialStep(3)}
-                                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all flex items-center gap-2"
-                              >
-                                Découvrir les leviers de financement
-                                <ArrowRight className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
+                        </div>
                       </motion.div>
                     )}
 
-                    {/* ===== STEP 3: FINANCEMENT - Toggles interactifs ===== */}
-                    {tutorialStep === 3 && (
-                      <motion.div
-                        key="step3"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                      >
+                    {/* ÉTAPE 4: LES JAUGES BUDGET */}
+                    {tutorialStep === 3 && selectedProject && (
+                      <motion.div key="s3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                         <div className="text-center mb-6">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium mb-4">
-                            <Scale className="w-3 h-3" />
-                            Étape 4 sur 5 — Interactif
-                          </div>
-                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                            Ajustez vos leviers de financement
-                          </h1>
-                          <p className="text-gray-400 max-w-xl mx-auto">
-                            Si vos projets dépassent le budget, vous pouvez activer des politiques tarifaires pour générer des recettes supplémentaires.
-                            <strong className="text-white"> Testez les interrupteurs</strong> ci-dessous pour voir l&apos;impact sur votre budget.
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium mb-4"><Euro className="w-3 h-3" />Étape 4 sur 7</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">Regardez en haut à gauche : vos budgets se sont mis à jour.</h1>
+                        </div>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 mb-6">
+                          <p className="text-gray-300 mb-4">
+                            Vous avez dépensé <strong className="text-white">{selectedProject.cost} M€</strong> sur le {mockMandat === 'm1' ? 'Mandat 1' : mockMandat === 'm2' ? 'Mandat 2' : 'les deux mandats'}. 
+                            {mockMandat === 'm1' && <> Il vous reste donc <strong className="text-blue-400">{mockBudget.m1.toLocaleString()} M€</strong> sur le Mandat 1.</>}
+                            {mockMandat === 'm2' && <> Il vous reste donc <strong className="text-purple-400">{mockBudget.m2.toLocaleString()} M€</strong> sur le Mandat 2.</>}
+                            {mockMandat === 'both' && <> Il vous reste <strong className="text-blue-400">{mockBudget.m1.toLocaleString()} M€</strong> sur M1 et <strong className="text-purple-400">{mockBudget.m2.toLocaleString()} M€</strong> sur M2.</>}
                           </p>
-                        </div>
-
-                        {/* Live budget impact bar */}
-                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 mb-6">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-gray-400 text-sm">Impact sur le budget annuel</span>
-                            <motion.span 
-                              key={tutorialBudgetImpact}
-                              initial={{ scale: 1.2 }}
-                              animate={{ scale: 1 }}
-                              className={cn(
-                                "font-bold",
-                                tutorialBudgetImpact >= 0 ? "text-green-400" : "text-red-400"
-                              )}
-                            >
-                              {tutorialBudgetImpact >= 0 ? '+' : ''}{tutorialBudgetImpact}M€/mandat
-                            </motion.span>
+                          <div className="space-y-3 mb-4">
+                            <MockBudgetGauge value={mockBudget.m1} label="Mandat 1 (2026-2032)" color="text-blue-400" />
+                            <MockBudgetGauge value={mockBudget.m2} label="Mandat 2 (2032-2038)" color="text-purple-400" />
                           </div>
-                          <div className="h-3 bg-gray-700 rounded-full overflow-hidden relative">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-0.5 h-full bg-white/20" />
+                          <div className="bg-gray-900/50 rounded-lg p-4">
+                            <p className="text-white font-medium mb-2">Ces jauges sont votre boussole :</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500"></span><span className="text-gray-300"><strong className="text-green-400">Vert</strong> : Budget respecté</span></p>
+                              <p className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-orange-500"></span><span className="text-gray-300"><strong className="text-orange-400">Orange</strong> : Léger déficit acceptable</span></p>
+                              <p className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500"></span><span className="text-gray-300"><strong className="text-red-400">Rouge</strong> : Déficit critique (&gt;100M€)</span></p>
                             </div>
-                            <motion.div 
-                              initial={{ width: '50%' }}
-                              animate={{ 
-                                width: `${Math.max(5, Math.min(95, 50 + (tutorialBudgetImpact / 3)))}%`
-                              }}
-                              className={cn(
-                                "h-full rounded-full transition-all",
-                                tutorialBudgetImpact >= 0 
-                                  ? "bg-gradient-to-r from-green-500 to-emerald-500" 
-                                  : "bg-gradient-to-r from-red-500 to-orange-500"
-                              )}
-                            />
-                          </div>
-                          <div className="flex justify-between mt-1 text-[10px] text-gray-500">
-                            <span>Déficit</span>
-                            <span>Équilibré</span>
-                            <span>Excédent</span>
                           </div>
                         </div>
+                        <p className="text-gray-400 text-center mb-6">L&apos;objectif : <strong className="text-white">rester dans une zone de déficit acceptable.</strong></p>
+                        <div className="flex justify-center">
+                          <button onClick={nextTutorialStep} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-2">Je veillerai sur l&apos;argent public<ArrowRight className="w-5 h-5" /></button>
+                        </div>
+                      </motion.div>
+                    )}
 
-                        {/* Interactive toggles */}
+                    {/* ÉTAPE 5: L'IMPACT VOYAGEURS */}
+                    {tutorialStep === 4 && selectedProject && (
+                      <motion.div key="s4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                        <div className="text-center mb-6">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-medium mb-4"><Users className="w-3 h-3" />Étape 5 sur 7</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">Cette jauge violette mesure votre ambition</h1>
+                          <p className="text-gray-400">L&apos;impact total sur les usagers.</p>
+                        </div>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 mb-6">
+                          <div className="flex items-center justify-center mb-4">
+                            <div className="relative w-32 h-32">
+                              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" fill="none" strokeWidth="8" className="stroke-gray-700" />
+                                <circle cx="50" cy="50" r="40" fill="none" strokeWidth="8" stroke="#a855f7" strokeLinecap="round" strokeDasharray={`${Math.min(100, ((selectedProject.impact || 0) / 2000) * 100) * 2.51} 251`} />
+                              </svg>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-purple-400 font-bold text-xl">+{((selectedProject.impact || 0) / 1000).toFixed(0)}k</span>
+                                <span className="text-gray-500 text-xs">voy/jour</span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-gray-300 text-center mb-4">Actuellement : <strong className="text-purple-400">+{(selectedProject.impact || 0).toLocaleString()} voyageurs quotidiens</strong> grâce au {selectedProject.name}.</p>
+                          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                            <p className="text-gray-300 text-sm">Plus vous sélectionnez de projets, plus cet impact augmente. Mais attention : <strong className="text-white">plus de projets = plus de coûts.</strong></p>
+                            <p className="text-purple-300 text-sm mt-2 font-medium">Votre défi : maximiser l&apos;impact tout en respectant le budget.</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-center">
+                          <button onClick={nextTutorialStep} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-2">Découvrir le financement<ArrowRight className="w-5 h-5" /></button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ÉTAPE 6: LE FINANCEMENT */}
+                    {tutorialStep === 5 && (
+                      <motion.div key="s5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                        <div className="text-center mb-6">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium mb-4"><Scale className="w-3 h-3" />Étape 6 sur 7 — Interactif</div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">Équilibrez votre budget avec les leviers de financement</h1>
+                          <p className="text-gray-400">Si vos projets dépassent le budget, vous avez des leviers pour générer des recettes.</p>
+                        </div>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-400 text-sm">Impact sur le budget</span>
+                            <motion.span key={tutorialBudgetImpact} initial={{ scale: 1.2 }} animate={{ scale: 1 }} className={cn("font-bold text-lg", tutorialBudgetImpact >= 0 ? "text-green-400" : "text-red-400")}>{tutorialBudgetImpact >= 0 ? '+' : ''}{tutorialBudgetImpact}M€/mandat</motion.span>
+                          </div>
+                          <div className="h-4 bg-gray-700 rounded-full overflow-hidden relative">
+                            <div className="absolute inset-0 flex items-center justify-center"><div className="w-0.5 h-full bg-white/30" /></div>
+                            <motion.div initial={{ width: '50%' }} animate={{ width: `${Math.max(5, Math.min(95, 50 + (tutorialBudgetImpact / 2)))}%` }} className={cn("h-full rounded-full transition-all", tutorialBudgetImpact >= 0 ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gradient-to-r from-red-500 to-orange-500")} />
+                          </div>
+                        </div>
+                        <p className="text-gray-400 text-sm mb-4"><strong className="text-white">3 grandes familles de leviers :</strong></p>
                         <div className="space-y-3 mb-6">
-                          {/* Toggle 1 */}
-                          <div 
-                            onClick={() => setTutorialToggles(prev => ({ ...prev, gratuiteJeunes: !prev.gratuiteJeunes }))}
-                            className={cn(
-                              "flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border",
-                              tutorialToggles.gratuiteJeunes 
-                                ? "bg-purple-500/20 border-purple-500" 
-                                : "bg-gray-800/50 border-gray-700 hover:border-gray-600"
-                            )}
-                          >
+                          <div onClick={() => setTutorialToggles(prev => ({ ...prev, gratuiteJeunes: !prev.gratuiteJeunes }))} className={cn("flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border", tutorialToggles.gratuiteJeunes ? "bg-purple-500/20 border-purple-500" : "bg-gray-800/50 border-gray-700 hover:border-gray-600")}>
                             <div className="flex items-center gap-3">
                               <span className="text-xl">🎫</span>
-                              <div>
-                                <p className="text-white font-medium text-sm">Gratuité 11-18 ans</p>
-                                <p className="text-gray-500 text-xs">Coût pour le réseau</p>
-                              </div>
+                              <div><p className="text-white font-medium text-sm">Gratuité jeunes</p><p className="text-gray-500 text-xs">Politique sociale</p></div>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-red-400 text-xs font-bold">-48M€</span>
-                              <div className={cn(
-                                "w-10 h-5 rounded-full transition-all flex items-center p-0.5",
-                                tutorialToggles.gratuiteJeunes ? "bg-purple-500 justify-end" : "bg-gray-600 justify-start"
-                              )}>
-                                <motion.div layout className="w-4 h-4 bg-white rounded-full" />
-                              </div>
+                              <div className={cn("w-10 h-5 rounded-full transition-all flex items-center p-0.5", tutorialToggles.gratuiteJeunes ? "bg-purple-500 justify-end" : "bg-gray-600 justify-start")}><motion.div layout className="w-4 h-4 bg-white rounded-full" /></div>
                             </div>
                           </div>
-
-                          {/* Toggle 2 */}
-                          <div 
-                            onClick={() => setTutorialToggles(prev => ({ ...prev, tarifHausse: !prev.tarifHausse }))}
-                            className={cn(
-                              "flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border",
-                              tutorialToggles.tarifHausse 
-                                ? "bg-green-500/20 border-green-500" 
-                                : "bg-gray-800/50 border-gray-700 hover:border-gray-600"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-xl">💰</span>
-                              <div>
-                                <p className="text-white font-medium text-sm">Hausse abonnements +10%</p>
-                                <p className="text-gray-500 text-xs">Recettes supplémentaires</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-green-400 text-xs font-bold">+120M€</span>
-                              <div className={cn(
-                                "w-10 h-5 rounded-full transition-all flex items-center p-0.5",
-                                tutorialToggles.tarifHausse ? "bg-green-500 justify-end" : "bg-gray-600 justify-start"
-                              )}>
-                                <motion.div layout className="w-4 h-4 bg-white rounded-full" />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Toggle 3 */}
-                          <div 
-                            onClick={() => setTutorialToggles(prev => ({ ...prev, metro24h: !prev.metro24h }))}
-                            className={cn(
-                              "flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border",
-                              tutorialToggles.metro24h 
-                                ? "bg-blue-500/20 border-blue-500" 
-                                : "bg-gray-800/50 border-gray-700 hover:border-gray-600"
-                            )}
-                          >
+                          <div onClick={() => setTutorialToggles(prev => ({ ...prev, metro24h: !prev.metro24h }))} className={cn("flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border", tutorialToggles.metro24h ? "bg-blue-500/20 border-blue-500" : "bg-gray-800/50 border-gray-700 hover:border-gray-600")}>
                             <div className="flex items-center gap-3">
                               <span className="text-xl">🌙</span>
-                              <div>
-                                <p className="text-white font-medium text-sm">Métro 24h le weekend</p>
-                                <p className="text-gray-500 text-xs">Coût d&apos;exploitation</p>
-                              </div>
+                              <div><p className="text-white font-medium text-sm">Métro 24h</p><p className="text-gray-500 text-xs">Politique sociale</p></div>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-red-400 text-xs font-bold">-24M€</span>
-                              <div className={cn(
-                                "w-10 h-5 rounded-full transition-all flex items-center p-0.5",
-                                tutorialToggles.metro24h ? "bg-blue-500 justify-end" : "bg-gray-600 justify-start"
-                              )}>
-                                <motion.div layout className="w-4 h-4 bg-white rounded-full" />
-                              </div>
+                              <div className={cn("w-10 h-5 rounded-full transition-all flex items-center p-0.5", tutorialToggles.metro24h ? "bg-blue-500 justify-end" : "bg-gray-600 justify-start")}><motion.div layout className="w-4 h-4 bg-white rounded-full" /></div>
+                            </div>
+                          </div>
+                          <div onClick={() => setTutorialToggles(prev => ({ ...prev, tarifHausse: !prev.tarifHausse }))} className={cn("flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border", tutorialToggles.tarifHausse ? "bg-green-500/20 border-green-500" : "bg-gray-800/50 border-gray-700 hover:border-gray-600")}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">💰</span>
+                              <div><p className="text-white font-medium text-sm">Hausse tickets +10%</p><p className="text-gray-500 text-xs">Recettes supplémentaires</p></div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-green-400 text-xs font-bold">+80M€</span>
+                              <div className={cn("w-10 h-5 rounded-full transition-all flex items-center p-0.5", tutorialToggles.tarifHausse ? "bg-green-500 justify-end" : "bg-gray-600 justify-start")}><motion.div layout className="w-4 h-4 bg-white rounded-full" /></div>
                             </div>
                           </div>
                         </div>
-
-                        <p className="text-gray-500 text-xs text-center mb-4">
-                          Ces leviers sont des exemples. Dans la simulation, vous aurez accès à de nombreuses autres options.
-                        </p>
-
+                        <p className="text-gray-500 text-xs text-center mb-4">👆 Testez ces leviers pour voir leur impact en temps réel sur vos budgets.</p>
                         <div className="flex justify-center">
-                          <button
-                            onClick={nextTutorialStep}
-                            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all flex items-center gap-2"
-                          >
-                            Terminer le tutoriel
-                            <ArrowRight className="w-4 h-4" />
-                          </button>
+                          <button onClick={nextTutorialStep} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-2">Valider mon programme<ArrowRight className="w-5 h-5" /></button>
                         </div>
                       </motion.div>
                     )}
 
-                    {/* ===== STEP 4: SIMULATION - CTA Final ===== */}
-                    {tutorialStep === 4 && (
-                      <motion.div
-                        key="step4"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="text-center"
-                      >
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium mb-4">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Tutoriel terminé
-                        </div>
-                        
-                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                          Vous êtes prêt(e), Président(e)
-                        </h1>
-                        
-                        <p className="text-gray-400 max-w-lg mx-auto mb-6">
-                          Vous avez compris les bases : choisir des projets, les planifier dans le temps, et équilibrer le budget grâce aux leviers de financement. 
-                          Il est temps de passer aux choses sérieuses.
-                        </p>
-
+                    {/* ÉTAPE 7: PRÊT(E) À GOUVERNER */}
+                    {tutorialStep === 6 && (
+                      <motion.div key="s6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium mb-4"><CheckCircle2 className="w-3 h-3" />Félicitations !</div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">Félicitations, Président(e).</h1>
+                        <p className="text-gray-300 text-lg max-w-lg mx-auto mb-6">Vous maîtrisez maintenant :</p>
                         <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 mb-8 text-left max-w-md mx-auto">
-                          <h3 className="text-white font-semibold mb-3">Ce qui vous attend :</h3>
-                          <ul className="space-y-2 text-gray-400 text-sm">
-                            <li className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>Une carte interactive avec tous les projets</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>Des détails sur chaque projet (coût, impact, description)</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>Un panneau de financement complet</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span>La possibilité de comparer avec les programmes des partis</span>
-                            </li>
+                          <ul className="space-y-3 text-gray-300">
+                            <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" /><span>La sélection de projets sur la carte</span></li>
+                            <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" /><span>La répartition budgétaire sur 2 mandats</span></li>
+                            <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" /><span>Le suivi de l&apos;impact voyageurs</span></li>
+                            <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" /><span>Les leviers de financement</span></li>
                           </ul>
                         </div>
-
-                        <motion.button
-                          onClick={handleStart}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 mx-auto"
-                        >
-                          <Play className="w-5 h-5" />
-                          Entrer dans la simulation
+                        <p className="text-gray-400 mb-6">Il est temps de construire votre propre programme.<br/><strong className="text-white">Bonne chance. La métropole compte sur vous.</strong></p>
+                        <motion.button onClick={handleStart} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-10 py-5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl font-bold text-xl shadow-lg shadow-emerald-500/20 flex items-center gap-3 mx-auto">
+                          <Play className="w-6 h-6" />Entrer dans la simulation
                         </motion.button>
                       </motion.div>
                     )}
