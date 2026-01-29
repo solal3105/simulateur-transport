@@ -197,6 +197,21 @@ export const PROJECTS: Project[] = [
       },
     ],
   },
+  {
+    id: 'telepherique-ouest',
+    name: 'Téléphérique de l\'Ouest',
+    cost: 200,
+    impact: 18000,
+    description: "Téléphérique urbain desservant l'ouest lyonnais.",
+  },
+  {
+    id: 'teol-craponne',
+    name: 'Extension TEOL Craponne',
+    cost: 300,
+    impact: 25000,
+    description: "Extension du Tramway Express de l'Ouest Lyonnais jusqu'à Craponne.",
+    requires: 'teol',
+  },
 ]
 
 export const PUBLIC_POLICIES: PublicPolicy[] = [
@@ -275,4 +290,6 @@ export const PROJECT_DURATIONS: Record<string, number | Record<string, number>> 
   'teol-enterre': 8, // Upgrade complètement enterré
   'metro-e-bellecour': 14,
   'metro-e-part-dieu': 4,
+  'telepherique-ouest': 5,
+  'teol-craponne': 5,
 }
