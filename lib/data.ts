@@ -35,7 +35,7 @@ export const PROJECTS: Project[] = [
     id: 'metro-e-part-dieu',
     name: 'Extension Métro E Part-Dieu',
     cost: 600,
-    impact: 102000,
+    impact: 38000,
     description: "Extension de la ligne E reliant Alaï à Part-Dieu depuis Bellecour.",
     requires: 'metro-e-bellecour',
   },
