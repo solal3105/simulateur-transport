@@ -129,6 +129,18 @@ export const PROJECT_GEO_DATA: Record<string, ProjectGeoData> = {
     type: 'bus',
     geojsonFile: 'bhns-rive-droite.geojson',
   },
+  'telepherique-ouest': {
+    id: 'telepherique-ouest',
+    coordinates: [45.7650, 4.8000], // Ouest lyonnais
+    type: 'other',
+    geojsonFile: 'telepherique-ouest.geojson',
+  },
+  'teol-craponne': {
+    id: 'teol-craponne',
+    coordinates: [45.7450, 4.7700], // Craponne
+    type: 'tram',
+    geojsonFile: 'teol-craponne.geojson',
+  },
 }
 
 // Couleurs selon le type de projet
