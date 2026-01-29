@@ -1,14 +1,19 @@
 # Simulateur Transport TCL Lyon
 
-Un simulateur interactif moderne pour l'arbitrage budgétaire des projets de transport TCL sur deux mandats (2026-2032 et 2032-2038).
+Un simulateur interactif moderne pour l'arbitrage budgétaire des projets de transport en commun. Conçu initialement pour Lyon et le réseau TCL, ce simulateur permet aux citoyens de comprendre les arbitrages budgétaires sur deux mandats (2026-2032 et 2032-2038).
+
+## 🌍 Adaptabilité à d'autres villes
+
+Ce projet est conçu pour être facilement adapté à d'autres réseaux de transport urbain. Les données des projets, les coûts et les leviers de financement sont centralisés dans `lib/data.ts`, permettant une personnalisation rapide pour votre ville.
 
 ## 🚀 Fonctionnalités
 
-- **25 projets de transport** à sélectionner et financer
+- **27 projets de transport** à sélectionner et financer (métro, tramway, téléphérique, BHNS...)
 - **6 leviers de financement** ajustables en temps réel
 - **Calcul budgétaire dynamique** pour deux mandats
 - **Interface mobile-first** avec animations fluides
 - **Visualisation des résultats** avec impact voyageurs
+- **Cartographie interactive** des projets (avec support GeoJSON)
 
 ## 🛠️ Stack Technique
 
@@ -44,8 +49,28 @@ Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 ## 📊 Données
 
 - Budget de base : 2 000 M€ par mandat
-- 25 projets allant de 36 M€ à 3,3 Md€
+- 27 projets allant de 36 M€ à 6 Md€
 - Impact jusqu'à 312 000 voyageurs/jour (Modernisation Ligne A)
+- Durées de construction réalistes (1 à 30 ans selon les projets)
+
+## 🔄 Adapter à votre ville
+
+Pour adapter ce simulateur à votre réseau de transport :
+
+1. **Modifiez les données** dans `lib/data.ts` :
+   - Liste des projets (`PROJECTS`)
+   - Coûts et impacts
+   - Durées de construction (`PROJECT_DURATIONS`)
+   - Leviers de financement (`FINANCING_IMPACTS`)
+
+2. **Ajoutez vos tracés** (optionnel) :
+   - Créez des fichiers GeoJSON pour vos projets
+   - Placez-les dans `public/geojson/`
+   - Nommez-les selon l'`id` du projet (ex: `metro-ligne-a.geojson`)
+
+3. **Personnalisez l'interface** :
+   - Couleurs et branding dans `tailwind.config.ts`
+   - Textes d'introduction dans `app/page.tsx`
 
 ## 🏗️ Structure du Projet
 
@@ -94,4 +119,14 @@ Le projet utilise :
 
 ## 📄 Licence
 
-Projet de démonstration pour la simulation budgétaire TCL Lyon.
+Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+
+Vous êtes libre de :
+- **Partager** : copier et redistribuer le matériel
+- **Adapter** : remixer, transformer et créer à partir du matériel pour votre propre ville
+
+Sous les conditions suivantes :
+- **Attribution** : Vous devez créditer l'œuvre originale
+- **Pas d'utilisation commerciale** : Vous ne pouvez pas utiliser le matériel à des fins commerciales
+
+Voir le fichier [LICENSE](LICENSE) pour plus de détails.

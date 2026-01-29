@@ -1,0 +1,69 @@
+Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
+Copyright (c) 2026 Simulateur Transport TCL Lyon
+
+Cette oeuvre est mise à disposition selon les termes de la Licence Creative Commons
+Attribution - Pas d'Utilisation Commerciale 4.0 International.
+
+Pour voir une copie de cette licence, visitez:
+http://creativecommons.org/licenses/by-nc/4.0/
+
+ou envoyez un courrier à:
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+=======================================================================
+
+VOUS ÊTES LIBRE DE :
+
+  Partager — copier, distribuer et communiquer le matériel par tous moyens et sous tous formats
+  Adapter — remixer, transformer et créer à partir du matériel pour votre propre ville
+
+  L'Offrant ne peut retirer les autorisations concédées par la licence tant que vous appliquez
+  les termes de cette licence.
+
+SELON LES CONDITIONS SUIVANTES :
+
+  Attribution — Vous devez créditer l'Oeuvre, intégrer un lien vers la licence et indiquer
+  si des modifications ont été effectuées à l'Oeuvre. Vous devez indiquer ces informations
+  par tous les moyens raisonnables, sans toutefois suggérer que l'Offrant vous soutient ou
+  soutient la façon dont vous avez utilisé son Oeuvre.
+
+  Pas d'Utilisation Commerciale — Vous n'êtes pas autorisé à faire un usage commercial de
+  cette Oeuvre, tout ou partie du matériel la composant.
+
+  Pas de restrictions complémentaires — Vous n'êtes pas autorisé à appliquer des conditions
+  légales ou des mesures techniques qui restreindraient légalement autrui à utiliser l'Oeuvre
+  dans les conditions décrites par la licence.
+
+NOTES :
+
+  Vous n'êtes pas dans l'obligation de respecter la licence pour les éléments ou matériel
+  appartenant au domaine public ou dans le cas où l'utilisation que vous souhaitez faire
+  est couverte par une exception.
+
+  Aucune garantie n'est donnée. Il se peut que la licence ne vous donne pas toutes les
+  permissions nécessaires pour votre utilisation. Par exemple, certains droits comme les
+  droits moraux, le droit des données personnelles et le droit à l'image sont susceptibles
+  de limiter votre utilisation.
+
+=======================================================================
+
+ADAPTATION À D'AUTRES VILLES :
+
+Ce simulateur a été conçu pour être facilement adapté à d'autres réseaux de transport urbain.
+Vous êtes encouragé à :
+
+- Modifier les données des projets pour correspondre à votre réseau
+- Adapter les leviers de financement à votre contexte local
+- Personnaliser l'interface avec les couleurs et le branding de votre ville
+- Ajouter vos propres tracés cartographiques (GeoJSON)
+
+Lors de l'adaptation, veuillez :
+
+1. Créditer le projet original : "Basé sur le Simulateur Transport TCL Lyon"
+2. Indiquer clairement les modifications apportées
+3. Maintenir la même licence CC BY-NC 4.0 pour votre version adaptée
+4. Ne pas utiliser à des fins commerciales
+
+Pour toute question sur l'adaptation ou l'utilisation, consultez la documentation complète
+dans le fichier README.md.
