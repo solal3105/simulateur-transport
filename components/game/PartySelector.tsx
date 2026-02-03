@@ -284,16 +284,19 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl"
+                className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl max-w-lg w-full shadow-2xl flex flex-col max-h-[90vh]"
               >
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-4 p-6 pb-4 border-b border-purple-200 dark:border-purple-500/20 flex-shrink-0">
                   <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
                     <AlertCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Programme LFI - Vision et réalité</h3>
-                    
-                    <div className="space-y-3 mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Programme LFI - Vision et réalité</h3>
+                  </div>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div className="space-y-3">
                       <div className="bg-purple-50 dark:bg-purple-500/10 rounded-lg p-4 border border-purple-200 dark:border-purple-500/20">
                         <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">🎯 Vision politique de long terme</p>
                         <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
@@ -321,14 +324,13 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
                         </p>
                       </div>
                       
-                      <p className="text-orange-600 dark:text-orange-300 text-xs font-medium leading-relaxed">
-                        💡 <strong>Important :</strong> L&apos;objectif politique revendiqué reste la gratuité totale, mais il dépend de décisions hors compétence de la métropole.
-                      </p>
-                    </div>
+                    <p className="text-orange-600 dark:text-orange-300 text-xs font-medium leading-relaxed">
+                      💡 <strong>Important :</strong> L&apos;objectif politique revendiqué reste la gratuité totale, mais il dépend de décisions hors compétence de la métropole.
+                    </p>
                   </div>
                 </div>
                 
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 p-6 pt-4 border-t border-purple-200 dark:border-purple-500/20 flex-shrink-0">
                   <button
                     onClick={() => setShowLFIModal(false)}
                     className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl font-medium transition-colors"
