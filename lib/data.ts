@@ -123,7 +123,7 @@ export const PROJECTS: Project[] = [
     name: 'Modernisation Ligne D',
     cost: 338,
     impact: 220500,
-    description: "Renouvellement des équipements et du matériel pour fiabiliser l’exploitation et augmenter la capacité.",
+    description: "Renouvellement des équipements et du matériel pour fiabiliser l'exploitation et augmenter la capacité.",
   },
   {
     id: 't8',
@@ -149,15 +149,15 @@ export const PROJECTS: Project[] = [
   {
     id: 't9-final',
     name: 'T9 Finalisation',
-    cost: 50,
+    cost: 75,
     impact: 38000,
     description: "Achèvement des travaux et connexions de la ligne T9.",
   },
   {
     id: 't10-final',
     name: 'T10 Finalisation',
-    cost: 50,
-    impact: 22000,
+    cost: 75,
+    impact: 42000,
     description: "Achèvement des travaux et connexions de la ligne T10.",
   },
   {
@@ -165,7 +165,14 @@ export const PROJECTS: Project[] = [
     name: 'BHNS Parilly',
     cost: 80,
     impact: 25000,
-    description: " Liaison rapide en bus à haut niveau de service pour le sud-est.",
+    description: "Liaison rapide en bus à haut niveau de service pour le sud-est.",
+  },
+  {
+    id: 'bhns-kimmerling',
+    name: 'Finalisation BHNS Part-Dieu',
+    cost: 30,
+    impact: 8000,
+    description: "Finalisation du tronçon Kimmerling - Sept Chemins du BHNS Part-Dieu, en retard comme les tramways T9 et T10.",
   },
   {
     id: 'navette-fluv',
@@ -177,7 +184,7 @@ export const PROJECTS: Project[] = [
   {
     id: 'bhns-rive-droite',
     name: 'Ligne du Rhône Rive Droite',
-    cost: 36,
+    cost: 50,
     impact: 20000,
     description: "Desserte de la rive droite du Rhône. Choisissez entre BHNS ou tramway.",
     upgradeOptions: [
@@ -185,14 +192,14 @@ export const PROJECTS: Project[] = [
         id: 'bhns',
         name: 'BHNS Rive Droite',
         description: 'Bus à Haut Niveau de Service. Solution économique avec voies dédiées.',
-        cost: 36,
+        cost: 50,
         impact: 20000,
       },
       {
         id: 'tram',
         name: 'Tram Rive Droite',
         description: 'Tramway moderne. Meilleure capacité et attractivité que le BHNS.',
-        cost: 120,
+        cost: 165,
         impact: 25000,
       },
     ],
@@ -279,6 +286,7 @@ export const PROJECT_DURATIONS: Record<string, number | Record<string, number>> 
     'tram': 8,
   },
   'bhns-parilly': 3,
+  'bhns-kimmerling': 1,
   'navette-fluv': 4,
   'bhns-rive-droite': 3,
   'teol': 6, // Semi-enterré de base

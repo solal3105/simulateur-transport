@@ -47,6 +47,8 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
       { projectId: 't9-final', period: 'M1' },
       // T10 (2027) - M1
       { projectId: 't10-final', period: 'M1' },
+      // BHNS Kimmerling-Sept Chemins
+      { projectId: 'bhns-kimmerling', period: 'M1' },
     ],
     financingLevers: {
       // Électrification des bus
@@ -79,6 +81,8 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
       // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
+      // BHNS Kimmerling-Sept Chemins
+      { projectId: 'bhns-kimmerling', period: 'M1' },
     ],
     financingLevers: {
       // Entretien Offre Bus
@@ -99,6 +103,7 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
       { projectId: 'teol', period: 'M1+M2' },
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
+      { projectId: 'bhns-kimmerling', period: 'M1' },
       { projectId: 't8', period: 'M1+M2' },
       { projectId: 'modern-a', period: 'M1+M2' },
       { projectId: 'modern-c', period: 'M1+M2' },
@@ -125,6 +130,8 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
       // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
+      // BHNS Kimmerling-Sept Chemins
+      { projectId: 'bhns-kimmerling', period: 'M1' },
       // BHNS Parilly (2029) - M1
       { projectId: 'bhns-parilly', period: 'M1+M2' },
       // Modernisation AC (2035) D (2030) - A et C en M2, D en M1

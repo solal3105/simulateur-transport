@@ -1,6 +1,6 @@
 'use client'
 
-import { MapContainer, TileLayer, GeoJSON, CircleMarker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { PROJECT_GEO_DATA, PROJECT_TYPE_COLORS } from '@/lib/projectsGeo'
@@ -90,8 +90,9 @@ export default function ResultsMap({ projectIds, isDarkMode = true }: ResultsMap
 
         return (
           <div key={projectId}>
-            {geojson ? (
+            {geojson && (
               <GeoJSON
+                key={projectId}
                 data={geojson}
                 style={{
                   color: color,
@@ -99,22 +100,6 @@ export default function ResultsMap({ projectIds, isDarkMode = true }: ResultsMap
                   opacity: 1,
                 }}
               />
-            ) : geoData && (
-              // Fallback: only show marker if no GeoJSON available
-              <CircleMarker
-                center={geoData.coordinates}
-                radius={8}
-                pathOptions={{
-                  fillColor: color,
-                  fillOpacity: 1,
-                  color: '#ffffff',
-                  weight: 2,
-                }}
-              >
-                <Tooltip permanent={false} direction="top">
-                  <span className="font-medium">{getProjectName(projectId)}</span>
-                </Tooltip>
-              </CircleMarker>
             )}
           </div>
         )

@@ -124,7 +124,7 @@ function calculateLeverImpact(levers: FinancingLevers): number {
   impact += levers.tarifAbonnements * FINANCING_IMPACTS.tarifAbonnementsPerPercent
   impact += levers.tarifTickets * FINANCING_IMPACTS.tarifTicketsPerPercent
 
-  impact += FINANCING_IMPACTS.versementMobilite[levers.versementMobilite.toString() as keyof typeof FINANCING_IMPACTS.versementMobilite]
+  impact += levers.versementMobilite * FINANCING_IMPACTS.versementMobilitePerPercent
 
   if (levers.tva55) {
     impact += FINANCING_IMPACTS.tva55

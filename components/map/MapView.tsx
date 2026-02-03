@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, GeoJSON, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/gameStore'
@@ -17,45 +17,6 @@ import 'leaflet/dist/leaflet.css'
 // Lyon center coordinates
 const LYON_CENTER: [number, number] = [45.7578, 4.8320]
 const DEFAULT_ZOOM = 12
-
-// Custom marker icon creation
-function createMarkerIcon(color: string, isSelected: boolean, projectType: string): L.DivIcon {
-  const size = isSelected ? 36 : 28
-  const borderColor = isSelected ? '#ffffff' : 'transparent'
-  const borderWidth = isSelected ? 3 : 0
-  const shadowClass = isSelected ? 'shadow-lg' : ''
-  
-  const typeEmoji = {
-    metro: '🚇',
-    tram: '🚊',
-    bus: '🚌',
-    other: '🚢',
-  }[projectType] || '📍'
-
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color};
-        border: ${borderWidth}px solid ${borderColor};
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: ${size * 0.45}px;
-        box-shadow: ${isSelected ? '0 4px 15px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.2)'};
-        transition: all 0.3s ease;
-        cursor: pointer;
-      ">
-        ${typeEmoji}
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  })
-}
 
 function getMarkerColor(period: MandatPeriod, projectType: string, colorMode: 'mode' | 'impact' | 'cost' = 'mode', efficiency: number = 0, cost: number = 0): string {
   if (colorMode === 'impact') {
@@ -97,7 +58,6 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isA
   const efficiency = project.impact && project.cost ? Math.round(project.impact / project.cost) : 0
   const cost = project.cost || 0
   const color = getMarkerColor(selectedPeriod, geoData.type, colorMode, efficiency, cost)
-  const icon = createMarkerIcon(color, isActive || selectedPeriod !== null, geoData.type)
   const [geojsonData, setGeojsonData] = useState<GeoJSON.GeoJsonObject | null>(null)
   const [hasGeojson, setHasGeojson] = useState(false)
 
@@ -144,80 +104,67 @@ function ProjectMarker({ project, geoData, selectedPeriod, onClick, onHover, isA
     }
   }
 
-  // If GeoJSON exists, render it instead of marker
-  if (hasGeojson && geojsonData) {
-    return (
-      <>
-        {/* Invisible thick trace for easier clicking */}
-        <GeoJSON
-          key={`${project.id}-hitbox-${selectedPeriod}-${isActive}`}
-          data={geojsonData}
-          style={() => ({
-            color: 'transparent',
-            weight: 30,
-            opacity: 0,
-            fillOpacity: 0,
-          })}
-          eventHandlers={{
-            click: (e) => {
-              L.DomEvent.stopPropagation(e)
-              onClick()
-            },
-            mouseover: () => onHover(project),
-            mouseout: () => onHover(null),
-          }}
-        />
-        {/* Glow effect for selected lines */}
-        {(selectedPeriod || isActive) && (
-          <GeoJSON
-            key={`${project.id}-glow-${selectedPeriod}-${isActive}`}
-            data={geojsonData}
-            style={() => ({
-              color: color,
-              weight: isActive ? 20 : 16,
-              opacity: 0.3,
-              fillOpacity: 0,
-            })}
-          />
-        )}
-        <GeoJSON
-          key={`${project.id}-${selectedPeriod}-${isActive}`}
-          data={geojsonData}
-          style={getLineStyle}
-          eventHandlers={{
-            click: (e) => {
-              L.DomEvent.stopPropagation(e)
-              onClick()
-            },
-            mouseover: (e) => {
-              const layer = e.target
-              layer.setStyle({
-                weight: isActive ? 12 : 10,
-                opacity: 1,
-              })
-              onHover(project)
-            },
-            mouseout: (e) => {
-              const layer = e.target
-              layer.setStyle(getLineStyle())
-              onHover(null)
-            },
-          }}
-        />
-      </>
-    )
-  }
+  if (!hasGeojson || !geojsonData) return null
 
   return (
-    <Marker
-      position={geoData.coordinates}
-      icon={icon}
-      eventHandlers={{
-        click: onClick,
-        mouseover: () => onHover(project),
-        mouseout: () => onHover(null),
-      }}
-    />
+    <>
+      {/* Invisible thick trace for easier clicking */}
+      <GeoJSON
+        key={`${project.id}-hitbox-${selectedPeriod}-${isActive}`}
+        data={geojsonData}
+        style={() => ({
+          color: 'transparent',
+          weight: 30,
+          opacity: 0,
+          fillOpacity: 0,
+        })}
+        eventHandlers={{
+          click: (e) => {
+            L.DomEvent.stopPropagation(e)
+            onClick()
+          },
+          mouseover: () => onHover(project),
+          mouseout: () => onHover(null),
+        }}
+      />
+      {/* Glow effect for selected lines */}
+      {(selectedPeriod || isActive) && (
+        <GeoJSON
+          key={`${project.id}-glow-${selectedPeriod}-${isActive}`}
+          data={geojsonData}
+          style={() => ({
+            color: color,
+            weight: isActive ? 20 : 16,
+            opacity: 0.3,
+            fillOpacity: 0,
+          })}
+        />
+      )}
+      <GeoJSON
+        key={`${project.id}-${selectedPeriod}-${isActive}`}
+        data={geojsonData}
+        style={getLineStyle}
+        eventHandlers={{
+          click: (e) => {
+            L.DomEvent.stopPropagation(e)
+            onClick()
+          },
+          mouseover: (e) => {
+            const layer = e.target
+            layer.setStyle({
+              weight: isActive ? 12 : 10,
+              opacity: 1,
+            })
+            onHover(project)
+          },
+          mouseout: (e) => {
+            const layer = e.target
+            layer.setStyle(getLineStyle())
+            onHover(null)
+          },
+        }}
+      />
+    </>
   )
 }
 
