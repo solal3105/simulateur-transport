@@ -185,7 +185,7 @@ export function IntroScreen() {
   const [mockBudget, setMockBudget] = useState({ m1: 2000, m2: 2000 })
   const [showFloatingCTA, setShowFloatingCTA] = useState(true)
   const [showEmail, setShowEmail] = useState(false)
-  const [showLFIWarning, setShowLFIWarning] = useState(false)
+  const [showLFIModal, setShowLFIModal] = useState(false)
   const footerRef = useRef<HTMLElement>(null)
   
   // 3 tutorial projects - real projects from the data
@@ -549,11 +549,7 @@ export function IntroScreen() {
                           ((party.financingLevers.tarifAbonnements || 0) * 12 * 2) +
                           ((party.financingLevers.tarifTickets || 0) * 8 * 2)
                         
-                        const versementMobiliteRevenue = party.financingLevers.versementMobilite 
-                          ? (party.financingLevers.versementMobilite === 25 ? 700 * 2 : 
-                             party.financingLevers.versementMobilite === 50 ? 1400 * 2 : 
-                             party.financingLevers.versementMobilite === -25 ? -700 * 2 : 0)
-                          : 0
+                        const versementMobiliteRevenue = (party.financingLevers.versementMobilite || 0) * 28 * 2
                         
                         const tva55Revenue = isLeverActive(party.financingLevers.tva55 as any) ? 96 * 2 : 0
                         
@@ -578,7 +574,7 @@ export function IntroScreen() {
                             transition={{ delay: index * 0.1 }}
                             onClick={() => {
                               if (party.id === 'lfi') {
-                                setShowLFIWarning(true)
+                                setShowLFIModal(true)
                               } else {
                                 applyPartyPreselection(party.id)
                                 handleStart()
@@ -617,12 +613,6 @@ export function IntroScreen() {
                                 <h3 className="text-white font-bold text-base leading-tight">
                                   {party.shortName}
                                 </h3>
-                                {party.id === 'lfi' && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <AlertCircle className="w-3 h-3 text-orange-400" />
-                                    <span className="text-orange-400 text-[10px] font-medium">En construction</span>
-                                  </div>
-                                )}
                               </div>
                             </div>
                             
@@ -643,12 +633,18 @@ export function IntroScreen() {
                             </div>
                             
                             {/* Social policies */}
-                            {(levers.gratuiteTotale || levers.gratuiteJeunesAbonnes || levers.metro24hWeekend || levers.electrificationBus || levers.entretienBus) && (
+                            {(levers.gratuiteTotale || levers.gratuiteMoins25ans || levers.gratuiteJeunesAbonnes || levers.metro24hWeekend || levers.electrificationBus || levers.entretienBus) && (
                               <div className="space-y-1.5 mb-4 pb-4 border-b border-white/10">
                                 {levers.gratuiteTotale && isLeverActive(levers.gratuiteTotale as any) && (
                                   <div className="flex items-center gap-1.5 text-purple-300 text-xs">
                                     <span>🎫</span>
                                     <span>Gratuité totale</span>
+                                  </div>
+                                )}
+                                {levers.gratuiteMoins25ans && isLeverActive(levers.gratuiteMoins25ans as any) && (
+                                  <div className="flex items-center gap-1.5 text-purple-300 text-xs">
+                                    <span>🎓</span>
+                                    <span>Gratuité -25 ans</span>
                                   </div>
                                 )}
                                 {levers.gratuiteJeunesAbonnes && isLeverActive(levers.gratuiteJeunesAbonnes as any) && (
@@ -1107,63 +1103,81 @@ export function IntroScreen() {
         </AnimatePresence>
       </div>
 
-      {/* Modale de warning LFI */}
+      {/* Modale explicative LFI */}
       <AnimatePresence>
-        {showLFIWarning && (
+        {showLFIModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowLFIWarning(false)}
+            className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => setShowLFIModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-gray-900 to-gray-800 border border-orange-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl"
             >
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-6 h-6 text-orange-400" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">Programme en construction</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
-                    Le programme de <strong className="text-purple-400">La France Insoumise</strong> est encore en cours d&apos;élaboration. Les données présentées ne sont pas exhaustives et peuvent évoluer.
-                  </p>
-                  <p className="text-orange-400 text-sm mt-3 font-medium">
-                    ⚠️ Prenez ces informations avec précaution.
-                  </p>
-                  <a 
-                    href="https://actu.fr/auvergne-rhone-alpes/lyon_69123/lyon-lfi-a-designe-son-candidat-pour-la-metropole-la-gratuite-des-tcl-pour-tous-promise_63744228.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 text-xs mt-3 inline-flex items-center gap-1 underline"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Source : Article Actu.fr
-                  </a>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Programme LFI - Vision et réalité</h3>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-purple-50 dark:bg-purple-500/10 rounded-lg p-4 border border-purple-200 dark:border-purple-500/20">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">🎯 Vision politique de long terme</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                        <strong className="text-purple-600 dark:text-purple-400">La France Insoumise</strong> affiche une vision de long terme : <strong>aller vers la gratuité totale des transports</strong>.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-4 border border-gray-200 dark:border-white/10">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">⚠️ Contraintes actuelles</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed mb-2">
+                        En l&apos;état actuel (cadre légal + ressources d&apos;une métropole), <strong className="text-gray-900 dark:text-white">une gratuité totale n&apos;est pas finançable</strong> sans leviers supplémentaires, notamment nationaux.
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">
+                        LFI souhaite donc une <strong className="text-gray-900 dark:text-white">intervention de l&apos;État ou une réforme des règles de financement</strong> (par exemple sur le versement mobilité ou d&apos;autres mécanismes).
+                      </p>
+                    </div>
+                    
+                    <div className="bg-green-50 dark:bg-green-500/10 rounded-lg p-4 border border-green-200 dark:border-green-500/20">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">✅ Programme présenté ici</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed mb-2">
+                        Ce scénario est <strong className="text-gray-900 dark:text-white">applicable dans le cadre actuel de la loi</strong>, avec uniquement la <strong>gratuité pour les moins de 25 ans</strong>.
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed italic">
+                        Programme établi en concertation avec l&apos;équipe de campagne LFI.
+                      </p>
+                    </div>
+                    
+                    <p className="text-orange-600 dark:text-orange-300 text-xs font-medium leading-relaxed">
+                      💡 <strong>Important :</strong> L&apos;objectif politique revendiqué reste la gratuité totale, mais il dépend de décisions hors compétence de la métropole.
+                    </p>
+                  </div>
                 </div>
               </div>
               
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={() => setShowLFIWarning(false)}
-                  className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium transition-colors"
+                  onClick={() => setShowLFIModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl font-medium transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={() => {
-                    setShowLFIWarning(false)
+                    setShowLFIModal(false)
                     applyPartyPreselection('lfi')
                     handleStart()
                   }}
                   className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
                 >
-                  Continuer
+                  Charger le programme
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

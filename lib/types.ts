@@ -53,7 +53,7 @@ export interface FinancingLevers {
   metro24hWeekend: FinancingLeverPeriod // Métro 24h/24 les weekends
   tarifAbonnements: number
   tarifTickets: number
-  versementMobilite: -25 | 0 | 25 | 50
+  versementMobilite: number // -100 to 100
   tva55: FinancingLeverPeriod
   electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
   entretienBus: MandatPeriod // Entretien et renouvellement de la flotte de bus - 800M€ total

@@ -245,12 +245,7 @@ export const FINANCING_IMPACTS = {
   metro24hWeekend: -24, // 24M€/mandat
   tarifAbonnementsPerPercent: 12,
   tarifTicketsPerPercent: 8,
-  versementMobilite: {
-    '-25': -700,
-    '0': 0,
-    '25': 700,
-    '50': 1400,
-  },
+  versementMobilitePerPercent: 28, // 28M€ per 1% change
   tva55: 96,
   electrificationBus: -460, // Coût de conversion de la flotte
 }

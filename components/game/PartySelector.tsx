@@ -5,7 +5,8 @@ import { useState } from 'react'
 import { useGameStore } from '@/lib/gameStore'
 import { POLITICAL_PARTIES } from '@/lib/politicalParties'
 import { cn } from '@/lib/utils'
-import { ChevronDown, Vote, X, Check } from 'lucide-react'
+import { ChevronDown, Vote, X, Check, AlertCircle, ArrowRight } from 'lucide-react'
+import { PartyVariantChoice } from './PartyVariantChoice'
 
 interface PartySelectorProps {
   compact?: boolean
@@ -20,12 +21,46 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
   const setIsOpen = onOpenChange || setInternalIsOpen
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [pendingPartyId, setPendingPartyId] = useState<string | null>(null)
+  const [showVariantModal, setShowVariantModal] = useState(false)
+  const [variantPartyId, setVariantPartyId] = useState<string | null>(null)
+  const [showLFIModal, setShowLFIModal] = useState(false)
   const { selectedPartyId, applyPartyPreselection, projectSelections } = useGameStore()
 
   const selectedParty = POLITICAL_PARTIES.find(p => p.id === selectedPartyId)
   const hasExistingSelections = projectSelections.length > 0
 
   const handlePartyClick = (partyId: string | null) => {
+    if (partyId === null) {
+      // Reset case
+      if (hasExistingSelections) {
+        setPendingPartyId(partyId)
+        setShowConfirmModal(true)
+        setIsOpen(false)
+      } else {
+        applyPartyPreselection(partyId)
+        setIsOpen(false)
+      }
+      return
+    }
+
+    // Check if LFI - show explanatory modal
+    if (partyId === 'lfi') {
+      setShowLFIModal(true)
+      setIsOpen(false)
+      return
+    }
+
+    const party = POLITICAL_PARTIES.find(p => p.id === partyId)
+    
+    // Check if party has variants
+    if (party?.variants && party.variants.length > 0) {
+      setVariantPartyId(partyId)
+      setShowVariantModal(true)
+      setIsOpen(false)
+      return
+    }
+
+    // Normal party selection
     if (hasExistingSelections && partyId !== selectedPartyId) {
       setPendingPartyId(partyId)
       setShowConfirmModal(true)
@@ -37,14 +72,39 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
   }
 
   const confirmPartyChange = () => {
-    applyPartyPreselection(pendingPartyId)
+    const partyId = pendingPartyId
     setShowConfirmModal(false)
     setPendingPartyId(null)
+    
+    // Check if this party has variants
+    if (partyId) {
+      const party = POLITICAL_PARTIES.find(p => p.id === partyId)
+      if (party?.variants && party.variants.length > 0) {
+        setVariantPartyId(partyId)
+        setShowVariantModal(true)
+        return
+      }
+    }
+    
+    applyPartyPreselection(partyId)
   }
 
   const cancelPartyChange = () => {
     setShowConfirmModal(false)
     setPendingPartyId(null)
+  }
+
+  const handleVariantSelect = (variantId: string) => {
+    if (variantPartyId) {
+      applyPartyPreselection(variantPartyId, variantId)
+    }
+    setShowVariantModal(false)
+    setVariantPartyId(null)
+  }
+
+  const handleVariantClose = () => {
+    setShowVariantModal(false)
+    setVariantPartyId(null)
   }
 
   if (compact) {
@@ -186,6 +246,109 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
                     className="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-all"
                   >
                     Confirmer
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Variant Choice Modal */}
+        {variantPartyId && (() => {
+          const party = POLITICAL_PARTIES.find(p => p.id === variantPartyId)
+          return party?.variants ? (
+            <PartyVariantChoice
+              isOpen={showVariantModal}
+              onClose={handleVariantClose}
+              variants={party.variants}
+              partyName={party.name}
+              partyColor={party.color}
+              partyEmoji={party.emoji}
+              onSelectVariant={handleVariantSelect}
+            />
+          ) : null
+        })()}
+
+        {/* LFI Explanatory Modal */}
+        <AnimatePresence>
+          {showLFIModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+              onClick={() => setShowLFIModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Programme LFI - Vision et réalité</h3>
+                    
+                    <div className="space-y-3 mb-4">
+                      <div className="bg-purple-50 dark:bg-purple-500/10 rounded-lg p-4 border border-purple-200 dark:border-purple-500/20">
+                        <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">🎯 Vision politique de long terme</p>
+                        <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                          <strong className="text-purple-600 dark:text-purple-400">La France Insoumise</strong> affiche une vision de long terme : <strong>aller vers la gratuité totale des transports</strong>.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-4 border border-gray-200 dark:border-white/10">
+                        <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">⚠️ Contraintes actuelles</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed mb-2">
+                          En l&apos;état actuel (cadre légal + ressources d&apos;une métropole), <strong className="text-gray-900 dark:text-white">une gratuité totale n&apos;est pas finançable</strong> sans leviers supplémentaires, notamment nationaux.
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">
+                          LFI souhaite donc une <strong className="text-gray-900 dark:text-white">intervention de l&apos;État ou une réforme des règles de financement</strong> (par exemple sur le versement mobilité ou d&apos;autres mécanismes).
+                        </p>
+                      </div>
+                      
+                      <div className="bg-green-50 dark:bg-green-500/10 rounded-lg p-4 border border-green-200 dark:border-green-500/20">
+                        <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">✅ Programme présenté ici</p>
+                        <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed mb-2">
+                          Ce scénario est <strong className="text-gray-900 dark:text-white">applicable dans le cadre actuel de la loi</strong>, avec uniquement la <strong>gratuité pour les moins de 25 ans</strong>.
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed italic">
+                          Programme établi en concertation avec l&apos;équipe de campagne LFI.
+                        </p>
+                      </div>
+                      
+                      <p className="text-orange-600 dark:text-orange-300 text-xs font-medium leading-relaxed">
+                        💡 <strong>Important :</strong> L&apos;objectif politique revendiqué reste la gratuité totale, mais il dépend de décisions hors compétence de la métropole.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowLFIModal(false)}
+                    className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl font-medium transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLFIModal(false)
+                      if (hasExistingSelections && selectedPartyId !== 'lfi') {
+                        setPendingPartyId('lfi')
+                        setShowConfirmModal(true)
+                      } else {
+                        applyPartyPreselection('lfi')
+                      }
+                    }}
+                    className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                  >
+                    Charger le programme
+                    <Check className="w-4 h-4" />
                   </button>
                 </div>
               </motion.div>
@@ -344,6 +507,109 @@ export function PartySelector({ compact = false, desktopStyle = false, isOpen: c
                   className="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-all"
                 >
                   Confirmer
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Variant Choice Modal */}
+      {variantPartyId && (() => {
+        const party = POLITICAL_PARTIES.find(p => p.id === variantPartyId)
+        return party?.variants ? (
+          <PartyVariantChoice
+            isOpen={showVariantModal}
+            onClose={handleVariantClose}
+            variants={party.variants}
+            partyName={party.name}
+            partyColor={party.color}
+            partyEmoji={party.emoji}
+            onSelectVariant={handleVariantSelect}
+          />
+        ) : null
+      })()}
+
+      {/* LFI Explanatory Modal */}
+      <AnimatePresence>
+        {showLFIModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => setShowLFIModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <Vote className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Programme LFI - Vision et réalité</h3>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-purple-50 dark:bg-purple-500/10 rounded-lg p-4 border border-purple-200 dark:border-purple-500/20">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">🎯 Vision politique de long terme</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                        <strong className="text-purple-600 dark:text-purple-400">La France Insoumise</strong> affiche une vision de long terme : <strong>aller vers la gratuité totale des transports</strong>.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-4 border border-gray-200 dark:border-white/10">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">⚠️ Contraintes actuelles</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed mb-2">
+                        En l&apos;état actuel (cadre légal + ressources d&apos;une métropole), <strong className="text-gray-900 dark:text-white">une gratuité totale n&apos;est pas finançable</strong> sans leviers supplémentaires, notamment nationaux.
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">
+                        LFI souhaite donc une <strong className="text-gray-900 dark:text-white">intervention de l&apos;État ou une réforme des règles de financement</strong> (par exemple sur le versement mobilité ou d&apos;autres mécanismes).
+                      </p>
+                    </div>
+                    
+                    <div className="bg-green-50 dark:bg-green-500/10 rounded-lg p-4 border border-green-200 dark:border-green-500/20">
+                      <p className="text-gray-900 dark:text-white text-sm font-semibold mb-2">✅ Programme présenté ici</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed mb-2">
+                        Ce scénario est <strong className="text-gray-900 dark:text-white">applicable dans le cadre actuel de la loi</strong>, avec uniquement la <strong>gratuité pour les moins de 25 ans</strong>.
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed italic">
+                        Programme établi en concertation avec l&apos;équipe de campagne LFI.
+                      </p>
+                    </div>
+                    
+                    <p className="text-orange-600 dark:text-orange-300 text-xs font-medium leading-relaxed">
+                      💡 <strong>Important :</strong> L&apos;objectif politique revendiqué reste la gratuité totale, mais il dépend de décisions hors compétence de la métropole.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowLFIModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl font-medium transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLFIModal(false)
+                    if (hasExistingSelections && selectedPartyId !== 'lfi') {
+                      setPendingPartyId('lfi')
+                      setShowConfirmModal(true)
+                    } else {
+                      applyPartyPreselection('lfi')
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                  Charger le programme
+                  <Check className="w-4 h-4" />
                 </button>
               </div>
             </motion.div>

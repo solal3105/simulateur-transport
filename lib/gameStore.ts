@@ -58,7 +58,7 @@ function calculateLeverImpactByMandate(levers: FinancingLevers): { m1: number; m
   }
 
   // Versement mobilité (applies to both mandates)
-  const vmImpact = FINANCING_IMPACTS.versementMobilite[levers.versementMobilite.toString() as keyof typeof FINANCING_IMPACTS.versementMobilite]
+  const vmImpact = levers.versementMobilite * FINANCING_IMPACTS.versementMobilitePerPercent
   m1Impact += vmImpact
   m2Impact += vmImpact
 
@@ -104,6 +104,7 @@ interface GameState {
   animatingBudget: boolean
   lastAction: string | null
   selectedPartyId: string | null
+  selectedPartyVariantId: string | null
   
   // Actions
   setPhase: (phase: GamePhase) => void
@@ -124,7 +125,7 @@ interface GameState {
   setAnimatingBudget: (val: boolean) => void
   setLastAction: (action: string | null) => void
   setBusOfferConfirmed: (val: boolean) => void
-  applyPartyPreselection: (partyId: string | null) => void
+  applyPartyPreselection: (partyId: string | null, variantId?: string | null) => void
 }
 
 const initialFinancingLevers: FinancingLevers = {
@@ -148,6 +149,7 @@ export const useGameStore = create<GameState>()(
       onboardingStep: 0,
       totalOnboardingSteps: 5,
       score: 0,
+      selectedPartyVariantId: null,
       projectSelections: [],
       financingLevers: initialFinancingLevers,
       busOfferConfirmed: false,
@@ -500,11 +502,12 @@ export const useGameStore = create<GameState>()(
       setLastAction: (action) => set({ lastAction: action }),
       setBusOfferConfirmed: (val) => set({ busOfferConfirmed: val }),
 
-      applyPartyPreselection: (partyId) => {
+      applyPartyPreselection: (partyId, variantId) => {
         if (partyId === null) {
           // Reset to empty state
           set({
             selectedPartyId: null,
+            selectedPartyVariantId: null,
             projectSelections: [],
             financingLevers: initialFinancingLevers,
             busOfferConfirmed: false,
@@ -514,14 +517,32 @@ export const useGameStore = create<GameState>()(
         } else {
           const party = POLITICAL_PARTIES.find(p => p.id === partyId)
           if (party) {
-            set({
-              selectedPartyId: partyId,
-              projectSelections: [...party.projectSelections],
-              financingLevers: { ...initialFinancingLevers, ...party.financingLevers },
-              busOfferConfirmed: party.financingLevers.entretienBus !== undefined,
-              lastAction: `${party.emoji} Programme ${party.shortName} appliqué`,
-              animatingBudget: true,
-            })
+            // If party has variants and a variantId is provided, use the variant
+            if (party.variants && variantId) {
+              const variant = party.variants.find(v => v.id === variantId)
+              if (variant) {
+                set({
+                  selectedPartyId: partyId,
+                  selectedPartyVariantId: variantId,
+                  projectSelections: [...variant.projectSelections],
+                  financingLevers: { ...initialFinancingLevers, ...variant.financingLevers },
+                  busOfferConfirmed: variant.financingLevers.entretienBus !== undefined,
+                  lastAction: `${party.emoji} ${party.shortName} - ${variant.name}`,
+                  animatingBudget: true,
+                })
+              }
+            } else {
+              // Use default party configuration
+              set({
+                selectedPartyId: partyId,
+                selectedPartyVariantId: null,
+                projectSelections: [...party.projectSelections],
+                financingLevers: { ...initialFinancingLevers, ...party.financingLevers },
+                busOfferConfirmed: party.financingLevers.entretienBus !== undefined,
+                lastAction: `${party.emoji} Programme ${party.shortName} appliqué`,
+                animatingBudget: true,
+              })
+            }
           }
         }
         setTimeout(() => set({ animatingBudget: false }), 600)
@@ -534,6 +555,7 @@ export const useGameStore = create<GameState>()(
         financingLevers: state.financingLevers,
         busOfferConfirmed: state.busOfferConfirmed,
         selectedPartyId: state.selectedPartyId,
+        selectedPartyVariantId: state.selectedPartyVariantId,
       }),
     }
   )

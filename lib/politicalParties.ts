@@ -1,5 +1,13 @@
 import { ProjectSelection, FinancingLevers, MandatPeriod } from './types'
 
+export interface PartyVariant {
+  id: string
+  name: string
+  description: string
+  projectSelections: ProjectSelection[]
+  financingLevers: Partial<FinancingLevers>
+}
+
 export interface PoliticalParty {
   id: string
   name: string
@@ -9,6 +17,7 @@ export interface PoliticalParty {
   description: string
   projectSelections: ProjectSelection[]
   financingLevers: Partial<FinancingLevers>
+  variants?: PartyVariant[]
 }
 
 export const POLITICAL_PARTIES: PoliticalParty[] = [
@@ -85,17 +94,20 @@ export const POLITICAL_PARTIES: PoliticalParty[] = [
     shortName: 'LFI',
     color: '#A855F7', // purple-500
     emoji: '🟣',
-    description: 'Programme axé sur la gratuité totale des transports.',
+    description: 'Programme de La France Insoumise pour les transports lyonnais.',
     projectSelections: [
-      // TEOL (2032) - M2
       { projectId: 'teol', period: 'M1+M2' },
-      // Finir T9 - T10 (2027) - M1
       { projectId: 't9-final', period: 'M1' },
       { projectId: 't10-final', period: 'M1' },
+      { projectId: 't8', period: 'M1+M2' },
+      { projectId: 'modern-a', period: 'M1+M2' },
+      { projectId: 'modern-c', period: 'M1+M2' },
+      { projectId: 'modern-d', period: 'M1+M2' },
+      { projectId: 'ligne-du-nord', period: 'M1+M2', selectedUpgradeOptionId: 'tram-surface' },
     ],
     financingLevers: {
-      // Gratuité Totale (2027)
-      gratuiteTotale: true,
+      entretienBus: 'M1+M2',
+      gratuiteMoins25ans: true,
     },
   },
   {
