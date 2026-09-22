@@ -122,7 +122,11 @@ export function Liste() {
             <span role="cell" className="flex min-w-0 items-center gap-3">
               <span
                 className="grid size-10 shrink-0 place-items-center rounded-xl"
-                style={c ? { background: couleurProjet(p.id, c), color: '#fff' } : { boxShadow: `inset 0 0 0 2px ${couleurProjet(p.id)}`, color: couleurProjet(p.id) }}
+                style={
+                  c
+                    ? { background: couleurProjet(p.id, c), color: '#fff' }
+                    : { boxShadow: `inset 0 0 0 2px ${couleurProjet(p.id)}`, color: couleurProjet(p.id) }
+                }
               >
                 <Icone nom={c ? 'valider' : ICONE_MODE[r.mode]!} taille={19} epaisseur={c ? 2.8 : 2} />
               </span>

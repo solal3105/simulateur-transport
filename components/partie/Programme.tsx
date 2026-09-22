@@ -160,7 +160,7 @@ export function BarreBas() {
         genre="sable"
         iconeAGauche="pieces"
         taille="petit"
-        className="min-h-13 justify-start"
+        className="min-h-13 justify-start px-3.5! text-[13.5px]! whitespace-nowrap"
         onClick={() => ouvrir({ type: 'leviers' })}
       >
         Trouver de l’argent
@@ -169,7 +169,7 @@ export function BarreBas() {
         genre="rouge"
         icone="drapeau"
         taille="petit"
-        className="min-h-13"
+        className="min-h-13 text-[13.5px]! whitespace-nowrap"
         data-guide={guide ? '' : undefined}
         onClick={() => (bilan.reste < 0 ? ouvrir({ type: 'leviers' }) : finirMandat())}
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}

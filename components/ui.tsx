@@ -167,7 +167,11 @@ export function Pastille({
 }) {
   return (
     <span
-      style={couleur ? { color: `color-mix(in srgb, ${couleur} 72%, black)`, background: `color-mix(in srgb, ${couleur} 12%, white)` } : undefined}
+      style={
+        couleur
+          ? { color: `color-mix(in srgb, ${couleur} 72%, black)`, background: `color-mix(in srgb, ${couleur} 12%, white)` }
+          : undefined
+      }
       className={clsx(
         'inline-flex items-center gap-1.5 self-start rounded-full bg-rouge-pale py-1 pr-2.5 pl-2 text-xs font-extrabold text-rouge-fonce',
         className,

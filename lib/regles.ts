@@ -128,7 +128,14 @@ export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouvert
     const p = PROJETS.get(c.id)
     if (!p) continue
     const r = resoudre(p, c)
-    liste.push({ id: p.id, nom: p.nom, annee: ouverture(c.mandat, r.duree), voyageurs: r.voyageurs, joueur: false, varianteId: c.varianteId })
+    liste.push({
+      id: p.id,
+      nom: p.nom,
+      annee: ouverture(c.mandat, r.duree),
+      voyageurs: r.voyageurs,
+      joueur: false,
+      varianteId: c.varianteId,
+    })
   }
   for (const l of lignes) {
     liste.push({

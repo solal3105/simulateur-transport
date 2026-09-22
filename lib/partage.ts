@@ -68,12 +68,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
   }
   const s = echelle / 2200
   for (const f of donnees.fond.features) {
-    const couleur =
-      f.properties.kind === 'fleuve'
-        ? '#cfe2ec'
-        : f.properties.kind === 'tram'
-          ? '#e1ddd7'
-          : '#b9b2a8'
+    const couleur = f.properties.kind === 'fleuve' ? '#cfe2ec' : f.properties.kind === 'tram' ? '#e1ddd7' : '#b9b2a8'
     for (const part of f.geometry.coordinates) trait(part, couleur, (f.properties.kind === 'fleuve' ? 9 : 2.5) * s)
   }
   for (const f of donnees.projets.features) {

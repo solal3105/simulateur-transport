@@ -307,7 +307,8 @@ export function MaLigne() {
   // Une ligne porte le nom de ses deux terminus, comme sur le réseau.
   // Tant que le joueur ne l'a pas renommée, la ligne porte le nom de ses terminus.
   const [nomSaisi, setNom] = useState<string | null>(null)
-  const nom = nomSaisi ?? (noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+  const nom =
+    nomSaisi ?? (noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
   const reste = bilan.reste

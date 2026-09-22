@@ -191,8 +191,8 @@ export function Bilan() {
 
         {resultat.nonDepense > 0 ? (
           <p className="text-[14.5px] leading-relaxed text-gris">
-            Il vous reste {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un projet de plus, ou un premier
-            chantier pour le mandat suivant.
+            Il vous reste {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un projet de plus, ou un
+            premier chantier pour le mandat suivant.
           </p>
         ) : null}
 
