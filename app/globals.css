@@ -1,186 +1,93 @@
 @import 'tailwindcss';
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
 @theme {
-  /* Le panneau. Un aplat unique porte tout le châssis. */
-  --color-signal: #a3d900;
-  --color-signal-lift: #b6ec12;
-  --color-signal-press: #8fbe00;
-  --color-signal-rule: #7aa300;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 
-  /* Le noir signalétique, en typographie comme en plaque encastrée. */
-  --color-ink: #0b0e07;
-  --color-ink-lift: #171c10;
-  --color-ink-rule: #2f3822;
+  --color-rouge: #e3051b;
+  --color-rouge-fonce: #b5000f;
+  --color-rouge-pale: #fdebed;
+  --color-encre: #1b1b1f;
+  --color-gris: #55555d;
+  --color-muet: #85858e;
+  --color-trait: #e7e4e0;
+  --color-sable: #f5f3f0;
 
-  /* La plaque du plan, encastrée dans le panneau. */
-  --color-plate: #060803;
+  --color-metro-a: #d8336f;
+  --color-metro-b: #1d6fb8;
+  --color-metro-c: #f29a1f;
+  --color-metro-d: #2e9e4f;
 
-  --color-chalk: #f2f5ea;
-  --color-chalk-dim: #99a489;
-  --color-olive: #3e4d0b;
-  --color-alert: #ff5a1f;
-
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-martian), ui-monospace, monospace;
-
-  --radius-plate: 2px;
-  --radius-inset: 2px;
-
-  --ease-sign: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-flotte: 0 4px 16px rgb(0 0 0 / 0.12);
+  --shadow-panneau: 0 -8px 30px rgb(0 0 0 / 0.14);
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-    --panel-gutter: 10px;
-  }
-
-  @media (min-width: 900px) {
-    :root {
-      --panel-gutter: 14px;
-    }
-  }
-
   html,
   body {
     height: 100%;
   }
-
   body {
-    background: var(--color-signal);
-    color: var(--color-ink);
-    font-family: var(--font-sans);
-    font-feature-settings: 'tnum' 0;
-    -webkit-font-smoothing: antialiased;
-    overscroll-behavior: none;
-  }
-
-  /* Les surfaces que je ne dessine pas portent quand même le système. */
-  ::selection {
-    background: var(--color-ink);
-    color: var(--color-signal);
-  }
-
-  .on-plate ::selection {
-    background: var(--color-signal);
-    color: var(--color-ink);
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--color-ink);
-    outline-offset: 2px;
-  }
-
-  .on-plate :focus-visible {
-    outline-color: var(--color-signal);
-  }
-
-  input,
-  button,
-  select {
-    caret-color: currentColor;
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-ink-rule) transparent;
-  }
-
-  .on-panel * {
-    scrollbar-color: var(--color-signal-rule) transparent;
-  }
-
-  *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background: var(--color-ink-rule);
-  }
-
-  .on-panel *::-webkit-scrollbar-thumb {
-    background: var(--color-signal-rule);
-  }
-}
-
-@layer utilities {
-  /* Les chiffres d'un panneau s'alignent en colonne, toujours. */
-  .lining {
-    font-variant-numeric: tabular-nums lining-nums;
+    @apply bg-white text-encre antialiased;
     font-feature-settings: 'tnum' 1;
   }
-
-  /* La chasse élargie d'Archivo, réservée aux nombres monumentaux. */
-  .wide {
-    font-variation-settings: 'wdth' 112;
+  button {
+    cursor: pointer;
   }
-
-  .narrow {
-    font-variation-settings: 'wdth' 82;
-  }
-
-  /* Hachure de dépassement : lisible sans la couleur. */
-  .hatched {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      var(--color-alert) 0 2px,
-      transparent 2px 9px
-    );
-  }
-
-  .sign-label {
-    font-size: 0.6875rem;
-    line-height: 1;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    scrollbar-width: none;
+  :focus-visible {
+    outline: 3px solid var(--color-encre);
+    outline-offset: 2px;
   }
 }
 
-/* MapLibre arrive avec ses propres surfaces : elles rejoignent le système. */
+@utility chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Étiquettes de prix posées sur la carte. */
+.etiquette {
+  font: 800 12px/1 var(--font-figtree), sans-serif;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-encre);
+  box-shadow: inset 0 0 0 1.5px var(--color-encre);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.etiquette[data-etat='construit'] {
+  background: var(--color-rouge);
+  color: #fff;
+  box-shadow: none;
+}
+.etiquette[data-etat='choisi'] {
+  background: var(--color-encre);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgb(227 5 27 / 0.25);
+}
+.etiquette[data-etat='indisponible'] {
+  opacity: 0.45;
+}
+.etiquette[data-etat='chantier'] {
+  color: var(--color-rouge);
+  box-shadow: inset 0 0 0 1.5px var(--color-rouge);
+}
+.etiquette:hover {
+  transform: scale(1.06);
+}
+.lieu {
+  font: 800 10.5px/1 var(--font-figtree), sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muet);
+  text-shadow: 0 0 3px var(--color-sable), 0 0 3px var(--color-sable), 0 0 3px var(--color-sable);
+  pointer-events: none;
+}
+.lieu[data-grand='1'] {
+  font-size: 13px;
+}
 .maplibregl-ctrl-attrib {
-  background: var(--color-ink) !important;
-  color: var(--color-chalk-dim) !important;
-  font-family: var(--font-sans) !important;
-  font-size: 10px !important;
-  line-height: 1.4 !important;
-  padding: 3px 7px !important;
-  border-radius: 0 !important;
-}
-
-.maplibregl-ctrl-attrib a {
-  color: var(--color-chalk-dim) !important;
-  text-decoration: none;
-}
-
-.maplibregl-ctrl-attrib a:hover {
-  color: var(--color-signal) !important;
-}
-
-.maplibregl-ctrl-attrib-button {
-  display: none !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-  inset-inline-end: 0;
-  inset-block-end: 0;
-}
-
-.maplibregl-canvas:focus {
-  outline: none;
+  font-size: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -188,7 +95,6 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

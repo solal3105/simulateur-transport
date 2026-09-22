@@ -1,61 +1,33 @@
-# Simulateur Transport TCL Lyon
+# Simulateur Transport TCL
 
-Un jeu d'arbitrage budgétaire sur les transports de la Métropole de Lyon. On dispose de deux mandats, 2026-2032 et 2032-2038, d'environ 2 000 M€ d'investissement par mandat, et d'un catalogue de 22 ouvrages réels dont le total dépasse de très loin ce que deux enveloppes permettent de payer. Le joueur inscrit chaque ouvrage sur une phase, ajuste les leviers de financement, et voit le réseau qu'il laisse en 2038.
+Un jeu pour comprendre l'arbitrage budgétaire des transports lyonnais. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
-Les coûts, les gains de fréquentation et les durées de chantier viennent de documents publics. Ce sont des estimations, pas des devis signés, et le produit le dit à l'écran.
+## Lancer le site
 
-## Ce que le simulateur contient
-
-Le catalogue compte 22 ouvrages, du métro à la navette fluviale. Trois d'entre eux ont des variantes exclusives qui changent le coût, la fréquentation et la durée de chantier : la Ligne du Nord se fait en tram de surface, en tram enterré ou en métro ; la Ligne de l'Ouest en bus à haut niveau de service ou en tramway ; la Rive Droite pareillement. Le tramway de l'ouest peut être enterré en totalité pour 300 M€ de plus. Deux ouvrages dépendent d'un autre : le métro E vers Part-Dieu exige la section Bellecour, l'extension du tramway de l'ouest exige le tramway de l'ouest.
-
-Les leviers de financement modifient l'enveloppe de chaque phase : gratuité totale ou ciblée, tarification sociale, métro de nuit, prix des abonnements et des tickets, versement mobilité, taux de TVA. Deux d'entre eux, le versement mobilité et la TVA, ne relèvent pas de la Métropole mais d'une loi nationale, et l'interface le signale par un pictogramme.
-
-L'entretien du parc de bus et son électrification forment un poste distinct, réparti lui aussi entre les phases.
-
-Chaque ouvrage porte une durée de chantier, ce qui donne une année de mise en service et un calendrier. Un chantier financé sur les deux mandats peut très bien n'ouvrir qu'après 2038, et le tableau le dit en orange.
-
-## Stack
-
-Next.js 15 en App Router, React 19, TypeScript strict, Tailwind CSS v4, MapLibre GL JS pour le plan en WebGL, Zustand pour l'état, Motion pour les animations. Le fond de carte vient de CARTO, gratuit et sans clé d'API, et il est repeint dans la palette du produit avant d'être remis à la carte.
-
-## Lancer le projet
+Il faut Node.js 20.9 ou plus récent.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Le simulateur s'ouvre sur http://localhost:3000.
+Le site s'ouvre sur http://localhost:3000. `npm run build` prépare la version de production, que Netlify publie à chaque envoi sur la branche principale.
 
-```bash
-npm run build      # compilation de production
-npm run typecheck  # vérification des types sans émission
-npm run lint
-```
+## Organisation du code
 
-## Où vivent les données
+`app/` contient la page et le style global. `components/` contient l'interface : la carte (`carte/`), l'écran de jeu (`partie/`), les panneaux qui s'ouvrent au-dessus de la carte (`panneaux/`) et les écrans d'accueil, de fin de mandat et de bilan (`ecrans/`). `lib/` contient la logique sans interface : le catalogue des projets, les règles de budget, le modèle de fréquentation des lignes tracées, l'état de la partie et le dessin de l'image de partage.
 
-Tout le contenu métier tient dans trois fichiers :
+## Les données
 
-- `lib/projects.ts` porte les ouvrages, leurs variantes, les programmes du parc de bus, les leviers de financement et les enveloppes. C'est le seul fichier à toucher pour changer un coût ou ajouter un projet.
-- `lib/budget.ts` contient le calcul, sans aucune dépendance à React : répartition par phase, effet des leviers, bilan, années de mise en service.
-- `lib/types.ts` décrit le modèle.
+Les chiffres des projets (coût, voyageurs, durée de chantier) sont dans `lib/catalogue.ts`. Les tracés sont dans `data/projets/`.
 
-Les tracés sont des fichiers GeoJSON dans `public/geojson/`. Ils sont fusionnés en un seul jeu de données servi à la carte, avec pour chaque ouvrage une ancre de cartouche et une emprise :
+Le fond de carte ne dépend d'aucun service extérieur. `scripts/fetch-osm.mjs` télécharge depuis OpenStreetMap le Rhône, la Saône et les lignes de métro et de tram actuelles, puis `npm run data` prépare les fichiers servis au navigateur dans `public/data/`. Les habitants et les emplois par carreau de 200 m viennent de l'INSEE ; leurs sources sont détaillées dans `data/insee/SOURCES.md`.
 
-```bash
-node scripts/build-geo.mjs
-```
+Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`. Le commentaire en tête du fichier explique la formule, son calage sur les lignes lyonnaises existantes et ses limites.
 
-À relancer après toute modification d'un tracé. La correspondance entre un identifiant d'ouvrage et son fichier se trouve en tête du script.
+## Adapter le simulateur à un autre réseau
 
-## Adapter à un autre réseau
-
-Remplacez le contenu de `lib/projects.ts` par vos ouvrages et vos leviers, déposez vos tracés dans `public/geojson/`, déclarez-les dans `scripts/build-geo.mjs`, puis ajustez l'emprise de départ dans `components/plan/basemap.ts`. Le reste de l'interface suit les données.
-
-## Design
-
-Le système visuel est décrit dans `DESIGN.md`, la vérité produit dans `PRODUCT.md`.
+Il suffit de remplacer le catalogue, les tracés, les extractions OpenStreetMap et les carreaux INSEE, puis de recaler le modèle de fréquentation sur les lignes du nouveau réseau.
 
 ## Licence
 

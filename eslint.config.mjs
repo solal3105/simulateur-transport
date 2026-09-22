@@ -1,10 +1,8 @@
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { FlatCompat } from '@eslint/eslintrc'
-
-const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta.url)) })
+import next from 'eslint-config-next'
 
 export default [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-  { ignores: ['.next/**', 'node_modules/**'] },
+  ...next,
+  // La détection automatique de la version de React ne fonctionne pas encore avec ESLint 10.
+  { settings: { react: { version: '19.3' } } },
+  { ignores: ['.next/**', 'data/**', 'public/**', 'next-env.d.ts'] },
 ]

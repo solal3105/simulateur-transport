@@ -14,3 +14,5 @@ tsconfig.tsbuildinfo
 .impeccable/review
 .impeccable/refs
 .impeccable/config.local.json
+data/osm/
+public/maplibre/

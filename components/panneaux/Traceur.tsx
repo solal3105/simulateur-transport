@@ -1,0 +1,226 @@
+'use client'
+
+import { clsx } from 'clsx'
+import { useMemo, useState } from 'react'
+
+import { useDonnees } from '@/lib/donnees'
+import { approx, km, n } from '@/lib/format'
+import { DUREE_CHANTIER, estimer, PRIX_KM } from '@/lib/modele'
+import { ouverture } from '@/lib/regles'
+import { useJeu } from '@/lib/store'
+import type { Estimation, ModeLigne } from '@/lib/types'
+
+import { useBilan } from '../partie/budget'
+import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
+import { Panneau } from './Panneau'
+
+const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; repere: string }[] = [
+  { id: 'tram', nom: 'Tramway', court: 'Tram', icone: 'tram', repere: 'Moyenne des T6 nord, T9 et T10, entre 32 et 37 M€ par km.' },
+  { id: 'bus', nom: 'Bus à haut niveau de service', court: 'Bus rapide', icone: 'bus', repere: 'Comme la ligne TB12 Part-Dieu - Sept Chemins, entre 12 et 17 M€ par km.' },
+  { id: 'metro', nom: 'Métro automatique', court: 'Métro', icone: 'metro', repere: 'Le prolongement du métro B à Saint-Genis-Laval a coûté environ 160 M€ par km.' },
+  { id: 'cable', nom: 'Téléphérique', court: 'Câble', icone: 'cable', repere: 'Comme Téléo à Toulouse ou le Câble C1 à Créteil, entre 27 et 31 M€ par km.' },
+]
+const NOM_MODE: Record<ModeLigne, string> = { tram: 'tramway', bus: 'bus rapide', metro: 'métro', cable: 'téléphérique' }
+
+export function useEstimation(): Estimation | null {
+  const donnees = useDonnees()
+  const brouillon = useJeu((s) => s.brouillon)
+  return useMemo(
+    () => (donnees && brouillon ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux) : null),
+    [donnees, brouillon],
+  )
+}
+
+function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {
+  return (
+    <div className="flex justify-between gap-3 border-b border-trait py-2 text-sm">
+      <span className="text-gris">{libelle}</span>
+      <span className="chiffres text-right font-extrabold">{valeur}</span>
+    </div>
+  )
+}
+
+function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: ModeLigne }) {
+  const cellule = (valeur: string, unite: string, legende: string, accent?: boolean) => (
+    <div className="flex flex-col gap-0.5">
+      <div className={clsx('flex items-baseline gap-1 whitespace-nowrap', accent && 'text-rouge')}>
+        <span className="chiffres text-xl font-black">{valeur}</span>
+        <span className="text-xs font-extrabold">{unite}</span>
+      </div>
+      <span className="text-xs font-semibold text-gris">{legende}</span>
+    </div>
+  )
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {cellule(km(e.km), 'km', 'de ligne')}
+      {cellule(String(arrets), '', arrets > 1 ? 'arrêts' : 'arrêt')}
+      {cellule(n(e.cout), 'M€', `à ${PRIX_KM[mode]} M€ / km`)}
+      {cellule(`~${approx(e.voyageurs)}`, '', 'voyageurs / jour', true)}
+    </div>
+  )
+}
+
+/** Le panneau affiché pendant qu'on pose les arrêts. */
+export function Traceur() {
+  const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir } = useJeu()
+  const bilan = useBilan()
+  const e = useEstimation()
+  if (!brouillon) return null
+  const arrets = brouillon.arrets.length
+  const pret = arrets >= 2 && e
+
+  return (
+    <Panneau
+      titre={`Tracer un ${NOM_MODE[brouillon.mode]}`}
+      onFermer={abandonnerTrace}
+      pied={
+        <div className="grid grid-cols-2 gap-2">
+          <Bouton genre="sable" iconeAGauche="annuler" taille="petit" className="min-h-13 justify-start" disabled={arrets === 0} onClick={retirerArret}>
+            Retirer l’arrêt
+          </Bouton>
+          <Bouton genre="rouge" icone="valider" taille="petit" className="min-h-13" disabled={!pret} onClick={() => ouvrir({ type: 'ligne' })}>
+            Terminer la ligne
+          </Bouton>
+        </div>
+      }
+    >
+      <fieldset className="flex flex-col gap-2">
+        <legend className="sr-only">Type de ligne</legend>
+        {/* Téléphone : une rangée compacte pour laisser la carte visible. */}
+        <div className="flex gap-1.5 lg:hidden">
+          {MODES.map((m) => (
+            <label
+              key={m.id}
+              className={clsx(
+                'flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full text-[13px] font-extrabold',
+                brouillon.mode === m.id ? 'bg-encre text-white' : 'bg-sable',
+              )}
+            >
+              <input type="radio" name="mode-court" className="sr-only" checked={brouillon.mode === m.id} onChange={() => changerMode(m.id)} />
+              {m.court}
+            </label>
+          ))}
+        </div>
+        {/* Ordinateur : le prix et sa référence. */}
+        {MODES.map((m) => (
+          <label
+            key={m.id}
+            className={clsx(
+              'hidden cursor-pointer items-start gap-3 rounded-2xl bg-white px-3.5 py-3 lg:flex',
+              brouillon.mode === m.id ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+            )}
+          >
+            <input type="radio" name="mode" className="sr-only" checked={brouillon.mode === m.id} onChange={() => changerMode(m.id)} />
+            <span className={clsx('grid size-9.5 shrink-0 place-items-center rounded-xl', brouillon.mode === m.id ? 'bg-rouge text-white' : 'bg-sable')}>
+              <Icone nom={m.icone} taille={20} />
+            </span>
+            <span className="flex flex-1 flex-col gap-0.5">
+              <span className="flex items-baseline justify-between gap-2">
+                <span className="text-[15px] font-extrabold">{m.nom}</span>
+                <span className="chiffres text-sm font-black whitespace-nowrap">{PRIX_KM[m.id]} M€ / km</span>
+              </span>
+              <span className="text-[12.5px] leading-snug text-gris">
+                {m.repere} Chantier d’environ {DUREE_CHANTIER[m.id]} ans.
+              </span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
+
+      {!pret ? (
+        <p className="flex items-start gap-2.5 rounded-2xl bg-encre px-4 py-3 text-sm leading-snug font-semibold text-white">
+          <Icone nom="main" taille={20} className="mt-0.5" />
+          {arrets === 0
+            ? 'Touchez la carte pour poser le premier arrêt. Les zones rouges sont celles où vivent et travaillent le plus de gens.'
+            : 'Posez au moins un deuxième arrêt pour voir le prix et les voyageurs.'}
+        </p>
+      ) : (
+        <>
+          <Chiffres e={e} arrets={arrets} mode={brouillon.mode} />
+          <div className="hidden flex-col gap-0.5 lg:flex">
+            <Surtitre>Autour de vos arrêts, à moins de {brouillon.mode === 'metro' ? 600 : 400} m</Surtitre>
+            <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
+            <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
+            <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
+          </div>
+          <p className="text-[13px] leading-snug text-gris">
+            {e.cout <= bilan.reste
+              ? `Il vous resterait ${n(bilan.reste - e.cout)} M€ sur ce mandat.`
+              : `Il manquerait ${n(e.cout - Math.max(0, bilan.reste))} M€ sur ce mandat.`}{' '}
+            Nous recalculons à chaque arrêt à partir des données INSEE.
+          </p>
+        </>
+      )}
+    </Panneau>
+  )
+}
+
+/** Le résultat d'une ligne terminée, avant de la construire. */
+export function MaLigne() {
+  const { brouillon, mandat, construireLigne, ouvrir } = useJeu()
+  const bilan = useBilan()
+  const e = useEstimation()
+  const [nom, setNom] = useState(() => `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+  if (!brouillon || !e) return null
+  const annee = ouverture(mandat, e.duree)
+  const reste = bilan.reste
+  const moitie = Math.round(e.cout / 2)
+
+  return (
+    <Panneau
+      surtitre={<Pastille icone="trace">Votre ligne de {NOM_MODE[brouillon.mode]}</Pastille>}
+      titre={
+        <label className="flex items-center gap-2">
+          <span className="sr-only">Nom de la ligne</span>
+          <input
+            value={nom}
+            onChange={(ev) => setNom(ev.target.value)}
+            maxLength={40}
+            className="min-w-0 flex-1 rounded-lg bg-transparent font-black outline-none focus:bg-sable focus:px-2"
+          />
+          <Icone nom="crayon" taille={18} className="text-muet" />
+        </label>
+      }
+      onFermer={() => ouvrir({ type: 'trace' })}
+      pied={
+        <>
+          <Bouton genre="rouge" icone="valider" taille="grand" onClick={() => construireLigne(nom.trim() || 'Ma ligne', e, false)}>
+            {e.cout <= reste ? `Construire pour ${n(e.cout)} M€` : `Construire pour ${n(e.cout)} M€, avec un déficit`}
+          </Bouton>
+          <div className="grid grid-cols-2 gap-2">
+            {mandat === 1 ? (
+              <Bouton genre="contour" taille="petit" onClick={() => construireLigne(nom.trim() || 'Ma ligne', e, true)}>
+                Payer {n(moitie)} M€ maintenant
+              </Bouton>
+            ) : null}
+            <Bouton genre="contour" taille="petit" onClick={() => ouvrir({ type: 'trace' })} className={mandat === 1 ? '' : 'col-span-2'}>
+              Modifier le tracé
+            </Bouton>
+          </div>
+        </>
+      }
+    >
+      <div className="grid grid-cols-3 gap-1.5">
+        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`${km(e.km)} km à ${PRIX_KM[brouillon.mode]} M€ le km`} />
+        <CarteChiffre icone="voyageurs" valeur={`~${approx(e.voyageurs)}`} legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`} accent />
+        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <Surtitre>Autour de vos {brouillon.arrets.length} arrêts, à moins de {brouillon.mode === 'metro' ? 600 : 400} m</Surtitre>
+        <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
+        <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
+        <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
+      </div>
+      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
+        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs seraient nouveaux sur le réseau, les autres viendraient d’une ligne
+        voisine. C’est ce chiffre qui s’ajoute à votre score.
+      </p>
+      <p className="text-[13.5px] leading-relaxed text-gris">
+        Pour comparer, le tram T9, long de 11,3 km, est attendu à 38 000 voyageurs par jour pour 290 M€.{' '}
+        <button type="button" onClick={() => ouvrir({ type: 'methode' })} className="font-extrabold text-rouge-fonce underline underline-offset-3">
+          Notre calcul
+        </button>
+      </p>
+    </Panneau>
+  )
+}

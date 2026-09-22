@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, MapLibre GL JS pour la cartographie WebGL, fond vectoriel CARTO (gratuit, sans clé API), Zustand pour l'état, Motion pour les animations. Choix confirmé par l'utilisateur lors de la refonte de septembre 2026.
+Next.js 16 (App Router), React 19, TypeScript 6, Tailwind CSS 4, MapLibre GL JS 6 pour la carte, Zustand pour l'état, Motion pour les animations. Le fond de carte est construit à partir d'OpenStreetMap et des carreaux INSEE, sans service extérieur. Refonte complète de septembre 2026, repartie de zéro.
 
 ## Users
 

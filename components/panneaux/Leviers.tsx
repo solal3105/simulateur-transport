@@ -1,0 +1,240 @@
+'use client'
+
+import { clsx } from 'clsx'
+
+import { TARIFS } from '@/lib/catalogue'
+import { n, signe } from '@/lib/format'
+import { LEVIERS_FIXES, RENDEMENT } from '@/lib/regles'
+import { useJeu } from '@/lib/store'
+import type { Leviers as TLeviers } from '@/lib/types'
+
+import { segmentsBudget, useBilan } from '../partie/budget'
+import { Bouton, Icone, Jauge, Surtitre } from '../ui'
+import { Panneau } from './Panneau'
+
+const euros = (v: number) => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive }: {
+  titre: string
+  valeur: number
+  unite: string
+  detail: string
+  gain: number
+  min: number
+  max: number
+  onChange: (v: number) => void
+  desactive?: string
+}) {
+  return (
+    <div className="flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-base font-extrabold">{titre}</span>
+        <span className={clsx('chiffres text-sm font-black whitespace-nowrap', gain > 0 ? 'text-rouge' : 'text-muet')}>{signe(gain)} M€</span>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          aria-label={`Baisser : ${titre}`}
+          disabled={valeur <= min || !!desactive}
+          onClick={() => onChange(valeur - 1)}
+          className="grid size-11 place-items-center rounded-full bg-sable disabled:opacity-35"
+        >
+          <Icone nom="moins" taille={18} epaisseur={2.6} />
+        </button>
+        <output className="chiffres flex-1 text-center text-[22px] font-black" aria-live="polite">
+          {valeur > 0 ? '+' : ''}
+          {valeur} {unite}
+        </output>
+        <button
+          type="button"
+          aria-label={`Augmenter : ${titre}`}
+          disabled={valeur >= max || !!desactive}
+          onClick={() => onChange(valeur + 1)}
+          className="grid size-11 place-items-center rounded-full bg-rouge text-white disabled:opacity-35"
+        >
+          <Icone nom="plus" taille={18} epaisseur={2.6} />
+        </button>
+      </div>
+      <div className="text-[13.5px] leading-snug text-gris">{desactive ?? detail}</div>
+    </div>
+  )
+}
+
+function Interrupteur({ titre, detail, gain, actif, onChange, desactive }: {
+  titre: string
+  detail: string
+  gain: number
+  actif: boolean
+  onChange: (v: boolean) => void
+  desactive?: string
+}) {
+  return (
+    <label
+      className={clsx(
+        'flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
+        actif ? 'shadow-[inset_0_0_0_2px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+        desactive && 'cursor-not-allowed opacity-55',
+      )}
+    >
+      <span className="flex flex-1 flex-col gap-1">
+        <span className="text-[15.5px] leading-tight font-extrabold">{titre}</span>
+        <span className="text-[13.5px] leading-snug text-gris">{desactive ?? detail}</span>
+        <span className={clsx('chiffres text-[13px] font-black', gain > 0 ? 'text-rouge' : 'text-gris')}>{signe(gain)} M€ par mandat</span>
+      </span>
+      <input type="checkbox" role="switch" checked={actif} disabled={!!desactive} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <span
+        aria-hidden="true"
+        className={clsx(
+          'relative h-7.5 w-12.5 shrink-0 rounded-full transition-colors peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-encre',
+          actif ? 'bg-rouge' : 'bg-[#dcd8d2]',
+        )}
+      >
+        <span className={clsx('absolute top-0.75 size-6 rounded-full bg-white transition-[left]', actif ? 'left-[23px]' : 'left-0.75')} />
+      </span>
+    </label>
+  )
+}
+
+export function Leviers() {
+  const { leviers, mandat, levier, fermer } = useJeu()
+  const l = leviers[mandat]
+  const bilan = useBilan()
+  const { segments, total } = segmentsBudget(bilan)
+  const gratuit = l.gratuiteTotale
+  const sansObjet = 'Sans objet : le réseau est gratuit.'
+  const nouveauMois = TARIFS.abonnement * (1 + l.abonnements / 100)
+  const nouveauTicket = TARIFS.ticket * (1 + l.tickets / 100)
+
+  const groupe = (titre: string, contenu: React.ReactNode, intro?: string, icone?: boolean) => (
+    <section className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-2 text-gris">
+        {icone ? <Icone nom="loi" taille={17} /> : null}
+        <Surtitre className="text-gris">{titre}</Surtitre>
+      </div>
+      {intro ? <p className="text-sm leading-relaxed text-gris">{intro}</p> : null}
+      {contenu}
+    </section>
+  )
+  const maj = <K extends keyof TLeviers>(k: K) => (v: TLeviers[K]) => levier(k, v)
+
+  return (
+    <Panneau
+      titre="Trouver de l’argent"
+      largeur="large"
+      hauteurTelephone="pleine"
+      pied={
+        <Bouton genre="rouge" icone="fleche" taille="grand" onClick={fermer} className="lg:self-end lg:min-w-[360px]">
+          {bilan.reste >= 0 ? `Revenir à la carte avec ${n(bilan.reste)} M€` : `Revenir à la carte, il manque ${n(-bilan.reste)} M€`}
+        </Bouton>
+      }
+    >
+      <div className="flex flex-col gap-2 rounded-2xl bg-rouge p-4 text-white">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-sm font-semibold opacity-90">Disponible sur ce mandat</span>
+          <span className="chiffres text-xl font-black">{bilan.reste >= 0 ? `${n(bilan.reste)} M€` : `-${n(-bilan.reste)} M€`}</span>
+        </div>
+        <Jauge segments={segments} total={total} surRouge label={`Il reste ${n(bilan.reste)} millions d’euros sur ce mandat.`} />
+        <div className="text-[13px] font-semibold opacity-90">
+          Vos choix changent l’argent disponible sur ce mandat{mandat === 1 ? ' et restent en place au suivant, où vous pourrez les revoir' : ''}. Au total, ils {bilan.leviers >= 0 ? 'rapportent' : 'coûtent'} {n(Math.abs(bilan.leviers))} M€.
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+        {groupe(
+          'Les tarifs',
+          <>
+            <Pas
+              titre="Prix des abonnements"
+              valeur={l.abonnements}
+              unite="%"
+              min={-20}
+              max={30}
+              gain={gratuit ? 0 : l.abonnements * RENDEMENT.abonnements}
+              detail={`Le mois passe de ${euros(TARIFS.abonnement)} € à ${euros(nouveauMois)} €. Chaque point rapporte ${RENDEMENT.abonnements} M€.`}
+              onChange={maj('abonnements')}
+              desactive={gratuit ? sansObjet : undefined}
+            />
+            <Pas
+              titre="Prix des tickets"
+              valeur={l.tickets}
+              unite="%"
+              min={-20}
+              max={30}
+              gain={gratuit ? 0 : l.tickets * RENDEMENT.tickets}
+              detail={`Le ticket passe de ${euros(TARIFS.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${RENDEMENT.tickets} M€.`}
+              onChange={maj('tickets')}
+              desactive={gratuit ? sansObjet : undefined}
+            />
+          </>,
+        )}
+        {groupe(
+          'La gratuité et les services',
+          <>
+            <Interrupteur
+              titre="Gratuité pour tout le monde"
+              detail="Plus aucune recette de billets ni d’abonnements."
+              gain={LEVIERS_FIXES.gratuiteTotale}
+              actif={l.gratuiteTotale}
+              onChange={maj('gratuiteTotale')}
+            />
+            <Interrupteur
+              titre="Gratuité pour les moins de 25 ans"
+              detail="Sans condition de ressources."
+              gain={LEVIERS_FIXES.gratuiteMoins25}
+              actif={l.gratuiteMoins25}
+              onChange={maj('gratuiteMoins25')}
+              desactive={gratuit ? sansObjet : undefined}
+            />
+            <Interrupteur
+              titre="Gratuité des 11-18 ans enfants d’abonnés"
+              detail="Dès qu’un parent a un abonnement."
+              gain={LEVIERS_FIXES.gratuiteJeunesAbonnes}
+              actif={l.gratuiteJeunesAbonnes}
+              onChange={maj('gratuiteJeunesAbonnes')}
+              desactive={gratuit ? sansObjet : undefined}
+            />
+            <Interrupteur
+              titre="Métro toute la nuit le week-end"
+              detail="Les vendredis et samedis, sur les quatre lignes."
+              gain={LEVIERS_FIXES.metroNuit}
+              actif={l.metroNuit}
+              onChange={maj('metroNuit')}
+            />
+            <Interrupteur
+              titre="Supprimer les tarifs sociaux"
+              detail="Les abonnés aux revenus modestes paient le plein tarif."
+              gain={LEVIERS_FIXES.suppressionTarifSocial}
+              actif={l.suppressionTarifSocial}
+              onChange={maj('suppressionTarifSocial')}
+              desactive={gratuit ? sansObjet : undefined}
+            />
+          </>,
+        )}
+        {groupe(
+          'Ce que seule une loi nationale peut changer',
+          <>
+            <Interrupteur
+              titre="TVA des transports à 5,5 %"
+              detail="Au lieu de 10 % aujourd’hui."
+              gain={LEVIERS_FIXES.tva}
+              actif={l.tva}
+              onChange={maj('tva')}
+            />
+            <Pas
+              titre="Versement mobilité des entreprises"
+              valeur={l.versementMobilite}
+              unite={Math.abs(l.versementMobilite) > 1 ? 'points' : 'point'}
+              min={0}
+              max={5}
+              gain={l.versementMobilite * RENDEMENT.versementMobilite}
+              detail={`Cette taxe est payée par les employeurs. Chaque point de hausse rapporte ${RENDEMENT.versementMobilite} M€.`}
+              onChange={maj('versementMobilite')}
+            />
+          </>,
+          'La Métropole ne peut pas décider seule de ces deux mesures. Vous pouvez les activer pour voir ce qu’elles changeraient.',
+          true,
+        )}
+      </div>
+    </Panneau>
+  )
+}
