@@ -53,7 +53,8 @@ export function useProgramme() {
 }
 
 export function Programme() {
-  const { mandat, ouvrir, finirMandat } = useJeu()
+  const { mandat, ouvrir, finirMandat, ecran, tuto } = useJeu()
+  const guide = ecran === 'tuto' && tuto === 2
   const { lignesProgramme } = useProgramme()
   const bilan = useBilan()
   const courant = lignesProgramme.filter((l) => l.mandat === mandat)
@@ -119,7 +120,7 @@ export function Programme() {
         <Bouton genre="sable" iconeAGauche="pieces" onClick={() => ouvrir({ type: 'leviers' })} className="justify-start">
           Trouver de l’argent
         </Bouton>
-        <Bouton genre="rouge" icone="drapeau" onClick={finirMandat} disabled={bilan.reste < 0}>
+        <Bouton genre="rouge" icone="drapeau" onClick={finirMandat} disabled={bilan.reste < 0} data-guide={guide ? '' : undefined}>
           {mandat === 1 ? 'Finir le premier mandat' : 'Finir le second mandat'}
         </Bouton>
         {bilan.reste < 0 ? (
@@ -133,7 +134,8 @@ export function Programme() {
 }
 
 export function BarreBas() {
-  const { ouvrir, finirMandat, mandat } = useJeu()
+  const { ouvrir, finirMandat, mandat, ecran, tuto } = useJeu()
+  const guide = ecran === 'tuto' && tuto === 2
   const bilan = useBilan()
   return (
     <div className="absolute inset-x-0 bottom-0 z-20 grid grid-cols-2 gap-2 border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden">
@@ -145,6 +147,7 @@ export function BarreBas() {
         icone="drapeau"
         taille="petit"
         className="min-h-13"
+        data-guide={guide ? '' : undefined}
         onClick={() => (bilan.reste < 0 ? ouvrir({ type: 'leviers' }) : finirMandat())}
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}
       >

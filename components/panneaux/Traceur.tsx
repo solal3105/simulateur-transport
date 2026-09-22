@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
+import { nommerArrets } from '@/lib/lieux'
 import { DUREE_CHANTIER, estimer, PRIX_KM } from '@/lib/modele'
 import { ouverture } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -65,6 +66,7 @@ export function Traceur() {
   const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir } = useJeu()
   const bilan = useBilan()
   const e = useEstimation()
+  const noms = useNomsArrets()
   if (!brouillon) return null
   const arrets = brouillon.arrets.length
   const pret = arrets >= 2 && e
@@ -137,6 +139,13 @@ export function Traceur() {
       ) : (
         <>
           <Chiffres e={e} arrets={arrets} mode={brouillon.mode} />
+          <p className="text-[13px] leading-snug font-semibold">
+            <span className="text-gris">De </span>
+            {noms[0]}
+            <span className="text-gris"> à </span>
+            {noms.at(-1)}
+            {noms.length > 2 ? <span className="text-gris">, par {noms.slice(1, -1).join(', ')}</span> : null}
+          </p>
           <div className="hidden flex-col gap-0.5 lg:flex">
             <Surtitre>Autour de vos arrêts, à moins de {brouillon.mode === 'metro' ? 600 : 400} m</Surtitre>
             <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
@@ -155,12 +164,23 @@ export function Traceur() {
   )
 }
 
+/** Noms des arrêts du tracé en cours, d'après les quartiers et les communes. */
+function useNomsArrets() {
+  const donnees = useDonnees()
+  const brouillon = useJeu((s) => s.brouillon)
+  return useMemo(() => (donnees && brouillon ? nommerArrets(brouillon.arrets, donnees.lieux) : []), [donnees, brouillon])
+}
+
 /** Le résultat d'une ligne terminée, avant de la construire. */
 export function MaLigne() {
   const { brouillon, mandat, construireLigne, ouvrir } = useJeu()
   const bilan = useBilan()
   const e = useEstimation()
-  const [nom, setNom] = useState(() => `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+  const noms = useNomsArrets()
+  // Une ligne porte le nom de ses deux terminus, comme sur le réseau.
+  const [nom, setNom] = useState(() =>
+    noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`,
+  )
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
   const reste = bilan.reste
@@ -210,6 +230,17 @@ export function MaLigne() {
         <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Surtitre>Vos arrêts</Surtitre>
+        <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
+          {noms.map((nomArret, i) => (
+            <li key={i} className="flex items-center gap-1">
+              <span className="rounded-full bg-sable px-2.5 py-1">{nomArret}</span>
+              {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+            </li>
+          ))}
+        </ol>
       </div>
       <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
         Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs seraient nouveaux sur le réseau, les autres viendraient d’une ligne

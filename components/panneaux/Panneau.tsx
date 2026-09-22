@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx'
 import { motion } from 'motion/react'
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { useJeu } from '@/lib/store'
 
@@ -32,6 +32,8 @@ export function Panneau({
   hauteurTelephone?: 'auto' | 'pleine'
 }) {
   const fermer = useJeu((s) => s.fermer)
+  // Sur ordinateur, le panneau arrive de la droite ; sur téléphone, il monte du bas.
+  const [grand] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches)
   const refTitre = useRef<HTMLHeadingElement>(null)
   const quitter = onFermer ?? fermer
 
@@ -47,13 +49,13 @@ export function Panneau({
       role="dialog"
       aria-modal="false"
       aria-labelledby="titre-panneau"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 24 }}
-      transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+      initial={grand ? { opacity: 0, x: 60 } : { y: '100%' }}
+      animate={grand ? { opacity: 1, x: 0 } : { y: 0 }}
+      exit={grand ? { opacity: 0, x: 60 } : { y: '100%' }}
+      transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.9 }}
       className={clsx(
         'fixed inset-x-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-t-[26px] bg-white shadow-panneau',
-        hauteurTelephone === 'pleine' ? 'top-0 rounded-t-none' : 'max-h-[88dvh]',
+        hauteurTelephone === 'pleine' ? 'top-0 rounded-t-none' : 'max-h-[calc(100dvh-150px)]',
         'lg:absolute lg:top-24 lg:right-0 lg:bottom-0 lg:left-auto lg:max-h-none lg:rounded-none lg:rounded-l-none lg:shadow-[-8px_0_30px_rgb(0_0_0/0.08)]',
         largeur === 'normale' && 'lg:w-[440px]',
         largeur === 'large' && 'lg:w-[min(1100px,calc(100vw-340px))]',

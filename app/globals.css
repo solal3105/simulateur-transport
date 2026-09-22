@@ -73,21 +73,109 @@
   box-shadow: inset 0 0 0 1.5px var(--color-rouge);
 }
 .etiquette:hover {
-  transform: scale(1.06);
+  background: var(--color-rouge-pale);
 }
 .lieu {
   font: 800 10.5px/1 var(--font-figtree), sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-muet);
-  text-shadow: 0 0 3px var(--color-sable), 0 0 3px var(--color-sable), 0 0 3px var(--color-sable);
+  text-shadow: 0 0 3px #f4f1ec, 0 0 3px #f4f1ec, 0 0 3px #f4f1ec;
   pointer-events: none;
 }
 .lieu[data-grand='1'] {
   font-size: 13px;
 }
+.lieu.quartier {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #8b857c;
+}
+[data-proche='0'] .quartier {
+  display: none;
+}
+/* Nom d'un arrêt posé par le joueur. */
+.nom-arret {
+  display: block;
+  font: 800 12px/1 var(--font-figtree), sans-serif;
+  color: var(--color-encre);
+  background: #fff;
+  padding: 4px 7px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: apparait 0.25s ease-out;
+}
+/* Le gain de voyageurs qui s'élève au-dessus d'un projet qu'on vient de lancer. */
+.gain-flottant {
+  display: block;
+  font: 900 17px/1 var(--font-figtree), sans-serif;
+  color: #fff;
+  background: var(--color-rouge);
+  padding: 7px 12px;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgb(227 5 27 / 0.35);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  animation: monte 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes monte {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+  25% {
+    transform: translateY(-4px) scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1);
+  }
+}
+@keyframes apparait {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
 .maplibregl-ctrl-attrib {
   font-size: 10px;
+}
+
+/* Ce que le tutoriel invite à toucher. */
+[data-tuto='0'] .etiquette[data-etat='choisi'] {
+  animation: appel 1.3s ease-out infinite;
+}
+[data-guide] {
+  animation: appel-bouton 1.6s ease-in-out infinite;
+}
+/* MapLibre place les marqueurs avec transform : l'animation ne doit toucher qu'à l'ombre. */
+@keyframes appel {
+  0% {
+    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgb(227 5 27 / 0);
+  }
+}
+@keyframes appel-bouton {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(227 5 27 / 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

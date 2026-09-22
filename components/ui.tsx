@@ -184,7 +184,7 @@ export function Jauge({ segments, total, surRouge, hauteur = 12, label }: { segm
       {segments
         .filter((s) => s.montant > 0)
         .map((s, i) => (
-          <div key={i} className={clsx('h-full transition-[width] duration-300', palette[s.style])} style={{ width: `${(s.montant / total) * 100}%` }} />
+          <div key={i} className={clsx('h-full transition-[width] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]', palette[s.style])} style={{ width: `${(s.montant / total) * 100}%` }} />
         ))}
     </div>
   )

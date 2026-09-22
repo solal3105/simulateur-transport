@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
-import { MANDATS, PROJETS } from '@/lib/catalogue'
+import { MANDATS, mots, PROJETS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -38,7 +38,9 @@ function Voie({ titre, detail, onClick, possible }: { titre: string; detail: str
 
 export function FicheProjet({ id }: { id: string }) {
   const projet = PROJETS.get(id)!
-  const { chantiers, mandat, construire, retirer, ouvrir, setApercu } = useJeu()
+  const { chantiers, mandat, construire, retirer, ouvrir, setApercu, changerPaiement, ecran, tuto } = useJeu()
+  const { verbe } = mots(id)
+  const guide = ecran === 'tuto' && tuto === 1
   const bilan = useBilan()
   const existant = chantiers.find((c) => c.id === id)
   const [varianteId, setVarianteId] = useState(existant?.varianteId ?? projet.variantes?.[0]?.id)
@@ -58,8 +60,11 @@ export function FicheProjet({ id }: { id: string }) {
   }, [r.cout, existant, bloque, setApercu])
 
   const message = {
-    titre: `${projet.nom} ajouté.`,
-    texte: r.voyageurs > 0 ? `Il apportera ${n(r.voyageurs)} voyageurs de plus par jour à partir de ${annee}.` : `Les travaux se termineront en ${annee}.`,
+    titre: 'C’est lancé.',
+    texte:
+      r.voyageurs > 0
+        ? `${projet.nom} : ${n(r.voyageurs)} voyageurs de plus par jour à partir de ${annee}.`
+        : `${projet.nom} : travaux terminés en ${annee}.`,
   }
   const bati = (etale: boolean) => construire({ id, varianteId, option, etale }, message)
 
@@ -75,7 +80,7 @@ export function FicheProjet({ id }: { id: string }) {
     pied =
       existant.mandat === mandat ? (
         <Bouton genre="contour" iconeAGauche="annuler" onClick={() => retirer(id)}>
-          Retirer ce projet du programme
+          Retirer ce projet
         </Bouton>
       ) : (
         <p className="text-sm leading-relaxed text-gris">Décidé pendant le premier mandat, ce projet ne peut plus être retiré.</p>
@@ -89,8 +94,8 @@ export function FicheProjet({ id }: { id: string }) {
   } else if (r.cout <= reste) {
     pied = (
       <>
-        <Bouton genre="rouge" icone="valider" taille="grand" onClick={() => bati(false)}>
-          Construire pour {n(r.cout)} M€
+        <Bouton genre="rouge" icone="valider" taille="grand" onClick={() => bati(false)} data-guide={guide ? '' : undefined}>
+          {verbe} pour {n(r.cout)} M€
         </Bouton>
         {peutEtaler ? (
           <Bouton genre="contour" taille="petit" onClick={() => bati(true)}>
@@ -139,7 +144,7 @@ export function FicheProjet({ id }: { id: string }) {
     )
     pied = (
       <button type="button" onClick={() => bati(false)} className="min-h-12 text-sm font-extrabold text-gris underline underline-offset-4">
-        Construire quand même, et combler le déficit ensuite
+        {verbe} quand même, et combler le déficit ensuite
       </button>
     )
   }
@@ -150,6 +155,22 @@ export function FicheProjet({ id }: { id: string }) {
       titre={projet.nom}
       pied={pied}
     >
+      {guide && !existant ? (
+        <div className="flex items-start gap-3 rounded-2xl bg-encre p-4 text-white">
+          <Icone nom="main" taille={22} className="mt-0.5 shrink-0" />
+          <div className="flex flex-col gap-1.5 text-[14.5px] leading-relaxed">
+            <span className="text-xs font-extrabold tracking-[0.08em] text-white/70 uppercase">Première décision, étape 2 sur 3</span>
+            <span>
+              Il coûte {n(r.cout)} M€ : la partie noire de la jauge rouge, tout en haut, montre ce qu’il prendrait sur votre budget. Il apporterait{' '}
+              {n(r.voyageurs)} voyageurs par jour.
+            </span>
+            <span className="font-extrabold">
+              Appuyez sur « {verbe} pour {n(r.cout)} M€ » pour le lancer.
+            </span>
+          </div>
+        </div>
+      ) : null}
+
       <p className="text-[15px] leading-relaxed text-gris">{projet.description}</p>
 
       {corpsManque}
@@ -157,8 +178,47 @@ export function FicheProjet({ id }: { id: string }) {
       {existant ? (
         <div className="flex items-center gap-2.5 rounded-2xl bg-rouge-pale px-4 py-3 text-sm font-bold text-rouge-fonce">
           <Icone nom="valider" taille={18} epaisseur={2.8} />
-          Dans votre programme{existant.etale ? ', payé en deux fois' : ''}.
+          Dans votre programme depuis le mandat {existant.mandat}.
         </div>
+      ) : null}
+
+      {existant && existant.mandat === mandat && mandat === 1 ? (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-[15px] font-extrabold">Comment le payer</legend>
+          {[
+            { etale: false, titre: 'En une fois', detail: `${n(r.cout)} M€ sur ce mandat.` },
+            {
+              etale: true,
+              titre: 'En deux fois',
+              detail: `${n(moitie)} M€ maintenant, ${n(r.cout - moitie)} M€ réservés sur le mandat 2032-2038.`,
+            },
+          ].map((o) => (
+            <label
+              key={o.titre}
+              className={clsx(
+                'flex cursor-pointer items-start gap-3 rounded-2xl bg-white px-4 py-3',
+                existant.etale === o.etale ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+              )}
+            >
+              <input
+                type="radio"
+                name="paiement"
+                checked={existant.etale === o.etale}
+                onChange={() => changerPaiement(id, o.etale)}
+                className="mt-1 size-5 accent-rouge"
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-[15px] font-extrabold">{o.titre}</span>
+                <span className="text-[13.5px] leading-snug text-gris">{o.detail}</span>
+              </span>
+            </label>
+          ))}
+          <p className="text-[13px] leading-snug text-gris">
+            {existant.etale
+              ? 'Payer en deux fois libère de l’argent maintenant, mais votre second mandat commencera déjà engagé.'
+              : 'Payer en une fois laisse votre second mandat libre.'}
+          </p>
+        </fieldset>
       ) : null}
 
       {bloque ? (

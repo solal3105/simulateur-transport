@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 
 import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
@@ -8,6 +9,7 @@ import { bilanMandat, ouvertures, resoudre, score, totauxCatalogue } from '@/lib
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
 
+import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
 
@@ -73,16 +75,41 @@ export function Bilan() {
     setEnvoi('Image téléchargée')
   }
 
+  // Le réseau se construit sous les yeux du joueur, de 2026 à la dernière ouverture.
+  const derniere = Math.max(MANDATS[2].fin, ...resultat.ouvertures.map((o) => o.annee))
+  const { annee, termine, relancer } = useDefilement(MANDATS[1].debut, derniere, Math.min(6, (derniere - MANDATS[1].debut) * 0.3))
+  // Le score monte au rythme des ouvertures.
+  const cumul = termine ? resultat.voyageurs : resultat.ouvertures.filter((o) => o.annee <= annee).reduce((t, o) => t + o.voyageurs, 0)
+  const voyageursAnimes = useCompteur(cumul, 0.6, 0)
+
   const partCatalogue = TOTAL.voyageurs > 0 ? Math.round((resultat.voyageurs / TOTAL.voyageurs) * 100) : 0
   const partCout = TOTAL.cout > 0 ? Math.round((resultat.investi / TOTAL.cout) * 100) : 0
 
   return (
     <main className="min-h-dvh bg-white lg:fixed lg:inset-0">
       <div className="relative h-[300px] lg:absolute lg:inset-y-0 lg:right-[620px] lg:left-0 lg:h-auto">
-        <Carte marges={MARGES_GRAND} decor />
+        <Carte marges={MARGES_GRAND} decor anneeMax={annee} />
         <div className="absolute top-4 left-4 flex items-center gap-2.5 lg:top-7 lg:left-7">
           <Logo taille={40} />
           <span className="hidden text-[17px] font-black lg:inline">Simulateur TCL</span>
+        </div>
+        <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
+          <div className="rounded-2xl bg-white/90 px-4 py-2.5 shadow-flotte backdrop-blur">
+            <div className="text-xs font-extrabold tracking-[0.08em] text-muet uppercase">{termine ? 'Votre réseau' : 'Le réseau se construit'}</div>
+            <div className="chiffres text-[34px] leading-none font-black tracking-tight lg:text-[52px]" aria-live="off">
+              {annee}
+            </div>
+          </div>
+          {termine ? (
+            <button
+              type="button"
+              onClick={relancer}
+              className="flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-extrabold shadow-flotte"
+            >
+              <Icone nom="rejouer" taille={16} />
+              Revoir la construction
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -97,7 +124,9 @@ export function Bilan() {
         <div className="flex flex-col gap-2">
           <h1 className="text-[15px] font-semibold text-gris lg:text-base">Votre réseau en 2038 transporte chaque jour</h1>
           <div className="flex items-baseline gap-2.5">
-            <span className="chiffres text-[50px] leading-none font-black tracking-[-0.04em] text-rouge lg:text-[72px]">+{n(resultat.voyageurs)}</span>
+            <span className="chiffres text-[50px] leading-none font-black tracking-[-0.04em] text-rouge lg:text-[72px]">
+              +{n(voyageursAnimes)}
+            </span>
             <span className="text-base font-extrabold lg:text-xl">voyageurs</span>
           </div>
           <p className="text-[14.5px] leading-relaxed text-gris lg:text-[15px]">
@@ -127,8 +156,14 @@ export function Bilan() {
             <ol className="flex flex-col gap-2.5">
               {resultat.ouvertures.map((o) => {
                 const tard = o.annee > MANDATS[2].fin
+                const ouverte = o.annee <= annee
                 return (
-                  <li key={o.id} className="flex items-start gap-3 text-[14.5px]">
+                  <motion.li
+                    key={o.id}
+                    animate={{ opacity: ouverte ? 1 : 0.35, x: ouverte ? 0 : 6 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+                    className="flex items-start gap-3 text-[14.5px]"
+                  >
                     <span className={`chiffres w-10 shrink-0 font-black ${tard ? 'text-muet' : ''}`}>{o.annee}</span>
                     <span
                       aria-hidden="true"
@@ -136,7 +171,7 @@ export function Bilan() {
                     />
                     <span className="flex-1 font-bold">{o.nom}</span>
                     <span className="chiffres font-extrabold whitespace-nowrap text-rouge">+{n(o.voyageurs)}</span>
-                  </li>
+                  </motion.li>
                 )
               })}
             </ol>

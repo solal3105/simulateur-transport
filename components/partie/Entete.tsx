@@ -1,11 +1,13 @@
 'use client'
 
 import { clsx } from 'clsx'
+import { motion } from 'motion/react'
 
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { useJeu } from '@/lib/store'
 
+import { useCompteur } from '../anim'
 import { EtapesMandat, Icone, Jauge, Logo } from '../ui'
 import { segmentsBudget, useBilan, useScore } from './budget'
 
@@ -21,7 +23,9 @@ export function Entete({ attenue }: { attenue?: boolean }) {
   const bilan = useBilan()
   const voyageurs = useScore()
   const { segments, total } = segmentsBudget(bilan, apercu)
-  const reste = libelleReste(bilan.reste, apercu)
+  const resteAnime = useCompteur(bilan.reste)
+  const voyageursAnimes = useCompteur(voyageurs, 1.1)
+  const reste = libelleReste(Math.round(resteAnime), apercu)
   const { debut, fin } = MANDATS[mandat]
   const labelJauge = `Budget du mandat : ${n(bilan.bus)} M€ pour l'entretien des bus, ${n(bilan.projets + bilan.reports)} M€ de projets, ${reste.valeur} ${reste.texte}.`
 
@@ -47,10 +51,16 @@ export function Entete({ attenue }: { attenue?: boolean }) {
             <div className="text-[12.5px] font-semibold opacity-90">{reste.texte.replace('M€ ', '')}</div>
           </div>
           <div className="flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-rouge">
+            <motion.div
+              key={voyageurs}
+              initial={{ scale: 1.25 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+              className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-rouge"
+            >
               <Icone nom="voyageurs" taille={15} epaisseur={2.3} />
-              <span className="chiffres text-sm font-black">+{n(voyageurs)}</span>
-            </div>
+              <span className="chiffres text-sm font-black">+{n(voyageursAnimes)}</span>
+            </motion.div>
             <div className="text-[11.5px] font-semibold opacity-90">voyageurs par jour</div>
           </div>
         </div>
@@ -103,10 +113,16 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           <Jauge segments={segments} total={total} surRouge hauteur={14} label={labelJauge} />
         </div>
         <div className="flex w-[210px] shrink-0 flex-col items-end gap-1">
-          <div className="flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-rouge">
+          <motion.div
+            key={voyageurs}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+            className="flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-rouge"
+          >
             <Icone nom="voyageurs" taille={18} epaisseur={2.3} />
-            <span className="chiffres text-lg font-black">+{n(voyageurs)}</span>
-          </div>
+            <span className="chiffres text-lg font-black">+{n(voyageursAnimes)}</span>
+          </motion.div>
           <span className="text-[12.5px] font-semibold opacity-90">voyageurs gagnés par jour</span>
         </div>
       </div>

@@ -73,11 +73,11 @@ export function Partie() {
   )
 
   return (
-    <main className="fixed inset-0 overflow-hidden bg-sable">
+    <main className="fixed inset-0 overflow-hidden bg-sable" data-tuto={tuto ? etapeTuto : undefined}>
       <h1 className="sr-only">Simulateur TCL, partie en cours</h1>
       <Carte marges={marges} />
-      <Entete attenue={tuto && etapeTuto !== 1} />
-      {!tuto ? <Programme /> : null}
+      <Entete />
+      {!tuto || etapeTuto === 2 ? <Programme /> : null}
 
       {!tuto && !panneau && !brouillon ? (
         <>
@@ -111,7 +111,7 @@ export function Partie() {
         </>
       ) : null}
 
-      {!tuto && !brouillon ? <BarreBas /> : null}
+      {(!tuto || etapeTuto === 2) && !brouillon ? <BarreBas /> : null}
       <Message />
 
       <AnimatePresence>

@@ -12,9 +12,41 @@ import { segmentsBudget, useBilan } from '../partie/budget'
 import { Bouton, Icone, Jauge, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
 
-const euros = (v: number) => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const euros = (v: number) => (Math.round((v + 1e-9) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive }: {
+/**
+ * Repère d'inflation : l'objectif de 2 % par an de la Banque centrale européenne, cumulé sur
+ * les six ans d'un mandat. C'est une hypothèse de lecture, pas une prévision.
+ */
+const INFLATION_ANNUELLE = 0.02
+const INFLATION_MANDAT = (1 + INFLATION_ANNUELLE) ** 6 - 1
+
+/** Situe une hausse de tarif par rapport à l'inflation du mandat. */
+function situer(hausse: number) {
+  const inflation = INFLATION_MANDAT * 100
+  if (hausse < 0) return { texte: 'Baisse de prix', ton: 'fort' as const }
+  if (hausse === 0) return { texte: 'Prix gelé, donc en baisse une fois l’inflation comptée', ton: 'moyen' as const }
+  if (Math.abs(hausse - inflation) <= 1) return { texte: 'Au niveau de l’inflation', ton: 'neutre' as const }
+  return hausse < inflation
+    ? { texte: 'En dessous de l’inflation', ton: 'moyen' as const }
+    : { texte: 'Au-dessus de l’inflation', ton: 'fort' as const }
+}
+
+function Repere({ hausse }: { hausse: number }) {
+  const s = situer(hausse)
+  return (
+    <span
+      className={clsx(
+        'self-start rounded-full px-2.5 py-1 text-xs font-extrabold',
+        s.ton === 'fort' ? 'bg-rouge text-white' : s.ton === 'moyen' ? 'bg-rouge-pale text-rouge-fonce' : 'bg-sable text-encre',
+      )}
+    >
+      {s.texte}
+    </span>
+  )
+}
+
+function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive, enPlus }: {
   titre: string
   valeur: number
   unite: string
@@ -24,6 +56,7 @@ function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive
   max: number
   onChange: (v: number) => void
   desactive?: string
+  enPlus?: React.ReactNode
 }) {
   return (
     <div className="flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
@@ -56,6 +89,7 @@ function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive
         </button>
       </div>
       <div className="text-[13.5px] leading-snug text-gris">{desactive ?? detail}</div>
+      {!desactive ? enPlus : null}
     </div>
   )
 }
@@ -150,9 +184,24 @@ export function Leviers() {
               min={-20}
               max={30}
               gain={gratuit ? 0 : l.abonnements * RENDEMENT.abonnements}
-              detail={`Le mois passe de ${euros(TARIFS.abonnement)} € à ${euros(nouveauMois)} €. Chaque point rapporte ${RENDEMENT.abonnements} M€.`}
+              detail={`Chaque point rapporte ${RENDEMENT.abonnements} M€ par mandat.`}
               onChange={maj('abonnements')}
               desactive={gratuit ? sansObjet : undefined}
+              enPlus={
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-sable px-3 py-2.5">
+                      <div className="chiffres text-lg font-black">{euros(nouveauMois)} €</div>
+                      <div className="text-xs leading-snug text-gris">par mois, au lieu de {euros(TARIFS.abonnement)} €</div>
+                    </div>
+                    <div className="rounded-xl bg-sable px-3 py-2.5">
+                      <div className="chiffres text-lg font-black">{euros(nouveauMois / 2)} €</div>
+                      <div className="text-xs leading-snug text-gris">pour un salarié, l’employeur payant la moitié</div>
+                    </div>
+                  </div>
+                  <Repere hausse={l.abonnements} />
+                </>
+              }
             />
             <Pas
               titre="Prix des tickets"
@@ -161,10 +210,16 @@ export function Leviers() {
               min={-20}
               max={30}
               gain={gratuit ? 0 : l.tickets * RENDEMENT.tickets}
-              detail={`Le ticket passe de ${euros(TARIFS.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${RENDEMENT.tickets} M€.`}
+              detail={`Le ticket passe de ${euros(TARIFS.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${RENDEMENT.tickets} M€ par mandat.`}
               onChange={maj('tickets')}
               desactive={gratuit ? sansObjet : undefined}
+              enPlus={<Repere hausse={l.tickets} />}
             />
+            <p className="text-[12.5px] leading-relaxed text-gris">
+              Nous comparons chaque hausse à une inflation de 2 % par an, l’objectif de la Banque centrale européenne : sur les six ans d’un
+              mandat, les prix monteraient d’environ {(INFLATION_MANDAT * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %. Tout employeur rembourse au moins la moitié
+              de l’abonnement de ses salariés.
+            </p>
           </>,
         )}
         {groupe(
@@ -227,7 +282,7 @@ export function Leviers() {
               min={0}
               max={5}
               gain={l.versementMobilite * RENDEMENT.versementMobilite}
-              detail={`Cette taxe est payée par les employeurs. Chaque point de hausse rapporte ${RENDEMENT.versementMobilite} M€.`}
+              detail={`Cette taxe est payée par les employeurs de 11 salariés et plus, en plus du remboursement des abonnements. Chaque point de hausse rapporte ${RENDEMENT.versementMobilite} M€ par mandat.`}
               onChange={maj('versementMobilite')}
             />
           </>,

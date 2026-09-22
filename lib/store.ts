@@ -42,6 +42,8 @@ interface Etat {
   fermer: () => void
   construire: (c: Omit<Chantier, 'mandat'>, message?: Etat['message']) => void
   retirer: (id: string) => void
+  /** Paie un projet déjà décidé en une ou deux fois, sans avoir à l'annuler. */
+  changerPaiement: (id: string, etale: boolean) => void
   levier: <K extends keyof Leviers>(cle: K, valeur: Leviers[K]) => void
   finirMandat: () => void
   commencerMandat2: () => void
@@ -76,19 +78,27 @@ export const useJeu = create<Etat>()(
       commencer: () => set({ ecran: 'tuto', tuto: 0 }),
       etapeTuto: (tuto) => set({ tuto }),
       finirTuto: () => set({ ecran: 'jeu', panneau: null }),
-      ouvrir: (panneau) => set({ panneau, apercu: 0 }),
-      fermer: () => set({ panneau: null, apercu: 0 }),
+      // Le tutoriel avance avec les gestes du joueur : ouvrir un projet, puis le lancer.
+      ouvrir: (panneau) =>
+        set((s) => ({ panneau, apercu: 0, tuto: s.ecran === 'tuto' && s.tuto === 0 && panneau.type === 'projet' ? 1 : s.tuto })),
+      fermer: () => set((s) => ({ panneau: null, apercu: 0, tuto: s.ecran === 'tuto' && s.tuto === 1 ? 0 : s.tuto })),
       construire: (c, message = null) =>
         set((s) => ({
           chantiers: [...s.chantiers.filter((x) => x.id !== c.id), { ...c, mandat: s.mandat }],
           panneau: null,
           apercu: 0,
-          message,
+          message: s.ecran === 'tuto' ? null : message,
+          tuto: s.ecran === 'tuto' ? 2 : s.tuto,
         })),
       retirer: (id) =>
         set((s) => ({
           chantiers: s.chantiers.filter((c) => !(c.id === id && c.mandat === s.mandat)),
           lignes: s.lignes.filter((l) => !(l.id === id && l.mandat === s.mandat)),
+        })),
+      changerPaiement: (id, etale) =>
+        set((s) => ({
+          chantiers: s.chantiers.map((c) => (c.id === id && c.mandat === s.mandat && s.mandat === 1 ? { ...c, etale } : c)),
+          lignes: s.lignes.map((l) => (l.id === id && l.mandat === s.mandat && s.mandat === 1 ? { ...l, etale } : l)),
         })),
       levier: (cle, valeur) =>
         set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),

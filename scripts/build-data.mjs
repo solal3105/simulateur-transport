@@ -13,6 +13,8 @@
  *   public/data/projets.json   tracés des projets, un par identifiant
  *   public/data/arrets.json    arrêts de tram et stations de métro actuels
  *   public/data/carreaux.json  habitants et emplois par carreau de 200 m
+ *   public/data/decor.json     parcs, eau, grands axes, voies ferrées et limites de communes
+ *   public/data/lieux.json     quartiers et communes, pour nommer les arrêts des lignes tracées
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -48,11 +50,11 @@ function simplify(points, tolerance) {
   return [...simplify(points.slice(0, index + 1), tolerance).slice(0, -1), ...simplify(points.slice(index), tolerance)]
 }
 
-const line = (geometry, tolerance = 0.00006) =>
+const line = (geometry, tolerance = 0.00006, decimales = 5) =>
   simplify(
     geometry.map((g) => [g.lon, g.lat]),
     tolerance,
-  ).map(([lon, lat]) => [round(lon), round(lat)])
+  ).map(([lon, lat]) => [round(lon, decimales), round(lat, decimales)])
 
 const feature = (properties, coordinates) => ({
   type: 'Feature',
@@ -86,6 +88,113 @@ const fond = {
   ],
 }
 writeFileSync(join(out, 'fond.json'), JSON.stringify(fond))
+
+// Décor : parcs, eau, routes, rail, communes.
+const lire = (nom) => {
+  try {
+    return readJson(src('osm', `${nom}.json`)).elements
+  } catch {
+    console.log(`${nom}.json absent : couche ignorée`)
+    return []
+  }
+}
+
+/** Assemble les morceaux d'un contour (membres « outer » d'une relation) en anneaux fermés. */
+function anneaux(morceaux) {
+  const restants = morceaux.map((m) => [...m])
+  const fermes = []
+  while (restants.length) {
+    let anneau = restants.shift()
+    let progres = true
+    while (progres && (anneau[0][0] !== anneau.at(-1)[0] || anneau[0][1] !== anneau.at(-1)[1])) {
+      progres = false
+      for (let i = 0; i < restants.length; i += 1) {
+        const m = restants[i]
+        const fin = anneau.at(-1)
+        if (m[0][0] === fin[0] && m[0][1] === fin[1]) anneau = anneau.concat(m.slice(1))
+        else if (m.at(-1)[0] === fin[0] && m.at(-1)[1] === fin[1]) anneau = anneau.concat([...m].reverse().slice(1))
+        else continue
+        restants.splice(i, 1)
+        progres = true
+        break
+      }
+    }
+    if (anneau.length >= 4) fermes.push(anneau)
+  }
+  return fermes
+}
+
+/** Un anneau commence et finit au même point : on le simplifie en deux moitiés. */
+const simplifierAnneau = (anneau, tolerance) => {
+  const milieu = Math.floor(anneau.length / 2)
+  return [...simplify(anneau.slice(0, milieu + 1), tolerance).slice(0, -1), ...simplify(anneau.slice(milieu), tolerance)]
+}
+
+const aire = (anneau) => {
+  let a = 0
+  for (let i = 1; i < anneau.length; i += 1) a += anneau[i - 1][0] * anneau[i][1] - anneau[i][0] * anneau[i - 1][1]
+  return Math.abs(a / 2) * 111320 * 111320 * Math.cos((45.76 * Math.PI) / 180)
+}
+
+function polygones(elements, aireMin, tolerance) {
+  const liste = []
+  for (const e of elements) {
+    let bruts = []
+    if (e.type === 'way' && e.geometry) bruts = [e.geometry.map((g) => [g.lon, g.lat])]
+    if (e.type === 'relation') {
+      bruts = anneaux(e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => m.geometry.map((g) => [g.lon, g.lat])))
+    }
+    for (const b of bruts) {
+      if (b.length < 4 || aire(b) < aireMin) continue
+      const s = simplifierAnneau(b, tolerance).map(([lon, lat]) => [round(lon, 4), round(lat, 4)])
+      if (s.length >= 4) liste.push(s)
+    }
+  }
+  return liste
+}
+
+const polygone = (properties, rings) => ({
+  type: 'Feature',
+  properties,
+  geometry: { type: 'MultiPolygon', coordinates: rings.map((r) => [r]) },
+})
+
+const lignesDe = (elements, tolerance) => elements.filter((e) => e.geometry).map((e) => line(e.geometry, tolerance, 4)).filter((l) => l.length > 1)
+const routes = lire('routes')
+const communesOsm = lire('communes').filter((e) => e.tags?.name)
+const decor = {
+  type: 'FeatureCollection',
+  features: [
+    polygone({ kind: 'parc' }, polygones(lire('parcs'), 25000, 0.00014)),
+    polygone({ kind: 'eau' }, polygones(lire('eau'), 10000, 0.0001)),
+    feature({ kind: 'route', rang: 1 }, lignesDe(routes.filter((e) => /motorway|trunk/.test(e.tags?.highway ?? '')), 0.00012)),
+    feature({ kind: 'route', rang: 2 }, lignesDe(routes.filter((e) => e.tags?.highway === 'primary'), 0.00012)),
+    feature({ kind: 'route', rang: 3 }, lignesDe(routes.filter((e) => e.tags?.highway === 'secondary'), 0.00018)),
+    feature({ kind: 'rail' }, lignesDe(lire('rail'), 0.00012)),
+    feature(
+      { kind: 'limite' },
+      communesOsm.flatMap((e) => e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => line(m.geometry, 0.0003, 4))),
+    ),
+  ],
+}
+writeFileSync(join(out, 'decor.json'), JSON.stringify(decor))
+
+// Noms de lieux : quartiers d'abord, communes pour le reste.
+const communes = communesOsm
+  .map((e) => ({
+    nom: e.tags.name,
+    anneaux: anneaux(e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => m.geometry.map((g) => [g.lon, g.lat]))).map((r) =>
+      simplifierAnneau(r, 0.0006).map(([lon, lat]) => [round(lon, 4), round(lat, 4)]),
+    ),
+  }))
+  .filter((c) => c.anneaux.length)
+const quartiers = lire('lieux')
+  .filter((e) => /suburb|quarter|neighbourhood/.test(e.tags?.place ?? '') && e.tags?.name && !/Arrondissement/i.test(e.tags.name))
+  .map((e) => [round(e.lon, 4), round(e.lat, 4), e.tags.name])
+const arrondissements = lire('lieux')
+  .filter((e) => /^(\d+)(er|e) Arrondissement$/i.test(e.tags?.name ?? ''))
+  .map((e) => [round(e.lon, 4), round(e.lat, 4), `Lyon ${e.tags.name.replace(/ Arrondissement/i, '')}`])
+writeFileSync(join(out, 'lieux.json'), JSON.stringify({ communes, quartiers, arrondissements }))
 
 // Arrêts existants, pour savoir qui est déjà desservi.
 const stops = readJson(src('osm', 'stops.json')).elements.map((e) => [
@@ -142,6 +251,7 @@ writeFileSync(join(out, 'carreaux.json'), JSON.stringify(carreaux))
 
 const total = carreaux.reduce((acc, c) => [acc[0] + c[2], acc[1] + c[3]], [0, 0])
 console.log(
+  `décor ${decor.features.map((f) => f.geometry.coordinates.length).join('/')} éléments, ${quartiers.length} quartiers, ${communes.length} communes, ` +
   `fond ${fond.features.length} couches, ${stops.length} arrêts, ${projets.features.length} tracés, ` +
     `${carreaux.length} carreaux (${Math.round(total[0])} habitants, ${Math.round(total[1])} emplois)`,
 )

@@ -1,13 +1,23 @@
 'use client'
 
 import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geojson'
-import { Map as CarteMaplibre, Marker, setWorkerUrl, type GeoJSONSource, type MapLayerMouseEvent, type MapMouseEvent, type StyleSpecification } from 'maplibre-gl'
+import {
+  Map as CarteMaplibre,
+  Marker,
+  setWorkerUrl,
+  type FilterSpecification,
+  type GeoJSONSource,
+  type MapLayerMouseEvent,
+  type MapMouseEvent,
+  type StyleSpecification,
+} from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CATALOGUE, MANDATS } from '@/lib/catalogue'
+import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
 import { useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { carreau, cercle, LIEUX, milieu } from '@/lib/geo'
+import { nommerArrets } from '@/lib/lieux'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 
@@ -17,22 +27,50 @@ if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mj
 const COULEURS = {
   rouge: '#e3051b',
   encre: '#1b1b1f',
-  sable: '#f5f3f0',
-  fleuve: '#cfe2ec',
-  tram: '#d9d5cf',
+  sol: '#f4f1ec',
+  parc: '#dfe8d2',
+  eau: '#c6dde9',
+  route: '#ffffff',
+  bordRoute: '#e3ddd4',
+  rail: '#bdb6ac',
+  limite: '#cfc8bd',
+  tram: '#cdc6bc',
   metro: { A: '#d8336f', B: '#1d6fb8', C: '#f29a1f', D: '#2e9e4f' },
 }
 
-/** Emprise de départ : la Métropole, du Tassin à Meyzieu. */
+/** Emprise de départ : la Métropole, de Tassin à Meyzieu. */
 const EMPRISE: [[number, number], [number, number]] = [
   [4.74, 45.69],
   [5.02, 45.83],
 ]
+/** En deçà de ce zoom, les noms de quartiers restent cachés. */
+const ZOOM_QUARTIERS = 13
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
 
 const largeur = (base: number) =>
   ['interpolate', ['exponential', 1.5], ['zoom'], 10, base * 0.6, 13, base * 1.4, 15, base * 3] as unknown as number
+
+/** Largeur selon le zoom et le rang de la route : le zoom doit rester l'expression la plus externe. */
+const largeurRang = (grande: number, moyenne: number) =>
+  [
+    'interpolate',
+    ['exponential', 1.5],
+    ['zoom'],
+    ...[10, 13, 15].flatMap((z, i) => {
+      const k = [0.6, 1.4, 3][i]!
+      return [z, ['match', ['get', 'rang'], 1, grande * k, moyenne * k]]
+    }),
+  ] as unknown as number
+
+const vide = () => ({ type: 'FeatureCollection', features: [] }) as FeatureCollection
+const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kind]
+const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
+  'all',
+  ['==', ['get', 'kind'], 'route'],
+  ['<=', ['get', 'rang'], rangMax],
+  ['>=', ['get', 'rang'], rangMin],
+]
 
 function styleDeBase(donnees: Donnees): StyleSpecification {
   const densite: FeatureCollection<Polygon, { poids: number }> = {
@@ -40,25 +78,78 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
     features: donnees.carreauxBruts
       .map(([lon, lat, pop, jobs]) => ({ poids: pop! + 0.3 * jobs!, lon: lon!, lat: lat! }))
       .filter((c) => c.poids >= 150)
-      .map((c) => ({
-        type: 'Feature',
-        properties: { poids: c.poids },
-        geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat)] },
-      })),
+      .map((c) => ({ type: 'Feature', properties: { poids: c.poids }, geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat)] } })),
   }
-  const vide = { type: 'FeatureCollection', features: [] } as FeatureCollection
+  const stations: FeatureCollection<Point> = {
+    type: 'FeatureCollection',
+    features: donnees.arrets
+      .filter((a) => a[2] === 1)
+      .map((a) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+  }
   return {
     version: 8,
     sources: {
+      decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
+      stations: { type: 'geojson', data: stations },
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
-      joueur: { type: 'geojson', data: vide },
-      brouillon: { type: 'geojson', data: vide },
-      zones: { type: 'geojson', data: vide },
+      joueur: { type: 'geojson', data: vide() },
+      eclat: { type: 'geojson', data: vide() },
+      brouillon: { type: 'geojson', data: vide() },
+      zones: { type: 'geojson', data: vide() },
     },
     layers: [
-      { id: 'sol', type: 'background', paint: { 'background-color': COULEURS.sable } },
+      { id: 'sol', type: 'background', paint: { 'background-color': COULEURS.sol } },
+      { id: 'parcs', type: 'fill', source: 'decor', filter: genre('parc'), paint: { 'fill-color': COULEURS.parc } },
+      { id: 'eau', type: 'fill', source: 'decor', filter: genre('eau'), paint: { 'fill-color': COULEURS.eau } },
+      {
+        id: 'fleuves',
+        type: 'line',
+        source: 'fond',
+        filter: genre('fleuve'),
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.eau, 'line-width': largeur(7) },
+      },
+      {
+        id: 'limites',
+        type: 'line',
+        source: 'decor',
+        filter: genre('limite'),
+        paint: { 'line-color': COULEURS.limite, 'line-width': 1, 'line-dasharray': [3, 2] },
+      },
+      {
+        id: 'routes-bord',
+        type: 'line',
+        source: 'decor',
+        filter: routes(2),
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.bordRoute, 'line-width': largeurRang(3.6, 2.4) },
+      },
+      {
+        id: 'routes-secondaires',
+        type: 'line',
+        source: 'decor',
+        filter: routes(3, 3),
+        minzoom: 11.5,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.route, 'line-width': largeur(1.1) },
+      },
+      {
+        id: 'routes',
+        type: 'line',
+        source: 'decor',
+        filter: routes(2),
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.route, 'line-width': largeurRang(2.4, 1.4) },
+      },
+      {
+        id: 'rail',
+        type: 'line',
+        source: 'decor',
+        filter: genre('rail'),
+        paint: { 'line-color': COULEURS.rail, 'line-width': largeur(1), 'line-dasharray': [4, 2] },
+      },
       {
         id: 'densite',
         type: 'fill',
@@ -70,30 +161,42 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         },
       },
       {
-        id: 'fleuves',
-        type: 'line',
-        source: 'fond',
-        filter: ['==', ['get', 'kind'], 'fleuve'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.fleuve, 'line-width': largeur(9) },
-      },
-      {
         id: 'tram-actuel',
         type: 'line',
         source: 'fond',
-        filter: ['==', ['get', 'kind'], 'tram'],
-        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(1.6) },
+        filter: genre('tram'),
+        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(1.8) },
+      },
+      {
+        id: 'metro-bord',
+        type: 'line',
+        source: 'fond',
+        filter: genre('metro'),
+        layout: { 'line-cap': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(5) },
       },
       {
         id: 'metro-actuel',
         type: 'line',
         source: 'fond',
-        filter: ['==', ['get', 'kind'], 'metro'],
+        filter: genre('metro'),
         layout: { 'line-cap': 'round' },
         paint: {
           'line-color': ['match', ['get', 'line'], 'A', COULEURS.metro.A, 'B', COULEURS.metro.B, 'C', COULEURS.metro.C, COULEURS.metro.D],
-          'line-opacity': 0.55,
+          'line-opacity': 0.7,
           'line-width': largeur(2.8),
+        },
+      },
+      {
+        id: 'stations',
+        type: 'circle',
+        source: 'stations',
+        minzoom: 11.5,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11.5, 2, 14, 4.5],
+          'circle-color': '#fff',
+          'circle-stroke-color': '#7d776f',
+          'circle-stroke-width': 1.2,
         },
       },
       {
@@ -118,6 +221,13 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         paint: { 'line-color': '#fff', 'line-width': largeur(9) },
       },
       {
+        id: 'eclat',
+        type: 'line',
+        source: 'eclat',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.rouge, 'line-opacity': 0, 'line-width': 30, 'line-blur': 8 },
+      },
+      {
         id: 'projets-construits',
         type: 'line',
         source: 'projets',
@@ -140,12 +250,7 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': COULEURS.encre, 'line-width': largeur(5.5) },
       },
-      {
-        id: 'projets-cible',
-        type: 'line',
-        source: 'projets',
-        paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 },
-      },
+      { id: 'projets-cible', type: 'line', source: 'projets', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 } },
       {
         id: 'joueur-liseré',
         type: 'line',
@@ -157,8 +262,16 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         id: 'joueur',
         type: 'line',
         source: 'joueur',
+        filter: ['!', ['get', 'chantier']],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5) },
+      },
+      {
+        id: 'joueur-chantier',
+        type: 'line',
+        source: 'joueur',
+        filter: ['get', 'chantier'],
+        paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
       },
       {
         id: 'zones',
@@ -198,20 +311,57 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
   }
 }
 
+const reduit = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/** Fait briller un tracé qui vient d'être décidé, puis l'éteint. */
+function eclat(m: CarteMaplibre, coordonnees: number[][][]) {
+  const source = m.getSource('eclat') as GeoJSONSource | undefined
+  if (!source || reduit()) return
+  source.setData({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: coordonnees } })
+  const debut = performance.now()
+  const duree = 1200
+  const pas = (t: number) => {
+    const x = Math.min(1, (t - debut) / duree)
+    const intensite = Math.max(0, x < 0.2 ? x / 0.2 : 1 - (x - 0.2) / 0.8)
+    m.setPaintProperty('eclat', 'line-opacity', 0.6 * intensite)
+    m.setPaintProperty('eclat', 'line-width', 12 + 30 * x)
+    if (x < 1) requestAnimationFrame(pas)
+  }
+  requestAnimationFrame(pas)
+}
+
+/** Un « +30 000 » qui s'élève au-dessus d'un tracé. */
+function gainFlottant(m: CarteMaplibre, position: [number, number], texte: string) {
+  // MapLibre positionne le marqueur avec transform : l'animation vit sur un élément intérieur.
+  const el = document.createElement('div')
+  el.setAttribute('aria-hidden', 'true')
+  const bulle = document.createElement('span')
+  bulle.className = 'gain-flottant'
+  bulle.textContent = texte
+  el.appendChild(bulle)
+  const marqueur = new Marker({ element: el, anchor: 'bottom', offset: [0, -16] }).setLngLat(position).addTo(m)
+  setTimeout(() => marqueur.remove(), 1900)
+}
+
 export function Carte({
   marges,
   decor = false,
+  anneeMax,
 }: {
   marges: { top: number; right: number; bottom: number; left: number }
   /** Carte d'illustration : pas de clic sur les projets, pas d'étiquettes. */
   decor?: boolean
+  /** Pour le bilan : n'affiche en rouge que ce qui a ouvert à cette date. */
+  anneeMax?: number
 }) {
   const donnees = useDonnees()
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
   const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
+  const [nomsArrets] = useState<Marker[]>(() => [])
   const pret = useRef(false)
   const appliquerEtat = useRef<() => void>(() => {})
+  const precedents = useRef<Map<string, EtatProjet> | null>(null)
 
   const { chantiers, lignes, brouillon, panneau, ecran, tuto } = useJeu()
   const trace = brouillon !== null
@@ -224,20 +374,24 @@ export function Carte({
       if (!p.trace) continue
       const c = faits.get(p.id)
       let e: EtatProjet = 'etude'
-      if (c) e = ouverture(c.mandat, resoudre(p, c).duree) > MANDATS[2].fin ? 'chantier' : 'construit'
-      else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
+      if (c) {
+        const annee = ouverture(c.mandat, resoudre(p, c).duree)
+        if (anneeMax !== undefined) e = annee <= anneeMax ? 'construit' : 'etude'
+        else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
+      } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
       if (ecran === 'tuto' && tuto === 0 && p.id === 't8') e = 'choisi'
       etat.set(p.trace, e)
     }
     return etat
-  }, [chantiers, panneau, ecran, tuto])
+  }, [chantiers, panneau, ecran, tuto, anneeMax])
 
   // Création de la carte.
   useEffect(() => {
     if (!donnees || !conteneur.current || carte.current) return
+    const boite = conteneur.current
     const m = new CarteMaplibre({
-      container: conteneur.current,
+      container: boite,
       style: styleDeBase(donnees),
       bounds: EMPRISE,
       fitBoundsOptions: { padding: 20 },
@@ -262,6 +416,19 @@ export function Carte({
       el.textContent = lieu.nom
       new Marker({ element: el }).setLngLat(lieu.pos).addTo(m)
     }
+    // Les quartiers n'apparaissent qu'en zoomant, pour ne pas charger la vue d'ensemble.
+    for (const [lon, lat, nom] of donnees.lieux.quartiers) {
+      if (lon < 4.76 || lon > 4.99 || lat < 45.69 || lat > 45.82) continue
+      const el = document.createElement('div')
+      el.className = 'lieu quartier'
+      el.textContent = nom
+      new Marker({ element: el }).setLngLat([lon, lat]).addTo(m)
+    }
+    const majZoom = () => {
+      boite.dataset.proche = m.getZoom() >= ZOOM_QUARTIERS ? '1' : '0'
+    }
+    majZoom()
+    m.on('zoom', majZoom)
 
     for (const f of donnees.projets.features) {
       const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
@@ -299,6 +466,11 @@ export function Carte({
     m.on('load', () => {
       pret.current = true
       appliquerEtat.current()
+      // Le décor est plus lourd : il arrive après les données du jeu.
+      fetch('/data/decor.json')
+        .then((r) => r.json())
+        .then((d) => (m.getSource('decor') as GeoJSONSource | undefined)?.setData(d))
+        .catch(() => {})
     })
     return () => {
       m.remove()
@@ -308,28 +480,42 @@ export function Carte({
     }
   }, [donnees, decor, etiquettes])
 
-  // Mise à jour des états, des étiquettes et du mode tracé.
+  // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {
     const m = carte.current
-    if (!m) return
+    if (!m || !donnees) return
     const appliquer = () => {
       if (!pret.current) return
-      if (donnees) {
-        ;(m.getSource('projets') as GeoJSONSource).setData({
-          ...donnees.projets,
-          features: donnees.projets.features.map((f) => ({
-            ...f,
-            properties: { ...f.properties, etat: etats.get(f.properties.id) ?? 'etude' },
-          })),
-        })
+      ;(m.getSource('projets') as GeoJSONSource).setData({
+        ...donnees.projets,
+        features: donnees.projets.features.map((f) => ({ ...f, properties: { ...f.properties, etat: etats.get(f.properties.id) ?? 'etude' } })),
+      })
+
+      // Ce qui vient d'être décidé brille un instant, avec le gain de voyageurs.
+      const avant = precedents.current
+      if (avant && (!decor || anneeMax !== undefined)) {
+        for (const [nomTrace, etat] of etats) {
+          const etaitFait = avant.get(nomTrace) === 'construit' || avant.get(nomTrace) === 'chantier'
+          const estFait = etat === 'construit' || etat === 'chantier'
+          if (!estFait || etaitFait) continue
+          const f = donnees.projets.features.find((x) => x.properties.id === nomTrace)
+          const projet = CATALOGUE.find((p) => p.trace === nomTrace)
+          const c = projet && chantiers.find((x) => x.id === projet.id)
+          if (!f) continue
+          eclat(m, f.geometry.coordinates)
+          if (projet && c && !reduit()) gainFlottant(m, milieu(f.geometry), `+${n(resoudre(projet, c).voyageurs)}`)
+        }
       }
+      precedents.current = new Map(etats)
+
       for (const [nomTrace, etat] of etats) {
         const el = etiquettes.get(nomTrace)
         if (!el) continue
         el.dataset.etat = etat
         const projet = CATALOGUE.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
-        el.textContent = etat === 'construit' ? 'Construit' : etat === 'chantier' ? 'En chantier' : projet ? n(resoudre(projet, c).cout) : ''
+        el.textContent =
+          etat === 'construit' && projet ? mots(projet.id).participe : etat === 'chantier' ? 'En chantier' : projet ? n(resoudre(projet, c).cout) : ''
       }
       for (const el of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
@@ -337,7 +523,13 @@ export function Carte({
 
       const joueur: FeatureCollection<LineString> = {
         type: 'FeatureCollection',
-        features: lignes.map((l) => ({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: l.arrets } })),
+        features: lignes
+          .filter((l) => anneeMax === undefined || ouverture(l.mandat, l.estimation.duree) <= anneeMax)
+          .map((l) => ({
+            type: 'Feature',
+            properties: { chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin },
+            geometry: { type: 'LineString', coordinates: l.arrets },
+          })),
       }
       ;(m.getSource('joueur') as GeoJSONSource).setData(joueur)
 
@@ -350,12 +542,23 @@ export function Carte({
       ;(m.getSource('brouillon') as GeoJSONSource).setData({ type: 'FeatureCollection', features: traits })
       const rayon = brouillon?.mode === 'metro' ? 600 : 400
       ;(m.getSource('zones') as GeoJSONSource).setData({ type: 'FeatureCollection', features: arrets.map((a) => cercle(a, rayon)) })
+
+      // Le nom de chaque arrêt posé, d'après le quartier ou la commune.
+      while (nomsArrets.length) nomsArrets.pop()!.remove()
+      nommerArrets(arrets, donnees.lieux).forEach((nom, i) => {
+        const el = document.createElement('div')
+        const etiquette = document.createElement('span')
+        etiquette.className = 'nom-arret'
+        etiquette.textContent = nom
+        el.appendChild(etiquette)
+        nomsArrets.push(new Marker({ element: el, anchor: 'left', offset: [10, -10] }).setLngLat(arrets[i]!).addTo(m))
+      })
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes])
+  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax])
 
-  // Pendant la première étape du tutoriel, la carte montre le T8 au-dessus de l'explication.
+  // Pendant la première étape du tutoriel, la carte montre le T8.
   useEffect(() => {
     const m = carte.current
     const t8 = donnees?.projets.features.find((f) => f.properties.id === 't8')
@@ -370,7 +573,11 @@ export function Carte({
           [Math.min(...lons), Math.min(...lats)],
           [Math.max(...lons), Math.max(...lats)],
         ],
-        { padding: grand ? { top: 160, bottom: 80, left: 120, right: 480 } : { top: 190, bottom: 360, left: 60, right: 60 }, maxZoom: 13, duration: 800 },
+        {
+          padding: grand ? { top: 160, bottom: 80, left: 420, right: 480 } : { top: 200, bottom: 300, left: 60, right: 60 },
+          maxZoom: 12.8,
+          duration: 1200,
+        },
       )
     if (pret.current) cadrer()
     else m.once('load', cadrer)
@@ -378,17 +585,13 @@ export function Carte({
 
   // Recadrage quand les panneaux changent de taille.
   useEffect(() => {
-    const m = carte.current
-    if (!m) return
-    m.easeTo({ padding: marges, duration: 300 })
+    carte.current?.easeTo({ padding: marges, duration: 400 })
   }, [marges])
 
   return (
     <div className="absolute inset-0">
       <div ref={conteneur} className="h-full w-full" />
-      {!donnees ? (
-        <div className="absolute inset-0 grid place-items-center bg-sable text-sm font-bold text-muet">Chargement de la carte</div>
-      ) : null}
+      {!donnees ? <div className="absolute inset-0 grid place-items-center bg-sable text-sm font-bold text-muet">Chargement de la carte</div> : null}
       <span className="sr-only" aria-live="polite">
         {trace ? `${brouillon?.arrets.length ?? 0} arrêts posés` : ''}
       </span>

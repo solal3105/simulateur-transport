@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 import { useMemo, useState } from 'react'
 
-import { CATALOGUE } from '@/lib/catalogue'
+import { CATALOGUE, mots } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -15,7 +15,7 @@ type Tri = 'rendement' | 'prix' | 'ouverture'
 const MEILLEUR = totauxCatalogue(CATALOGUE).meilleur
 
 export function Liste() {
-  const { chantiers, lignes, mandat, ouvrir, retirer } = useJeu()
+  const { chantiers, lignes, mandat, ouvrir, retirer, changerPaiement } = useJeu()
   const [tri, setTri] = useState<Tri>('rendement')
 
   const lignesTableau = useMemo(() => {
@@ -67,9 +67,20 @@ export function Liste() {
                 </span>
               </span>
               {l.mandat === mandat ? (
-                <button type="button" onClick={() => retirer(l.id)} className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold">
-                  Retirer
-                </button>
+                <span className="flex flex-wrap justify-end gap-1.5">
+                  {mandat === 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => changerPaiement(l.id, !l.etale)}
+                      className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold"
+                    >
+                      {l.etale ? 'Payer en une fois' : 'Payer en deux fois'}
+                    </button>
+                  ) : null}
+                  <button type="button" onClick={() => retirer(l.id)} className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold">
+                    Retirer
+                  </button>
+                </span>
               ) : null}
             </div>
           ))}
@@ -127,11 +138,15 @@ export function Liste() {
             </span>
             <span role="cell" className="col-span-2 lg:col-span-1">
               {c && c.mandat === mandat ? (
-                <button type="button" onClick={() => retirer(p.id)} className="min-h-10 rounded-full bg-white px-4 text-[13.5px] font-extrabold shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
-                  Retirer
+                <button
+                  type="button"
+                  onClick={() => ouvrir({ type: 'projet', id: p.id })}
+                  className="min-h-10 rounded-full bg-white px-4 text-[13.5px] font-extrabold shadow-[inset_0_0_0_1.5px_var(--color-trait)]"
+                >
+                  Modifier
                 </button>
               ) : c ? (
-                <span className="text-[13px] font-extrabold text-rouge">Construit</span>
+                <span className="text-[13px] font-extrabold text-rouge">{mots(p.id).participe}</span>
               ) : (
                 <button type="button" onClick={() => ouvrir({ type: 'projet', id: p.id })} className="min-h-10 rounded-full bg-rouge-pale px-4 text-[13.5px] font-extrabold text-rouge-fonce">
                   Voir le projet

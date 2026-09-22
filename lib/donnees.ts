@@ -3,6 +3,7 @@
 import type { FeatureCollection, MultiLineString } from 'geojson'
 import { useEffect, useState } from 'react'
 
+import type { Lieux } from './lieux'
 import { preparerCarreaux, type Carreaux } from './modele'
 
 export interface Donnees {
@@ -10,6 +11,9 @@ export interface Donnees {
   projets: FeatureCollection<MultiLineString, { id: string }>
   carreauxBruts: number[][]
   carreaux: Carreaux
+  lieux: Lieux
+  /** [lon, lat, métro (1) ou tram (0)] */
+  arrets: number[][]
 }
 
 let promesse: Promise<Donnees> | null = null
@@ -22,11 +26,14 @@ export function chargerDonnees() {
     lire<Donnees['projets']>('projets'),
     lire<number[][]>('carreaux'),
     lire<number[][]>('arrets'),
-  ]).then(([fond, projets, carreauxBruts, arrets]) => ({
+    lire<Lieux>('lieux'),
+  ]).then(([fond, projets, carreauxBruts, arrets, lieux]) => ({
     fond,
     projets,
     carreauxBruts,
     carreaux: preparerCarreaux(carreauxBruts, arrets),
+    lieux,
+    arrets,
   }))
   return promesse
 }

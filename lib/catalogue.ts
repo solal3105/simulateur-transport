@@ -354,6 +354,49 @@ export const CATALOGUE: Projet[] = [
 
 export const PROJETS = new Map(CATALOGUE.map((p) => [p.id, p]))
 
+type Action = 'construire' | 'moderniser' | 'achever' | 'renforcer' | 'electrifier'
+
+const ACTIONS: Partial<Record<string, Action>> = {
+  'modern-a': 'moderniser',
+  'modern-d': 'moderniser',
+  'modern-c': 'moderniser',
+  't9-final': 'achever',
+  't10-final': 'achever',
+  'bhns-kimmerling': 'achever',
+  't3-renf': 'renforcer',
+  'electrification-bus': 'electrifier',
+}
+
+/** Projets dont le nom appelle un accord au féminin : la ligne, l'extension, la navette. */
+const FEMININS = new Set([
+  'grande-dorsale',
+  'ext-a-est',
+  'ext-d',
+  'ligne-du-nord',
+  'modern-a',
+  'modern-d',
+  'modern-c',
+  'ligne-ouest',
+  'bhns-rive-droite',
+  'navette-fluv',
+  'electrification-bus',
+])
+
+const MOTS: Record<Action, { verbe: string; participe: string }> = {
+  construire: { verbe: 'Construire', participe: 'Construit' },
+  moderniser: { verbe: 'Moderniser', participe: 'Modernisé' },
+  achever: { verbe: 'Achever', participe: 'Achevé' },
+  renforcer: { verbe: 'Renforcer', participe: 'Renforcé' },
+  electrifier: { verbe: 'Électrifier', participe: 'Électrifié' },
+}
+
+/** Le vocabulaire d'un projet : « Moderniser pour 338 M€ », « Modernisée » sur la carte. */
+export function mots(id: string) {
+  const action = ACTIONS[id] ?? 'construire'
+  const { verbe, participe } = MOTS[action]
+  return { verbe, participe: FEMININS.has(id) ? `${participe}e` : participe }
+}
+
 /** Enveloppe d'investissement de chaque mandat, en millions d'euros. */
 export const ENVELOPPE = 2000
 
