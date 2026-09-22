@@ -16,3 +16,4 @@ tsconfig.tsbuildinfo
 .impeccable/config.local.json
 data/osm/
 public/maplibre/
+public/_mock/
