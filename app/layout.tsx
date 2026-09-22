@@ -1,77 +1,65 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import Script from "next/script"
-import "./globals.css"
-import { ThemeProvider } from "@/contexts/ThemeContext"
+import type { Metadata, Viewport } from 'next'
+import { Archivo, Martian_Mono } from 'next/font/google'
+import Script from 'next/script'
+import './globals.css'
 
-const inter = Inter({ subsets: ["latin"] })
+const archivo = Archivo({
+  subsets: ['latin'],
+  axes: ['wdth'],
+  variable: '--font-archivo',
+  display: 'swap',
+})
+
+const martian = Martian_Mono({
+  subsets: ['latin'],
+  variable: '--font-martian',
+  display: 'swap',
+})
+
+const SITE = 'https://simulateur-transport-tcl.netlify.app'
 
 export const metadata: Metadata = {
-  title: "Simulateur Transport TCL Lyon",
-  description: "Simulateur interactif pour l'arbitrage budgétaire des projets de transport TCL dans la métropole de Lyon. Explorez les programmes des candidats 2026.",
-  metadataBase: new URL('https://simulateur-transport-tcl.netlify.app'),
+  metadataBase: new URL(SITE),
+  title: 'Simulateur Transport TCL Lyon',
+  description:
+    'Répartissez deux enveloppes de 2 000 millions d’euros entre les projets de transport de la Métropole de Lyon, et voyez ce que vos choix construisent vraiment d’ici 2038.',
   openGraph: {
-    title: "Simulateur Transport TCL Lyon",
-    description: "Simulateur interactif pour l'arbitrage budgétaire des projets de transport TCL dans la métropole de Lyon.",
-    url: 'https://simulateur-transport-tcl.netlify.app',
-    siteName: 'Simulateur Transport TCL',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Simulateur Transport TCL Lyon',
-      },
-    ],
-    locale: 'fr_FR',
     type: 'website',
+    locale: 'fr_FR',
+    url: SITE,
+    siteName: 'Simulateur Transport TCL',
+    title: 'Simulateur Transport TCL Lyon',
+    description:
+      'Deux mandats, deux enveloppes, vingt-deux ouvrages réels. Arbitrez le budget des transports lyonnais.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Simulateur Transport TCL Lyon' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Simulateur Transport TCL Lyon",
-    description: "Simulateur interactif pour l'arbitrage budgétaire des projets de transport TCL.",
+    title: 'Simulateur Transport TCL Lyon',
+    description: 'Deux mandats, deux enveloppes, vingt-deux ouvrages réels.',
     images: ['/og-image.png'],
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export const viewport: Viewport = {
+  themeColor: '#a3d900',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <head>
-        {/* Google Analytics */}
+    <html lang="fr" className={`${archivo.variable} ${martian.variable}`}>
+      <body>
+        {children}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-VC9WDCWFY1"
           strategy="afterInteractive"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-VC9WDCWFY1');
-          `}
+        <Script id="analytics" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-VC9WDCWFY1');`}
         </Script>
-        
-        {/* Hotjar */}
-        <Script id="hotjar" strategy="afterInteractive">
-          {`
-            (function(h,o,t,j,a,r){
-                h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-                h._hjSettings={hjid:6629925,hjsv:6};
-                a=o.getElementsByTagName('head')[0];
-                r=o.createElement('script');r.async=1;
-                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-                a.appendChild(r);
-            })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-          `}
-        </Script>
-      </head>
-      <body className={inter.className}>
-        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   )

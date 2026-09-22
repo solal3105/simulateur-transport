@@ -1,134 +1,135 @@
+'use client'
+
 import { create } from 'zustand'
-import { ProjectSelection, FinancingLevers, BudgetState, MandatPeriod } from './types'
-import { PROJECTS, BASE_BUDGET, FINANCING_IMPACTS } from './data'
+import { persist } from 'zustand/middleware'
+import { dependentsOf } from './budget'
+import { PROJECTS_BY_ID } from './projects'
+import type { LeverState, Phase, Selection } from './types'
 
-interface SimulatorState {
-  projectSelections: ProjectSelection[]
-  financingLevers: FinancingLevers
-  setProjectPeriod: (projectId: string, period: MandatPeriod) => void
-  setFinancingLever: <K extends keyof FinancingLevers>(
-    lever: K,
-    value: FinancingLevers[K]
-  ) => void
-  getBudgetState: () => BudgetState
-  reset: () => void
-}
+export type Stage = 'briefing' | 'plan' | 'bilan'
+export type Deck = 'ouvrages' | 'leviers' | 'mises-en-service'
 
-const initialFinancingLevers: FinancingLevers = {
-  gratuiteTotale: false,
-  gratuiteMoins25ans: false,
-  gratuiteJeunesAbonnes: false,
-  suppressionTarifSocial: false,
-  metro24hWeekend: false,
+const EMPTY_LEVERS: LeverState = {
+  gratuiteTotale: null,
+  gratuiteMoins25: null,
+  gratuiteJeunesAbonnes: null,
+  suppressionTarifSocial: null,
+  metroNuitWeekend: null,
+  tva55: null,
   tarifAbonnements: 0,
   tarifTickets: 0,
   versementMobilite: 0,
-  tva55: false,
-  electrificationBus: null,
-  entretienBus: null,
+  maintenance: 'M1M2',
+  electrification: null,
 }
 
-export const useSimulatorStore = create<SimulatorState>((set, get) => ({
-  projectSelections: [],
-  financingLevers: initialFinancingLevers,
+interface StudyState {
+  stage: Stage
+  deck: Deck
+  selections: Selection[]
+  levers: LeverState
+  /** Ouvrage dont la fiche est ouverte, sur le plan comme dans la nomenclature. */
+  focused: string | null
+  /** Ouvrage survolé, mis en évidence sur le plan. */
+  hovered: string | null
+  /** Ouvrage dont le tracé est en train de s'écrire sur le plan. */
+  drawing: string | null
 
-  setProjectPeriod: (projectId: string, period: MandatPeriod) => {
-    set((state) => {
-      const existing = state.projectSelections.find((s) => s.projectId === projectId)
-      
-      if (period === null) {
-        return {
-          projectSelections: state.projectSelections.filter((s) => s.projectId !== projectId),
+  setStage: (stage: Stage) => void
+  setDeck: (deck: Deck) => void
+  setFocused: (id: string | null) => void
+  setHovered: (id: string | null) => void
+  clearDrawing: (id: string) => void
+  assign: (projectId: string, phase: Phase | null) => void
+  setVariant: (projectId: string, variantId: string) => void
+  setOption: (projectId: string, taken: boolean) => void
+  setLever: <K extends keyof LeverState>(key: K, value: LeverState[K]) => void
+  reset: () => void
+}
+
+export const useStudy = create<StudyState>()(
+  persist(
+    (set, get) => ({
+      stage: 'briefing',
+      deck: 'ouvrages',
+      selections: [],
+      levers: EMPTY_LEVERS,
+      focused: null,
+      hovered: null,
+      drawing: null,
+
+      setStage: (stage) => set({ stage }),
+      setDeck: (deck) => set({ deck }),
+      setFocused: (focused) => set({ focused }),
+      setHovered: (hovered) => set({ hovered }),
+      clearDrawing: (id) => set((s) => (s.drawing === id ? { drawing: null } : s)),
+
+      assign: (projectId, phase) => {
+        const project = PROJECTS_BY_ID.get(projectId)
+        if (!project) return
+        const { selections } = get()
+
+        if (phase === null) {
+          // Retirer un prérequis emporte tout ce qui en dépend.
+          const doomed = new Set([projectId, ...dependentsOf(projectId)])
+          set({ selections: selections.filter((s) => !doomed.has(s.projectId)), drawing: null })
+          return
         }
-      }
 
-      if (existing) {
-        return {
-          projectSelections: state.projectSelections.map((s) =>
-            s.projectId === projectId ? { ...s, period } : s
-          ),
+        // Un ouvrage dont le prérequis n'est pas retenu ne peut pas être inscrit.
+        if (project.requires && !selections.some((s) => s.projectId === project.requires)) return
+
+        const existing = selections.find((s) => s.projectId === projectId)
+        if (existing) {
+          set({
+            selections: selections.map((s) => (s.projectId === projectId ? { ...s, phase } : s)),
+          })
+          return
         }
-      }
 
-      return {
-        projectSelections: [...state.projectSelections, { projectId, period }],
-      }
-    })
-  },
-
-  setFinancingLever: (lever, value) => {
-    set((state) => ({
-      financingLevers: {
-        ...state.financingLevers,
-        [lever]: value,
+        const entry: Selection = { projectId, phase }
+        if (project.variants?.length) entry.variantId = project.variants[0].id
+        set({ selections: [...selections, entry], drawing: projectId })
       },
-    }))
-  },
 
-  getBudgetState: (): BudgetState => {
-    const { projectSelections, financingLevers } = get()
+      setVariant: (projectId, variantId) =>
+        set((s) => ({
+          selections: s.selections.map((sel) =>
+            sel.projectId === projectId ? { ...sel, variantId } : sel,
+          ),
+          drawing: projectId,
+        })),
 
-    let m1Cost = 0
-    let m2Cost = 0
-    let totalImpact = 0
+      setOption: (projectId, optionTaken) =>
+        set((s) => ({
+          selections: s.selections.map((sel) =>
+            sel.projectId === projectId ? { ...sel, optionTaken } : sel,
+          ),
+        })),
 
-    projectSelections.forEach((selection) => {
-      const project = PROJECTS.find((p) => p.id === selection.projectId)
-      if (!project) return
+      setLever: (key, value) => set((s) => ({ levers: { ...s.levers, [key]: value } })),
 
-      if (selection.period === 'M1') {
-        m1Cost += project.cost
-      } else if (selection.period === 'M2') {
-        m2Cost += project.cost
-      } else if (selection.period === 'M1+M2') {
-        m1Cost += project.cost / 2
-        m2Cost += project.cost / 2
-      }
+      reset: () =>
+        set({
+          selections: [],
+          levers: EMPTY_LEVERS,
+          focused: null,
+          hovered: null,
+          drawing: null,
+          stage: 'plan',
+          deck: 'ouvrages',
+        }),
+    }),
+    {
+      name: 'tcl-etude',
+      version: 2,
+      partialize: (state) => ({
+        selections: state.selections,
+        levers: state.levers,
+        stage: state.stage === 'briefing' ? 'briefing' : 'plan',
+      }),
+    },
+  ),
+)
 
-      if (project.impact) {
-        totalImpact += project.impact
-      }
-    })
-
-    const leverImpact = calculateLeverImpact(financingLevers)
-    const totalCost = m1Cost + m2Cost
-    const efficiency = totalCost > 0 ? totalImpact / totalCost : 0
-    const m1Budget = BASE_BUDGET + leverImpact - m1Cost
-    const m2Budget = BASE_BUDGET + leverImpact - m2Cost
-
-    return {
-      m1: m1Budget,
-      m2: m2Budget,
-      totalImpact,
-      efficiency,
-      isValid: m1Budget >= -1000 && m2Budget >= -1000,
-      hasExcessiveDebt: m1Budget < -1000 || m2Budget < -1000,
-    }
-  },
-
-  reset: () => {
-    set({
-      projectSelections: [],
-      financingLevers: initialFinancingLevers,
-    })
-  },
-}))
-
-function calculateLeverImpact(levers: FinancingLevers): number {
-  let impact = 0
-
-  if (levers.gratuiteTotale) {
-    impact += FINANCING_IMPACTS.gratuiteTotale
-  }
-
-  impact += levers.tarifAbonnements * FINANCING_IMPACTS.tarifAbonnementsPerPercent
-  impact += levers.tarifTickets * FINANCING_IMPACTS.tarifTicketsPerPercent
-
-  impact += levers.versementMobilite * FINANCING_IMPACTS.versementMobilitePerPercent
-
-  if (levers.tva55) {
-    impact += FINANCING_IMPACTS.tva55
-  }
-
-  return impact
-}
+export { EMPTY_LEVERS }

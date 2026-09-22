@@ -1,69 +1,132 @@
-export type MandatPeriod = 'M1' | 'M2' | 'M1+M2' | null
+/**
+ * Le programme s'étale sur deux mandats métropolitains consécutifs.
+ * Un ouvrage est inscrit sur l'un, sur l'autre, ou étalé sur les deux.
+ */
+export type Phase = 'M1' | 'M2' | 'M1M2'
 
-export interface UpgradeOption {
+/** Famille de mode, qui détermine le pictogramme et la couleur du tracé. */
+export type Mode = 'metro' | 'renovation' | 'tram' | 'bus' | 'cable' | 'fluvial'
+
+export interface Variant {
   id: string
+  /** Libellé court affiché dans le sélecteur de variante. */
   name: string
-  description: string
+  /** Une phrase qui dit ce que la variante change concrètement. */
+  detail: string
+  mode: Mode
+  /** Investissement total en millions d'euros. */
   cost: number
-  impact: number
+  /** Fréquentation supplémentaire estimée, en voyageurs par jour. */
+  ridership: number
+  /** Durée de chantier en années, à partir du début de la phase. */
+  duration: number
 }
 
 export interface Project {
   id: string
   name: string
+  /** Deux ou trois phrases, dans la langue du produit, sur ce que l'ouvrage fait. */
+  description: string
+  mode: Mode
   cost: number
-  impact?: number
-  mandatOnly?: 'M1+M2'
-  description?: string
-  upgrade?: {
+  ridership: number
+  duration: number
+  /** Variantes exclusives : le joueur en retient exactement une. */
+  variants?: Variant[]
+  /** Option supplémentaire payante sur la variante de base. */
+  option?: {
     name: string
-    description: string
-    additionalCost: number
-    additionalImpact?: number
+    detail: string
+    extraCost: number
+    extraRidership: number
+    duration: number
   }
-  upgradeOptions?: UpgradeOption[] // Pour les projets avec choix multiples (ex: Ligne du Nord)
-  requires?: string // ID du projet requis
+  /** Ouvrage dont celui-ci dépend : sans lui, il ne peut pas être inscrit. */
+  requires?: string
+  /** Fichier de tracé, absent quand l'ouvrage n'a pas de géométrie propre. */
+  geometryId?: string
 }
 
-export interface PublicPolicy {
-  id: string
+export interface Selection {
+  projectId: string
+  phase: Phase
+  variantId?: string
+  optionTaken?: boolean
+}
+
+/** Programme d'exploitation du parc de bus, financé hors catalogue d'ouvrages. */
+export interface FleetProgramme {
+  id: 'maintenance' | 'electrification'
   name: string
   description: string
-  costPerMandat: number
+  /** Coût total, réparti sur la ou les phases retenues. */
+  cost: number
+}
+
+export type LeverId =
+  | 'gratuiteTotale'
+  | 'gratuiteMoins25'
+  | 'gratuiteJeunesAbonnes'
+  | 'suppressionTarifSocial'
+  | 'metroNuitWeekend'
+  | 'tva55'
+
+export interface ToggleLever {
+  id: LeverId
+  name: string
+  detail: string
+  /** Effet sur l'enveloppe d'une phase : négatif quand la mesure coûte. */
+  perPhase: number
+  /** La mesure ne relève pas de la Métropole mais d'une loi nationale. */
   requiresLaw?: boolean
-  lawType?: 'versement_mobilite' | 'tva'
+  /** La gratuité totale rend la mesure sans objet. */
+  voidedByFreeTravel?: boolean
 }
 
-export interface ProjectSelection {
-  projectId: string
-  period: MandatPeriod
-  upgraded?: boolean // Pour les projets avec upgrade simple
-  selectedUpgradeOptionId?: string // Pour les projets avec choix multiples (upgradeOptions)
-}
-
-// Pour les leviers de financement pouvant être étalés sur les mandats
-// true = M1+M2, false/null = désactivé, 'M1'/'M2'/'M1+M2' = période spécifique
-export type FinancingLeverPeriod = boolean | MandatPeriod
-
-export interface FinancingLevers {
-  gratuiteTotale: FinancingLeverPeriod
-  gratuiteMoins25ans: FinancingLeverPeriod // Gratuité -25 ans - 240M€/mandat
-  gratuiteJeunesAbonnes: FinancingLeverPeriod // Gratuité 11-18 ans enfants d'abonnés TCL
-  suppressionTarifSocial: FinancingLeverPeriod // Supprimer la tarification sociale (fin gratuité précaires, fin abonnements solidaires) +240M
-  metro24hWeekend: FinancingLeverPeriod // Métro 24h/24 les weekends
+export interface LeverState {
+  gratuiteTotale: Phase | null
+  gratuiteMoins25: Phase | null
+  gratuiteJeunesAbonnes: Phase | null
+  suppressionTarifSocial: Phase | null
+  metroNuitWeekend: Phase | null
+  tva55: Phase | null
+  /** Écart au tarif actuel des abonnements, en pourcentage. */
   tarifAbonnements: number
+  /** Écart au tarif actuel des tickets, en pourcentage. */
   tarifTickets: number
-  versementMobilite: number // -100 to 100
-  tva55: FinancingLeverPeriod
-  electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
-  entretienBus: MandatPeriod // Entretien et renouvellement de la flotte de bus - 800M€ total
+  /** Écart au taux actuel du versement mobilité, en pourcentage. */
+  versementMobilite: number
+  maintenance: Phase | null
+  electrification: Phase | null
 }
 
-export interface BudgetState {
-  m1: number
-  m2: number
-  totalImpact: number
-  efficiency: number
-  isValid: boolean
-  hasExcessiveDebt: boolean
+export interface PhaseBalance {
+  /** Enveloppe de départ, avant leviers. */
+  base: number
+  /** Effet net des leviers de financement sur cette phase. */
+  levers: number
+  /** Investissement engagé sur cette phase. */
+  spend: number
+  /** Ce qu'il reste : base + leviers - engagé. */
+  left: number
+}
+
+export interface Assessment {
+  m1: PhaseBalance
+  m2: PhaseBalance
+  /** Fréquentation supplémentaire cumulée, en voyageurs par jour. */
+  ridership: number
+  /** Voyageurs gagnés par million d'euros engagé. */
+  yield: number
+  spend: number
+  balanced: boolean
+}
+
+export interface Delivery {
+  projectId: string
+  name: string
+  mode: Mode
+  phase: Phase
+  start: number
+  year: number
 }

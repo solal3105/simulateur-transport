@@ -1,132 +1,62 @@
 # Simulateur Transport TCL Lyon
 
-Un simulateur interactif moderne pour l'arbitrage budgétaire des projets de transport en commun. Conçu initialement pour Lyon et le réseau TCL, ce simulateur permet aux citoyens de comprendre les arbitrages budgétaires sur deux mandats (2026-2032 et 2032-2038).
+Un jeu d'arbitrage budgétaire sur les transports de la Métropole de Lyon. On dispose de deux mandats, 2026-2032 et 2032-2038, d'environ 2 000 M€ d'investissement par mandat, et d'un catalogue de 22 ouvrages réels dont le total dépasse de très loin ce que deux enveloppes permettent de payer. Le joueur inscrit chaque ouvrage sur une phase, ajuste les leviers de financement, et voit le réseau qu'il laisse en 2038.
 
-## 🌍 Adaptabilité à d'autres villes
+Les coûts, les gains de fréquentation et les durées de chantier viennent de documents publics. Ce sont des estimations, pas des devis signés, et le produit le dit à l'écran.
 
-Ce projet est conçu pour être facilement adapté à d'autres réseaux de transport urbain. Les données des projets, les coûts et les leviers de financement sont centralisés dans `lib/data.ts`, permettant une personnalisation rapide pour votre ville.
+## Ce que le simulateur contient
 
-## 🚀 Fonctionnalités
+Le catalogue compte 22 ouvrages, du métro à la navette fluviale. Trois d'entre eux ont des variantes exclusives qui changent le coût, la fréquentation et la durée de chantier : la Ligne du Nord se fait en tram de surface, en tram enterré ou en métro ; la Ligne de l'Ouest en bus à haut niveau de service ou en tramway ; la Rive Droite pareillement. Le tramway de l'ouest peut être enterré en totalité pour 300 M€ de plus. Deux ouvrages dépendent d'un autre : le métro E vers Part-Dieu exige la section Bellecour, l'extension du tramway de l'ouest exige le tramway de l'ouest.
 
-- **27 projets de transport** à sélectionner et financer (métro, tramway, téléphérique, BHNS...)
-- **6 leviers de financement** ajustables en temps réel
-- **Calcul budgétaire dynamique** pour deux mandats
-- **Interface mobile-first** avec animations fluides
-- **Visualisation des résultats** avec impact voyageurs
-- **Cartographie interactive** des projets (avec support GeoJSON)
+Les leviers de financement modifient l'enveloppe de chaque phase : gratuité totale ou ciblée, tarification sociale, métro de nuit, prix des abonnements et des tickets, versement mobilité, taux de TVA. Deux d'entre eux, le versement mobilité et la TVA, ne relèvent pas de la Métropole mais d'une loi nationale, et l'interface le signale par un pictogramme.
 
-## 🛠️ Stack Technique
+L'entretien du parc de bus et son électrification forment un poste distinct, réparti lui aussi entre les phases.
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **UI Components**: shadcn/ui + Radix UI
-- **State Management**: Zustand
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
+Chaque ouvrage porte une durée de chantier, ce qui donne une année de mise en service et un calendrier. Un chantier financé sur les deux mandats peut très bien n'ouvrir qu'après 2038, et le tableau le dit en orange.
 
-## 📦 Installation
+## Stack
+
+Next.js 15 en App Router, React 19, TypeScript strict, Tailwind CSS v4, MapLibre GL JS pour le plan en WebGL, Zustand pour l'état, Motion pour les animations. Le fond de carte vient de CARTO, gratuit et sans clé d'API, et il est repeint dans la palette du produit avant d'être remis à la carte.
+
+## Lancer le projet
 
 ```bash
-# Installer les dépendances
 npm install
-
-# Lancer le serveur de développement
 npm run dev
 ```
 
-Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
-
-## 🎯 Utilisation
-
-1. **Page d'accueil** : Introduction au contexte et aux objectifs
-2. **Simulateur** : 
-   - Sélectionnez les projets pour M1, M2 ou M1+M2
-   - Ajustez les leviers de financement
-   - Visualisez l'impact budgétaire en temps réel
-3. **Résultats** : Synthèse complète de vos choix avec impact voyageurs
-
-## 📊 Données
-
-- Budget de base : 2 000 M€ par mandat
-- 27 projets allant de 36 M€ à 6 Md€
-- Impact jusqu'à 312 000 voyageurs/jour (Modernisation Ligne A)
-- Durées de construction réalistes (1 à 30 ans selon les projets)
-
-## 🔄 Adapter à votre ville
-
-Pour adapter ce simulateur à votre réseau de transport :
-
-1. **Modifiez les données** dans `lib/data.ts` :
-   - Liste des projets (`PROJECTS`)
-   - Coûts et impacts
-   - Durées de construction (`PROJECT_DURATIONS`)
-   - Leviers de financement (`FINANCING_IMPACTS`)
-
-2. **Ajoutez vos tracés** (optionnel) :
-   - Créez des fichiers GeoJSON pour vos projets
-   - Placez-les dans `public/geojson/`
-   - Nommez-les selon l'`id` du projet (ex: `metro-ligne-a.geojson`)
-
-3. **Personnalisez l'interface** :
-   - Couleurs et branding dans `tailwind.config.ts`
-   - Textes d'introduction dans `app/page.tsx`
-
-## 🏗️ Structure du Projet
-
-```
-simulateur-transport/
-├── app/                    # Pages Next.js
-│   ├── page.tsx           # Page d'accueil
-│   ├── simulator/         # Interface de simulation
-│   └── results/           # Page de résultats
-├── components/            # Composants React
-│   ├── ui/               # Composants UI réutilisables
-│   ├── ProjectCard.tsx   # Carte de projet
-│   ├── FinancingPanel.tsx # Panneau de financement
-│   └── BudgetIndicators.tsx # Indicateurs budgétaires
-├── lib/                   # Utilitaires et logique
-│   ├── data.ts           # Données des projets
-│   ├── store.ts          # State management (Zustand)
-│   ├── types.ts          # Types TypeScript
-│   └── utils.ts          # Fonctions utilitaires
-└── specs.md              # Spécifications fonctionnelles
-```
-
-## 🎨 Design
-
-- Design moderne avec gradients et animations
-- Mobile-first avec breakpoints responsive
-- Palette de couleurs cohérente (bleu primaire)
-- Composants accessibles (Radix UI)
-
-## 📝 Scripts
+Le simulateur s'ouvre sur http://localhost:3000.
 
 ```bash
-npm run dev      # Développement
-npm run build    # Build production
-npm run start    # Serveur production
-npm run lint     # Linting
+npm run build      # compilation de production
+npm run typecheck  # vérification des types sans émission
+npm run lint
 ```
 
-## 🔧 Configuration
+## Où vivent les données
 
-Le projet utilise :
-- TypeScript strict mode
-- ESLint avec config Next.js
-- TailwindCSS avec variables CSS personnalisées
-- Path aliases (`@/*`)
+Tout le contenu métier tient dans trois fichiers :
 
-## 📄 Licence
+- `lib/projects.ts` porte les ouvrages, leurs variantes, les programmes du parc de bus, les leviers de financement et les enveloppes. C'est le seul fichier à toucher pour changer un coût ou ajouter un projet.
+- `lib/budget.ts` contient le calcul, sans aucune dépendance à React : répartition par phase, effet des leviers, bilan, années de mise en service.
+- `lib/types.ts` décrit le modèle.
 
-Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+Les tracés sont des fichiers GeoJSON dans `public/geojson/`. Ils sont fusionnés en un seul jeu de données servi à la carte, avec pour chaque ouvrage une ancre de cartouche et une emprise :
 
-Vous êtes libre de :
-- **Partager** : copier et redistribuer le matériel
-- **Adapter** : remixer, transformer et créer à partir du matériel pour votre propre ville
+```bash
+node scripts/build-geo.mjs
+```
 
-Sous les conditions suivantes :
-- **Attribution** : Vous devez créditer l'œuvre originale
-- **Pas d'utilisation commerciale** : Vous ne pouvez pas utiliser le matériel à des fins commerciales
+À relancer après toute modification d'un tracé. La correspondance entre un identifiant d'ouvrage et son fichier se trouve en tête du script.
 
-Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+## Adapter à un autre réseau
+
+Remplacez le contenu de `lib/projects.ts` par vos ouvrages et vos leviers, déposez vos tracés dans `public/geojson/`, déclarez-les dans `scripts/build-geo.mjs`, puis ajustez l'emprise de départ dans `components/plan/basemap.ts`. Le reste de l'interface suit les données.
+
+## Design
+
+Le système visuel est décrit dans `DESIGN.md`, la vérité produit dans `PRODUCT.md`.
+
+## Licence
+
+CC BY-NC 4.0. Voir `LICENSE`.
