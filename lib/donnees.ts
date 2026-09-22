@@ -18,7 +18,7 @@ export interface Donnees {
 
 let promesse: Promise<Donnees> | null = null
 
-const lire = <T,>(nom: string) => fetch(`/data/${nom}.json`).then((r) => r.json() as Promise<T>)
+const lire = <T>(nom: string) => fetch(`/data/${nom}.json`).then((r) => r.json() as Promise<T>)
 
 export function chargerDonnees() {
   promesse ??= Promise.all([

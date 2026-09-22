@@ -4,6 +4,7 @@ import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
 import { MANDATS, mots, PROJETS } from '@/lib/catalogue'
+import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -21,7 +22,9 @@ function Voie({ titre, detail, onClick, possible }: { titre: string; detail: str
       onClick={onClick}
       className={clsx(
         'flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-left transition-shadow',
-        possible ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:shadow-[inset_0_0_0_1.5px_var(--color-muet)]',
+        possible
+          ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]'
+          : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:shadow-[inset_0_0_0_1.5px_var(--color-muet)]',
       )}
     >
       <span className="flex flex-1 flex-col gap-1">
@@ -108,7 +111,9 @@ export function FicheProjet({ id }: { id: string }) {
     corpsManque = (
       <>
         <div className="flex items-center gap-3.5 rounded-2xl bg-encre px-4 py-3.5 text-white">
-          <div className="chiffres text-[26px] font-black tracking-tight whitespace-nowrap text-[#ff6b78]">-{n(r.cout - Math.max(reste, 0))} M€</div>
+          <div className="chiffres text-[26px] font-black tracking-tight whitespace-nowrap text-[#ff6b78]">
+            -{n(r.cout - Math.max(reste, 0))} M€
+          </div>
           <div className="text-sm leading-snug font-semibold">
             Ce projet coûte {n(r.cout)} M€ et il vous en reste {n(Math.max(reste, 0))}.
           </div>
@@ -127,7 +132,11 @@ export function FicheProjet({ id }: { id: string }) {
               onClick={() => bati(true)}
             />
           ) : null}
-          <Voie titre="Trouver de l’argent" detail="Hausse des tarifs, baisse de la TVA, versement des entreprises." onClick={() => ouvrir({ type: 'leviers' })} />
+          <Voie
+            titre="Trouver de l’argent"
+            detail="Hausse des tarifs, baisse de la TVA, versement des entreprises."
+            onClick={() => ouvrir({ type: 'leviers' })}
+          />
           {liberable > 0 ? (
             <Voie
               titre="Retirer un projet déjà choisi"
@@ -151,7 +160,11 @@ export function FicheProjet({ id }: { id: string }) {
 
   return (
     <Panneau
-      surtitre={<Pastille icone={ICONE_MODE[r.mode]}>{projet.genre}</Pastille>}
+      surtitre={
+        <Pastille icone={ICONE_MODE[r.mode]} couleur={couleurProjet(id, { varianteId, option })}>
+          {projet.genre}
+        </Pastille>
+      }
       titre={projet.nom}
       pied={pied}
     >
@@ -161,8 +174,8 @@ export function FicheProjet({ id }: { id: string }) {
           <div className="flex flex-col gap-1.5 text-[14.5px] leading-relaxed">
             <span className="text-xs font-extrabold tracking-[0.08em] text-white/70 uppercase">Première décision, étape 2 sur 3</span>
             <span>
-              Il coûte {n(r.cout)} M€ : la partie noire de la jauge rouge, tout en haut, montre ce qu’il prendrait sur votre budget. Il apporterait{' '}
-              {n(r.voyageurs)} voyageurs par jour.
+              Il coûte {n(r.cout)} M€ : la partie noire de la jauge rouge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
+              apporterait {n(r.voyageurs)} voyageurs par jour.
             </span>
             <span className="font-extrabold">
               Appuyez sur « {verbe} pour {n(r.cout)} M€ » pour le lancer.
@@ -197,7 +210,9 @@ export function FicheProjet({ id }: { id: string }) {
               key={o.titre}
               className={clsx(
                 'flex cursor-pointer items-start gap-3 rounded-2xl bg-white px-4 py-3',
-                existant.etale === o.etale ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+                existant.etale === o.etale
+                  ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]'
+                  : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
               )}
             >
               <input
@@ -241,7 +256,14 @@ export function FicheProjet({ id }: { id: string }) {
                   choisi ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
                 )}
               >
-                <input type="radio" name="variante" value={v.id} checked={choisi} onChange={() => setVarianteId(v.id)} className="mt-1 size-5 accent-rouge" />
+                <input
+                  type="radio"
+                  name="variante"
+                  value={v.id}
+                  checked={choisi}
+                  onChange={() => setVarianteId(v.id)}
+                  className="mt-1 size-5 accent-rouge"
+                />
                 <span className="flex flex-1 flex-col gap-1.5">
                   <span className="text-base font-extrabold">{v.nom}</span>
                   <span className="text-[13.5px] leading-snug text-gris">{v.detail}</span>
@@ -250,7 +272,9 @@ export function FicheProjet({ id }: { id: string }) {
                     <span className="text-rouge">+{n(v.voyageurs)} voy./jour</span>
                     <span className="text-gris">ouvre en {ouverture(mandat, v.duree)}</span>
                   </span>
-                  {tropCher ? <span className="text-[12.5px] font-extrabold text-rouge-fonce">Plus cher que tout votre budget restant</span> : null}
+                  {tropCher ? (
+                    <span className="text-[12.5px] font-extrabold text-rouge-fonce">Plus cher que tout votre budget restant</span>
+                  ) : null}
                 </span>
               </label>
             )
@@ -275,7 +299,13 @@ export function FicheProjet({ id }: { id: string }) {
           icone="pieces"
           valeur={n(r.cout)}
           unite="M€"
-          legende={existant ? 'investis' : reste > 0 ? `${Math.min(999, Math.round((r.cout / reste) * 100))} % de ce qui vous reste` : 'votre budget est épuisé'}
+          legende={
+            existant
+              ? 'investis'
+              : reste > 0
+                ? `${Math.min(999, Math.round((r.cout / reste) * 100))} % de ce qui vous reste`
+                : 'votre budget est épuisé'
+          }
         />
         <CarteChiffre icone="voyageurs" valeur={r.voyageurs > 0 ? `+${n(r.voyageurs)}` : '0'} legende="voyageurs par jour" accent />
         <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier`} />

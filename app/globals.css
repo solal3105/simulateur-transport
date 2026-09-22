@@ -46,41 +46,52 @@
 
 /* Étiquettes de prix posées sur la carte. */
 .etiquette {
-  font: 800 12px/1 var(--font-figtree), sans-serif;
+  --mode: var(--color-encre);
+  font:
+    800 12px/1 var(--font-figtree),
+    sans-serif;
   padding: 5px 9px;
   border-radius: 999px;
   background: #fff;
   color: var(--color-encre);
-  box-shadow: inset 0 0 0 1.5px var(--color-encre);
+  box-shadow: inset 0 0 0 2px var(--mode);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .etiquette[data-etat='construit'] {
-  background: var(--color-rouge);
+  background: var(--mode);
   color: #fff;
   box-shadow: none;
 }
 .etiquette[data-etat='choisi'] {
   background: var(--color-encre);
   color: #fff;
-  box-shadow: 0 0 0 4px rgb(227 5 27 / 0.25);
+  box-shadow: 0 0 0 3px var(--mode);
 }
 .etiquette[data-etat='indisponible'] {
   opacity: 0.45;
 }
 .etiquette[data-etat='chantier'] {
-  color: var(--color-rouge);
-  box-shadow: inset 0 0 0 1.5px var(--color-rouge);
+  color: var(--mode);
+  box-shadow: inset 0 0 0 2px var(--mode);
+}
+.etiquette-masquee {
+  visibility: hidden;
 }
 .etiquette:hover {
   background: var(--color-rouge-pale);
 }
 .lieu {
-  font: 800 10.5px/1 var(--font-figtree), sans-serif;
+  font:
+    800 10.5px/1 var(--font-figtree),
+    sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-muet);
-  text-shadow: 0 0 3px #f4f1ec, 0 0 3px #f4f1ec, 0 0 3px #f4f1ec;
+  text-shadow:
+    0 0 3px #f4f1ec,
+    0 0 3px #f4f1ec,
+    0 0 3px #f4f1ec;
   pointer-events: none;
 }
 .lieu[data-grand='1'] {
@@ -99,7 +110,9 @@
 /* Nom d'un arrêt posé par le joueur. */
 .nom-arret {
   display: block;
-  font: 800 12px/1 var(--font-figtree), sans-serif;
+  font:
+    800 12px/1 var(--font-figtree),
+    sans-serif;
   color: var(--color-encre);
   background: #fff;
   padding: 4px 7px;
@@ -112,7 +125,9 @@
 /* Le gain de voyageurs qui s'élève au-dessus d'un projet qu'on vient de lancer. */
 .gain-flottant {
   display: block;
-  font: 900 17px/1 var(--font-figtree), sans-serif;
+  font:
+    900 17px/1 var(--font-figtree),
+    sans-serif;
   color: #fff;
   background: var(--color-rouge);
   padding: 7px 12px;

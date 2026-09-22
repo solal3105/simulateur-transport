@@ -4,6 +4,7 @@ import { clsx } from 'clsx'
 import { useMemo, useState } from 'react'
 
 import { CATALOGUE, mots } from '@/lib/catalogue'
+import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -25,9 +26,7 @@ export function Liste() {
       const r = resoudre(p, c)
       return { p, r, c, rendement: r.cout > 0 ? r.voyageurs / r.cout : 0, annee: ouverture(c?.mandat ?? mandat, r.duree) }
     })
-    rows.sort((a, b) =>
-      tri === 'rendement' ? b.rendement - a.rendement : tri === 'prix' ? a.r.cout - b.r.cout : a.annee - b.annee,
-    )
+    rows.sort((a, b) => (tri === 'rendement' ? b.rendement - a.rendement : tri === 'prix' ? a.r.cout - b.r.cout : a.annee - b.annee))
     return rows
   }, [chantiers, mandat, tri])
 
@@ -47,7 +46,10 @@ export function Liste() {
             type="button"
             aria-pressed={tri === t.id}
             onClick={() => setTri(t.id)}
-            className={clsx('min-h-9 rounded-full px-3.5 text-[13.5px] font-extrabold', tri === t.id ? 'bg-encre text-white' : 'bg-sable text-encre')}
+            className={clsx(
+              'min-h-9 rounded-full px-3.5 text-[13.5px] font-extrabold',
+              tri === t.id ? 'bg-encre text-white' : 'bg-sable text-encre',
+            )}
           >
             {t.texte}
           </button>
@@ -59,11 +61,14 @@ export function Liste() {
           <h3 className="text-base font-black">Vos lignes</h3>
           {lignes.map((l) => (
             <div key={l.id} className="flex items-center gap-3 rounded-2xl bg-rouge-pale px-4 py-3">
-              <Icone nom="trace" taille={20} className="text-rouge" />
+              <span style={{ color: couleurLigne(l.mode) }}>
+                <Icone nom="trace" taille={20} />
+              </span>
               <span className="flex flex-1 flex-col">
                 <span className="font-extrabold">{l.nom}</span>
                 <span className="chiffres text-[12.5px] font-semibold text-gris">
-                  {n(l.estimation.cout)} M€ · +{n(l.estimation.nouveaux)} nouveaux voyageurs par jour · ouvre en {ouverture(l.mandat, l.estimation.duree)}
+                  {n(l.estimation.cout)} M€ · +{n(l.estimation.nouveaux)} nouveaux voyageurs par jour · ouvre en{' '}
+                  {ouverture(l.mandat, l.estimation.duree)}
                 </span>
               </span>
               {l.mandat === mandat ? (
@@ -77,7 +82,11 @@ export function Liste() {
                       {l.etale ? 'Payer en une fois' : 'Payer en deux fois'}
                     </button>
                   ) : null}
-                  <button type="button" onClick={() => retirer(l.id)} className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold">
+                  <button
+                    type="button"
+                    onClick={() => retirer(l.id)}
+                    className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold"
+                  >
                     Retirer
                   </button>
                 </span>
@@ -111,7 +120,10 @@ export function Liste() {
             )}
           >
             <span role="cell" className="flex min-w-0 items-center gap-3">
-              <span className={clsx('grid size-10 shrink-0 place-items-center rounded-xl', c ? 'bg-rouge text-white' : 'bg-sable')}>
+              <span
+                className="grid size-10 shrink-0 place-items-center rounded-xl"
+                style={c ? { background: couleurProjet(p.id, c), color: '#fff' } : { boxShadow: `inset 0 0 0 2px ${couleurProjet(p.id)}`, color: couleurProjet(p.id) }}
+              >
                 <Icone nom={c ? 'valider' : ICONE_MODE[r.mode]!} taille={19} epaisseur={c ? 2.8 : 2} />
               </span>
               <span className="flex min-w-0 flex-col">
@@ -148,7 +160,11 @@ export function Liste() {
               ) : c ? (
                 <span className="text-[13px] font-extrabold text-rouge">{mots(p.id).participe}</span>
               ) : (
-                <button type="button" onClick={() => ouvrir({ type: 'projet', id: p.id })} className="min-h-10 rounded-full bg-rouge-pale px-4 text-[13.5px] font-extrabold text-rouge-fonce">
+                <button
+                  type="button"
+                  onClick={() => ouvrir({ type: 'projet', id: p.id })}
+                  className="min-h-10 rounded-full bg-rouge-pale px-4 text-[13.5px] font-extrabold text-rouge-fonce"
+                >
                   Voir le projet
                 </button>
               )}

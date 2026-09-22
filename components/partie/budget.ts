@@ -11,7 +11,7 @@ import type { Segment } from '../ui'
 export function useBilan(mandat?: Mandat) {
   const { chantiers, lignes, leviers, mandat: courant } = useJeu()
   const m = mandat ?? courant
-  return useMemo(() => bilanMandat(m, chantiers, lignes, leviers[m]), [m, chantiers, lignes, leviers])
+  return useMemo(() => bilanMandat(m, chantiers, lignes, leviers), [m, chantiers, lignes, leviers])
 }
 
 export function useScore() {

@@ -15,6 +15,7 @@ import { Bouton, Icone } from '../ui'
 import { Entete } from './Entete'
 import { BarreBas, Programme } from './Programme'
 import { Tutoriel } from './Tutoriel'
+import { LEGENDE_MODES } from '@/lib/couleurs'
 
 function useGrandEcran() {
   const [grand, setGrand] = useState(false)
@@ -36,7 +37,10 @@ function Message() {
     return () => clearTimeout(t)
   }, [message, effacerMessage])
   return (
-    <div aria-live="polite" className="pointer-events-none absolute inset-x-3 top-44 z-20 flex justify-center lg:top-auto lg:right-auto lg:bottom-24 lg:left-[358px] lg:justify-start">
+    <div
+      aria-live="polite"
+      className="pointer-events-none absolute inset-x-3 top-44 z-20 flex justify-center lg:top-auto lg:right-auto lg:bottom-24 lg:left-[358px] lg:justify-start"
+    >
       <AnimatePresence>
         {message ? (
           <motion.div
@@ -54,6 +58,31 @@ function Message() {
           </motion.div>
         ) : null}
       </AnimatePresence>
+    </div>
+  )
+}
+
+/** Les couleurs des projets par mode, et le réseau actuel en gris. */
+function Legende() {
+  return (
+    <div
+      aria-label="Légende de la carte"
+      className="absolute top-[166px] left-3 z-10 flex max-w-[calc(100%-24px)] flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl bg-white/95 px-3 py-2 text-[11.5px] font-bold shadow-flotte lg:top-auto lg:bottom-6 lg:left-[358px] lg:gap-x-4 lg:px-4 lg:py-3 lg:text-[12.5px]"
+    >
+      {LEGENDE_MODES.map((m) => (
+        <span key={m.nom} className="flex items-center gap-1.5">
+          <span className="h-1.5 w-4 rounded-full" style={{ background: m.couleur }} />
+          {m.nom}
+        </span>
+      ))}
+      <span className="hidden items-center gap-1.5 text-gris lg:flex">
+        <span className="w-4 border-t-2 border-dashed border-gris" />
+        En pointillés : pas encore décidé
+      </span>
+      <span className="hidden items-center gap-1.5 text-gris lg:flex">
+        <span className="h-1 w-4 rounded-full bg-[#958e84]" />
+        Réseau actuel
+      </span>
     </div>
   )
 }
@@ -89,25 +118,7 @@ export function Partie() {
               Voir en liste
             </Bouton>
           </div>
-          <div className="absolute bottom-6 left-[358px] z-10 hidden flex-wrap gap-4 rounded-2xl bg-white px-4 py-3 text-[12.5px] font-semibold shadow-flotte lg:flex">
-            <span className="flex items-center gap-2">
-              <span className="w-6 border-t-[2.5px] border-dashed border-encre" />
-              Projet possible, avec son prix en M€
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="h-1.5 w-6 rounded-full bg-rouge" />
-              Projet que vous construisez
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="flex w-6 gap-0.5">
-                <span className="size-2 rounded-full bg-metro-a" />
-                <span className="size-2 rounded-full bg-metro-b" />
-                <span className="size-2 rounded-full bg-metro-c" />
-                <span className="size-2 rounded-full bg-metro-d" />
-              </span>
-              Métro actuel, lignes A à D
-            </span>
-          </div>
+          <Legende />
         </>
       ) : null}
 

@@ -8,9 +8,10 @@ interface Contenu {
   retenus: number
   total: number
   equilibre: boolean
-  /** Noms de tracé des projets construits, et lignes du joueur. */
-  traces: Set<string>
-  lignes: [number, number][][]
+  /** Tracés des projets décidés, avec la couleur de leur mode. */
+  traces: Map<string, string>
+  /** Lignes du joueur, avec leur couleur. */
+  lignes: { arrets: [number, number][]; couleur: string }[]
   adresse: string
 }
 
@@ -72,19 +73,21 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
         ? '#cfe2ec'
         : f.properties.kind === 'tram'
           ? '#e1ddd7'
-          : ({ A: '#e9a3bb', B: '#9dbfe0', C: '#f7cd92', D: '#9ccfaa' } as Record<string, string>)[f.properties.line ?? 'A']!
+          : '#b9b2a8'
     for (const part of f.geometry.coordinates) trait(part, couleur, (f.properties.kind === 'fleuve' ? 9 : 2.5) * s)
   }
   for (const f of donnees.projets.features) {
     if (c.traces.has(f.properties.id)) continue
     for (const part of f.geometry.coordinates) trait(part, 'rgba(27,27,31,0.25)', 2.5 * s, [6 * s, 5 * s])
   }
-  const rouges = [
-    ...donnees.projets.features.filter((f) => c.traces.has(f.properties.id)).flatMap((f) => f.geometry.coordinates),
-    ...c.lignes,
+  const faits = [
+    ...donnees.projets.features
+      .filter((f) => c.traces.has(f.properties.id))
+      .flatMap((f) => f.geometry.coordinates.map((coords) => ({ coords, couleur: c.traces.get(f.properties.id)! }))),
+    ...c.lignes.map((l) => ({ coords: l.arrets, couleur: l.couleur })),
   ]
-  for (const part of rouges) trait(part, '#ffffff', 13 * s)
-  for (const part of rouges) trait(part, ROUGE, 8 * s)
+  for (const f of faits) trait(f.coords, '#ffffff', 13 * s)
+  for (const f of faits) trait(f.coords, f.couleur, 8 * s)
   g.restore()
 
   // Textes.

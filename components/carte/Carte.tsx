@@ -14,6 +14,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
+import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { carreau, cercle, LIEUX, milieu } from '@/lib/geo'
@@ -34,8 +35,8 @@ const COULEURS = {
   bordRoute: '#e3ddd4',
   rail: '#bdb6ac',
   limite: '#cfc8bd',
-  tram: '#cdc6bc',
-  metro: { A: '#d8336f', B: '#1d6fb8', C: '#f29a1f', D: '#2e9e4f' },
+  tram: '#d2cbc1',
+  metroActuel: '#958e84',
 }
 
 /** Emprise de départ : la Métropole, de Tassin à Meyzieu. */
@@ -78,7 +79,11 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
     features: donnees.carreauxBruts
       .map(([lon, lat, pop, jobs]) => ({ poids: pop! + 0.3 * jobs!, lon: lon!, lat: lat! }))
       .filter((c) => c.poids >= 150)
-      .map((c) => ({ type: 'Feature', properties: { poids: c.poids }, geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat)] } })),
+      .map((c) => ({
+        type: 'Feature',
+        properties: { poids: c.poids },
+        geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat)] },
+      })),
   }
   const stations: FeatureCollection<Point> = {
     type: 'FeatureCollection',
@@ -182,9 +187,8 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         filter: genre('metro'),
         layout: { 'line-cap': 'round' },
         paint: {
-          'line-color': ['match', ['get', 'line'], 'A', COULEURS.metro.A, 'B', COULEURS.metro.B, 'C', COULEURS.metro.C, COULEURS.metro.D],
-          'line-opacity': 0.7,
-          'line-width': largeur(2.8),
+          'line-color': COULEURS.metroActuel,
+          'line-width': largeur(2.6),
         },
       },
       {
@@ -206,10 +210,10 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         filter: ['!', ['in', ['get', 'etat'], ['literal', ['construit', 'chantier', 'choisi']]]],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': COULEURS.encre,
-          'line-opacity': ['case', ['==', ['get', 'etat'], 'indisponible'], 0.25, 0.8],
-          'line-width': largeur(2.2),
-          'line-dasharray': [2, 1.6],
+          'line-color': ['get', 'couleur'],
+          'line-opacity': ['case', ['==', ['get', 'etat'], 'indisponible'], 0.3, 0.9],
+          'line-width': largeur(2.6),
+          'line-dasharray': [2, 1.4],
         },
       },
       {
@@ -218,14 +222,26 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         source: 'projets',
         filter: ['in', ['get', 'etat'], ['literal', ['construit', 'chantier', 'choisi']]],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(9) },
+        paint: {
+          'line-color': ['case', ['==', ['get', 'etat'], 'choisi'], COULEURS.encre, '#fff'],
+          // Le zoom doit rester l'expression la plus externe : le choix de largeur se fait à chaque palier.
+          'line-width': [
+            'interpolate',
+            ['exponential', 1.5],
+            ['zoom'],
+            ...[10, 13, 15].flatMap((z, i) => {
+              const k = [0.6, 1.4, 3][i]!
+              return [z, ['case', ['==', ['get', 'etat'], 'choisi'], 10.5 * k, 9 * k]]
+            }),
+          ] as unknown as number,
+        },
       },
       {
         id: 'eclat',
         type: 'line',
         source: 'eclat',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.rouge, 'line-opacity': 0, 'line-width': 30, 'line-blur': 8 },
+        paint: { 'line-color': ['get', 'couleur'], 'line-opacity': 0, 'line-width': 30, 'line-blur': 8 },
       },
       {
         id: 'projets-construits',
@@ -233,14 +249,14 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         source: 'projets',
         filter: ['==', ['get', 'etat'], 'construit'],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5) },
+        paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5) },
       },
       {
         id: 'projets-chantier',
         type: 'line',
         source: 'projets',
         filter: ['==', ['get', 'etat'], 'chantier'],
-        paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
+        paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
       },
       {
         id: 'projets-choisi',
@@ -248,7 +264,7 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         source: 'projets',
         filter: ['==', ['get', 'etat'], 'choisi'],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.encre, 'line-width': largeur(5.5) },
+        paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5) },
       },
       { id: 'projets-cible', type: 'line', source: 'projets', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 } },
       {
@@ -264,14 +280,14 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         source: 'joueur',
         filter: ['!', ['get', 'chantier']],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5) },
+        paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5) },
       },
       {
         id: 'joueur-chantier',
         type: 'line',
         source: 'joueur',
         filter: ['get', 'chantier'],
-        paint: { 'line-color': COULEURS.rouge, 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
+        paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
       },
       {
         id: 'zones',
@@ -293,7 +309,7 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         source: 'brouillon',
         filter: ['==', ['geometry-type'], 'LineString'],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.encre, 'line-width': largeur(5.5) },
+        paint: { 'line-color': ['coalesce', ['get', 'couleur'], COULEURS.encre], 'line-width': largeur(5.5) },
       },
       {
         id: 'brouillon-arrets',
@@ -314,10 +330,10 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
 const reduit = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** Fait briller un tracé qui vient d'être décidé, puis l'éteint. */
-function eclat(m: CarteMaplibre, coordonnees: number[][][]) {
+function eclat(m: CarteMaplibre, coordonnees: number[][][], couleur: string) {
   const source = m.getSource('eclat') as GeoJSONSource | undefined
   if (!source || reduit()) return
-  source.setData({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: coordonnees } })
+  source.setData({ type: 'Feature', properties: { couleur }, geometry: { type: 'MultiLineString', coordinates: coordonnees } })
   const debut = performance.now()
   const duree = 1200
   const pas = (t: number) => {
@@ -328,6 +344,30 @@ function eclat(m: CarteMaplibre, coordonnees: number[][][]) {
     if (x < 1) requestAnimationFrame(pas)
   }
   requestAnimationFrame(pas)
+}
+
+const PRIORITE: Record<string, number> = { choisi: 0, construit: 1, chantier: 1, etude: 2, indisponible: 3 }
+
+/**
+ * Masque les étiquettes qui se chevauchent : le projet choisi et les projets décidés passent
+ * d'abord, puis les plus chers. Les tracés restent cliquables, et la liste donne accès à tout.
+ */
+function eviterChevauchements(etiquettes: Map<string, HTMLButtonElement>) {
+  const visibles: DOMRect[] = []
+  const ordre = [...etiquettes.values()]
+    .filter((el) => el.style.display !== 'none')
+    .sort(
+      (a, b) =>
+        (PRIORITE[a.dataset.etat ?? 'etude'] ?? 2) - (PRIORITE[b.dataset.etat ?? 'etude'] ?? 2) ||
+        Number(b.dataset.cout ?? 0) - Number(a.dataset.cout ?? 0),
+    )
+  for (const el of ordre) {
+    el.classList.remove('etiquette-masquee')
+    const r = el.getBoundingClientRect()
+    const gene = visibles.some((v) => r.left < v.right + 4 && r.right > v.left - 4 && r.top < v.bottom + 2 && r.bottom > v.top - 2)
+    if (gene) el.classList.add('etiquette-masquee')
+    else visibles.push(r)
+  }
 }
 
 /** Un « +30 000 » qui s'élève au-dessus d'un tracé. */
@@ -376,7 +416,8 @@ export function Carte({
       let e: EtatProjet = 'etude'
       if (c) {
         const annee = ouverture(c.mandat, resoudre(p, c).duree)
-        if (anneeMax !== undefined) e = annee <= anneeMax ? 'construit' : 'etude'
+        // Dans un récapitulatif, un projet apparaît en chantier l'année de sa décision, puis s'allume à son ouverture.
+        if (anneeMax !== undefined) e = anneeMax < MANDATS[c.mandat].debut ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
         else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
       } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
@@ -438,6 +479,7 @@ export function Carte({
       el.className = 'etiquette'
       el.setAttribute('aria-label', `${projet.nom}, ${n(projet.cout)} millions d'euros`)
       el.textContent = n(resoudre(projet).cout)
+      el.dataset.cout = String(resoudre(projet).cout)
       if (decor) el.hidden = true
       el.addEventListener('click', (ev) => {
         ev.stopPropagation()
@@ -463,6 +505,7 @@ export function Carte({
     m.on('click', (e: MapMouseEvent) => {
       if (useJeu.getState().brouillon) useJeu.getState().ajouterArret([e.lngLat.lng, e.lngLat.lat])
     })
+    m.on('moveend', () => eviterChevauchements(etiquettes))
     m.on('load', () => {
       pret.current = true
       appliquerEtat.current()
@@ -488,7 +531,18 @@ export function Carte({
       if (!pret.current) return
       ;(m.getSource('projets') as GeoJSONSource).setData({
         ...donnees.projets,
-        features: donnees.projets.features.map((f) => ({ ...f, properties: { ...f.properties, etat: etats.get(f.properties.id) ?? 'etude' } })),
+        features: donnees.projets.features.map((f) => {
+          const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
+          const choix = projet && chantiers.find((x) => x.id === projet.id)
+          return {
+            ...f,
+            properties: {
+              ...f.properties,
+              etat: etats.get(f.properties.id) ?? 'etude',
+              couleur: projet ? couleurProjet(projet.id, choix) : '#1b1b1f',
+            },
+          }
+        }),
       })
 
       // Ce qui vient d'être décidé brille un instant, avec le gain de voyageurs.
@@ -497,12 +551,14 @@ export function Carte({
         for (const [nomTrace, etat] of etats) {
           const etaitFait = avant.get(nomTrace) === 'construit' || avant.get(nomTrace) === 'chantier'
           const estFait = etat === 'construit' || etat === 'chantier'
-          if (!estFait || etaitFait) continue
+          // En jeu : le projet brille quand on le décide. Dans un récapitulatif : quand il ouvre.
+          const brille = anneeMax === undefined ? estFait && !etaitFait : etat === 'construit' && avant.get(nomTrace) !== 'construit'
+          if (!brille) continue
           const f = donnees.projets.features.find((x) => x.properties.id === nomTrace)
           const projet = CATALOGUE.find((p) => p.trace === nomTrace)
           const c = projet && chantiers.find((x) => x.id === projet.id)
           if (!f) continue
-          eclat(m, f.geometry.coordinates)
+          eclat(m, f.geometry.coordinates, projet ? couleurProjet(projet.id, c) : '#e3051b')
           if (projet && c && !reduit()) gainFlottant(m, milieu(f.geometry), `+${n(resoudre(projet, c).voyageurs)}`)
         }
       }
@@ -514,10 +570,18 @@ export function Carte({
         el.dataset.etat = etat
         const projet = CATALOGUE.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
+        if (projet) el.style.setProperty('--mode', couleurProjet(projet.id, c))
         el.textContent =
-          etat === 'construit' && projet ? mots(projet.id).participe : etat === 'chantier' ? 'En chantier' : projet ? n(resoudre(projet, c).cout) : ''
+          etat === 'construit' && projet
+            ? mots(projet.id).participe
+            : etat === 'chantier'
+              ? 'En chantier'
+              : projet
+                ? n(resoudre(projet, c).cout)
+                : ''
       }
       for (const el of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
+      requestAnimationFrame(() => eviterChevauchements(etiquettes))
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
       m.getCanvas().style.cursor = trace ? 'crosshair' : ''
 
@@ -527,7 +591,10 @@ export function Carte({
           .filter((l) => anneeMax === undefined || ouverture(l.mandat, l.estimation.duree) <= anneeMax)
           .map((l) => ({
             type: 'Feature',
-            properties: { chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin },
+            properties: {
+              chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin,
+              couleur: couleurLigne(l.mode),
+            },
             geometry: { type: 'LineString', coordinates: l.arrets },
           })),
       }
@@ -535,7 +602,12 @@ export function Carte({
 
       const arrets = brouillon?.arrets ?? []
       const traits: Feature<LineString | Point>[] = []
-      if (arrets.length >= 2) traits.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: arrets } })
+      if (arrets.length >= 2 && brouillon)
+        traits.push({
+          type: 'Feature',
+          properties: { couleur: couleurLigne(brouillon.mode) },
+          geometry: { type: 'LineString', coordinates: arrets },
+        })
       arrets.forEach((a, i) =>
         traits.push({ type: 'Feature', properties: { dernier: i === arrets.length - 1 }, geometry: { type: 'Point', coordinates: a } }),
       )
@@ -583,6 +655,14 @@ export function Carte({
     else m.once('load', cadrer)
   }, [donnees, ecran, tuto])
 
+  // À la sortie du tutoriel, la carte revient sur toute la Métropole.
+  const ecranPrecedent = useRef(ecran)
+  useEffect(() => {
+    const m = carte.current
+    if (m && ecranPrecedent.current === 'tuto' && ecran !== 'tuto') m.fitBounds(EMPRISE, { padding: marges, duration: 1200 })
+    ecranPrecedent.current = ecran
+  }, [ecran, marges])
+
   // Recadrage quand les panneaux changent de taille.
   useEffect(() => {
     carte.current?.easeTo({ padding: marges, duration: 400 })
@@ -591,7 +671,9 @@ export function Carte({
   return (
     <div className="absolute inset-0">
       <div ref={conteneur} className="h-full w-full" />
-      {!donnees ? <div className="absolute inset-0 grid place-items-center bg-sable text-sm font-bold text-muet">Chargement de la carte</div> : null}
+      {!donnees ? (
+        <div className="absolute inset-0 grid place-items-center bg-sable text-sm font-bold text-muet">Chargement de la carte</div>
+      ) : null}
       <span className="sr-only" aria-live="polite">
         {trace ? `${brouillon?.arrets.length ?? 0} arrêts posés` : ''}
       </span>

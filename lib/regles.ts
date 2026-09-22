@@ -1,5 +1,5 @@
 import { ENTRETIEN_BUS, ENVELOPPE, MANDATS, PROJETS } from './catalogue'
-import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, Projet } from './types'
+import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, ModeLigne, Projet } from './types'
 
 /** Ce qu'un projet coûte et rapporte, une fois sa version et son option choisies. */
 export interface Resolu {
@@ -70,6 +70,8 @@ function part(cout: number, decision: { mandat: Mandat; etale: boolean }, mandat
 export interface Bilan {
   enveloppe: number
   leviers: number
+  /** Argent non dépensé au premier mandat, qui passe au second. */
+  reliquat: number
   bus: number
   /** Projets décidés pendant ce mandat. */
   projets: number
@@ -78,12 +80,9 @@ export interface Bilan {
   reste: number
 }
 
-export function bilanMandat(
-  mandat: Mandat,
-  chantiers: Chantier[],
-  lignes: LigneJoueur[],
-  leviers: Leviers,
-): Bilan {
+export function bilanMandat(mandat: Mandat, chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>): Bilan {
+  // Ce qui n'a pas été dépensé au premier mandat reste disponible au second.
+  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers).reste) : 0
   let projets = 0
   let reports = 0
   const ajouter = (cout: number, d: { mandat: Mandat; etale: boolean }) => {
@@ -96,11 +95,12 @@ export function bilanMandat(
     if (p) ajouter(resoudre(p, c).cout, c)
   }
   for (const l of lignes) ajouter(l.estimation.cout, l)
-  const effet = effetLeviers(leviers)
-  const reste = ENVELOPPE + effet - ENTRETIEN_BUS - projets - reports
+  const effet = effetLeviers(leviers[mandat])
+  const reste = ENVELOPPE + effet + reliquat - ENTRETIEN_BUS - projets - reports
   return {
     enveloppe: ENVELOPPE,
     leviers: effet,
+    reliquat,
     bus: ENTRETIEN_BUS,
     projets: Math.round(projets),
     reports: Math.round(reports),
@@ -117,6 +117,9 @@ export interface Ouverture {
   annee: number
   voyageurs: number
   joueur: boolean
+  /** Pour retrouver la couleur de la ligne : sa version, ou le mode d'une ligne du joueur. */
+  varianteId?: string
+  modeLigne?: ModeLigne
 }
 
 export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouverture[] {
@@ -125,10 +128,17 @@ export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouvert
     const p = PROJETS.get(c.id)
     if (!p) continue
     const r = resoudre(p, c)
-    liste.push({ id: p.id, nom: p.nom, annee: ouverture(c.mandat, r.duree), voyageurs: r.voyageurs, joueur: false })
+    liste.push({ id: p.id, nom: p.nom, annee: ouverture(c.mandat, r.duree), voyageurs: r.voyageurs, joueur: false, varianteId: c.varianteId })
   }
   for (const l of lignes) {
-    liste.push({ id: l.id, nom: l.nom, annee: ouverture(l.mandat, l.estimation.duree), voyageurs: l.estimation.nouveaux, joueur: true })
+    liste.push({
+      id: l.id,
+      nom: l.nom,
+      annee: ouverture(l.mandat, l.estimation.duree),
+      voyageurs: l.estimation.nouveaux,
+      joueur: true,
+      modeLigne: l.mode,
+    })
   }
   return liste.sort((a, b) => a.annee - b.annee || b.voyageurs - a.voyageurs)
 }

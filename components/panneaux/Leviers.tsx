@@ -12,7 +12,8 @@ import { segmentsBudget, useBilan } from '../partie/budget'
 import { Bouton, Icone, Jauge, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
 
-const euros = (v: number) => (Math.round((v + 1e-9) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const euros = (v: number) =>
+  (Math.round((v + 1e-9) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 /**
  * Repère d'inflation : l'objectif de 2 % par an de la Banque centrale européenne, cumulé sur
@@ -46,7 +47,18 @@ function Repere({ hausse }: { hausse: number }) {
   )
 }
 
-function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive, enPlus }: {
+function Pas({
+  titre,
+  valeur,
+  unite,
+  detail,
+  gain,
+  min,
+  max,
+  onChange,
+  desactive,
+  enPlus,
+}: {
   titre: string
   valeur: number
   unite: string
@@ -62,7 +74,9 @@ function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive
     <div className="flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-base font-extrabold">{titre}</span>
-        <span className={clsx('chiffres text-sm font-black whitespace-nowrap', gain > 0 ? 'text-rouge' : 'text-muet')}>{signe(gain)} M€</span>
+        <span className={clsx('chiffres text-sm font-black whitespace-nowrap', gain > 0 ? 'text-rouge' : 'text-muet')}>
+          {signe(gain)} M€
+        </span>
       </div>
       <div className="flex items-center gap-2.5">
         <button
@@ -94,7 +108,14 @@ function Pas({ titre, valeur, unite, detail, gain, min, max, onChange, desactive
   )
 }
 
-function Interrupteur({ titre, detail, gain, actif, onChange, desactive }: {
+function Interrupteur({
+  titre,
+  detail,
+  gain,
+  actif,
+  onChange,
+  desactive,
+}: {
   titre: string
   detail: string
   gain: number
@@ -115,7 +136,14 @@ function Interrupteur({ titre, detail, gain, actif, onChange, desactive }: {
         <span className="text-[13.5px] leading-snug text-gris">{desactive ?? detail}</span>
         <span className={clsx('chiffres text-[13px] font-black', gain > 0 ? 'text-rouge' : 'text-gris')}>{signe(gain)} M€ par mandat</span>
       </span>
-      <input type="checkbox" role="switch" checked={actif} disabled={!!desactive} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <input
+        type="checkbox"
+        role="switch"
+        checked={actif}
+        disabled={!!desactive}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
       <span
         aria-hidden="true"
         className={clsx(
@@ -149,7 +177,10 @@ export function Leviers() {
       {contenu}
     </section>
   )
-  const maj = <K extends keyof TLeviers>(k: K) => (v: TLeviers[K]) => levier(k, v)
+  const maj =
+    <K extends keyof TLeviers>(k: K) =>
+    (v: TLeviers[K]) =>
+      levier(k, v)
 
   return (
     <Panneau
@@ -169,7 +200,9 @@ export function Leviers() {
         </div>
         <Jauge segments={segments} total={total} surRouge label={`Il reste ${n(bilan.reste)} millions d’euros sur ce mandat.`} />
         <div className="text-[13px] font-semibold opacity-90">
-          Vos choix changent l’argent disponible sur ce mandat{mandat === 1 ? ' et restent en place au suivant, où vous pourrez les revoir' : ''}. Au total, ils {bilan.leviers >= 0 ? 'rapportent' : 'coûtent'} {n(Math.abs(bilan.leviers))} M€.
+          Vos choix changent l’argent disponible sur ce mandat
+          {mandat === 1 ? ' et restent en place au suivant, où vous pourrez les revoir' : ''}. Au total, ils{' '}
+          {bilan.leviers >= 0 ? 'rapportent' : 'coûtent'} {n(Math.abs(bilan.leviers))} M€.
         </div>
       </div>
 
@@ -217,8 +250,8 @@ export function Leviers() {
             />
             <p className="text-[12.5px] leading-relaxed text-gris">
               Nous comparons chaque hausse à une inflation de 2 % par an, l’objectif de la Banque centrale européenne : sur les six ans d’un
-              mandat, les prix monteraient d’environ {(INFLATION_MANDAT * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %. Tout employeur rembourse au moins la moitié
-              de l’abonnement de ses salariés.
+              mandat, les prix monteraient d’environ {(INFLATION_MANDAT * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %.
+              Tout employeur rembourse au moins la moitié de l’abonnement de ses salariés.
             </p>
           </>,
         )}

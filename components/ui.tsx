@@ -29,7 +29,8 @@ const TRACES = {
   liste: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
   carte: 'M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14',
   points: 'M5 12h.01M12 12h.01M19 12h.01',
-  trace: 'M6 20.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5',
+  trace:
+    'M6 20.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5',
   crayon: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
   annuler: 'M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3',
   telecharger: 'M12 4v11M7 10l5 5 5-5M5 20h14',
@@ -38,7 +39,17 @@ const TRACES = {
 
 export type NomIcone = keyof typeof TRACES
 
-export function Icone({ nom, taille = 20, epaisseur = 2, className }: { nom: NomIcone; taille?: number; epaisseur?: number; className?: string }) {
+export function Icone({
+  nom,
+  taille = 20,
+  epaisseur = 2,
+  className,
+}: {
+  nom: NomIcone
+  taille?: number
+  epaisseur?: number
+  className?: string
+}) {
   return (
     <svg
       width={taille}
@@ -112,13 +123,26 @@ export function Bouton({
   )
 }
 
-export function BoutonRond({ label, icone, onClick, className }: { label: string; icone: NomIcone; onClick: () => void; className?: string }) {
+export function BoutonRond({
+  label,
+  icone,
+  onClick,
+  className,
+}: {
+  label: string
+  icone: NomIcone
+  onClick: () => void
+  className?: string
+}) {
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={clsx('grid size-11 shrink-0 place-items-center rounded-full bg-sable text-encre transition-colors hover:bg-trait', className)}
+      className={clsx(
+        'grid size-11 shrink-0 place-items-center rounded-full bg-sable text-encre transition-colors hover:bg-trait',
+        className,
+      )}
     >
       <Icone nom={icone} taille={20} epaisseur={2.3} />
     </button>
@@ -129,16 +153,45 @@ export function Surtitre({ children, className }: { children: ReactNode; classNa
   return <div className={clsx('text-xs font-extrabold tracking-[0.08em] text-muet uppercase', className)}>{children}</div>
 }
 
-export function Pastille({ icone, children, className }: { icone?: NomIcone; children: ReactNode; className?: string }) {
+export function Pastille({
+  icone,
+  children,
+  className,
+  couleur,
+}: {
+  icone?: NomIcone
+  children: ReactNode
+  className?: string
+  /** Couleur du mode de transport : la pastille la reprend en fond léger. */
+  couleur?: string
+}) {
   return (
-    <span className={clsx('inline-flex items-center gap-1.5 self-start rounded-full bg-rouge-pale py-1 pr-2.5 pl-2 text-xs font-extrabold text-rouge-fonce', className)}>
+    <span
+      style={couleur ? { color: `color-mix(in srgb, ${couleur} 72%, black)`, background: `color-mix(in srgb, ${couleur} 12%, white)` } : undefined}
+      className={clsx(
+        'inline-flex items-center gap-1.5 self-start rounded-full bg-rouge-pale py-1 pr-2.5 pl-2 text-xs font-extrabold text-rouge-fonce',
+        className,
+      )}
+    >
       {icone ? <Icone nom={icone} taille={15} epaisseur={2.3} /> : null}
       {children}
     </span>
   )
 }
 
-export function CarteChiffre({ icone, valeur, unite, legende, accent }: { icone: NomIcone; valeur: string; unite?: string; legende: string; accent?: boolean }) {
+export function CarteChiffre({
+  icone,
+  valeur,
+  unite,
+  legende,
+  accent,
+}: {
+  icone: NomIcone
+  valeur: string
+  unite?: string
+  legende: string
+  accent?: boolean
+}) {
   return (
     <div className="flex flex-col gap-1 rounded-2xl bg-sable p-3">
       <Icone nom={icone} taille={17} className="text-muet" />
@@ -172,7 +225,19 @@ const SEGMENTS_CLAIR: Record<Segment['style'], string> = {
   levier: 'bg-rouge/45',
 }
 
-export function Jauge({ segments, total, surRouge, hauteur = 12, label }: { segments: Segment[]; total: number; surRouge?: boolean; hauteur?: number; label: string }) {
+export function Jauge({
+  segments,
+  total,
+  surRouge,
+  hauteur = 12,
+  label,
+}: {
+  segments: Segment[]
+  total: number
+  surRouge?: boolean
+  hauteur?: number
+  label: string
+}) {
   const palette = surRouge ? SEGMENTS_ROUGE : SEGMENTS_CLAIR
   return (
     <div
@@ -184,7 +249,11 @@ export function Jauge({ segments, total, surRouge, hauteur = 12, label }: { segm
       {segments
         .filter((s) => s.montant > 0)
         .map((s, i) => (
-          <div key={i} className={clsx('h-full transition-[width] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]', palette[s.style])} style={{ width: `${(s.montant / total) * 100}%` }} />
+          <div
+            key={i}
+            className={clsx('h-full transition-[width] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]', palette[s.style])}
+            style={{ width: `${(s.montant / total) * 100}%` }}
+          />
         ))}
     </div>
   )

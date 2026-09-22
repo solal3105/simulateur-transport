@@ -22,8 +22,7 @@ export const CATALOGUE: Projet[] = [
     id: 'metro-e-bellecour',
     nom: 'Métro E jusqu’à Bellecour',
     genre: 'Nouvelle ligne de métro',
-    description:
-      "La section principale de la ligne E, d'Alaï à Bellecour. Sans elle, aucune extension de la ligne n'a de sens.",
+    description: "La section principale de la ligne E, d'Alaï à Bellecour. Sans elle, aucune extension de la ligne n'a de sens.",
     mode: 'metro',
     cout: 1800,
     voyageurs: 64000,
@@ -34,8 +33,7 @@ export const CATALOGUE: Projet[] = [
     id: 'ext-a-est',
     nom: 'Extension de la ligne A à l’est',
     genre: 'Prolongement de métro',
-    description:
-      "Prolongement au-delà de Vaulx-en-Velin pour desservir Décines et le stade, aujourd'hui accessibles en tramway seulement.",
+    description: "Prolongement au-delà de Vaulx-en-Velin pour desservir Décines et le stade, aujourd'hui accessibles en tramway seulement.",
     mode: 'metro',
     cout: 2000,
     voyageurs: 48500,
@@ -57,8 +55,7 @@ export const CATALOGUE: Projet[] = [
     id: 'metro-e-part-dieu',
     nom: 'Métro E jusqu’à Part-Dieu',
     genre: 'Prolongement de métro',
-    description:
-      "Prolongement de la ligne E de Bellecour à Part-Dieu, qui la raccorde au principal pôle d'échanges de la Métropole.",
+    description: "Prolongement de la ligne E de Bellecour à Part-Dieu, qui la raccorde au principal pôle d'échanges de la Métropole.",
     mode: 'metro',
     cout: 600,
     voyageurs: 38000,
@@ -111,8 +108,7 @@ export const CATALOGUE: Projet[] = [
     id: 'teol',
     nom: 'Tramway express de l’ouest lyonnais',
     genre: 'Nouveau tramway',
-    description:
-      "Une liaison rapide vers l'ouest, semi-enterrée sous les pentes. Vous pouvez payer davantage pour l'enterrer entièrement.",
+    description: "Une liaison rapide vers l'ouest, semi-enterrée sous les pentes. Vous pouvez payer davantage pour l'enterrer entièrement.",
     mode: 'tram',
     cout: 800,
     voyageurs: 55000,
@@ -219,8 +215,7 @@ export const CATALOGUE: Projet[] = [
     id: 't8',
     nom: 'Tramway T8',
     genre: 'Nouveau tramway',
-    description:
-      "Liaison de Vaulx-en-Velin La Soie à la gare de Vénissieux, qui relie les communes de l'est sans passer par le centre.",
+    description: "Liaison de Vaulx-en-Velin La Soie à la gare de Vénissieux, qui relie les communes de l'est sans passer par le centre.",
     mode: 'tram',
     cout: 245,
     voyageurs: 30000,
@@ -231,8 +226,7 @@ export const CATALOGUE: Projet[] = [
     id: 'telepherique-ouest',
     nom: 'Téléphérique de l’Ouest',
     genre: 'Téléphérique urbain',
-    description:
-      "Un téléphérique pour franchir le relief de l'ouest lyonnais, là où le rail coûterait beaucoup plus cher.",
+    description: "Un téléphérique pour franchir le relief de l'ouest lyonnais, là où le rail coûterait beaucoup plus cher.",
     mode: 'cable',
     cout: 200,
     voyageurs: 18000,
@@ -285,8 +279,7 @@ export const CATALOGUE: Projet[] = [
     id: 't9-final',
     nom: 'Achèvement du T9',
     genre: 'Fin de chantier d’un tramway',
-    description:
-      'Les derniers travaux et raccordements du tramway T9, entre La Soie et Charpennes, dont le chantier est lancé.',
+    description: 'Les derniers travaux et raccordements du tramway T9, entre La Soie et Charpennes, dont le chantier est lancé.',
     mode: 'tram',
     cout: 75,
     voyageurs: 38000,
@@ -297,8 +290,7 @@ export const CATALOGUE: Projet[] = [
     id: 't10-final',
     nom: 'Achèvement du T10',
     genre: 'Fin de chantier d’un tramway',
-    description:
-      'Les derniers travaux du tramway T10, entre la gare de Vénissieux et Gerland, dans la même situation que le T9.',
+    description: 'Les derniers travaux du tramway T10, entre la gare de Vénissieux et Gerland, dans la même situation que le T9.',
     mode: 'tram',
     cout: 75,
     voyageurs: 42000,
@@ -320,8 +312,7 @@ export const CATALOGUE: Projet[] = [
     id: 't3-renf',
     nom: 'T3 en express',
     genre: 'Renfort d’un tramway',
-    description:
-      'Déplacement du terminus, trams plus fréquents et rames supplémentaires sur la ligne T3.',
+    description: 'Déplacement du terminus, trams plus fréquents et rames supplémentaires sur la ligne T3.',
     mode: 'tram',
     cout: 35,
     voyageurs: 12000,

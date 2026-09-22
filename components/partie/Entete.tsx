@@ -87,11 +87,17 @@ export function Entete({ attenue }: { attenue?: boolean }) {
               <span className="chiffres text-[32px] leading-none font-black tracking-tight">{reste.valeur}</span>
               <span className="text-sm font-extrabold">{reste.texte}</span>
             </div>
-            <div className="flex gap-4 text-[12.5px] font-semibold">
+            <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]" />
                 Entretien des bus, {n(bilan.bus)}
               </span>
+              {bilan.reliquat > 0 ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-3.5 rounded-sm shadow-[inset_0_0_0_1.5px_#fff]" />
+                  Report du mandat 1, +{n(bilan.reliquat)}
+                </span>
+              ) : null}
               {bilan.reports > 0 ? (
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,#fff_0_3px,rgba(255,255,255,0.45)_3px_6px)]" />

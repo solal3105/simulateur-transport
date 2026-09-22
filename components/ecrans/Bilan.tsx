@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 
 import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
+import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { bilanMandat, ouvertures, resoudre, score, totauxCatalogue } from '@/lib/regles'
 import { dessinerPartage } from '@/lib/partage'
@@ -22,15 +23,17 @@ export function Bilan() {
   const [envoi, setEnvoi] = useState<string | null>(null)
 
   const resultat = useMemo(() => {
-    const b1 = bilanMandat(1, chantiers, lignes, leviers[1])
-    const b2 = bilanMandat(2, chantiers, lignes, leviers[2])
-    const investi = chantiers.reduce((t, c) => t + resoudre(PROJETS.get(c.id)!, c).cout, 0) + lignes.reduce((t, l) => t + l.estimation.cout, 0)
+    const b1 = bilanMandat(1, chantiers, lignes, leviers)
+    const b2 = bilanMandat(2, chantiers, lignes, leviers)
+    const investi =
+      chantiers.reduce((t, c) => t + resoudre(PROJETS.get(c.id)!, c).cout, 0) + lignes.reduce((t, l) => t + l.estimation.cout, 0)
     const faits = new Set(chantiers.map((c) => c.id))
     const laisses = AVEC_TRACE.filter((p) => !faits.has(p.id))
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
       voyageurs: score(chantiers, lignes),
       equilibre: b1.reste >= 0 && b2.reste >= 0,
+      nonDepense: Math.max(0, b2.reste),
       deficit: Math.min(0, b1.reste) + Math.min(0, b2.reste),
       investi,
       retenus: chantiers.filter((c) => PROJETS.get(c.id)?.trace).length + lignes.length,
@@ -43,7 +46,12 @@ export function Bilan() {
 
   const partager = async (format: 'story' | 'paysage') => {
     setEnvoi('Préparation de l’image')
-    const traces = new Set(chantiers.map((c) => PROJETS.get(c.id)?.trace).filter(Boolean) as string[])
+    const traces = new Map(
+      chantiers.flatMap((c) => {
+        const trace = PROJETS.get(c.id)?.trace
+        return trace ? [[trace, couleurProjet(c.id, c)] as [string, string]] : []
+      }),
+    )
     const blob = await dessinerPartage(
       {
         voyageurs: resultat.voyageurs,
@@ -51,7 +59,7 @@ export function Bilan() {
         total: AVEC_TRACE.length,
         equilibre: resultat.equilibre,
         traces,
-        lignes: lignes.map((l) => l.arrets),
+        lignes: lignes.map((l) => ({ arrets: l.arrets, couleur: couleurLigne(l.mode) })),
         adresse: window.location.host,
       },
       format,
@@ -95,7 +103,9 @@ export function Bilan() {
         </div>
         <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
           <div className="rounded-2xl bg-white/90 px-4 py-2.5 shadow-flotte backdrop-blur">
-            <div className="text-xs font-extrabold tracking-[0.08em] text-muet uppercase">{termine ? 'Votre réseau' : 'Le réseau se construit'}</div>
+            <div className="text-xs font-extrabold tracking-[0.08em] text-muet uppercase">
+              {termine ? 'Votre réseau' : 'Le réseau se construit'}
+            </div>
             <div className="chiffres text-[34px] leading-none font-black tracking-tight lg:text-[52px]" aria-live="off">
               {annee}
             </div>
@@ -167,7 +177,8 @@ export function Bilan() {
                     <span className={`chiffres w-10 shrink-0 font-black ${tard ? 'text-muet' : ''}`}>{o.annee}</span>
                     <span
                       aria-hidden="true"
-                      className={`mt-1 size-3 shrink-0 rounded-full shadow-[inset_0_0_0_2.5px_var(--color-rouge)] ${tard ? 'bg-white' : 'bg-rouge'}`}
+                      className="mt-1 size-3 shrink-0 rounded-full"
+                      style={{ background: tard ? '#fff' : couleurOuverture(o), boxShadow: `inset 0 0 0 2.5px ${couleurOuverture(o)}` }}
                     />
                     <span className="flex-1 font-bold">{o.nom}</span>
                     <span className="chiffres font-extrabold whitespace-nowrap text-rouge">+{n(o.voyageurs)}</span>
@@ -178,10 +189,17 @@ export function Bilan() {
           </section>
         ) : null}
 
+        {resultat.nonDepense > 0 ? (
+          <p className="text-[14.5px] leading-relaxed text-gris">
+            Il vous reste {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un projet de plus, ou un premier
+            chantier pour le mandat suivant.
+          </p>
+        ) : null}
+
         {resultat.plusGros ? (
           <p className="rounded-2xl bg-sable px-4 py-3.5 text-[14.5px] leading-relaxed text-gris">
-            Vous laissez {resultat.laisses.length} projets à l’étude, pour {n(resultat.coutLaisse)} M€. Le plus cher est {resultat.plusGros.nom}, à{' '}
-            {n(resoudre(resultat.plusGros).cout)} M€.
+            Vous laissez {resultat.laisses.length} projets à l’étude, pour {n(resultat.coutLaisse)} M€. Le plus cher est{' '}
+            {resultat.plusGros.nom}, à {n(resoudre(resultat.plusGros).cout)} M€.
           </p>
         ) : null}
 

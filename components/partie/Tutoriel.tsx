@@ -46,11 +46,13 @@ export function Tutoriel() {
           <Entete etape={3} />
           <div className="flex flex-col gap-2">
             <h2 id="titre-tuto" className="text-lg leading-tight font-black lg:text-xl">
-              {r.voyageurs > 0 ? `Bien joué : ${n(r.voyageurs)} voyageurs de plus par jour dès ${ouverture(dernier.mandat, r.duree)}.` : 'C’est lancé.'}
+              {r.voyageurs > 0
+                ? `Bien joué : ${n(r.voyageurs)} voyageurs de plus par jour dès ${ouverture(dernier.mandat, r.duree)}.`
+                : 'C’est lancé.'}
             </h2>
             <p className="text-[14.5px] leading-relaxed text-gris">
-              Votre score, en haut à droite, a monté d’autant. Il vous reste {n(bilan.reste)} M€ sur ce mandat pour d’autres projets, ou pour
-              tracer votre propre ligne.
+              Votre score, en haut à droite, a monté d’autant. Il vous reste {n(bilan.reste)} M€ sur ce mandat pour d’autres projets, ou
+              pour tracer votre propre ligne.
             </p>
             <p className="text-[14.5px] leading-relaxed text-gris">
               Quand vous avez fini, terminez le mandat avec le bouton rouge : la partie passe alors à 2032.

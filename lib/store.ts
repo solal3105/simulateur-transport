@@ -10,12 +10,7 @@ import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } fr
 export type Ecran = 'accueil' | 'tuto' | 'jeu' | 'fin-mandat' | 'bilan'
 
 export type Panneau =
-  | { type: 'projet'; id: string }
-  | { type: 'liste' }
-  | { type: 'leviers' }
-  | { type: 'trace' }
-  | { type: 'ligne' }
-  | { type: 'methode' }
+  { type: 'projet'; id: string } | { type: 'liste' } | { type: 'leviers' } | { type: 'trace' } | { type: 'ligne' } | { type: 'methode' }
 
 export interface Brouillon {
   mode: ModeLigne
@@ -100,18 +95,14 @@ export const useJeu = create<Etat>()(
           chantiers: s.chantiers.map((c) => (c.id === id && c.mandat === s.mandat && s.mandat === 1 ? { ...c, etale } : c)),
           lignes: s.lignes.map((l) => (l.id === id && l.mandat === s.mandat && s.mandat === 1 ? { ...l, etale } : l)),
         })),
-      levier: (cle, valeur) =>
-        set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
-      finirMandat: () => set({ ecran: get().mandat === 1 ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null }),
-      commencerMandat2: () =>
-        set((s) => ({ ecran: 'jeu', mandat: 2, leviers: { ...s.leviers, 2: { ...s.leviers[1] } }, panneau: null })),
+      levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
+      finirMandat: () => set({ ecran: get().mandat === 1 ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null }),
+      commencerMandat2: () => set((s) => ({ ecran: 'jeu', mandat: 2, leviers: { ...s.leviers, 2: { ...s.leviers[1] } }, panneau: null })),
       rejouer: () => set({ ...DEPART }),
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
       changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
-      ajouterArret: (p) =>
-        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
-      retirerArret: () =>
-        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.slice(0, -1) } } : {})),
+      ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
+      retirerArret: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.slice(0, -1) } } : {})),
       abandonnerTrace: () => set({ brouillon: null, panneau: null, apercu: 0 }),
       construireLigne: (nom, estimation, etale) =>
         set((s) => {
@@ -130,7 +121,10 @@ export const useJeu = create<Etat>()(
             lignes: [...s.lignes, ligne],
             brouillon: null,
             panneau: null,
-            message: { titre: `${nom} ajoutée.`, texte: `Environ ${approx(estimation.nouveaux)} nouveaux voyageurs par jour pour le réseau.` },
+            message: {
+              titre: `${nom} ajoutée.`,
+              texte: `Environ ${approx(estimation.nouveaux)} nouveaux voyageurs par jour pour le réseau.`,
+            },
           }
         }),
       effacerMessage: () => set({ message: null }),

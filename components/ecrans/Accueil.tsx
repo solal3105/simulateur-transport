@@ -23,8 +23,14 @@ function Etapes() {
   return (
     <motion.ol variants={cascade.parent} className="flex flex-col gap-2.5 lg:gap-3">
       {etapes.map((e, i) => (
-        <motion.li variants={cascade.enfant} key={e} className="flex items-center gap-3 text-[15px] leading-snug font-semibold lg:text-[17px]">
-          <span className="grid size-6.5 shrink-0 place-items-center rounded-full bg-white text-[13px] font-black text-rouge lg:size-7.5">{i + 1}</span>
+        <motion.li
+          variants={cascade.enfant}
+          key={e}
+          className="flex items-center gap-3 text-[15px] leading-snug font-semibold lg:text-[17px]"
+        >
+          <span className="grid size-6.5 shrink-0 place-items-center rounded-full bg-white text-[13px] font-black text-rouge lg:size-7.5">
+            {i + 1}
+          </span>
           {e}
         </motion.li>
       ))}
@@ -60,7 +66,8 @@ export function Accueil() {
           </h1>
           <p className="max-w-[500px] text-base leading-relaxed font-medium lg:text-[19px]">
             Vous dirigez les transports de la Métropole pendant deux mandats, avec {n((ENVELOPPE * 2) / 1000)} milliards d’euros. Les{' '}
-            {CATALOGUE.filter((p) => p.trace).length} projets sur la table en coûtent plus de {milliards}. Vous choisissez ceux qui verront le jour.
+            {CATALOGUE.filter((p) => p.trace).length} projets sur la table en coûtent plus de {milliards}. Vous choisissez ceux qui verront
+            le jour.
           </p>
         </motion.div>
 
@@ -89,7 +96,10 @@ export function Accueil() {
           </p>
         </motion.div>
 
-        <section id="sources" className="flex flex-col gap-2 border-t border-white/30 pt-5 text-[13px] leading-relaxed opacity-95 lg:hidden">
+        <section
+          id="sources"
+          className="flex flex-col gap-2 border-t border-white/30 pt-5 text-[13px] leading-relaxed opacity-95 lg:hidden"
+        >
           <Sources />
         </section>
       </motion.div>
@@ -103,9 +113,9 @@ export function Accueil() {
 function Sources() {
   return (
     <p>
-      Les coûts, les voyageurs et les durées de chantier viennent d’études et de délibérations publiques ; ce sont des estimations, pas des devis
-      signés. La carte utilise OpenStreetMap, et le traceur de ligne les données de population et d’emploi de l’INSEE. Projet citoyen, sous
-      licence CC BY-NC 4.0.
+      Les coûts, les voyageurs et les durées de chantier viennent d’études et de délibérations publiques ; ce sont des estimations, pas des
+      devis signés. La carte utilise OpenStreetMap, et le traceur de ligne les données de population et d’emploi de l’INSEE. Projet citoyen,
+      sous licence CC BY-NC 4.0.
     </p>
   )
 }

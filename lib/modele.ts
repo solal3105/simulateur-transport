@@ -39,8 +39,7 @@ export const FOURCHETTE = { bas: 0.7, haut: 1.4 }
 const LAT0 = 45.755
 const MX = 111320 * Math.cos((LAT0 * Math.PI) / 180)
 const MY = 111320
-export const metres = (a: [number, number], b: [number, number]) =>
-  Math.hypot((a[0] - b[0]) * MX, (a[1] - b[1]) * MY)
+export const metres = (a: [number, number], b: [number, number]) => Math.hypot((a[0] - b[0]) * MX, (a[1] - b[1]) * MY)
 
 export interface Carreaux {
   /** [lon, lat, habitants, emplois, déjà desservi (0 ou 1)] */
