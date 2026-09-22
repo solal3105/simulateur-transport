@@ -7,6 +7,7 @@ import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { bilanMandat, ouvertures, resoudre, score, totauxCatalogue } from '@/lib/regles'
+import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
 
@@ -18,8 +19,24 @@ const AVEC_TRACE = CATALOGUE.filter((p) => p.trace)
 const TOTAL = totauxCatalogue(AVEC_TRACE)
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
 
-export function Bilan() {
-  const { chantiers, lignes, leviers, rejouer } = useJeu()
+/**
+ * Le bilan de fin de partie. Avec `partage`, il montre le réseau reçu par un lien, en lecture seule,
+ * et invite à jouer sa propre partie.
+ */
+export function Bilan({ partage }: { partage?: PartiePartagee }) {
+  const jeu = useJeu()
+  const chantiers = partage?.chantiers ?? jeu.chantiers
+  const lignes = partage?.lignes ?? jeu.lignes
+  const leviers = partage?.leviers ?? jeu.leviers
+  const rejouer = () => {
+    if (partage) {
+      // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
+      window.history.replaceState(null, '', window.location.pathname)
+      window.location.reload()
+      return
+    }
+    jeu.rejouer()
+  }
   const [envoi, setEnvoi] = useState<string | null>(null)
 
   const resultat = useMemo(() => {
@@ -43,6 +60,25 @@ export function Bilan() {
       ouvertures: ouvertures(chantiers, lignes),
     }
   }, [chantiers, lignes, leviers])
+
+  // Le lien contient toute la partie : qui l'ouvre voit ce réseau se construire, sans compte ni serveur.
+  const copierLien = async () => {
+    const url = partage ? window.location.href : await lienDePartage({ chantiers, lignes, leviers })
+    if (navigator.share && window.innerWidth < 1024) {
+      try {
+        await navigator.share({ url, title: 'Mon réseau de transport en 2038' })
+        return
+      } catch {
+        // Partage annulé : on copie le lien.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setEnvoi('Lien copié. Qui l’ouvre verra ce réseau se construire, année par année.')
+    } catch {
+      setEnvoi('La copie n’a pas fonctionné. Vous pouvez copier l’adresse de la page après l’avoir ouverte.')
+    }
+  }
 
   const partager = async (format: 'story' | 'paysage') => {
     setEnvoi('Préparation de l’image')
@@ -96,7 +132,7 @@ export function Bilan() {
   return (
     <main className="min-h-dvh bg-white lg:fixed lg:inset-0">
       <div className="relative h-[300px] lg:absolute lg:inset-y-0 lg:right-[620px] lg:left-0 lg:h-auto">
-        <Carte marges={MARGES_GRAND} decor anneeMax={annee} />
+        <Carte marges={MARGES_GRAND} decor anneeMax={annee} partie={partage} />
         <div className="absolute top-4 left-4 flex items-center gap-2.5 lg:top-7 lg:left-7">
           <Logo taille={40} />
           <span className="hidden text-[17px] font-black lg:inline">Simulateur TCL</span>
@@ -132,7 +168,9 @@ export function Bilan() {
         </span>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-[15px] font-semibold text-gris lg:text-base">Votre réseau en 2038 transporte chaque jour</h1>
+          <h1 className="text-[15px] font-semibold text-gris lg:text-base">
+            {partage ? 'Ce réseau, partagé avec vous, transporte chaque jour en 2038' : 'Votre réseau en 2038 transporte chaque jour'}
+          </h1>
           <div className="flex items-baseline gap-2.5">
             <span className="chiffres text-[50px] leading-none font-black tracking-[-0.04em] text-rouge lg:text-[72px]">
               +{n(voyageursAnimes)}
@@ -191,33 +229,40 @@ export function Bilan() {
 
         {resultat.nonDepense > 0 ? (
           <p className="text-[14.5px] leading-relaxed text-gris">
-            Il vous reste {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un projet de plus, ou un
-            premier chantier pour le mandat suivant.
+            {partage ? 'Il reste' : 'Il vous reste'} {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un
+            projet de plus, ou un premier chantier pour le mandat suivant.
           </p>
         ) : null}
 
         {resultat.plusGros ? (
           <p className="rounded-2xl bg-sable px-4 py-3.5 text-[14.5px] leading-relaxed text-gris">
-            Vous laissez {resultat.laisses.length} projets à l’étude, pour {n(resultat.coutLaisse)} M€. Le plus cher est{' '}
-            {resultat.plusGros.nom}, à {n(resoudre(resultat.plusGros).cout)} M€.
+            {partage ? 'Ce réseau laisse' : 'Vous laissez'} {resultat.laisses.length} projets à l’étude, pour {n(resultat.coutLaisse)} M€.
+            Le plus cher est {resultat.plusGros.nom}, à {n(resoudre(resultat.plusGros).cout)} M€.
           </p>
         ) : null}
 
         <div className="flex flex-col gap-2 lg:mt-auto">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Bouton genre="rouge" icone="partager" onClick={() => partager('story')}>
-              Partager mon réseau
+          {partage ? (
+            <Bouton genre="rouge" icone="fleche" taille="grand" onClick={rejouer}>
+              Faire mieux : jouer ma partie
             </Bouton>
-            <Bouton genre="contour" icone="telecharger" onClick={() => partager('paysage')}>
-              Image au format paysage
+          ) : null}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Bouton genre={partage ? 'contour' : 'rouge'} icone="partager" onClick={copierLien}>
+              {partage ? 'Copier le lien de ce réseau' : 'Partager le lien de mon réseau'}
+            </Bouton>
+            <Bouton genre="contour" icone="telecharger" onClick={() => partager(window.innerWidth < 1024 ? 'story' : 'paysage')}>
+              Télécharger l’image
             </Bouton>
           </div>
           <p aria-live="polite" className="min-h-5 text-center text-[13px] font-semibold text-gris">
             {envoi ?? ''}
           </p>
-          <Bouton genre="contour" icone="rejouer" onClick={rejouer}>
-            Rejouer une partie
-          </Bouton>
+          {partage ? null : (
+            <Bouton genre="contour" icone="rejouer" onClick={rejouer}>
+              Rejouer une partie
+            </Bouton>
+          )}
         </div>
       </div>
     </main>

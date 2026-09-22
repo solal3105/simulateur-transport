@@ -387,12 +387,15 @@ export function Carte({
   marges,
   decor = false,
   anneeMax,
+  partie,
 }: {
   marges: { top: number; right: number; bottom: number; left: number }
   /** Carte d'illustration : pas de clic sur les projets, pas d'étiquettes. */
   decor?: boolean
   /** Pour le bilan : n'affiche en rouge que ce qui a ouvert à cette date. */
   anneeMax?: number
+  /** Un réseau partagé par lien, affiché à la place de la partie en cours. */
+  partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'>
 }) {
   const donnees = useDonnees()
   const conteneur = useRef<HTMLDivElement>(null)
@@ -403,7 +406,10 @@ export function Carte({
   const appliquerEtat = useRef<() => void>(() => {})
   const precedents = useRef<Map<string, EtatProjet> | null>(null)
 
-  const { chantiers, lignes, brouillon, panneau, ecran, tuto } = useJeu()
+  const jeu = useJeu()
+  const { brouillon, panneau, ecran, tuto } = jeu
+  const chantiers = partie?.chantiers ?? jeu.chantiers
+  const lignes = partie?.lignes ?? jeu.lignes
   const trace = brouillon !== null
 
   // État de chaque projet du catalogue, par nom de tracé.
