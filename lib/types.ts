@@ -1,69 +1,86 @@
-export type MandatPeriod = 'M1' | 'M2' | 'M1+M2' | null
+export type Mode = 'metro' | 'renovation' | 'tram' | 'bus' | 'cable' | 'fluvial'
 
-export interface UpgradeOption {
+/** Les deux mandats de la partie. */
+export type Mandat = 1 | 2
+
+export interface Variante {
   id: string
-  name: string
+  nom: string
+  /** Une phrase qui dit ce que la version change concrètement. */
+  detail: string
+  mode: Mode
+  cout: number
+  voyageurs: number
+  duree: number
+}
+
+export interface Projet {
+  id: string
+  nom: string
+  /** Le genre d'ouvrage, en quelques mots, affiché au-dessus du nom. */
+  genre: string
   description: string
-  cost: number
-  impact: number
+  mode: Mode
+  /** Investissement en millions d'euros. */
+  cout: number
+  /** Voyageurs gagnés par jour de semaine, d'après les études publiques. */
+  voyageurs: number
+  /** Durée du chantier en années. */
+  duree: number
+  variantes?: Variante[]
+  option?: { nom: string; detail: string; surcout: number; duree: number }
+  /** Projet sans lequel celui-ci ne peut pas être construit. */
+  requiert?: string
+  /** Nom du tracé dans public/data/projets.json. Absent pour les projets sans tracé propre. */
+  trace?: string
 }
 
-export interface Project {
+/** Un projet du catalogue que le joueur a décidé de construire. */
+export interface Chantier {
   id: string
-  name: string
-  cost: number
-  impact?: number
-  mandatOnly?: 'M1+M2'
-  description?: string
-  upgrade?: {
-    name: string
-    description: string
-    additionalCost: number
-    additionalImpact?: number
-  }
-  upgradeOptions?: UpgradeOption[] // Pour les projets avec choix multiples (ex: Ligne du Nord)
-  requires?: string // ID du projet requis
+  varianteId?: string
+  option?: boolean
+  /** Mandat pendant lequel la décision a été prise. */
+  mandat: Mandat
+  /** La moitié du coût est reportée sur le mandat suivant. */
+  etale: boolean
 }
 
-export interface PublicPolicy {
+export type ModeLigne = 'tram' | 'bus' | 'metro' | 'cable'
+
+/** Une ligne dessinée par le joueur. */
+export interface LigneJoueur {
   id: string
-  name: string
-  description: string
-  costPerMandat: number
-  requiresLaw?: boolean
-  lawType?: 'versement_mobilite' | 'tva'
+  nom: string
+  mode: ModeLigne
+  arrets: [number, number][]
+  mandat: Mandat
+  etale: boolean
+  estimation: Estimation
 }
 
-export interface ProjectSelection {
-  projectId: string
-  period: MandatPeriod
-  upgraded?: boolean // Pour les projets avec upgrade simple
-  selectedUpgradeOptionId?: string // Pour les projets avec choix multiples (upgradeOptions)
+export interface Estimation {
+  km: number
+  cout: number
+  duree: number
+  voyageurs: number
+  bas: number
+  haut: number
+  /** Part des voyageurs qui n'ont aujourd'hui ni tram ni métro à proximité. */
+  nouveaux: number
+  habitants: number
+  emplois: number
+  habitantsNonDesservis: number
 }
 
-// Pour les leviers de financement pouvant être étalés sur les mandats
-// true = M1+M2, false/null = désactivé, 'M1'/'M2'/'M1+M2' = période spécifique
-export type FinancingLeverPeriod = boolean | MandatPeriod
-
-export interface FinancingLevers {
-  gratuiteTotale: FinancingLeverPeriod
-  gratuiteMoins25ans: FinancingLeverPeriod // Gratuité -25 ans - 240M€/mandat
-  gratuiteJeunesAbonnes: FinancingLeverPeriod // Gratuité 11-18 ans enfants d'abonnés TCL
-  suppressionTarifSocial: FinancingLeverPeriod // Supprimer la tarification sociale (fin gratuité précaires, fin abonnements solidaires) +240M
-  metro24hWeekend: FinancingLeverPeriod // Métro 24h/24 les weekends
-  tarifAbonnements: number
-  tarifTickets: number
-  versementMobilite: number // -100 to 100
-  tva55: FinancingLeverPeriod
-  electrificationBus: MandatPeriod // Électrification de la flotte de bus - 460M€ total
-  entretienBus: MandatPeriod // Entretien et renouvellement de la flotte de bus - 800M€ total
-}
-
-export interface BudgetState {
-  m1: number
-  m2: number
-  totalImpact: number
-  efficiency: number
-  isValid: boolean
-  hasExcessiveDebt: boolean
+export interface Leviers {
+  abonnements: number
+  tickets: number
+  versementMobilite: number
+  gratuiteTotale: boolean
+  gratuiteMoins25: boolean
+  gratuiteJeunesAbonnes: boolean
+  suppressionTarifSocial: boolean
+  metroNuit: boolean
+  tva: boolean
 }

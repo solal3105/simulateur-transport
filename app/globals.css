@@ -1,175 +1,203 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 142 76% 36%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 76% 36%;
-    --radius: 0.75rem;
-    --map-bg: #e5e7eb;
-  }
+@theme {
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 
-  .dark {
-    --background: 220 18% 12%;
-    --foreground: 213 31% 91%;
-    --card: 220 18% 15%;
-    --card-foreground: 213 31% 91%;
-    --popover: 220 18% 15%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 220 18% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 220 18% 18%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 142 76% 36%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 18% 25%;
-    --input: 220 18% 25%;
-    --ring: 142 76% 36%;
-    --map-bg: #1a1d29;
-  }
+  --color-rouge: #e3051b;
+  --color-rouge-fonce: #b5000f;
+  --color-rouge-pale: #fdebed;
+  --color-encre: #1b1b1f;
+  --color-gris: #55555d;
+  --color-muet: #85858e;
+  --color-trait: #e7e4e0;
+  --color-sable: #f5f3f0;
+
+  --color-metro-a: #d8336f;
+  --color-metro-b: #1d6fb8;
+  --color-metro-c: #f29a1f;
+  --color-metro-d: #2e9e4f;
+
+  --shadow-flotte: 0 4px 16px rgb(0 0 0 / 0.12);
+  --shadow-panneau: 0 -8px 30px rgb(0 0 0 / 0.14);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
-  html {
-    scroll-behavior: smooth;
-  }
-  
+  html,
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    height: 100%;
   }
-  
-  /* Mobile viewport height fix - accounts for browser UI */
-  .h-screen-safe {
-    height: 100vh;
-    height: 100dvh;
+  body {
+    @apply bg-white text-encre antialiased;
+    font-feature-settings: 'tnum' 1;
   }
-  
-  .min-h-screen-safe {
-    min-height: 100vh;
-    min-height: 100dvh;
+  button {
+    cursor: pointer;
   }
-  
-  .max-h-screen-safe {
-    max-height: 100vh;
-    max-height: 100dvh;
+  :focus-visible {
+    outline: 3px solid var(--color-encre);
+    outline-offset: 2px;
   }
 }
 
-@layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+@utility chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Étiquettes de prix posées sur la carte. */
+.etiquette {
+  --mode: var(--color-encre);
+  font:
+    800 12px/1 var(--font-figtree),
+    sans-serif;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-encre);
+  box-shadow: inset 0 0 0 2px var(--mode);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.etiquette[data-etat='construit'] {
+  background: var(--mode);
+  color: #fff;
+  box-shadow: none;
+}
+.etiquette[data-etat='choisi'] {
+  background: var(--color-encre);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--mode);
+}
+.etiquette[data-etat='indisponible'] {
+  opacity: 0.45;
+}
+.etiquette[data-etat='chantier'] {
+  color: var(--mode);
+  box-shadow: inset 0 0 0 2px var(--mode);
+}
+.etiquette-masquee {
+  visibility: hidden;
+}
+.etiquette:hover {
+  background: var(--color-rouge-pale);
+}
+.lieu {
+  font:
+    800 10.5px/1 var(--font-figtree),
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muet);
+  text-shadow:
+    0 0 3px #f4f1ec,
+    0 0 3px #f4f1ec,
+    0 0 3px #f4f1ec;
+  pointer-events: none;
+}
+.lieu[data-grand='1'] {
+  font-size: 13px;
+}
+.lieu.quartier {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #8b857c;
+}
+[data-proche='0'] .quartier {
+  display: none;
+}
+/* Nom d'un arrêt posé par le joueur. */
+.nom-arret {
+  display: block;
+  font:
+    800 12px/1 var(--font-figtree),
+    sans-serif;
+  color: var(--color-encre);
+  background: #fff;
+  padding: 4px 7px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: apparait 0.25s ease-out;
+}
+/* Le gain de voyageurs qui s'élève au-dessus d'un projet qu'on vient de lancer. */
+.gain-flottant {
+  display: block;
+  font:
+    900 17px/1 var(--font-figtree),
+    sans-serif;
+  color: #fff;
+  background: var(--color-rouge);
+  padding: 7px 12px;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgb(227 5 27 / 0.35);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  animation: monte 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes monte {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.7);
   }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
   }
-  
-  .text-balance {
-    text-wrap: balance;
+  25% {
+    transform: translateY(-4px) scale(1);
   }
-}
-
-@layer components {
-  .glass {
-    @apply bg-gray-800/50 backdrop-blur-xl border border-gray-700/50;
+  75% {
+    opacity: 1;
   }
-  
-  .gradient-text {
-    @apply bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent;
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1);
   }
 }
-
-/* Leaflet Map Customizations */
-.leaflet-container {
-  background: var(--map-bg) !important;
-  font-family: inherit;
+@keyframes apparait {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
 }
 
-.leaflet-control-zoom {
-  border: none !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+/* Ce que le tutoriel invite à toucher. */
+[data-tuto='0'] .etiquette[data-etat='choisi'] {
+  animation: appel 1.3s ease-out infinite;
+}
+[data-guide] {
+  animation: appel-bouton 1.6s ease-in-out infinite;
+}
+/* MapLibre place les marqueurs avec transform : l'animation ne doit toucher qu'à l'ombre. */
+@keyframes appel {
+  0% {
+    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgb(227 5 27 / 0);
+  }
+}
+@keyframes appel-bouton {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(227 5 27 / 0);
+  }
 }
 
-.leaflet-control-zoom a {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #374151 !important;
-  border: 1px solid rgba(209, 213, 219, 0.5) !important;
-  backdrop-filter: blur(12px);
-}
-
-.dark .leaflet-control-zoom a {
-  background: rgba(17, 24, 39, 0.9) !important;
-  color: #fff !important;
-  border: 1px solid rgba(55, 65, 81, 0.5) !important;
-}
-
-.leaflet-control-zoom a:hover {
-  background: rgba(243, 244, 246, 0.9) !important;
-}
-
-.dark .leaflet-control-zoom a:hover {
-  background: rgba(31, 41, 55, 0.9) !important;
-}
-
-.leaflet-control-attribution {
-  background: rgba(255, 255, 255, 0.8) !important;
-  color: rgba(107, 114, 128, 0.8) !important;
-  font-size: 10px !important;
-  backdrop-filter: blur(8px);
-}
-
-.dark .leaflet-control-attribution {
-  background: rgba(17, 24, 39, 0.8) !important;
-  color: rgba(156, 163, 175, 0.8) !important;
-}
-
-.leaflet-control-attribution a {
-  color: rgba(107, 114, 128, 0.8) !important;
-}
-
-.dark .leaflet-control-attribution a {
-  color: rgba(156, 163, 175, 0.8) !important;
-}
-
-/* Custom marker styles */
-.custom-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-.custom-marker > div {
-  transition: all 0.3s ease;
-}
-
-.custom-marker:hover > div {
-  transform: scale(1.15);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

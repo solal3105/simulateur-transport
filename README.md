@@ -1,132 +1,46 @@
-# Simulateur Transport TCL Lyon
+# Simulateur Transport TCL
 
-Un simulateur interactif moderne pour l'arbitrage budgétaire des projets de transport en commun. Conçu initialement pour Lyon et le réseau TCL, ce simulateur permet aux citoyens de comprendre les arbitrages budgétaires sur deux mandats (2026-2032 et 2032-2038).
+Un jeu pour comprendre l'arbitrage budgétaire des transports lyonnais. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
-## 🌍 Adaptabilité à d'autres villes
+## Lancer le site
 
-Ce projet est conçu pour être facilement adapté à d'autres réseaux de transport urbain. Les données des projets, les coûts et les leviers de financement sont centralisés dans `lib/data.ts`, permettant une personnalisation rapide pour votre ville.
-
-## 🚀 Fonctionnalités
-
-- **27 projets de transport** à sélectionner et financer (métro, tramway, téléphérique, BHNS...)
-- **6 leviers de financement** ajustables en temps réel
-- **Calcul budgétaire dynamique** pour deux mandats
-- **Interface mobile-first** avec animations fluides
-- **Visualisation des résultats** avec impact voyageurs
-- **Cartographie interactive** des projets (avec support GeoJSON)
-
-## 🛠️ Stack Technique
-
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **UI Components**: shadcn/ui + Radix UI
-- **State Management**: Zustand
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-
-## 📦 Installation
+Il faut Node.js 20.9 ou plus récent.
 
 ```bash
-# Installer les dépendances
 npm install
-
-# Lancer le serveur de développement
 npm run dev
 ```
 
-Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
+Le site s'ouvre sur http://localhost:3000. `npm run build` prépare la version de production, que Netlify publie à chaque envoi sur la branche principale.
 
-## 🎯 Utilisation
+## Les règles du jeu
 
-1. **Page d'accueil** : Introduction au contexte et aux objectifs
-2. **Simulateur** : 
-   - Sélectionnez les projets pour M1, M2 ou M1+M2
-   - Ajustez les leviers de financement
-   - Visualisez l'impact budgétaire en temps réel
-3. **Résultats** : Synthèse complète de vos choix avec impact voyageurs
+Chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entretien des bus. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit.
 
-## 📊 Données
+À la fin de la partie, le bilan donne un lien qui contient tout le réseau, sans compte ni serveur. Qui ouvre ce lien voit le réseau se construire, peut partir de ce réseau pour sa propre partie, ou le comparer à la sienne.
 
-- Budget de base : 2 000 M€ par mandat
-- 27 projets allant de 36 M€ à 6 Md€
-- Impact jusqu'à 312 000 voyageurs/jour (Modernisation Ligne A)
-- Durées de construction réalistes (1 à 30 ans selon les projets)
+Le bilan permet aussi de publier son réseau dans la communauté, sous un pseudo et sans compte. Les réseaux publiés se consultent sur `/communaute`, chacun a sa page `/reseau/<identifiant>`, et chacun peut les soutenir, les signaler ou partir d'eux pour sa partie. La communauté repose sur Supabase ; son fonctionnement est décrit dans `docs/communaute.md`. Sans les deux réglages de `.env.example`, le jeu tourne sans elle.
 
-## 🔄 Adapter à votre ville
+Le score est le nombre de voyageurs gagnés par jour. Pour une ligne tracée par le joueur, seuls comptent les voyageurs qui vivent ou travaillent loin d'un tram ou d'un métro existant.
 
-Pour adapter ce simulateur à votre réseau de transport :
+Sur la carte, chaque mode a sa couleur (métro, tramway, bus rapide, téléphérique, bateau), une modernisation prend la couleur de la ligne modernisée, et le réseau actuel reste en gris. Les couleurs sont définies dans `lib/couleurs.ts`.
 
-1. **Modifiez les données** dans `lib/data.ts` :
-   - Liste des projets (`PROJECTS`)
-   - Coûts et impacts
-   - Durées de construction (`PROJECT_DURATIONS`)
-   - Leviers de financement (`FINANCING_IMPACTS`)
+## Organisation du code
 
-2. **Ajoutez vos tracés** (optionnel) :
-   - Créez des fichiers GeoJSON pour vos projets
-   - Placez-les dans `public/geojson/`
-   - Nommez-les selon l'`id` du projet (ex: `metro-ligne-a.geojson`)
+`app/` contient la page et le style global. `components/` contient l'interface : la carte (`carte/`), l'écran de jeu (`partie/`), les panneaux qui s'ouvrent au-dessus de la carte (`panneaux/`) et les écrans d'accueil, de fin de mandat et de bilan (`ecrans/`). `lib/` contient la logique sans interface : le catalogue des projets, les règles de budget, le modèle de fréquentation des lignes tracées, l'état de la partie, la lecture d'une partie partagée ou publiée, l'accès à la communauté et le dessin de l'image de partage. `components/communaute/` contient les pages de la communauté, et `supabase/` la base et la fonction serveur qui en garde l'entrée.
 
-3. **Personnalisez l'interface** :
-   - Couleurs et branding dans `tailwind.config.ts`
-   - Textes d'introduction dans `app/page.tsx`
+## Les données
 
-## 🏗️ Structure du Projet
+Les chiffres des projets (coût, voyageurs, durée de chantier) sont dans `lib/catalogue.ts`. Les tracés sont dans `data/projets/`.
 
-```
-simulateur-transport/
-├── app/                    # Pages Next.js
-│   ├── page.tsx           # Page d'accueil
-│   ├── simulator/         # Interface de simulation
-│   └── results/           # Page de résultats
-├── components/            # Composants React
-│   ├── ui/               # Composants UI réutilisables
-│   ├── ProjectCard.tsx   # Carte de projet
-│   ├── FinancingPanel.tsx # Panneau de financement
-│   └── BudgetIndicators.tsx # Indicateurs budgétaires
-├── lib/                   # Utilitaires et logique
-│   ├── data.ts           # Données des projets
-│   ├── store.ts          # State management (Zustand)
-│   ├── types.ts          # Types TypeScript
-│   └── utils.ts          # Fonctions utilitaires
-└── specs.md              # Spécifications fonctionnelles
-```
+Le fond de carte ne dépend d'aucun service extérieur. `scripts/fetch-osm.mjs` télécharge depuis OpenStreetMap le Rhône et la Saône, les parcs, les plans d'eau, les grands axes, les voies ferrées, les limites de communes, les noms de quartiers et les lignes de métro et de tram actuelles, puis `npm run data` prépare les fichiers servis au navigateur dans `public/data/`. Les noms de quartiers servent aussi à nommer les arrêts des lignes tracées par le joueur (`lib/lieux.ts`). Les habitants et les emplois par carreau de 200 m viennent de l'INSEE ; leurs sources sont détaillées dans `data/insee/SOURCES.md`.
 
-## 🎨 Design
+Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`. Le commentaire en tête du fichier explique la formule, son calage sur les lignes lyonnaises existantes et ses limites.
 
-- Design moderne avec gradients et animations
-- Mobile-first avec breakpoints responsive
-- Palette de couleurs cohérente (bleu primaire)
-- Composants accessibles (Radix UI)
+## Adapter le simulateur à un autre réseau
 
-## 📝 Scripts
+Il suffit de remplacer le catalogue, les tracés, les extractions OpenStreetMap et les carreaux INSEE, puis de recaler le modèle de fréquentation sur les lignes du nouveau réseau.
 
-```bash
-npm run dev      # Développement
-npm run build    # Build production
-npm run start    # Serveur production
-npm run lint     # Linting
-```
+## Licence
 
-## 🔧 Configuration
-
-Le projet utilise :
-- TypeScript strict mode
-- ESLint avec config Next.js
-- TailwindCSS avec variables CSS personnalisées
-- Path aliases (`@/*`)
-
-## 📄 Licence
-
-Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
-
-Vous êtes libre de :
-- **Partager** : copier et redistribuer le matériel
-- **Adapter** : remixer, transformer et créer à partir du matériel pour votre propre ville
-
-Sous les conditions suivantes :
-- **Attribution** : Vous devez créditer l'œuvre originale
-- **Pas d'utilisation commerciale** : Vous ne pouvez pas utiliser le matériel à des fins commerciales
-
-Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+CC BY-NC 4.0. Voir `LICENSE`.

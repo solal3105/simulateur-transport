@@ -1,0 +1,403 @@
+import type { Projet } from './types'
+
+/**
+ * Le catalogue des projets sur la table. Coûts en millions d'euros, voyageurs gagnés
+ * par jour de semaine, durée de chantier en années. Les chiffres viennent des études
+ * et délibérations publiques rassemblées pour la première version du simulateur.
+ */
+export const CATALOGUE: Projet[] = [
+  {
+    id: 'grande-dorsale',
+    nom: 'Grande Dorsale est-ouest',
+    genre: 'Nouvelle ligne de métro',
+    description:
+      "Une traversée souterraine de la Métropole, de l'ouest lyonnais à l'est. C'est le projet le plus lourd du catalogue et le plus long à construire : trente ans de chantier, bien au-delà des deux mandats.",
+    mode: 'metro',
+    cout: 6000,
+    voyageurs: 182000,
+    duree: 30,
+    trace: 'grande-dorsale',
+  },
+  {
+    id: 'metro-e-bellecour',
+    nom: 'Métro E jusqu’à Bellecour',
+    genre: 'Nouvelle ligne de métro',
+    description: "La section principale de la ligne E, d'Alaï à Bellecour. Sans elle, aucune extension de la ligne n'a de sens.",
+    mode: 'metro',
+    cout: 1800,
+    voyageurs: 64000,
+    duree: 14,
+    trace: 'metro-e-bellecour',
+  },
+  {
+    id: 'ext-a-est',
+    nom: 'Extension de la ligne A à l’est',
+    genre: 'Prolongement de métro',
+    description: "Prolongement au-delà de Vaulx-en-Velin pour desservir Décines et le stade, aujourd'hui accessibles en tramway seulement.",
+    mode: 'metro',
+    cout: 2000,
+    voyageurs: 48500,
+    duree: 8,
+    trace: 'ext-a-est',
+  },
+  {
+    id: 'ext-d',
+    nom: 'Extension de la ligne D',
+    genre: 'Prolongement de métro',
+    description: 'Prolongement au-delà du terminus actuel pour relier le plateau de la Duchère au métro.',
+    mode: 'metro',
+    cout: 1400,
+    voyageurs: 40000,
+    duree: 7,
+    trace: 'ext-d',
+  },
+  {
+    id: 'metro-e-part-dieu',
+    nom: 'Métro E jusqu’à Part-Dieu',
+    genre: 'Prolongement de métro',
+    description: "Prolongement de la ligne E de Bellecour à Part-Dieu, qui la raccorde au principal pôle d'échanges de la Métropole.",
+    mode: 'metro',
+    cout: 600,
+    voyageurs: 38000,
+    duree: 4,
+    requiert: 'metro-e-bellecour',
+    trace: 'metro-e-part-dieu',
+  },
+  {
+    id: 'ligne-du-nord',
+    nom: 'Ligne du Nord',
+    genre: 'Nouvelle ligne vers Rillieux-la-Pape',
+    description:
+      "Une nouvelle desserte du nord lyonnais jusqu'à Rillieux-la-Pape. Il existe trois façons de la faire, qui ne coûtent pas du tout la même chose.",
+    mode: 'tram',
+    cout: 350,
+    voyageurs: 40000,
+    duree: 8,
+    trace: 'ext-b-nord',
+    variantes: [
+      {
+        id: 'tram-surface',
+        nom: 'Tramway en surface',
+        detail: 'Le tracé reste en surface, le chantier est plus court.',
+        mode: 'tram',
+        cout: 350,
+        voyageurs: 40000,
+        duree: 8,
+      },
+      {
+        id: 'tram-enterre',
+        nom: 'Tramway enterré',
+        detail: 'Plus régulier, mais la rue au-dessus n’est pas réaménagée.',
+        mode: 'tram',
+        cout: 900,
+        voyageurs: 55000,
+        duree: 14,
+      },
+      {
+        id: 'metro',
+        nom: 'Métro, prolongement de la ligne B',
+        detail: 'Depuis Charpennes, en souterrain.',
+        mode: 'metro',
+        cout: 3300,
+        voyageurs: 71500,
+        duree: 15,
+      },
+    ],
+  },
+  {
+    id: 'teol',
+    nom: 'Tramway express de l’ouest lyonnais',
+    genre: 'Nouveau tramway',
+    description: "Une liaison rapide vers l'ouest, semi-enterrée sous les pentes. Vous pouvez payer davantage pour l'enterrer entièrement.",
+    mode: 'tram',
+    cout: 800,
+    voyageurs: 55000,
+    duree: 6,
+    trace: 'teol',
+    option: {
+      nom: 'Enterrer tout le tracé',
+      detail:
+        'Le tramway passe en souterrain partout. La régularité s’améliore, mais la rue n’est pas réaménagée et le chantier dure deux ans de plus.',
+      surcout: 300,
+      duree: 8,
+    },
+  },
+  {
+    id: 'modern-a',
+    nom: 'Modernisation de la ligne A',
+    genre: 'Rénovation d’une ligne de métro',
+    description:
+      'Automatisation complète, portes palières sur les quais et rames allongées. Aucun kilomètre de ligne en plus, mais beaucoup de voyageurs en plus.',
+    mode: 'renovation',
+    cout: 686,
+    voyageurs: 312000,
+    duree: 9,
+    trace: 'modern-a',
+  },
+  {
+    id: 'modern-d',
+    nom: 'Modernisation de la ligne D',
+    genre: 'Rénovation d’une ligne de métro',
+    description:
+      'Nouvelles rames et nouveaux équipements, pour fiabiliser la ligne et augmenter sa capacité. C’est le meilleur rapport entre l’argent engagé et les voyageurs gagnés de tout le catalogue.',
+    mode: 'renovation',
+    cout: 338,
+    voyageurs: 220500,
+    duree: 4,
+    trace: 'modern-d',
+  },
+  {
+    id: 'modern-c',
+    nom: 'Modernisation de la ligne C',
+    genre: 'Rénovation d’une ligne de métro',
+    description: 'Modernisation du matériel et des équipements de la ligne C, entre Hôtel de Ville et Cuire.',
+    mode: 'renovation',
+    cout: 239,
+    voyageurs: 28000,
+    duree: 9,
+    trace: 'modern-c',
+  },
+  {
+    id: 't12-c3',
+    nom: 'Tram du Centre',
+    genre: 'Nouveau tramway',
+    description: 'La ligne de bus C3 devient un tramway, sur l’un des axes les plus chargés du réseau.',
+    mode: 'tram',
+    cout: 540,
+    voyageurs: 75000,
+    duree: 6,
+    trace: 't12-c3',
+  },
+  {
+    id: 'ligne-ouest',
+    nom: 'Ligne de l’Ouest',
+    genre: 'Nouvelle ligne dans l’ouest lyonnais',
+    description: "Une nouvelle desserte de l'ouest lyonnais, en bus à haut niveau de service ou en tramway.",
+    mode: 'bus',
+    cout: 240,
+    voyageurs: 20000,
+    duree: 6,
+    trace: 'ligne-ouest',
+    variantes: [
+      {
+        id: 'bhns',
+        nom: 'Bus à haut niveau de service',
+        detail: 'Des voies réservées et des stations aménagées, sans rails.',
+        mode: 'bus',
+        cout: 240,
+        voyageurs: 20000,
+        duree: 6,
+      },
+      {
+        id: 'tram',
+        nom: 'Tramway',
+        detail: 'Plus de places à bord, pour un chantier plus long et plus cher.',
+        mode: 'tram',
+        cout: 600,
+        voyageurs: 25000,
+        duree: 8,
+      },
+    ],
+  },
+  {
+    id: 'teol-craponne',
+    nom: 'Tramway de l’ouest jusqu’à Craponne',
+    genre: 'Prolongement de tramway',
+    description: "Prolongement du tramway express de l'ouest au-delà de son terminus, jusqu'à Craponne.",
+    mode: 'tram',
+    cout: 300,
+    voyageurs: 25000,
+    duree: 5,
+    requiert: 'teol',
+    trace: 'teol-craponne',
+  },
+  {
+    id: 't8',
+    nom: 'Tramway T8',
+    genre: 'Nouveau tramway',
+    description: "Liaison de Vaulx-en-Velin La Soie à la gare de Vénissieux, qui relie les communes de l'est sans passer par le centre.",
+    mode: 'tram',
+    cout: 245,
+    voyageurs: 30000,
+    duree: 4,
+    trace: 't8',
+  },
+  {
+    id: 'telepherique-ouest',
+    nom: 'Téléphérique de l’Ouest',
+    genre: 'Téléphérique urbain',
+    description: "Un téléphérique pour franchir le relief de l'ouest lyonnais, là où le rail coûterait beaucoup plus cher.",
+    mode: 'cable',
+    cout: 200,
+    voyageurs: 18000,
+    duree: 5,
+    trace: 'telepherique-ouest',
+  },
+  {
+    id: 'bhns-rive-droite',
+    nom: 'Ligne du Rhône rive droite',
+    genre: 'Nouvelle ligne le long du Rhône',
+    description: 'Une desserte continue de la rive droite du Rhône, en bus à haut niveau de service ou en tramway.',
+    mode: 'bus',
+    cout: 50,
+    voyageurs: 20000,
+    duree: 3,
+    trace: 'bhns-rive-droite',
+    variantes: [
+      {
+        id: 'bhns',
+        nom: 'Bus à haut niveau de service',
+        detail: 'Des voies réservées sur les rues existantes, pour un investissement minime.',
+        mode: 'bus',
+        cout: 50,
+        voyageurs: 20000,
+        duree: 3,
+      },
+      {
+        id: 'tram',
+        nom: 'Tramway',
+        detail: 'Plus de places et plus de confort, pour trois fois le prix.',
+        mode: 'tram',
+        cout: 165,
+        voyageurs: 25000,
+        duree: 3,
+      },
+    ],
+  },
+  {
+    id: 'bhns-parilly',
+    nom: 'Bus rapide de Parilly',
+    genre: 'Bus à haut niveau de service',
+    description: 'Une ligne de bus sur voies réservées dans le secteur de Parilly, à l’est de Lyon.',
+    mode: 'bus',
+    cout: 80,
+    voyageurs: 25000,
+    duree: 3,
+    trace: 'bhns-parilly',
+  },
+  {
+    id: 't9-final',
+    nom: 'Achèvement du T9',
+    genre: 'Fin de chantier d’un tramway',
+    description: 'Les derniers travaux et raccordements du tramway T9, entre La Soie et Charpennes, dont le chantier est lancé.',
+    mode: 'tram',
+    cout: 75,
+    voyageurs: 38000,
+    duree: 1,
+    trace: 't9-final',
+  },
+  {
+    id: 't10-final',
+    nom: 'Achèvement du T10',
+    genre: 'Fin de chantier d’un tramway',
+    description: 'Les derniers travaux du tramway T10, entre la gare de Vénissieux et Gerland, dans la même situation que le T9.',
+    mode: 'tram',
+    cout: 75,
+    voyageurs: 42000,
+    duree: 1,
+    trace: 't10-final',
+  },
+  {
+    id: 'navette-fluv',
+    nom: 'Navette fluviale',
+    genre: 'Transport par bateau',
+    description: 'Un service régulier de bateaux. Le plus petit gain de voyageurs du catalogue, pour un des plus petits prix.',
+    mode: 'fluvial',
+    cout: 40,
+    voyageurs: 1500,
+    duree: 4,
+    trace: 'navette-fluv',
+  },
+  {
+    id: 't3-renf',
+    nom: 'T3 en express',
+    genre: 'Renfort d’un tramway',
+    description: 'Déplacement du terminus, trams plus fréquents et rames supplémentaires sur la ligne T3.',
+    mode: 'tram',
+    cout: 35,
+    voyageurs: 12000,
+    duree: 2,
+    trace: 't3-renf',
+  },
+  {
+    id: 'bhns-kimmerling',
+    nom: 'Achèvement du bus Part-Dieu',
+    genre: 'Fin de chantier d’un bus rapide',
+    description: 'Finition du tronçon Kimmerling - Sept Chemins, resté inachevé comme les tramways T9 et T10.',
+    mode: 'bus',
+    cout: 30,
+    voyageurs: 8000,
+    duree: 1,
+    trace: 'bhns-kimmerling',
+  },
+  {
+    id: 'electrification-bus',
+    nom: 'Électrification des bus',
+    genre: 'Parc de bus',
+    description:
+      'Remplacement des bus thermiques par des bus électriques et équipement des dépôts en bornes de recharge. Aucun voyageur de plus, mais moins de bruit et de pollution.',
+    mode: 'bus',
+    cout: 460,
+    voyageurs: 0,
+    duree: 6,
+  },
+]
+
+export const PROJETS = new Map(CATALOGUE.map((p) => [p.id, p]))
+
+type Action = 'construire' | 'moderniser' | 'achever' | 'renforcer' | 'electrifier'
+
+const ACTIONS: Partial<Record<string, Action>> = {
+  'modern-a': 'moderniser',
+  'modern-d': 'moderniser',
+  'modern-c': 'moderniser',
+  't9-final': 'achever',
+  't10-final': 'achever',
+  'bhns-kimmerling': 'achever',
+  't3-renf': 'renforcer',
+  'electrification-bus': 'electrifier',
+}
+
+/** Projets dont le nom appelle un accord au féminin : la ligne, l'extension, la navette. */
+const FEMININS = new Set([
+  'grande-dorsale',
+  'ext-a-est',
+  'ext-d',
+  'ligne-du-nord',
+  'modern-a',
+  'modern-d',
+  'modern-c',
+  'ligne-ouest',
+  'bhns-rive-droite',
+  'navette-fluv',
+  'electrification-bus',
+])
+
+const MOTS: Record<Action, { verbe: string; participe: string }> = {
+  construire: { verbe: 'Construire', participe: 'Construit' },
+  moderniser: { verbe: 'Moderniser', participe: 'Modernisé' },
+  achever: { verbe: 'Achever', participe: 'Achevé' },
+  renforcer: { verbe: 'Renforcer', participe: 'Renforcé' },
+  electrifier: { verbe: 'Électrifier', participe: 'Électrifié' },
+}
+
+/** Le vocabulaire d'un projet : « Moderniser pour 338 M€ », « Modernisée » sur la carte. */
+export function mots(id: string) {
+  const action = ACTIONS[id] ?? 'construire'
+  const { verbe, participe } = MOTS[action]
+  return { verbe, participe: FEMININS.has(id) ? `${participe}e` : participe }
+}
+
+/** Enveloppe d'investissement de chaque mandat, en millions d'euros. */
+export const ENVELOPPE = 2000
+
+/** Entretien et renouvellement du parc de bus, réservé d'office sur chaque mandat. */
+export const ENTRETIEN_BUS = 400
+
+export const MANDATS = {
+  1: { debut: 2026, fin: 2032 },
+  2: { debut: 2032, fin: 2038 },
+} as const
+
+/** Tarifs actuels, en euros, affichés quand on les modifie. */
+export const TARIFS = { abonnement: 74.1, ticket: 2.1 }

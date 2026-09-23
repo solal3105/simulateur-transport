@@ -4,3 +4,9 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Adresse et clé publique de Supabase pour la communauté. Elles sont publiques par nature : le site
+# les envoie au navigateur, et les règles d'accès de la base interdisent toute écriture directe.
+[build.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://tyqrzfhrgrnyriwqkvju.supabase.co"
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_m1nWijMehbeNeysp_FXvIg_oeGk9y_v"

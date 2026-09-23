@@ -1,0 +1,114 @@
+// Copie de lib/partie.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
+import { PROJETS } from './catalogue.ts'
+import { estimer, type Carreaux } from './modele.ts'
+import { LEVIERS_NEUTRES } from './regles.ts'
+import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types.ts'
+
+/**
+ * Une partie telle qu'elle voyage : dans un lien de partage, ou dans un réseau publié. Ce module
+ * ne dépend d'aucun navigateur, pour que le site et la fonction serveur de la communauté appliquent
+ * exactement les mêmes vérifications.
+ */
+export interface PartiePartagee {
+  chantiers: Chantier[]
+  lignes: LigneJoueur[]
+  leviers: Record<1 | 2, Leviers>
+}
+
+export const VERSION_PARTIE = 1
+
+/** La forme compacte : choix du joueur seulement, sans aucun chiffre calculé. */
+export interface PartieCompacte {
+  v: number
+  c: [string, number, number, string, number][]
+  l: { n: string; m: string; d: number; e: number; a: [number, number][] }[]
+  f: Record<1 | 2, Leviers>
+}
+
+export function compacter(p: PartiePartagee): PartieCompacte {
+  return {
+    v: VERSION_PARTIE,
+    c: p.chantiers.map((c) => [c.id, c.mandat, c.etale ? 1 : 0, c.varianteId ?? '', c.option ? 1 : 0]),
+    l: p.lignes.map((l) => ({
+      n: l.nom,
+      m: l.mode,
+      d: l.mandat,
+      e: l.etale ? 1 : 0,
+      a: l.arrets.map(([lon, lat]) => [Math.round(lon * 1e5) / 1e5, Math.round(lat * 1e5) / 1e5] as [number, number]),
+    })),
+    f: p.leviers,
+  }
+}
+
+const MODES: readonly ModeLigne[] = ['tram', 'bus', 'metro', 'cable']
+const estPoint = (p: unknown): p is [number, number] =>
+  Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && Number.isFinite(x))
+
+/**
+ * Vérifie une partie compacte et recalcule tout ce qui en découle. Les estimations des lignes ne
+ * voyagent jamais : elles sont recalculées ici, pour qu'une partie modifiée à la main ne puisse pas
+ * afficher un faux score. Renvoie null si la partie n'est pas lisible.
+ */
+export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartiePartagee | null {
+  if (!brut || typeof brut !== 'object') return null
+  const b = brut as Partial<PartieCompacte>
+  if (b.v !== VERSION_PARTIE || !Array.isArray(b.c) || !Array.isArray(b.l)) return null
+
+  const vus = new Set<string>()
+  const chantiers: Chantier[] = []
+  for (const entree of b.c) {
+    if (!Array.isArray(entree)) continue
+    const [id, mandat, etale, varianteId, option] = entree
+    const projet = typeof id === 'string' ? PROJETS.get(id) : undefined
+    if (!projet || vus.has(projet.id)) continue
+    vus.add(projet.id)
+    chantiers.push({
+      id: projet.id,
+      mandat: mandat === 2 ? 2 : 1,
+      // Seul un projet décidé au premier mandat peut être payé en deux fois.
+      etale: etale === 1 && mandat !== 2,
+      varianteId: projet.variantes?.some((v) => v.id === varianteId) ? (varianteId as string) : undefined,
+      option: option === 1 && Boolean(projet.option),
+    })
+  }
+  // Un projet qui dépend d'un autre ne tient pas sans lui.
+  const decides = new Set(chantiers.map((c) => c.id))
+  const chantiersValides = chantiers.filter((c) => {
+    const requis = PROJETS.get(c.id)?.requiert
+    return !requis || decides.has(requis)
+  })
+
+  const lignes: LigneJoueur[] = []
+  b.l.forEach((l, i) => {
+    if (!l || typeof l !== 'object') return
+    const mode = MODES.find((m) => m === l.m)
+    if (!mode || !Array.isArray(l.a) || l.a.length < 2 || l.a.length > 60 || !l.a.every(estPoint)) return
+    const estimation = estimer(mode, l.a, carreaux)
+    lignes.push({
+      id: `partage-${i}`,
+      nom: String(l.n ?? '').slice(0, 60) || `Ligne ${i + 1}`,
+      mode,
+      mandat: l.d === 2 ? 2 : 1,
+      etale: l.e === 1 && l.d !== 2,
+      arrets: l.a,
+      estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
+    })
+  })
+
+  // Les leviers sont bornés aux valeurs que le jeu permet.
+  const borne = (v: unknown, min: number, max: number) => Math.max(min, Math.min(max, Math.round(Number(v) || 0)))
+  const lire = (l: Partial<Leviers> | undefined): Leviers => ({
+    ...LEVIERS_NEUTRES,
+    abonnements: borne(l?.abonnements, -20, 30),
+    tickets: borne(l?.tickets, -20, 30),
+    versementMobilite: borne(l?.versementMobilite, 0, 5),
+    gratuiteTotale: l?.gratuiteTotale === true,
+    gratuiteMoins25: l?.gratuiteMoins25 === true,
+    gratuiteJeunesAbonnes: l?.gratuiteJeunesAbonnes === true,
+    suppressionTarifSocial: l?.suppressionTarifSocial === true,
+    metroNuit: l?.metroNuit === true,
+    tva: l?.tva === true,
+  })
+  const f = (b.f ?? {}) as Partial<Record<1 | 2, Partial<Leviers>>>
+  return { chantiers: chantiersValides, lignes, leviers: { 1: lire(f[1]), 2: lire(f[2]) } }
+}
