@@ -10,7 +10,7 @@ import { communauteActive } from '@/lib/communaute'
 import { n } from '@/lib/format'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseReseaux, ID_VILLES, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -19,6 +19,8 @@ import { Bouton, Icone, Logo } from '../ui'
 const TOTAL = totauxCatalogue(CATALOGUE.filter((p) => p.trace))
 const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
+/** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
+const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
 /** 4 000 M€ donne « 4 », 3 120 M€ donne « 3,1 ». */
 const milliards = (v: number) => (Math.round(v / 100) / 10).toLocaleString('fr-FR', { maximumFractionDigits: 1 })
@@ -94,17 +96,21 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
   )
 }
 
+/** La partie enregistrée dans ce navigateur, finie ou non, quand l'accueil s'affiche par-dessus. */
+export interface PartieEnregistree {
+  ville: IdVille
+  /** La partie est finie : on revoit son bilan au lieu de la reprendre. */
+  terminee: boolean
+  /** Son réseau est publié : il reste en ligne même si une nouvelle partie le remplace ici. */
+  publiee: boolean
+  reprendre: () => void
+}
+
 /**
- * L'accueil d'une ville. `partieEnCours` signale une partie enregistrée dans une autre ville : commencer
- * ici la remplacerait, et un bouton permet de la retrouver.
+ * L'accueil d'une ville. Avec `partieEnCours`, il propose de retrouver la partie enregistrée ou d'en
+ * commencer une autre, ici ou dans une autre ville, après avoir dit ce qui sera effacé.
  */
-export function Accueil({
-  villeInitiale = 'lyon',
-  partieEnCours,
-}: {
-  villeInitiale?: IdVille
-  partieEnCours?: { ville: IdVille; reprendre: () => void }
-}) {
+export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitiale?: IdVille; partieEnCours?: PartieEnregistree }) {
   const commencer = useJeu((s) => s.commencer)
   const [choix, setChoix] = useState<IdVille>(villeInitiale)
   // La ville proposée peut arriver après la lecture de la partie enregistrée : elle remplace alors le choix.
@@ -115,9 +121,12 @@ export function Accueil({
   }
   const ville = VILLES[choix]
   const t = textes(ville)
-  // Revenir sur la ville de la partie enregistrée, c'est retrouver cette partie.
-  const retour = partieEnCours?.ville === choix ? partieEnCours.reprendre : null
-  const ailleurs = partieEnCours && !retour ? partieEnCours : null
+  // Une nouvelle partie remplace celle qui est enregistrée : on le dit avant, pour la ville affichée.
+  const [confirmerPour, setConfirmerPour] = useState<IdVille | null>(null)
+  const confirmer = confirmerPour === choix
+  const enregistree = partieEnCours ?? null
+  const ici = enregistree?.ville === choix
+  const villeEnregistree = enregistree ? VILLES[enregistree.ville].nom : ''
 
   // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
   // d'origine après un changement d'adresse : le titre est corrigé juste après.
@@ -144,7 +153,7 @@ export function Accueil({
         <motion.div variants={cascade.enfant} className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Logo taille={38} inverse />
-            <span className="text-[15px] font-extrabold lg:text-[17px]">{ville.marque}</span>
+            <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
           </div>
           {/* Sur ordinateur, les sources restent affichées en bas à droite : le lien ne sert que sur téléphone. */}
           <a href="#sources" className="text-[13px] font-bold underline underline-offset-3 lg:hidden">
@@ -165,7 +174,7 @@ export function Accueil({
           aria-hidden="true"
           className="relative h-[230px] shrink-0 overflow-hidden rounded-[20px] bg-sable lg:fixed lg:inset-y-0 lg:right-0 lg:left-[640px] lg:h-auto lg:rounded-none"
         >
-          <Carte key={choix} marges={MARGES} decor ville={choix} />
+          <Carte key={choix} marges={MARGES} decor ville={choix} partie={RESEAU_ACTUEL} />
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 lg:hidden">
             <span className="rounded-full bg-encre px-2.5 py-1 text-xs font-extrabold text-white">{t.pastilles[0]}</span>
             <span className="chiffres rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-encre shadow-[inset_0_0_0_1.5px_var(--color-encre)]">
@@ -177,39 +186,83 @@ export function Accueil({
         <Etapes key={choix} etapes={t.etapes} />
 
         <motion.div variants={cascade.enfant} className="mt-auto flex flex-col gap-3">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-            <Bouton
-              genre="blanc"
-              icone="fleche"
-              taille="grand"
-              onClick={() => (retour ? retour() : commencer(choix))}
-              className="w-full lg:w-[250px]"
-            >
-              {retour ? 'Reprendre ma partie' : ailleurs ? `Commencer à ${ville.nom}` : 'Commencer la partie'}
-            </Bouton>
-            {ailleurs ? (
-              <button
-                type="button"
-                onClick={ailleurs.reprendre}
-                className="flex min-h-14 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
-              >
-                Reprendre ma partie à {VILLES[ailleurs.ville].nom}
-              </button>
-            ) : communauteActive ? (
+          {confirmer && enregistree ? (
+            <div role="group" aria-labelledby="remplacer-partie" className="flex flex-col gap-3 rounded-2xl bg-white/12 p-4">
+              <p id="remplacer-partie" className="text-[15px] leading-relaxed font-semibold">
+                {!enregistree.terminee
+                  ? `Votre partie en cours à ${villeEnregistree} sera effacée.`
+                  : enregistree.publiee
+                    ? `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Il reste dans les réseaux publiés.`
+                    : `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Pour le garder, revoyez-le d’abord et publiez-le ou copiez son lien.`}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Bouton genre="blanc" onClick={() => commencer(choix)}>
+                  Effacer et commencer
+                </Bouton>
+                <Bouton genre="contourBlanc" onClick={() => setConfirmerPour(null)}>
+                  {enregistree.terminee ? 'Garder mon réseau' : 'Garder ma partie'}
+                </Bouton>
+              </div>
+            </div>
+          ) : enregistree ? (
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
+              {/* Dans la ville de la partie enregistrée, on la retrouve d'abord ; ailleurs, on commence d'abord. */}
+              {ici ? (
+                <>
+                  <Bouton genre="blanc" icone="fleche" taille="grand" onClick={enregistree.reprendre} className="w-full lg:w-[250px]">
+                    {enregistree.terminee ? 'Revoir mon réseau' : 'Reprendre ma partie'}
+                  </Bouton>
+                  <Bouton genre="contourBlanc" taille="grand" onClick={() => setConfirmerPour(choix)} className="whitespace-nowrap">
+                    Nouvelle partie à {ville.nom}
+                  </Bouton>
+                </>
+              ) : (
+                <>
+                  <Bouton
+                    genre="blanc"
+                    icone="fleche"
+                    taille="grand"
+                    onClick={() => setConfirmerPour(choix)}
+                    className="w-full lg:w-[250px]"
+                  >
+                    Commencer à {ville.nom}
+                  </Bouton>
+                  <Bouton genre="contourBlanc" taille="grand" onClick={enregistree.reprendre} className="whitespace-nowrap">
+                    {enregistree.terminee ? `Revoir mon réseau de ${villeEnregistree}` : `Reprendre ma partie à ${villeEnregistree}`}
+                  </Bouton>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
+              <Bouton genre="blanc" icone="fleche" taille="grand" onClick={() => commencer(choix)} className="w-full lg:w-[250px]">
+                Commencer la partie
+              </Bouton>
+              {communauteActive ? (
+                <Link
+                  href={adresseReseaux(choix)}
+                  className="flex min-h-14 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
+                >
+                  <Icone nom="voyageurs" taille={19} />
+                  Voir les réseaux publiés
+                </Link>
+              ) : null}
+            </div>
+          )}
+          {enregistree ? (
+            communauteActive && !confirmer ? (
               <Link
                 href={adresseReseaux(choix)}
-                className="flex min-h-14 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
+                className="self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start"
               >
-                <Icone nom="voyageurs" taille={19} />
                 Voir les réseaux publiés
               </Link>
-            ) : null}
-          </div>
-          <p className="text-center text-[13px] leading-snug font-semibold opacity-90 lg:text-left lg:text-sm">
-            {ailleurs
-              ? `Commencer ici remplace votre partie en cours à ${VILLES[ailleurs.ville].nom}.`
-              : 'Sans compte. Votre partie reste dans ce navigateur.'}
-          </p>
+            ) : null
+          ) : (
+            <p className="text-center text-[13px] leading-snug font-semibold opacity-90 lg:text-left lg:text-sm">
+              Sans compte. Votre partie reste dans ce navigateur.
+            </p>
+          )}
         </motion.div>
 
         <section

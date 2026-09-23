@@ -2,7 +2,7 @@
 
 import { chargerDonnees } from './donnees'
 import { n } from './format'
-import type { Ville } from './villes'
+import { MARQUE, type Ville } from './villes'
 
 interface Contenu {
   ville: Ville
@@ -92,7 +92,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
     g.fillText(t, x, y)
   }
   if (format === 'story') {
-    texte(c.ville.marque, 70, 130, 40)
+    texte(MARQUE, 70, 130, 40)
     texte(`Mon réseau ${c.ville.reseau}`, 70, 290, 104, 900)
     texte('en 2038', 70, 400, 104, 900)
     texte(`+${n(c.voyageurs)}`, 70, 1530, 130, 900)
@@ -101,7 +101,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
     texte('Et vous, que construiriez-vous ?', 70, 1800, 44, 800)
     texte(c.adresse, 70, 1860, 34, 700)
   } else {
-    texte(c.ville.marque, 52, 90, 26)
+    texte(MARQUE, 52, 90, 26)
     texte(`Mon réseau ${c.ville.reseau}`, 52, 180, 60, 900)
     texte('en 2038', 52, 245, 60, 900)
     texte(`+${n(c.voyageurs)}`, 52, 380, 78, 900)

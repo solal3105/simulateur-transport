@@ -46,7 +46,7 @@ Les programmes préchargés des listes candidates, présents dans la version pr�
 
 ## Brand Commitments
 
-Le produit s'appelle le Simulateur Transport TCL Lyon et appartient à la famille des projets de veille citoyenne de Solal Gendrin sur les mobilités lyonnaises. Licence CC BY-NC 4.0. Les logos existants sont dans public/. Le ton s'adresse à un adulte intelligent qui n'est pas spécialiste : des phrases entières, pas de jargon interne, pas de slogan, et jamais une promesse que le produit ne tient pas.
+Le produit s'appelle le Simulateur transport, le même nom dans toutes les villes (il s'appelait d'abord Simulateur TCL, du nom du réseau lyonnais), et appartient à la famille des projets de veille citoyenne de Solal Gendrin sur les mobilités lyonnaises. Licence CC BY-NC 4.0. Les logos existants sont dans public/. Le ton s'adresse à un adulte intelligent qui n'est pas spécialiste : des phrases entières, pas de jargon interne, pas de slogan, et jamais une promesse que le produit ne tient pas.
 
 ## Evidence on Hand
 
