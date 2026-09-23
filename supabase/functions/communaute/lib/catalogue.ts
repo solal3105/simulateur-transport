@@ -389,12 +389,6 @@ export function mots(id: string) {
   return { verbe, participe: FEMININS.has(id) ? `${participe}e` : participe }
 }
 
-/** Enveloppe d'investissement de chaque mandat, en millions d'euros. */
-export const ENVELOPPE = 2000
-
-/** Entretien et renouvellement du parc de bus, réservé d'office sur chaque mandat. */
-export const ENTRETIEN_BUS = 400
-
 export const MANDATS = {
   1: { debut: 2026, fin: 2032 },
   2: { debut: 2032, fin: 2038 },

@@ -8,6 +8,7 @@ import { PROJETS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { resumer } from '@/lib/regles'
 import type { Chantier, Leviers, LigneJoueur, Mandat } from '@/lib/types'
+import { VILLES, type IdVille } from '@/lib/villes'
 
 import { Carte } from '../carte/Carte'
 import { BoutonRond, Surtitre } from '../ui'
@@ -16,6 +17,8 @@ export interface Reseau {
   /** Le nom du réseau en tête de colonne, et tel qu'on le cite dans une phrase. */
   titre: string
   sujet: string
+  /** Les deux réseaux comparés sont toujours de la même ville. */
+  ville: IdVille
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<Mandat, Leviers>
@@ -68,8 +71,9 @@ function Ligne({ label, a, b, meilleur }: { label: string; a: string; b: string;
  * S'ouvre par-dessus le bilan ; Échap ou le bouton de fermeture y ramènent.
  */
 export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: () => void }) {
-  const ra = resumer(a.chantiers, a.lignes, a.leviers)
-  const rb = resumer(b.chantiers, b.lignes, b.leviers)
+  const ra = resumer(a.chantiers, a.lignes, a.leviers, VILLES[a.ville])
+  const rb = resumer(b.chantiers, b.lignes, b.leviers, VILLES[b.ville])
+  const catalogue = VILLES[a.ville].catalogue
   const rendement = (r: Resume) => (r.investi > 0 ? Math.round(r.voyageurs / r.investi) : 0)
   const mieux = (va: number, vb: number, plusGrandGagne = true) =>
     va === vb ? undefined : va > vb === plusGrandGagne ? ('a' as const) : ('b' as const)
@@ -115,7 +119,7 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
             <section key={r.titre} className="flex flex-col gap-3">
               <Surtitre>{r.titre}</Surtitre>
               <div className="relative h-[220px] overflow-hidden rounded-[20px] bg-sable shadow-[inset_0_0_0_1px_var(--color-trait)] lg:h-[340px]">
-                <Carte marges={MARGES} decor partie={r} />
+                <Carte marges={MARGES} decor partie={r} ville={r.ville} />
               </div>
             </section>
           ))}
@@ -150,19 +154,28 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
             a={ra.equilibre ? 'Tenu' : `Déficit de ${n(-ra.deficit)} M€`}
             b={rb.equilibre ? 'Tenu' : `Déficit de ${n(-rb.deficit)} M€`}
           />
-          <Ligne label="Projets et lignes retenus" a={n(ra.retenus)} b={n(rb.retenus)} />
+          {catalogue ? <Ligne label="Projets et lignes retenus" a={n(ra.retenus)} b={n(rb.retenus)} /> : null}
           <Ligne label="Lignes tracées par le joueur" a={n(a.lignes.length)} b={n(b.lignes.length)} />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3 lg:gap-8">
-          {[
-            { titre: 'Dans les deux réseaux', noms: communs },
-            { titre: `Seulement dans ${a.sujet}`, noms: seulsA },
-            { titre: `Seulement dans ${b.sujet}`, noms: seulsB },
-          ].map(({ titre, noms }) => (
+        {/* Sans catalogue, deux réseaux n'ont jamais de ligne en commun : on montre les lignes de chacun. */}
+        <div className={clsx('grid gap-4 lg:gap-8', catalogue ? 'lg:grid-cols-3' : 'lg:grid-cols-2')}>
+          {(catalogue
+            ? [
+                { titre: 'Dans les deux réseaux', noms: communs },
+                { titre: `Seulement dans ${a.sujet}`, noms: seulsA },
+                { titre: `Seulement dans ${b.sujet}`, noms: seulsB },
+              ]
+            : [
+                { titre: `Les lignes de ${a.sujet}`, noms: seulsA },
+                { titre: `Les lignes de ${b.sujet}`, noms: seulsB },
+              ]
+          ).map(({ titre, noms }) => (
             <section key={titre} className="flex flex-col gap-1.5">
               <h3 className="text-[15px] font-black">{majuscule(titre)}</h3>
-              <p className="text-[14.5px] leading-relaxed text-gris">{noms.length ? `${noms.join(', ')}.` : 'Aucun projet.'}</p>
+              <p className="text-[14.5px] leading-relaxed text-gris">
+                {noms.length ? `${noms.join(', ')}.` : catalogue ? 'Aucun projet.' : 'Aucune ligne.'}
+              </p>
             </section>
           ))}
         </div>

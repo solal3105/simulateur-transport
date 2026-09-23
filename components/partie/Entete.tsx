@@ -5,7 +5,7 @@ import { motion } from 'motion/react'
 
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 
 import { useCompteur } from '../anim'
 import { EtapesMandat, Icone, Jauge, Logo } from '../ui'
@@ -20,6 +20,7 @@ function libelleReste(reste: number, apercu: number) {
 /** Le budget du mandat et le score, toujours visibles pendant la partie. */
 export function Entete({ attenue }: { attenue?: boolean }) {
   const { mandat, apercu } = useJeu()
+  const ville = useVille()
   const bilan = useBilan()
   const voyageurs = useScore()
   const { segments, total } = segmentsBudget(bilan, apercu)
@@ -36,7 +37,9 @@ export function Entete({ attenue }: { attenue?: boolean }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <EtapesMandat mandat={mandat} />
-            <span className="text-[13px] font-extrabold">Mandat {mandat} sur 2</span>
+            <span className="text-[13px] font-extrabold">
+              {ville.nom}, mandat {mandat} sur 2
+            </span>
             <span className="chiffres text-xs font-semibold opacity-80">
               {debut}-{fin}
             </span>
@@ -72,7 +75,9 @@ export function Entete({ attenue }: { attenue?: boolean }) {
         <div className="flex w-[276px] shrink-0 items-center gap-3">
           <Logo taille={42} inverse />
           <div className="flex flex-col gap-1.5">
-            <span className="text-base font-black">Mandat {mandat} sur 2</span>
+            <span className="text-base font-black">
+              {ville.nom}, mandat {mandat} sur 2
+            </span>
             <div className="flex items-center gap-2">
               <EtapesMandat mandat={mandat} />
               <span className="chiffres text-[12.5px] font-semibold opacity-85">

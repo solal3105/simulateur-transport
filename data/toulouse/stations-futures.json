@@ -1,0 +1,211 @@
+{
+ "source": "Wikidata, stations de la ligne C du métro de Toulouse (Q110876443) et de la ligne B (Q3239063), consulté le 23 septembre 2026",
+ "lignes": [
+  {
+   "ligne": "C",
+   "ouverture": "fin 2028",
+   "stations": [
+    {
+     "nom": "Colomiers Gare",
+     "wikidata": "Q56308729",
+     "pos": [
+      1.3354,
+      43.6005
+     ]
+    },
+    {
+     "nom": "Fontaine Lumineuse",
+     "wikidata": "Q56308731",
+     "pos": [
+      1.35404,
+      43.60862
+     ]
+    },
+    {
+     "nom": "Saint-Martin-du-Touch",
+     "wikidata": "Q56308738",
+     "pos": [
+      1.37156,
+      43.61038
+     ]
+    },
+    {
+     "nom": "Blagnac",
+     "wikidata": "Q56308773",
+     "pos": [
+      1.39593,
+      43.62151
+     ]
+    },
+    {
+     "nom": "Sept Deniers - Stade Toulousain",
+     "wikidata": "Q56309231",
+     "pos": [
+      1.41144,
+      43.621
+     ]
+    },
+    {
+     "nom": "Ponts-Jumeaux",
+     "wikidata": "Q56309259",
+     "pos": [
+      1.42374,
+      43.62004
+     ]
+    },
+    {
+     "nom": "Fondeyre",
+     "wikidata": "Q56309335",
+     "pos": [
+      1.42873,
+      43.63148
+     ]
+    },
+    {
+     "nom": "La Vache",
+     "wikidata": "Q3213405",
+     "pos": [
+      1.43561,
+      43.6336
+     ]
+    },
+    {
+     "nom": "lycée Toulouse-Lautrec",
+     "wikidata": "Q56309362",
+     "pos": [
+      1.44375,
+      43.62661
+     ]
+    },
+    {
+     "nom": "Raisin",
+     "wikidata": "Q56309363",
+     "pos": [
+      1.44582,
+      43.61798
+     ]
+    },
+    {
+     "nom": "Bonnefoy",
+     "wikidata": "Q56309369",
+     "pos": [
+      1.45639,
+      43.61854
+     ]
+    },
+    {
+     "nom": "Marengo - SNCF",
+     "wikidata": "Q3290417",
+     "pos": [
+      1.45505,
+      43.6109
+     ]
+    },
+    {
+     "nom": "François Verdier",
+     "wikidata": "Q3083675",
+     "pos": [
+      1.45201,
+      43.6006
+     ]
+    },
+    {
+     "nom": "Côte Pavée",
+     "wikidata": "Q56309378",
+     "pos": [
+      1.46564,
+      43.59372
+     ]
+    },
+    {
+     "nom": "Limayrac - Cité de l'Espace",
+     "wikidata": "Q56309370",
+     "pos": [
+      1.4801,
+      43.5874
+     ]
+    },
+    {
+     "nom": "Ormeau",
+     "wikidata": "Q56309375",
+     "pos": [
+      1.4837,
+      43.5752
+     ]
+    },
+    {
+     "nom": "Montaudran Gare",
+     "wikidata": "Q56309483",
+     "pos": [
+      1.47995,
+      43.57314
+     ]
+    },
+    {
+     "nom": "Aerospace Campus",
+     "wikidata": "Q56309508",
+     "pos": [
+      1.49114,
+      43.56396
+     ]
+    },
+    {
+     "nom": "Labège Madron",
+     "wikidata": "Q56309366",
+     "pos": [
+      1.5041,
+      43.5472
+     ]
+    },
+    {
+     "nom": "Diagora",
+     "wikidata": "Q56309826",
+     "pos": [
+      1.50944,
+      43.54361
+     ]
+    },
+    {
+     "nom": "Labège Gare",
+     "wikidata": "Q56309859",
+     "pos": [
+      1.52039,
+      43.53871
+     ]
+    }
+   ]
+  },
+  {
+   "ligne": "B",
+   "ouverture": "2027",
+   "detail": "connexion de Ramonville à la ligne C",
+   "stations": [
+    {
+     "nom": "Ramonville",
+     "wikidata": "Q3418560",
+     "pos": [
+      1.47636,
+      43.5558
+     ],
+     "existante": true
+    },
+    {
+     "nom": "Parc technologique du Canal",
+     "wikidata": "Q56309372",
+     "pos": [
+      1.4885,
+      43.5474
+     ]
+    },
+    {
+     "nom": "Labège Madron",
+     "wikidata": "Q56309366",
+     "pos": [
+      1.5041,
+      43.5472
+     ]
+    }
+   ]
+  }
+ ]
+}

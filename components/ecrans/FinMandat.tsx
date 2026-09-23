@@ -5,7 +5,7 @@ import { motion } from 'motion/react'
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { bilanMandat, ouvertures } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 
 import { cascade, useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -16,6 +16,7 @@ const MARGES_CARTE = { top: 20, left: 20, right: 20, bottom: 20 }
 
 export function FinMandat() {
   const { chantiers, lignes, leviers, commencerMandat2, aVenir } = useJeu()
+  const ville = useVille()
   const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
   const bilan1 = useBilan(1)
   const liste = ouvertures(chantiers, lignes)
@@ -23,7 +24,7 @@ export function FinMandat() {
   const enChantier = liste.filter((o) => o.annee > MANDATS[1].fin)
   const reportes = [...chantiers, ...lignes].filter((x) => x.mandat === 1 && x.etale)
   // Le second mandat démarre avec les mêmes leviers que le premier.
-  const bilan2 = bilanMandat(2, chantiers, lignes, { 1: leviers[1], 2: leviers[1] })
+  const bilan2 = bilanMandat(2, chantiers, lignes, { 1: leviers[1], 2: leviers[1] }, ville)
   const { segments, total } = segmentsBudget(bilan2)
   // Les six ans du mandat défilent : l'année, et sur la carte les chantiers qui ouvrent.
   const { annee, termine, relancer } = useDefilement(MANDATS[1].debut, MANDATS[1].fin, 2.6)
@@ -120,7 +121,7 @@ export function FinMandat() {
               {bilan2.reports > 0
                 ? ` et les ${n(bilan2.reports)} M€ ${reportes.length > 1 ? `des ${reportes.length} projets payés` : 'du projet payé'} en deux fois`
                 : ''}
-              . Vos choix de tarifs restent en place, et vous pourrez les revoir.
+              .{ville.leviers ? ' Vos choix de tarifs restent en place, et vous pourrez les revoir.' : ''}
               {nombreAVenir > 0
                 ? ` En commençant, ${nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du second mandat du réseau que vous avez repris ${nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme.`
                 : ''}

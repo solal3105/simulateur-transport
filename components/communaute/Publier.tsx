@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { publier, useProfilLocal } from '@/lib/communaute'
 import { de, n } from '@/lib/format'
 import { compacter, type PartiePartagee } from '@/lib/partie'
+import { VILLES } from '@/lib/villes'
 import type { Inspiration } from '@/lib/store'
 
 import { Bouton, BoutonRond, Icone } from '../ui'
@@ -124,7 +125,7 @@ export function Publier({
           <div className="flex flex-col gap-3">
             <p className="text-[15px] leading-relaxed text-gris">
               {visibilite === 'publique'
-                ? `Il apparaît dans les réseaux de Lyon, sous le nom ${resultat.pseudo}. D’autres joueurs peuvent le soutenir, le comparer au leur ou partir de lui pour leur partie.`
+                ? `Il apparaît dans les réseaux de ${VILLES[partie.ville].nom}, sous le nom ${resultat.pseudo}. D’autres joueurs peuvent le soutenir, le comparer au leur ou partir de lui pour leur partie.`
                 : `Seules les personnes qui ont son lien peuvent le voir. Il n’apparaît dans aucune liste.`}
             </p>
             <Link
@@ -205,7 +206,7 @@ export function Publier({
                   [
                     'publique',
                     'Toute la communauté',
-                    'Il apparaît dans les réseaux de Lyon, et d’autres peuvent partir de lui pour leur partie.',
+                    `Il apparaît dans les réseaux de ${VILLES[partie.ville].nom}, et d’autres peuvent partir de lui pour leur partie.`,
                   ],
                   [
                     'lien',

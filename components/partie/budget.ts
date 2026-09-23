@@ -3,15 +3,16 @@
 import { useMemo } from 'react'
 
 import { bilanMandat, score, type Bilan } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 import type { Mandat } from '@/lib/types'
 
 import type { Segment } from '../ui'
 
 export function useBilan(mandat?: Mandat) {
   const { chantiers, lignes, leviers, mandat: courant } = useJeu()
+  const ville = useVille()
   const m = mandat ?? courant
-  return useMemo(() => bilanMandat(m, chantiers, lignes, leviers), [m, chantiers, lignes, leviers])
+  return useMemo(() => bilanMandat(m, chantiers, lignes, leviers, ville), [m, chantiers, lignes, leviers, ville])
 }
 
 export function useScore() {

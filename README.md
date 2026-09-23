@@ -2,6 +2,8 @@
 
 Un jeu pour comprendre l'arbitrage budgétaire des transports lyonnais. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
+Le jeu se joue aussi à Toulouse (`/toulouse`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes, avec 1 560 M€ par mandat (le budget de Lyon rapporté au nombre d'habitants) et une formule de fréquentation recalée sur les lignes de Tisséo. Les leviers de financement n'y sont pas encore calculés.
+
 ## Lancer le site
 
 Il faut Node.js 20.9 ou plus récent.
@@ -37,9 +39,9 @@ Le fond de carte ne dépend d'aucun service extérieur. `scripts/fetch-osm.mjs` 
 
 Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`. Le commentaire en tête du fichier explique la formule, son calage sur les lignes lyonnaises existantes et ses limites.
 
-## Adapter le simulateur à un autre réseau
+## Ouvrir une autre ville
 
-Il suffit de remplacer le catalogue, les tracés, les extractions OpenStreetMap et les carreaux INSEE, puis de recaler le modèle de fréquentation sur les lignes du nouveau réseau.
+Tout ce qui change d'une ville à l'autre est décrit dans `lib/villes.ts` : la carte, le budget, le réglage de la formule de fréquentation et quelques repères pour les textes. Les données d'une ville vont dans `public/data/<ville>/` : le fond de carte et les arrêts par `scripts/fetch-osm.mjs` et `scripts/build-data.mjs` (avec le nom de la ville en argument), les habitants et les emplois par `scripts/carreaux-ville.py`. `data/toulouse/SOURCES.md` montre ce qu'il a fallu pour Toulouse, et `docs/villes.md` rassemble les recherches sur Marseille, Nice et Paris. Côté communauté, la ville doit être ouverte dans la table `villes` et ses données déposées pour la fonction serveur (voir `docs/communaute.md`).
 
 ## Licence
 

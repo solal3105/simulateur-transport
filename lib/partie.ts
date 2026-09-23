@@ -2,6 +2,7 @@ import { PROJETS } from './catalogue'
 import { estimer, type Carreaux } from './modele'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
+import { estVille, VILLES, type IdVille } from './villes'
 
 /**
  * Une partie telle qu'elle voyage : dans un lien de partage, ou dans un réseau publié. Ce module
@@ -9,6 +10,7 @@ import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
  * exactement les mêmes vérifications.
  */
 export interface PartiePartagee {
+  ville: IdVille
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<1 | 2, Leviers>
@@ -19,6 +21,8 @@ export const VERSION_PARTIE = 1
 /** La forme compacte : choix du joueur seulement, sans aucun chiffre calculé. */
 export interface PartieCompacte {
   v: number
+  /** La ville, absente pour Lyon : les liens et les réseaux publiés avant l'ouverture de Toulouse restent lisibles. */
+  w?: IdVille
   c: [string, number, number, string, number][]
   l: { n: string; m: string; d: number; e: number; a: [number, number][] }[]
   f: Record<1 | 2, Leviers>
@@ -27,6 +31,7 @@ export interface PartieCompacte {
 export function compacter(p: PartiePartagee): PartieCompacte {
   return {
     v: VERSION_PARTIE,
+    ...(p.ville === 'lyon' ? {} : { w: p.ville }),
     c: p.chantiers.map((c) => [c.id, c.mandat, c.etale ? 1 : 0, c.varianteId ?? '', c.option ? 1 : 0]),
     l: p.lignes.map((l) => ({
       n: l.nom,
@@ -43,6 +48,14 @@ const MODES: readonly ModeLigne[] = ['tram', 'bus', 'metro', 'cable']
 const estPoint = (p: unknown): p is [number, number] =>
   Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && Number.isFinite(x))
 
+/** La ville d'une partie compacte, avant même de la vérifier : il faut charger ses données pour la relire. */
+export function villeDePartie(brut: unknown): IdVille | null {
+  if (!brut || typeof brut !== 'object') return null
+  const w = (brut as Partial<PartieCompacte>).w
+  if (w === undefined) return 'lyon'
+  return estVille(w) ? w : null
+}
+
 /**
  * Vérifie une partie compacte et recalcule tout ce qui en découle. Les estimations des lignes ne
  * voyagent jamais : elles sont recalculées ici, pour qu'une partie modifiée à la main ne puisse pas
@@ -52,10 +65,15 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   if (!brut || typeof brut !== 'object') return null
   const b = brut as Partial<PartieCompacte>
   if (b.v !== VERSION_PARTIE || !Array.isArray(b.c) || !Array.isArray(b.l)) return null
+  // Les lignes se recalculent avec les habitants et les emplois de leur ville, jamais d'une autre.
+  const ville = villeDePartie(brut)
+  if (!ville || ville !== carreaux.ville) return null
+  // Une ville sans catalogue n'a que des lignes tracées.
+  const catalogue = VILLES[ville].catalogue
 
   const vus = new Set<string>()
   const chantiers: Chantier[] = []
-  for (const entree of b.c) {
+  for (const entree of catalogue ? b.c : []) {
     if (!Array.isArray(entree)) continue
     const [id, mandat, etale, varianteId, option] = entree
     const projet = typeof id === 'string' ? PROJETS.get(id) : undefined
@@ -109,5 +127,6 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     tva: l?.tva === true,
   })
   const f = (b.f ?? {}) as Partial<Record<1 | 2, Partial<Leviers>>>
-  return { chantiers: chantiersValides, lignes, leviers: { 1: lire(f[1]), 2: lire(f[2]) } }
+  const leviers = VILLES[ville].leviers ? { 1: lire(f[1]), 2: lire(f[2]) } : { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES }
+  return { ville, chantiers: chantiersValides, lignes, leviers }
 }

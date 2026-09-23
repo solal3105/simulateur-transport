@@ -2,20 +2,36 @@
 
 import { clsx } from 'clsx'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import { communauteActive, listerReseaux, reseauxDe, useProfilLocal, type ReseauPublie } from '@/lib/communaute'
 import { n } from '@/lib/format'
+import { villeDePartie } from '@/lib/partie'
+import { estVille, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
 
 import { Bouton, Icone, Logo } from '../ui'
 import { MiniCarte } from './MiniCarte'
 
 type Onglet = 'populaires' | 'recents' | 'miens'
 
-const TITRES: Record<Onglet, string> = {
-  populaires: 'Les réseaux les plus soutenus à Lyon',
-  recents: 'Les derniers réseaux publiés à Lyon',
-  miens: 'Vos réseaux publiés',
+const titre = (onglet: Onglet, ville: IdVille) =>
+  onglet === 'populaires'
+    ? `Les réseaux les plus soutenus à ${VILLES[ville].nom}`
+    : onglet === 'recents'
+      ? `Les derniers réseaux publiés à ${VILLES[ville].nom}`
+      : 'Vos réseaux publiés'
+
+/** La ville demandée dans l'adresse (?ville=toulouse), lue sans décalage entre le serveur et le navigateur. */
+function useVilleAdresse() {
+  const brut = useSyncExternalStore(
+    (changer) => {
+      window.addEventListener('popstate', changer)
+      return () => window.removeEventListener('popstate', changer)
+    },
+    () => new URLSearchParams(window.location.search).get('ville'),
+    () => null,
+  )
+  return estVille(brut) ? brut : 'lyon'
 }
 
 const pluriel = (nombre: number, mot: string) => `${n(nombre)} ${mot}${nombre > 1 ? 's' : ''}`
@@ -43,7 +59,8 @@ export function EnteteCommunaute({ children }: { children?: React.ReactNode }) {
   )
 }
 
-export function CarteReseau({ reseau }: { reseau: ReseauPublie }) {
+/** Un réseau publié en vignette. `avecVille` remplace le pseudo par la ville, pour la liste de ses propres réseaux. */
+export function CarteReseau({ reseau, avecVille }: { reseau: ReseauPublie; avecVille?: boolean }) {
   return (
     <Link
       href={`/reseau/${reseau.id}`}
@@ -53,7 +70,9 @@ export function CarteReseau({ reseau }: { reseau: ReseauPublie }) {
         <MiniCarte partie={reseau.partie} />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className="text-[13px] font-bold text-gris">{reseau.auteur?.pseudo ?? 'Anonyme'}</span>
+        <span className="text-[13px] font-bold text-gris">
+          {avecVille ? VILLES[villeDePartie(reseau.partie) ?? 'lyon'].nom : (reseau.auteur?.pseudo ?? 'Anonyme')}
+        </span>
         <span className="text-[17px] leading-tight font-black">{reseau.titre}</span>
         {reseau.intention ? <p className="line-clamp-3 text-[13.5px] leading-relaxed text-gris">{reseau.intention}</p> : null}
         <div className="chiffres mt-auto flex flex-wrap gap-x-3.5 gap-y-1 pt-1 text-[13px] font-extrabold">
@@ -75,19 +94,22 @@ export function CarteReseau({ reseau }: { reseau: ReseauPublie }) {
   )
 }
 
-/** La page de la communauté : les réseaux publiés à Lyon, les plus soutenus ou les plus récents. */
+/** La page de la communauté : les réseaux publiés dans une ville, les plus soutenus ou les plus récents. */
 export function Communaute() {
   const [onglet, setOnglet] = useState<Onglet>('populaires')
+  const villeAdresse = useVilleAdresse()
+  const [choix, setChoix] = useState<IdVille | null>(null)
+  const ville = choix ?? villeAdresse
   const profil = useProfilLocal()
   // Chaque réponse porte la clé de sa demande : un changement d'onglet affiche le chargement sans effacer d'état.
   const [essai, setEssai] = useState(0)
-  const demande = `${onglet}:${profil?.id ?? ''}:${essai}`
+  const demande = `${onglet}:${ville}:${profil?.id ?? ''}:${essai}`
   const [reponse, setReponse] = useState<{ demande: string; reseaux?: ReseauPublie[]; erreur?: string } | null>(null)
 
   useEffect(() => {
     if (!communauteActive) return
     let actif = true
-    const requete = onglet === 'miens' ? (profil ? reseauxDe(profil.id) : Promise.resolve([])) : listerReseaux(onglet)
+    const requete = onglet === 'miens' ? (profil ? reseauxDe(profil.id) : Promise.resolve([])) : listerReseaux(onglet, ville)
     requete.then(
       (reseaux) => actif && setReponse({ demande, reseaux }),
       (e: unknown) =>
@@ -97,13 +119,17 @@ export function Communaute() {
     return () => {
       actif = false
     }
-  }, [onglet, profil, demande])
+  }, [onglet, ville, profil, demande])
 
   const actuelle = reponse?.demande === demande ? reponse : null
   const reseaux = actuelle?.reseaux ?? null
   const erreur = actuelle?.erreur ?? null
 
   const onglets: Onglet[] = profil ? ['populaires', 'recents', 'miens'] : ['populaires', 'recents']
+  const choisir = (id: IdVille) => {
+    setChoix(id)
+    window.history.replaceState(null, '', id === 'lyon' ? '/communaute' : `/communaute?ville=${id}`)
+  }
 
   return (
     <div className="min-h-dvh bg-[#faf9f7]">
@@ -127,7 +153,26 @@ export function Communaute() {
       </EnteteCommunaute>
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-5 px-5 pt-6 pb-16 lg:px-8 lg:pt-8">
-        <h1 className="text-[24px] leading-tight font-black tracking-tight lg:text-[28px]">{TITRES[onglet]}</h1>
+        {onglet !== 'miens' ? (
+          <div role="radiogroup" aria-label="Ville" className="flex gap-1.5">
+            {ID_VILLES.map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={ville === id}
+                onClick={() => choisir(id)}
+                className={clsx(
+                  'min-h-10 rounded-full px-4 text-[14px] font-extrabold transition-colors',
+                  ville === id ? 'bg-encre text-white' : 'bg-white shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:bg-sable',
+                )}
+              >
+                {VILLES[id].nom}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <h1 className="text-[24px] leading-tight font-black tracking-tight lg:text-[28px]">{titre(onglet, ville)}</h1>
 
         {!communauteActive ? (
           <p className="max-w-[640px] text-[15px] leading-relaxed text-gris">
@@ -151,7 +196,10 @@ export function Communaute() {
                 ? 'Vous n’avez encore rien publié depuis ce navigateur.'
                 : 'Aucun réseau n’a encore été publié. Terminez une partie, puis publiez votre réseau depuis le bilan : il apparaîtra ici.'}
             </p>
-            <Link href="/" className="flex min-h-13 items-center gap-2.5 rounded-full bg-rouge px-5 text-[15px] font-extrabold text-white">
+            <Link
+              href={ville === 'lyon' ? '/' : `/${ville}`}
+              className="flex min-h-13 items-center gap-2.5 rounded-full bg-rouge px-5 text-[15px] font-extrabold text-white"
+            >
               Jouer une partie
               <Icone nom="fleche" taille={19} epaisseur={2.3} />
             </Link>
@@ -159,7 +207,7 @@ export function Communaute() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {reseaux.map((r) => (
-              <CarteReseau key={r.id} reseau={r} />
+              <CarteReseau key={r.id} reseau={r} avecVille={onglet === 'miens'} />
             ))}
           </div>
         )}

@@ -1,4 +1,4 @@
-import { metres } from './modele'
+import { distance, metresParDegre } from './modele'
 
 export interface Lieux {
   communes: { nom: string; anneaux: [number, number][][] }[]
@@ -20,6 +20,8 @@ function dansAnneau(p: [number, number], anneau: [number, number][]) {
 }
 
 function plusProche(p: [number, number], liste: [number, number, string][]) {
+  // Les longitudes sont comptées à la latitude du point : cela vaut pour toutes les villes.
+  const metres = distance(metresParDegre(p[1]))
   let meilleur: { nom: string; d: number } | null = null
   for (const [lon, lat, nom] of liste) {
     const d = metres(p, [lon, lat])
@@ -39,7 +41,7 @@ export function nommerArret(p: [number, number], lieux: Lieux): string {
 
 /** Situe un point par rapport à un autre : « Est », « Nord »… */
 function direction(de: [number, number], vers: [number, number]) {
-  const dx = (vers[0] - de[0]) * Math.cos((45.76 * Math.PI) / 180)
+  const dx = (vers[0] - de[0]) * Math.cos((de[1] * Math.PI) / 180)
   const dy = vers[1] - de[1]
   if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'Est' : 'Ouest'
   return dy > 0 ? 'Nord' : 'Sud'

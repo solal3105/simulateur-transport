@@ -1,7 +1,7 @@
 'use client'
 
 import { chargerDonnees } from './donnees'
-import { compacter, normaliserPartie, type PartiePartagee } from './partie'
+import { compacter, normaliserPartie, villeDePartie, type PartiePartagee } from './partie'
 
 export type { PartiePartagee } from './partie'
 
@@ -38,7 +38,8 @@ export async function decoderPartie(texte: string): Promise<PartiePartagee | nul
 
 /** Relit une partie compacte, venue d'un lien ou d'un réseau publié, et recalcule ses lignes. */
 export async function lirePartie(brut: unknown): Promise<PartiePartagee | null> {
-  return normaliserPartie(brut, (await chargerDonnees()).carreaux)
+  const ville = villeDePartie(brut)
+  return ville ? normaliserPartie(brut, (await chargerDonnees(ville)).carreaux) : null
 }
 
 /** L'adresse complète à partager. */
