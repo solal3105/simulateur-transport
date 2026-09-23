@@ -9,7 +9,7 @@ import fondLyon from '@/public/data/fond.json'
 import projetsLyon from '@/public/data/projets.json'
 import fondMarseille from '@/public/data/marseille/fond.json'
 import fondNice from '@/public/data/nice/fond.json'
-import fondParis from '@/public/data/paris/fond.json'
+import fondIdf from '@/public/data/idf/fond.json'
 import fondToulouse from '@/public/data/toulouse/fond.json'
 
 import { lireApercu } from './apercu'
@@ -31,7 +31,7 @@ const DONNEES: Record<IdVille, { fond: Fond; projets: Projets }> = {
   toulouse: { fond: fondToulouse as unknown as Fond, projets: SANS_PROJETS },
   marseille: { fond: fondMarseille as unknown as Fond, projets: SANS_PROJETS },
   nice: { fond: fondNice as unknown as Fond, projets: SANS_PROJETS },
-  paris: { fond: fondParis as unknown as Fond, projets: SANS_PROJETS },
+  idf: { fond: fondIdf as unknown as Fond, projets: SANS_PROJETS },
 }
 
 /** La police n'a pas l'espace fine insécable que le français met entre les milliers. */
@@ -71,9 +71,12 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const chemins = cheminsFond(fond, ville)
   const traces = cheminsReseau(projets, reseau.partie, ville)
   const long = reseau.titre.length > 32
-  const surtitre = `${MARQUE}, ${ville.nom} en 2038`
+  const libre = (reseau.partie as { x?: number } | null)?.x === 1
+  const surtitre = `${MARQUE}, ${ville.nom} en 2038${libre ? ', jeu libre' : ''}`
   return new ImageResponse(
-    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ROUGE, fontFamily: 'Figtree' }}>
+    <div
+      style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ville.couleurs.principale, fontFamily: 'Figtree' }}
+    >
       <div style={{ display: 'flex', width: 640, height: 550, borderRadius: 32, overflow: 'hidden', background: SABLE }}>
         <svg width={640} height={550} viewBox={cadreMiniature(ville).viewBox} preserveAspectRatio="xMidYMid meet">
           <path d={chemins.mer} fill="#c6dde9" fillRule="evenodd" />

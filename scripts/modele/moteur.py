@@ -72,6 +72,12 @@ GROUPES_MAX = 7
 BASSINS_RETENUS = 4
 # Les villes du jeu (lib/villes.ts), dont la formule exportée donne la constante.
 VILLES_DU_JEU = ['lyon', 'toulouse', 'marseille', 'nice', 'paris']
+# Le nom de chaque ville du calage dans le jeu, quand il diffère : le jeu couvre toute l'Île-de-France.
+ID_DU_JEU = {'paris': 'idf'}
+
+
+def jeu(v):
+    return ID_DU_JEU.get(v, v)
 # Les variables de ligne que le jeu sait calculer (lib/modele.ts), sous leur nom dans le jeu.
 VARIABLES_DU_JEU = {'bassin': 'bassin', 'stations': 'stations', 'longueur': 'longueur', 'distance_centre': 'distanceCentre',
                     'part_centre': 'partCentre', 'concurrence': 'concurrence', 'bassin_large': 'bassinLarge'}
@@ -455,7 +461,7 @@ def exporter(retenue, coefficients, niveaux, cable, e_connue, e_ville, poids, d,
     r = lambda x: round(x, 4)
     lignes_ts = '\n'.join(f'    {k}: {r(v)},' for k, v in ligne.items())
     calage_ts = '\n'.join(
-        f'    {v}: [\n' + ''.join(f"      {{ ligne: '{x['ligne']}', reel: {x['reel']}, ecart: {x['ecart']} }},\n" for x in lignes) + '    ],'
+        f'    {jeu(v)}: [\n' + ''.join(f"      {{ ligne: '{x['ligne']}', reel: {x['reel']}, ecart: {x['ecart']} }},\n" for x in lignes) + '    ],'
         for v, lignes in calage.items())
     texte = f'''/**
  * La formule de fréquentation retenue par le moteur (scripts/modele/moteur.py, docs/modele.md). Ce
@@ -522,10 +528,10 @@ export const FORMULE: Formule = {{
 {lignes_ts}
   }},
   modes: {{ tram: 0, metro: {r(modes['metro'])}, bus: {r(modes['bus'])}, cable: {r(modes['cable'])} }},
-  constantes: {{ {', '.join(f'{v}: {r(k)}' for v, k in constantes.items())} }},
-  constantesMoteur: {{ {', '.join(f'{v}: {r(k)}' for v, k in constantes.items())} }},
-  recalage: {{ {', '.join(f'{v}: 0' for v in constantes)} }},
-  ajustements: {{ {'paris: { metro: ' + str(r(coefficients['entrees'])) + ' }' if 'entrees' in coefficients else ''} }},
+  constantes: {{ {', '.join(f'{jeu(v)}: {r(k)}' for v, k in constantes.items())} }},
+  constantesMoteur: {{ {', '.join(f'{jeu(v)}: {r(k)}' for v, k in constantes.items())} }},
+  recalage: {{ {', '.join(f'{jeu(v)}: 0' for v in constantes)} }},
+  ajustements: {{ {'idf: { metro: ' + str(r(coefficients['entrees'])) + ' }' if 'entrees' in coefficients else ''} }},
   fourchette: {{ bas: {round(bas, 2)}, haut: {round(haut, 2)} }},
   variablesDeVille: [{', '.join(repr(NOMS_DE_VILLE[v]) for v in coefficients if v in VARIABLES_DE_VILLE)}],
   formules: {n_formules},
@@ -551,7 +557,7 @@ export const FORMULE: Formule = {{
             continue
         prevu = constantes[x['ville']] + modes[{'bhns': 'bus'}.get(x['mode'], x['mode'])] + sum(
             b * valeur_ligne(x, nom, retenue) for nom, b in coefficients.items() if nom in VARIABLES_DU_JEU)
-        controle.append({'ville': x['ville'], 'ligne': x['ligne'], 'mode': {'bhns': 'bus'}.get(x['mode'], x['mode']),
+        controle.append({'ville': jeu(x['ville']), 'ligne': x['ligne'], 'mode': {'bhns': 'bus'}.get(x['mode'], x['mode']),
                          'reel': round(float(x['voyages_jour'])), 'moteur': float(prevu), 'arrets': arrets})
     json.dump(controle, open(os.path.join(MODELE, 'controle-jeu.json'), 'w'), ensure_ascii=False)
     print('\nlib/formule.ts écrit : constantes', {v: round(k, 3) for v, k in constantes.items()}, f'fourchette {bas:.2f} à {haut:.2f}, téléphérique {cable:.2f}')

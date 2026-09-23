@@ -71,21 +71,22 @@ const VILLES = {
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.60,6.74,44.40,7.50);out;',
     stops: '(node["railway"="tram_stop"](43.63,7.10,43.80,7.40););out;',
   },
-  // Paris et les 123 communes des Hauts-de-Seine, de la Seine-Saint-Denis et du Val-de-Marne.
-  paris: {
-    rivers: 'way["waterway"="river"]["name"~"^(La Seine|La Marne|Seine|Marne)$"](48.67,2.12,49.03,2.64);out geom;',
-    metro: 'way["railway"="subway"][!"service"](48.67,2.12,49.03,2.64);out geom;',
-    tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](48.67,2.12,49.03,2.64);out geom;',
+  // Les 1 267 communes des huit départements d'Île-de-France. Sur un territoire aussi grand, on ne garde
+  // des bois que ceux qui ont un nom, et des routes secondaires que celles du cœur de l'agglomération.
+  idf: {
+    rivers: 'way["waterway"="river"]["name"~"^(La |L\'|L’)?(Seine|Marne|Oise)$"](48.10,1.43,49.25,3.57);out geom;',
+    metro: 'way["railway"="subway"][!"service"](48.10,1.43,49.25,3.57);out geom;',
+    tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](48.10,1.43,49.25,3.57);out geom;',
     cable: 'way["aerialway"~"^(gondola|cable_car)$"](48.72,2.42,48.80,2.50);out geom;',
-    chantiers: 'way["railway"="construction"]["construction"~"^(subway|tram|light_rail)$"](48.67,2.12,49.03,2.64);out geom;',
+    chantiers: 'way["railway"="construction"]["construction"~"^(subway|tram|light_rail)$"](48.10,1.43,49.25,3.57);out geom;',
     parcs:
-      '(way["leisure"="park"](48.67,2.12,49.03,2.64);relation["leisure"="park"](48.67,2.12,49.03,2.64);way["landuse"="forest"](48.67,2.12,49.03,2.64);way["natural"="wood"](48.67,2.12,49.03,2.64););out geom;',
-    eau: '(way["natural"="water"](48.67,2.12,49.03,2.64);relation["natural"="water"](48.67,2.12,49.03,2.64););out geom;',
-    routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](48.67,2.12,49.03,2.64);out geom;',
-    rail: 'way["railway"="rail"][!"service"](48.67,2.12,49.03,2.64);out geom;',
-    lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](48.65,2.10,49.05,2.66);out;',
+      '(way["leisure"="park"](48.10,1.43,49.25,3.57);relation["leisure"="park"](48.10,1.43,49.25,3.57);way["landuse"="forest"]["name"](48.10,1.43,49.25,3.57);relation["landuse"="forest"](48.10,1.43,49.25,3.57);way["natural"="wood"]["name"](48.10,1.43,49.25,3.57);relation["natural"="wood"](48.10,1.43,49.25,3.57););out geom;',
+    eau: '(way["natural"="water"](48.10,1.43,49.25,3.57);relation["natural"="water"](48.10,1.43,49.25,3.57););out geom;',
+    routes: '(way["highway"~"^(motorway|trunk|primary)$"](48.10,1.43,49.25,3.57);way["highway"="secondary"](48.72,2.15,49.00,2.60););out geom;',
+    rail: 'way["railway"="rail"][!"service"](48.10,1.43,49.25,3.57);out geom;',
+    lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](48.10,1.43,49.25,3.57);out;',
     stops:
-      '(node["railway"="tram_stop"](48.67,2.12,49.03,2.64);node["railway"="station"]["station"="subway"](48.67,2.12,49.03,2.64);node["aerialway"="station"](48.72,2.42,48.80,2.50););out;',
+      '(node["railway"="tram_stop"](48.10,1.43,49.25,3.57);node["railway"="station"]["station"="subway"](48.10,1.43,49.25,3.57);node["aerialway"="station"](48.72,2.42,48.80,2.50););out;',
   },
 }
 
@@ -101,7 +102,7 @@ mkdirSync(dir, { recursive: true })
 // Hors de Lyon, les contours des communes viennent de geo.api.gouv.fr, plus sûr que les grosses requêtes Overpass.
 if (ville !== 'lyon' && (!demandees.length || demandees.includes('contours'))) {
   const { communes } = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'data', ville, 'communes.json'), 'utf8'))
-  // Les communes sont rattachées à une intercommunalité, ou à un département pour Paris et la petite couronne.
+  // Les communes sont rattachées à une intercommunalité, ou à un département en Île-de-France.
   const epcis = [...new Set(communes.map((c) => c.epci).filter(Boolean))]
   const departements = [...new Set(communes.filter((c) => !c.epci).map((c) => c.departement))]
   const features = []

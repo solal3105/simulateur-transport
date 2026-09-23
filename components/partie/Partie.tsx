@@ -8,6 +8,7 @@ import { useJeu, useVille } from '@/lib/store'
 import { MARQUE } from '@/lib/villes'
 
 import { Carte } from '../carte/Carte'
+import { useCouleursReseau } from '../couleurs'
 import { Budget } from '../panneaux/Budget'
 import { FicheProjet } from '../panneaux/FicheProjet'
 import { Leviers } from '../panneaux/Leviers'
@@ -96,6 +97,7 @@ function Legende() {
 export function Partie() {
   const { panneau, brouillon, ecran, ouvrir, tracer, tuto: etapeTuto, lignes } = useJeu()
   const ville = useVille()
+  useCouleursReseau(ville.id)
   const grand = useGrandEcran()
   const tuto = ecran === 'tuto'
 
@@ -111,7 +113,7 @@ export function Partie() {
   return (
     <main className="fixed inset-0 overflow-hidden bg-sable" data-tuto={tuto ? etapeTuto : undefined}>
       <h1 className="sr-only">
-        {MARQUE}, partie en cours à {ville.nom}
+        {MARQUE}, partie en cours {ville.ou}
       </h1>
       <Carte marges={marges} />
       <Entete />

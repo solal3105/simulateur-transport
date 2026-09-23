@@ -19,6 +19,7 @@ export const marseille: BudgetVille = {
   payeur: 'la Métropole d’Aix-Marseille-Provence',
   total: {
     montants: { 1: 1800, 2: 1800 },
+    simple: 'La Métropole s’est engagée à investir 300 millions d’euros par an dans ses transports, soit 1,8 milliard par mandat.',
     explication:
       'La Métropole s’est engagée auprès de l’État à investir au moins 300 M€ par an dans ses transports de 2023 à 2032, et son rapport d’orientation budgétaire 2026 garde cet objectif. Nous le reprenons, soit 1 800 M€ par mandat. Ce rythme n’est pas acquis : la Métropole n’a dépensé en moyenne que 260 M€ par an de 2023 à 2025, et son budget des transports est si déséquilibré que le préfet a dû arrêter lui-même celui de 2026. Aucun document ne va au-delà de 2032 : nous gardons le même rythme au second mandat.',
     sources: [
@@ -41,6 +42,7 @@ export const marseille: BudgetVille = {
   },
   decides: {
     montants: { 1: 50, 2: 0 },
+    simple: 'Il reste environ 50 millions à payer sur l’extension du T3 et le Val’Tram, déjà sur la carte.',
     explication:
       'L’extension du T3 ouverte en janvier 2026, le Val’Tram d’Aubagne et les bus à haut niveau de service livrés en 2025 sont déjà dessinés sur notre carte, et presque payés : 96,8 M€ ont été versés pour le T3 et 50,4 M€ pour le Val’Tram en 2024. Nous estimons à environ 50 M€ ce qui reste à régler après 2026. Les trams qui n’ont pas encore de déclaration d’utilité publique, jusqu’à La Bricarde, au 4-Septembre ou à la Belle de Mai, ne sont pas sur la carte : c’est à vous de les tracer si vous le voulez.',
     sources: [
@@ -54,6 +56,7 @@ export const marseille: BudgetVille = {
   },
   bus: {
     montants: { 1: 400, 2: 400 },
+    simple: 'Passer aux bus électriques et reconstruire deux dépôts coûte environ 400 millions par mandat.',
     explication:
       'Depuis janvier 2026, la Métropole paie elle-même les bus, les dépôts et le matériel que la RTM finançait jusque-là : 1,2 milliard prévu de 2026 à 2033. La RTM a 629 bus, dont 21 électriques, et doit en recevoir 60 électriques par an jusqu’en 2030, avec deux dépôts à reconstruire, à Saint-Pierre et à Arenc. En comptant 300 bus à environ 0,65 M€ et ces deux dépôts, nous arrivons à environ 400 M€ par mandat.',
     sources: [
@@ -75,6 +78,7 @@ export const marseille: BudgetVille = {
   },
   lignes: {
     montants: { 1: 650, 2: 650 },
+    simple: 'Finir la rénovation du métro et entretenir le reste du réseau coûte environ 650 millions par mandat.',
     explication:
       'Le reste du programme repris de la RTM va au métro, au tram et aux équipements. Il faut aussi finir Neomma, le renouvellement complet du métro : 38 rames, l’automatisation des deux lignes et des façades de quai, pour 548 M€ au total, dont il reste environ 100 M€ à payer. S’y ajoutent environ 50 M€ pour les autres réseaux de la Métropole. Nous estimons l’ensemble à 650 M€ par mandat, et gardons ce montant au second mandat faute de chiffre.',
     sources: [

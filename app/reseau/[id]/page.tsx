@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const titre = `${reseau.titre}, par ${reseau.auteur?.pseudo ?? 'un joueur'}`
   const voyageurs = reseau.voyageurs.toLocaleString('fr-FR')
   const ville = VILLES[villeDePartie(reseau.partie) ?? 'lyon']
-  const description = reseau.intention ?? `Un réseau de transport pour ${ville.nom} en 2038, qui gagne ${voyageurs} voyageurs par jour.`
+  const description = reseau.intention ?? `Un réseau de transport imaginé ${ville.ou} pour 2038, qui gagne ${voyageurs} voyageurs par jour.`
   return {
     title: `${titre} | ${MARQUE}`,
     description,

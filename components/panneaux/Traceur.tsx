@@ -287,7 +287,7 @@ export function Traceur() {
         <p className="flex items-start gap-2.5 rounded-2xl bg-encre px-4 py-3 text-sm leading-snug font-semibold text-white">
           <Icone nom="main" taille={20} className="mt-0.5" />
           {arrets === 0
-            ? 'Touchez la carte pour poser le premier arrêt. Les zones rouges sont celles où vivent et travaillent le plus de gens.'
+            ? 'Touchez la carte pour poser le premier arrêt. Les zones les plus colorées sont celles où vivent et travaillent le plus de gens.'
             : 'Posez au moins un deuxième arrêt pour voir le prix et les voyageurs.'}
         </p>
       ) : (
@@ -327,7 +327,7 @@ function useNomsArrets() {
 
 /** Le résultat d'une ligne terminée, avant de la construire. */
 export function MaLigne() {
-  const { brouillon, mandat, construireLigne, ouvrir } = useJeu()
+  const { brouillon, mandat, construireLigne, ouvrir, libre } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const e = useEstimation()
@@ -339,7 +339,9 @@ export function MaLigne() {
     nomSaisi ?? (noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
-  const reste = bilan.reste
+  // En jeu libre, il n'y a pas de budget à tenir, ni de paiement en deux fois.
+  const reste = libre ? Infinity : bilan.reste
+  const etaler = mandat === 1 && !libre
   const moitie = Math.round(e.cout / 2)
 
   return (
@@ -364,12 +366,12 @@ export function MaLigne() {
             {e.cout <= reste ? `Construire pour ${n(e.cout)} M€` : `Construire pour ${n(e.cout)} M€, avec un déficit`}
           </Bouton>
           <div className="grid grid-cols-2 gap-2">
-            {mandat === 1 ? (
+            {etaler ? (
               <Bouton genre="contour" taille="petit" onClick={() => construireLigne(nom.trim() || 'Ma ligne', e, true)}>
                 Payer {n(moitie)} M€ maintenant
               </Bouton>
             ) : null}
-            <Bouton genre="contour" taille="petit" onClick={() => ouvrir({ type: 'trace' })} className={mandat === 1 ? '' : 'col-span-2'}>
+            <Bouton genre="contour" taille="petit" onClick={() => ouvrir({ type: 'trace' })} className={etaler ? '' : 'col-span-2'}>
               Modifier le tracé
             </Bouton>
           </div>

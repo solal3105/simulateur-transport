@@ -65,7 +65,7 @@ export function useProgramme() {
 }
 
 export function Programme() {
-  const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir } = useJeu()
+  const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir, libre } = useJeu()
   const ville = useVille()
   // Sans catalogue, le programme ne compte que des lignes tracées.
   const mot = ville.catalogue ? 'projet' : 'ligne'
@@ -81,11 +81,18 @@ export function Programme() {
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6.5 pt-6.5 pb-6">
         <div className="flex flex-col gap-3">
           <Surtitre>Où vous en êtes</Surtitre>
-          <ol className="flex flex-col gap-3">
-            <Etape numero={1} texte="Premier mandat, 2026-2032" etat={mandat === 1 ? 'encours' : 'fait'} />
-            <Etape numero={2} texte="Second mandat, 2032-2038" etat={mandat === 2 ? 'encours' : 'avenir'} />
-            <Etape numero={3} texte="Votre réseau en 2038" etat="avenir" />
-          </ol>
+          {libre ? (
+            <ol className="flex flex-col gap-3">
+              <Etape numero={1} texte="Jeu libre, 2026-2038" etat="encours" />
+              <Etape numero={2} texte="Votre réseau en 2038" etat="avenir" />
+            </ol>
+          ) : (
+            <ol className="flex flex-col gap-3">
+              <Etape numero={1} texte="Premier mandat, 2026-2032" etat={mandat === 1 ? 'encours' : 'fait'} />
+              <Etape numero={2} texte="Second mandat, 2032-2038" etat={mandat === 2 ? 'encours' : 'avenir'} />
+              <Etape numero={3} texte="Votre réseau en 2038" etat="avenir" />
+            </ol>
+          )}
         </div>
 
         <section className="flex flex-col">
@@ -140,28 +147,37 @@ export function Programme() {
         </section>
 
         <p className="text-sm leading-relaxed text-gris">
-          {ville.catalogue ? 'Choisissez des projets sur la carte ou tracez votre propre ligne.' : 'Tracez vos lignes sur la carte.'} Quand
-          vous avez fini, terminez le mandat.{' '}
-          {mandat === 1
-            ? 'L’argent que vous n’aurez pas dépensé passera au second mandat.'
-            : 'L’argent non dépensé restera disponible pour la suite.'}
+          {ville.catalogue ? 'Choisissez des projets sur la carte ou tracez votre propre ligne.' : 'Tracez vos lignes sur la carte.'}{' '}
+          {libre
+            ? 'Il n’y a pas de budget à tenir : quand vous avez fini, voyez votre réseau en 2038.'
+            : `Quand vous avez fini, terminez le mandat. ${
+                mandat === 1
+                  ? 'L’argent que vous n’aurez pas dépensé passera au second mandat.'
+                  : 'L’argent non dépensé restera disponible pour la suite.'
+              }`}
         </p>
       </div>
 
       {/* Les deux actions de la partie restent fixées en bas, quelle que soit la longueur du programme. */}
       <div className="flex shrink-0 flex-col gap-2 border-t border-trait bg-white px-6.5 pt-4 pb-6">
-        {ville.leviers ? (
+        {ville.budget.leviers && !libre ? (
           <Bouton genre="sable" iconeAGauche="pieces" onClick={() => ouvrir({ type: 'leviers' })} className="justify-start">
             Trouver de l’argent
           </Bouton>
         ) : null}
-        <Bouton genre="rouge" icone="drapeau" onClick={finirMandat} disabled={bilan.reste < 0} data-guide={guide ? '' : undefined}>
-          {mandat === 1 ? 'Finir le premier mandat' : 'Finir le second mandat'}
+        <Bouton
+          genre="rouge"
+          icone="drapeau"
+          onClick={finirMandat}
+          disabled={!libre && bilan.reste < 0}
+          data-guide={guide ? '' : undefined}
+        >
+          {libre ? 'Voir mon réseau en 2038' : mandat === 1 ? 'Finir le premier mandat' : 'Finir le second mandat'}
         </Bouton>
-        {bilan.reste < 0 ? (
+        {!libre && bilan.reste < 0 ? (
           <p className="text-[13px] leading-snug font-semibold text-rouge-fonce">
             Le mandat est en déficit de {n(-bilan.reste)} M€.{' '}
-            {ville.leviers
+            {ville.budget.leviers
               ? 'Retirez un projet ou trouvez de l’argent pour pouvoir le terminer.'
               : 'Retirez une ligne pour pouvoir le terminer.'}
           </p>
@@ -172,20 +188,29 @@ export function Programme() {
 }
 
 export function BarreBas() {
-  const { ouvrir, finirMandat, mandat, ecran, tuto } = useJeu()
+  const { ouvrir, finirMandat, mandat, ecran, tuto, libre } = useJeu()
   const ville = useVille()
   const guide = ecran === 'tuto' && tuto === 2
   const bilan = useBilan()
+  if (libre) {
+    return (
+      <div className="absolute inset-x-0 bottom-0 z-20 grid border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden">
+        <Bouton genre="rouge" icone="drapeau" taille="petit" className="min-h-13 text-[13.5px]! whitespace-nowrap" onClick={finirMandat}>
+          Voir mon réseau en 2038
+        </Bouton>
+      </div>
+    )
+  }
   // Sans leviers de financement, un déficit se comble en retirant une ligne depuis la liste.
-  const combler = () => ouvrir(ville.leviers ? { type: 'leviers' } : { type: 'liste' })
+  const combler = () => ouvrir(ville.budget.leviers ? { type: 'leviers' } : { type: 'liste' })
   return (
     <div
       className={clsx(
         'absolute inset-x-0 bottom-0 z-20 grid gap-2 border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden',
-        ville.leviers ? 'grid-cols-2' : 'grid-cols-1',
+        ville.budget.leviers ? 'grid-cols-2' : 'grid-cols-1',
       )}
     >
-      {ville.leviers ? (
+      {ville.budget.leviers ? (
         <Bouton
           genre="sable"
           iconeAGauche="pieces"
@@ -206,7 +231,7 @@ export function BarreBas() {
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}
       >
         {bilan.reste < 0
-          ? ville.leviers
+          ? ville.budget.leviers
             ? 'Combler le déficit'
             : 'Retirer une ligne'
           : mandat === 1

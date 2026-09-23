@@ -2,7 +2,11 @@
 
 Un jeu pour comprendre l'arbitrage budgétaire des transports publics, né à Lyon sous le nom de Simulateur TCL. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
-Le jeu se joue aussi à Toulouse (`/toulouse`), Marseille (`/marseille`), Nice (`/nice`) et Paris (`/paris`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes. Son budget est l'investissement prévu par l'autorité organisatrice, moins ce que demandent les projets déjà décidés, les bus et les lignes existantes, avec une source pour chaque chiffre : voir `docs/budgets.md`. Les leviers de financement n'y sont pas encore calculés.
+Le jeu se joue sur cinq réseaux, chacun sur le territoire de son autorité organisatrice et dans ses couleurs : TCL (Métropole de Lyon, `/`), Tisséo (agglomération toulousaine, `/toulouse`), Aix-Marseille-Provence (`/marseille`), Lignes d'Azur (métropole Nice Côte d'Azur, `/nice`) et Île-de-France Mobilités (toute l'Île-de-France, `/ile-de-france`). Hors de Lyon, il n'y a pas encore de catalogue de projets : le joueur trace toutes ses lignes. Son budget est l'investissement prévu, moins ce que demandent les projets déjà décidés, les bus et les lignes existantes, avec une source pour chaque chiffre, et ses leviers de financement sont calculés à partir des recettes réelles de son réseau : voir `docs/budgets.md`.
+
+Chaque réseau a une page qui explique simplement ces calculs, sans commencer de partie (`/methode`, `/toulouse/methode`, etc.). Elle invite aussi à écrire si un chiffre doit être corrigé ; l'adresse n'est assemblée qu'au clic, pour la cacher aux robots.
+
+En commençant une partie, le joueur choisit entre le vrai budget et le jeu libre, sans limite de budget : il trace alors le réseau dont il rêve, et le bilan compare son coût au budget réel. Un réseau fait en jeu libre peut être publié, marqué comme tel et listé à part.
 
 Les voyageurs d'une ligne tracée viennent d'une formule choisie par un moteur parmi des dizaines de milliers, calées sur plus d'une centaine de lignes de près de trente villes françaises : voir `docs/modele.md`.
 
@@ -19,7 +23,7 @@ Le site s'ouvre sur http://localhost:3000. `npm run build` prépare la version d
 
 ## Les règles du jeu
 
-Chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entretien des bus. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit.
+À Lyon, chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entretien des bus ; ailleurs, le budget de chaque mandat vient de `lib/budgets/<réseau>.ts`. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit, sauf en jeu libre, qui n'a qu'une étape de 2026 à 2038 et pas de budget à tenir.
 
 À la fin de la partie, le bilan donne un lien qui contient tout le réseau, sans compte ni serveur. Qui ouvre ce lien voit le réseau se construire, peut partir de ce réseau pour sa propre partie, ou le comparer à la sienne.
 
@@ -41,9 +45,9 @@ Le fond de carte ne dépend d'aucun service extérieur. `scripts/fetch-osm.mjs` 
 
 Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`, avec la formule de `lib/formule.ts`, écrite par le moteur de fréquentation. `docs/modele.md` explique comment cette formule a été choisie, ce qu'elle vaut ligne par ligne et comment la recalculer.
 
-## Ouvrir une autre ville
+## Ouvrir un autre réseau
 
-Tout ce qui change d'une ville à l'autre est décrit dans `lib/villes.ts` : la carte, le budget, le centre d'où se mesure la distance au centre, et quelques repères pour les textes. La constante de la formule de fréquentation de chaque ville est dans `lib/formule.ts`. Les données d'une ville vont dans `public/data/<ville>/` : le fond de carte et les arrêts par `scripts/fetch-osm.mjs` et `scripts/build-data.mjs` (avec le nom de la ville en argument), les habitants et les emplois par `scripts/carreaux-ville.py`. `data/<ville>/SOURCES.md` décrit les données de chaque ville, et `docs/villes.md` rassemble les recherches sur les réseaux, les projets et les budgets. Côté communauté, la ville doit être ouverte dans la table `villes` et ses données déposées pour la fonction serveur (voir `docs/communaute.md`).
+Tout ce qui change d'un réseau à l'autre est décrit dans `lib/villes.ts` : son nom, son territoire, ses couleurs, la carte, le centre d'où se mesure la distance au centre, et quelques repères pour les textes. Son budget et ses leviers de financement sont dans `lib/budgets/<réseau>.ts`, établis et contrôlés selon `docs/budgets.md`. La constante de la formule de fréquentation de chaque ville est dans `lib/formule.ts`. Les données d'une ville vont dans `public/data/<ville>/` : le fond de carte et les arrêts par `scripts/fetch-osm.mjs` et `scripts/build-data.mjs` (avec le nom de la ville en argument), les habitants et les emplois par `scripts/carreaux-ville.py`. `data/<ville>/SOURCES.md` décrit les données de chaque ville, et `docs/villes.md` rassemble les recherches sur les réseaux, les projets et les budgets. Côté communauté, la ville doit être ouverte dans la table `villes` et ses données déposées pour la fonction serveur (voir `docs/communaute.md`).
 
 ## Licence
 

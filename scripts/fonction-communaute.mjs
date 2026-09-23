@@ -17,7 +17,7 @@ const budgets = readdirSync(join(racine, 'lib', 'budgets'))
   .filter((f) => f.endsWith('.ts'))
   .map((f) => `budgets/${f.slice(0, -3)}`)
 
-for (const nom of ['types', 'villes', 'catalogue', 'regles', 'formule', 'modele', 'partie', 'budget', ...budgets]) {
+for (const nom of ['types', 'villes', 'catalogue', 'regles', 'formule', 'modele', 'partie', 'budget', 'leviers', ...budgets]) {
   const source = readFileSync(join(racine, 'lib', `${nom}.ts`), 'utf8')
   const copie = source.replace(/from '(\.\.?\/[a-z/-]+)'/g, "from '$1.ts'")
   mkdirSync(dirname(join(cible, `${nom}.ts`)), { recursive: true })

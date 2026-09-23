@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx'
 import Link from 'next/link'
-import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
+import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react'
 
 const TRACES = {
   fleche: 'M5 12h14M13 6l6 6-6 6',
@@ -36,6 +36,7 @@ const TRACES = {
   annuler: 'M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3',
   telecharger: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',
+  lettre: 'M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5zM3.5 6.5l8.5 6.5 8.5-6.5',
 } as const
 
 export type NomIcone = keyof typeof TRACES
@@ -250,9 +251,9 @@ const SEGMENTS_ROUGE: Record<Segment['style'], string> = {
 const SEGMENTS_CLAIR: Record<Segment['style'], string> = {
   reserve: 'bg-[repeating-linear-gradient(135deg,#b9b5af_0_3px,#dad6d0_3px_6px)]',
   fait: 'bg-rouge',
-  report: 'bg-[repeating-linear-gradient(135deg,#e3051b_0_3px,#f58b96_3px_6px)]',
+  report: 'bg-[repeating-linear-gradient(135deg,var(--color-rouge)_0_3px,var(--color-rouge-moyen)_3px_6px)]',
   apercu: 'bg-encre',
-  manque: 'bg-[repeating-linear-gradient(135deg,#1b1b1f_0_3px,#e3051b_3px_6px)]',
+  manque: 'bg-[repeating-linear-gradient(135deg,#1b1b1f_0_3px,var(--color-rouge)_3px_6px)]',
   libre: 'bg-transparent',
   levier: 'bg-rouge/45',
 }
@@ -311,4 +312,18 @@ export function EtapesMandat({ mandat, surRouge = true }: { mandat: 1 | 2; surRo
       <div className={clsx('h-1.5 w-5.5 rounded-full', mandat === 2 ? actif : inactif)} />
     </div>
   )
+}
+
+/**
+ * Une rangée qui défile sur téléphone garde son élément choisi en vue, sans faire bouger la page : à
+ * poser sur la rangée, avec ce qui change le choix.
+ */
+export function useChoixVisible<T extends HTMLElement>(choix: unknown) {
+  const rangee = useRef<T>(null)
+  useEffect(() => {
+    const r = rangee.current
+    const choisi = r?.querySelector<HTMLElement>('[aria-checked="true"], [aria-current="page"]')
+    if (r && choisi && r.scrollWidth > r.clientWidth) r.scrollLeft = choisi.offsetLeft - 24
+  }, [choix])
+  return rangee
 }

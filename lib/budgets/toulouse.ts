@@ -12,6 +12,7 @@ export const toulouse: BudgetVille = {
   payeur: 'Tisséo Collectivités',
   total: {
     montants: { 1: 2600, 2: 1300 },
+    simple: 'Tisséo investira environ 2,6 milliards d’euros de 2026 à 2032, puis 1,3 milliard de 2032 à 2038.',
     explication:
       'Tisséo Collectivités n’a pas publié de programme d’investissement pour 2026-2038. Pour le premier mandat, nous additionnons ses budgets : 869,9 M€ votés pour 2026, 763 M€ attendus en 2027 selon l’agence de notation Moody’s, environ 800 M€ de 2028 à 2030, ce qui reste de son plan de 4,5 milliards sur 2023-2030, puis environ 200 M€ en 2031. Pour le second mandat, une fois la ligne C payée, nous prenons ce que Tisséo peut investir chaque année sans s’endetter davantage : environ 200 M€ d’épargne et une vingtaine de millions de subventions, soit 1 300 M€ en six ans.',
     sources: [
@@ -35,6 +36,7 @@ export const toulouse: BudgetVille = {
   },
   decides: {
     montants: { 1: 1800, 2: 0 },
+    simple: 'La ligne C du métro, qui ouvre fin 2028, en prend encore 1,8 milliard au premier mandat.',
     explication:
       'La ligne C du métro, la ligne Aéroport et le prolongement de la ligne B à Labège sont déjà dessinés sur notre carte. Leur enveloppe est de 3,4 milliards en euros de 2017, dont 1,6 milliard dépensé de 2022 à 2024. Tisséo ne publie pas ce qui reste à payer : nous l’estimons à 1,8 milliard sur le premier mandat, les 768 M€ inscrits au budget 2026 puis environ un milliard en 2027 et 2028. Rien ne reste à payer au second mandat.',
     sources: [
@@ -58,6 +60,7 @@ export const toulouse: BudgetVille = {
   },
   bus: {
     montants: { 1: 150, 2: 200 },
+    simple: 'Renouveler les bus et électrifier leurs dépôts coûte 150 à 200 millions par mandat.',
     explication:
       'Tisséo possède ses 572 bus. Il prévoit de 320 à 395 M€ pour les renouveler et électrifier leurs dépôts de 2025 à 2040, soit 20 à 25 M€ par an. Trois achats sont déjà votés : la conversion du dépôt de Langlade à l’électrique, 65 bus électriques et 55 bus articulés. Nous répartissons ces montants selon son calendrier d’achat, plus chargé au second mandat : 163 bus articulés électriques sont prévus de 2031 à 2040, et 164 bus standards de 2034 à 2038.',
     sources: [
@@ -75,6 +78,7 @@ export const toulouse: BudgetVille = {
   },
   lignes: {
     montants: { 1: 450, 2: 450 },
+    simple: 'Entretenir le métro et le tram, et remplacer leurs rames, coûte environ 450 millions par mandat.',
     explication:
       'Tisséo renouvelle lui-même ses rames et ses équipements : 64 M€ de travaux en 2023, 45 M€ en 2024, 95,4 M€ au budget 2026. Sont en cours 15 rames de VAL, 9 rames de tram, les escaliers mécaniques de la ligne B et l’alimentation électrique de la ligne A. Nous prolongeons ce rythme, environ 75 M€ par an. Le doublement de la ligne B, annoncé sans coût ni date, n’y est pas.',
     sources: [

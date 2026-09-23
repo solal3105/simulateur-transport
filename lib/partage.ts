@@ -10,6 +10,8 @@ interface Contenu {
   /** Ce que contient le réseau : « 14 projets sur 22 », « 3 lignes tracées ». */
   contenu: string
   equilibre: boolean
+  /** Un réseau fait en jeu libre le dit sur son image. */
+  libre: boolean
   /** Tracés des projets décidés, avec la couleur de leur mode. */
   traces: Map<string, string>
   /** Lignes du joueur, avec leur couleur. */
@@ -17,7 +19,6 @@ interface Contenu {
   adresse: string
 }
 
-const ROUGE = '#e3051b'
 const ENCRE = '#1b1b1f'
 
 /** Dessine l'image de partage : format story (1080 × 1920) ou paysage (1200 × 630). */
@@ -31,7 +32,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
   const g = canvas.getContext('2d')!
   const police = getComputedStyle(document.body).fontFamily
 
-  g.fillStyle = ROUGE
+  g.fillStyle = c.ville.couleurs.principale
   g.fillRect(0, 0, W, H)
 
   // Cadre de la carte.
@@ -112,7 +113,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
     texte('en 2038', 70, 400, 104, 900)
     texte(`+${n(c.voyageurs)}`, 70, 1530, 130, 900)
     texte('voyageurs par jour, avec', 70, 1610, 44, 700)
-    texte(`${c.contenu}${c.equilibre ? ' et un budget tenu.' : '.'}`, 70, 1670, 44, 700)
+    texte(`${c.contenu}${c.libre ? ', en jeu libre.' : c.equilibre ? ' et un budget tenu.' : '.'}`, 70, 1670, 44, 700)
     texte('Et vous, que construiriez-vous ?', 70, 1800, 44, 800)
     texte(c.adresse, 70, 1860, 34, 700)
   } else {
@@ -121,7 +122,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
     texte('en 2038', 52, 245, 60, 900)
     texte(`+${n(c.voyageurs)}`, 52, 380, 78, 900)
     texte('voyageurs par jour, avec', 52, 425, 26, 700)
-    texte(`${c.contenu}${c.equilibre ? ' et un budget tenu.' : '.'}`, 52, 460, 26, 700)
+    texte(`${c.contenu}${c.libre ? ', en jeu libre.' : c.equilibre ? ' et un budget tenu.' : '.'}`, 52, 460, 26, 700)
     texte('Et vous, que construiriez-vous ?', 52, 550, 26, 800)
     texte(c.adresse, 52, 585, 20, 700)
   }

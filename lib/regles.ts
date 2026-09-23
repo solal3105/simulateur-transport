@@ -1,4 +1,5 @@
 import { enveloppe, reserve as reserveDuMandat } from './budget'
+import { effetLeviers } from './leviers'
 import { MANDATS, PROJETS } from './catalogue'
 import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, ModeLigne, Projet } from './types'
 import type { Ville } from './villes'
@@ -23,17 +24,6 @@ export function resoudre(projet: Projet, choix?: Pick<Chantier, 'varianteId' | '
   return { projet, mode: variante?.mode ?? projet.mode, cout, voyageurs: variante?.voyageurs ?? projet.voyageurs, duree }
 }
 
-// Leviers de financement, en millions d'euros par mandat.
-export const RENDEMENT = { abonnements: 12, tickets: 8, versementMobilite: 28 }
-export const LEVIERS_FIXES = {
-  gratuiteTotale: -1925,
-  gratuiteMoins25: -240,
-  gratuiteJeunesAbonnes: -48,
-  suppressionTarifSocial: 240,
-  metroNuit: -24,
-  tva: 96,
-} as const
-
 export const LEVIERS_NEUTRES: Leviers = {
   abonnements: 0,
   tickets: 0,
@@ -44,23 +34,6 @@ export const LEVIERS_NEUTRES: Leviers = {
   suppressionTarifSocial: false,
   metroNuit: false,
   tva: false,
-}
-
-/** Ce que les leviers ajoutent ou retirent à l'enveloppe d'un mandat. */
-export function effetLeviers(l: Leviers): number {
-  let total = 0
-  if (l.gratuiteTotale) total += LEVIERS_FIXES.gratuiteTotale
-  else {
-    // La gratuité totale rend sans objet les autres mesures tarifaires.
-    if (l.gratuiteMoins25) total += LEVIERS_FIXES.gratuiteMoins25
-    if (l.gratuiteJeunesAbonnes) total += LEVIERS_FIXES.gratuiteJeunesAbonnes
-    if (l.suppressionTarifSocial) total += LEVIERS_FIXES.suppressionTarifSocial
-    total += l.abonnements * RENDEMENT.abonnements + l.tickets * RENDEMENT.tickets
-  }
-  if (l.metroNuit) total += LEVIERS_FIXES.metroNuit
-  if (l.tva) total += LEVIERS_FIXES.tva
-  total += l.versementMobilite * RENDEMENT.versementMobilite
-  return total
 }
 
 /** Part d'un coût payée sur un mandat donné. */
@@ -84,8 +57,8 @@ export interface Bilan {
   reste: number
 }
 
-/** Ce que les règles demandent à une ville : son budget, et si ses leviers de financement sont calculés. */
-export type Budget = Pick<Ville, 'budget' | 'leviers'>
+/** Ce que les règles demandent à un réseau : son budget, avec ses leviers de financement s'il en a. */
+export type Budget = Pick<Ville, 'budget'>
 
 export function bilanMandat(
   mandat: Mandat,
@@ -109,7 +82,7 @@ export function bilanMandat(
   }
   for (const l of lignes) ajouter(l.estimation.cout, l)
   // Là où les leviers ne sont pas calculés, ils ne changent rien au budget.
-  const effet = ville.leviers ? effetLeviers(leviers[mandat]) : 0
+  const effet = ville.budget.leviers ? effetLeviers(leviers[mandat], ville.budget.leviers) : 0
   const total = enveloppe(ville.budget, mandat)
   const reserve = reserveDuMandat(ville.budget, mandat)
   const reste = total + effet + reliquat - reserve - projets - reports

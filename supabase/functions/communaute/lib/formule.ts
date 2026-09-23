@@ -65,10 +65,10 @@ export const FORMULE: Formule = {
     concurrence: -0.5027,
   },
   modes: { tram: 0, metro: -0.062, bus: -0.8231, cable: -0.132 },
-  constantes: { lyon: -1.4072, toulouse: -1.2728, marseille: -1.3255, nice: -1.298, paris: -1.218 },
-  constantesMoteur: { lyon: -1.3355, toulouse: -1.3313, marseille: -1.3519, nice: -1.3284, paris: -1.1954 },
-  recalage: { lyon: -0.0717, toulouse: 0.0585, marseille: 0.0264, nice: 0.0304, paris: -0.0226 },
-  ajustements: { paris: { metro: -0.6965 } },
+  constantes: { lyon: -1.4072, toulouse: -1.2728, marseille: -1.3255, nice: -1.298, idf: -1.2121 },
+  constantesMoteur: { lyon: -1.3355, toulouse: -1.3313, marseille: -1.3519, nice: -1.3284, idf: -1.1954 },
+  recalage: { lyon: -0.0717, toulouse: 0.0585, marseille: 0.0264, nice: 0.0304, idf: -0.0167 },
+  ajustements: { idf: { metro: -0.6965 } },
   fourchette: { bas: 0.64, haut: 1.59 },
   variablesDeVille: [],
   formules: 23980,
@@ -115,7 +115,7 @@ export const FORMULE: Formule = {
     nice: [
       { ligne: 'Tram L1', reel: 120000, ecart: -29 },
     ],
-    paris: [
+    idf: [
       { ligne: 'Métro 1', reel: 636800, ecart: -33 },
       { ligne: 'Métro 4', reel: 631900, ecart: -53 },
       { ligne: 'Métro 14', reel: 574400, ecart: -31 },

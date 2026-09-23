@@ -394,5 +394,3 @@ export const MANDATS = {
   2: { debut: 2032, fin: 2038 },
 } as const
 
-/** Tarifs actuels, en euros, affichés quand on les modifie. */
-export const TARIFS = { abonnement: 74.1, ticket: 2.1 }

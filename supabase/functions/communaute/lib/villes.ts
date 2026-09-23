@@ -1,34 +1,57 @@
 // Copie de lib/villes.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 /**
- * Ce qui change d'une ville à l'autre : la carte, le budget, le réglage de la formule de fréquentation
- * et quelques repères pour les textes. Ce module ne dépend d'aucun navigateur : la fonction serveur de
+ * Ce qui change d'un réseau à l'autre : la carte, le budget, les leviers de financement, les couleurs,
+ * le réglage de la formule de fréquentation et quelques repères pour les textes. Chaque réseau couvre le
+ * territoire de son autorité organisatrice (toute l'Île-de-France pour Île-de-France Mobilités), pas une
+ * seule ville ; le code garde le mot « ville » pour ses identifiants. Ce module ne dépend d'aucun navigateur : la fonction serveur de
  * la communauté l'utilise pour recalculer un réseau publié avec les règles de sa ville.
  *
- * Les chiffres de Toulouse, Marseille, Nice et Paris et leurs sources sont dans docs/villes.md, sauf le
+ * Les chiffres de Tisséo, d'Aix-Marseille-Provence, de Lignes d'Azur et d'Île-de-France Mobilités et leurs
+ * sources sont dans docs/villes.md, sauf le
  * budget, que chaque ville détaille dans lib/budgets selon la méthode de docs/budgets.md. La constante de
  * la formule de fréquentation de chaque ville est dans lib/formule.ts, écrit par le moteur.
  */
 
 import type { BudgetVille } from './budget.ts'
+import { idf } from './budgets/idf.ts'
 import { lyon } from './budgets/lyon.ts'
 import { marseille } from './budgets/marseille.ts'
 import { nice } from './budgets/nice.ts'
-import { paris } from './budgets/paris.ts'
 import { toulouse } from './budgets/toulouse.ts'
 
-export type IdVille = 'lyon' | 'toulouse' | 'marseille' | 'nice' | 'paris'
+export type IdVille = 'lyon' | 'toulouse' | 'marseille' | 'nice' | 'idf'
 
-/** Le nom du site, le même dans toutes les villes : TCL et Tisséo sont les noms des réseaux, pas du site. */
+/** Le nom du site, le même pour tous les réseaux : TCL et Tisséo sont les noms des réseaux, pas du site. */
 export const MARQUE = 'Simulateur transport'
 
 type Emprise = [[number, number], [number, number]]
 
+/** Les couleurs d'un réseau, qui remplacent le rouge TCL dans toute l'interface quand on y joue. */
+export interface Couleurs {
+  /** La couleur de la marque, sur laquelle le texte blanc reste lisible. */
+  principale: string
+  /** Plus sombre, pour les survols et les textes sur fond pâle. */
+  fonce: string
+  /** Très claire, pour les fonds. */
+  pale: string
+  /** Entre les deux, pour les hachures des jauges. */
+  moyen: string
+}
+
 export interface Ville {
   id: IdVille
+  /** Le nom du réseau, tel qu'on le montre partout : « TCL », « Île-de-France Mobilités ». */
   nom: string
-  /** Le titre de la page d'accueil de la ville, dans l'onglet et les moteurs de recherche. */
+  /** Le territoire en quelques mots, sous le nom du réseau : « Métropole de Lyon », « Île-de-France ». */
+  lieu: string
+  /** Où l'on joue, dans une phrase : « sur le réseau TCL », « en Île-de-France ». */
+  ou: string
+  /** Le chemin de sa page d'accueil : vide pour Lyon, à la racine du site. */
+  chemin: string
+  couleurs: Couleurs
+  /** Le titre de la page d'accueil du réseau, dans l'onglet et les moteurs de recherche. */
   titrePage: string
-  /** Le nom du réseau de transport : « le réseau TCL ». */
+  /** Ce qui suit « le réseau » dans une phrase : « le réseau TCL », « le réseau francilien ». */
   reseau: string
   /** Qui organise les transports, tel qu'on le présente à l'accueil. */
   autorite: string
@@ -38,14 +61,12 @@ export interface Ville {
   dossier: string
   /** Latitude de référence des distances : un degré de longitude y mesure 111 320 m × cos(latitude). */
   latitude: number
-  /** Le centre de la ville, [lon, lat], d'où la formule de fréquentation mesure la distance au centre. */
+  /** Le centre du territoire, [lon, lat], d'où la formule de fréquentation mesure la distance au centre. */
   centre: [number, number]
   /** Le budget de chaque mandat, poste par poste et avec ses sources : lib/budgets/<ville>.ts. */
   budget: BudgetVille
   /** Un catalogue de projets réels ; sans lui, le joueur trace toutes ses lignes. */
   catalogue: boolean
-  /** Les leviers de financement (tarifs, versement mobilité) sont calculés pour ce réseau. */
-  leviers: boolean
   /** Vue de départ de la carte. */
   emprise: Emprise
   /** Au-delà, la carte ne se déplace plus. */
@@ -67,17 +88,20 @@ export interface Ville {
 export const VILLES: Record<IdVille, Ville> = {
   lyon: {
     id: 'lyon',
-    nom: 'Lyon',
+    nom: 'TCL',
+    lieu: 'Métropole de Lyon',
+    ou: 'sur le réseau TCL',
+    chemin: '',
+    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
     titrePage: 'Simulateur transport : construisez le réseau TCL de 2038',
     reseau: 'TCL',
     autorite: 'Métropole de Lyon, réseau TCL',
-    territoire: 'de la Métropole',
+    territoire: 'de la Métropole de Lyon',
     dossier: '',
     latitude: 45.755,
     centre: [4.8357, 45.764],
     budget: lyon,
     catalogue: true,
-    leviers: true,
     emprise: [
       [4.74, 45.69],
       [5.02, 45.83],
@@ -117,7 +141,11 @@ export const VILLES: Record<IdVille, Ville> = {
   },
   toulouse: {
     id: 'toulouse',
-    nom: 'Toulouse',
+    nom: 'Tisséo',
+    lieu: 'Agglomération toulousaine',
+    ou: 'sur le réseau Tisséo',
+    chemin: 'toulouse',
+    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
     titrePage: 'Simulateur transport : construisez le réseau Tisséo de 2038',
     reseau: 'Tisséo',
     autorite: 'Tisséo Collectivités',
@@ -127,7 +155,6 @@ export const VILLES: Record<IdVille, Ville> = {
     centre: [1.444, 43.6045],
     budget: toulouse,
     catalogue: false,
-    leviers: false,
     emprise: [
       [1.33, 43.535],
       [1.54, 43.675],
@@ -166,9 +193,13 @@ export const VILLES: Record<IdVille, Ville> = {
   },
   marseille: {
     id: 'marseille',
-    nom: 'Marseille',
-    titrePage: 'Simulateur transport : construisez le réseau RTM de 2038',
-    reseau: 'RTM',
+    nom: 'Aix-Marseille-Provence',
+    lieu: 'Métropole Aix-Marseille-Provence',
+    ou: 'dans la métropole Aix-Marseille-Provence',
+    chemin: 'marseille',
+    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    titrePage: 'Simulateur transport : construisez le réseau d’Aix-Marseille-Provence de 2038',
+    reseau: 'd’Aix-Marseille-Provence',
     autorite: 'Métropole d’Aix-Marseille-Provence',
     territoire: 'de la métropole Aix-Marseille-Provence',
     dossier: 'marseille',
@@ -176,7 +207,6 @@ export const VILLES: Record<IdVille, Ville> = {
     centre: [5.3698, 43.2965],
     budget: marseille,
     catalogue: false,
-    leviers: false,
     emprise: [
       [5.27, 43.2],
       [5.57, 43.4],
@@ -215,7 +245,11 @@ export const VILLES: Record<IdVille, Ville> = {
   },
   nice: {
     id: 'nice',
-    nom: 'Nice',
+    nom: 'Lignes d’Azur',
+    lieu: 'Métropole Nice Côte d’Azur',
+    ou: 'sur le réseau Lignes d’Azur',
+    chemin: 'nice',
+    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
     titrePage: 'Simulateur transport : construisez le réseau Lignes d’Azur de 2038',
     reseau: 'Lignes d’Azur',
     autorite: 'Métropole Nice Côte d’Azur',
@@ -225,7 +259,6 @@ export const VILLES: Record<IdVille, Ville> = {
     centre: [7.27, 43.6975],
     budget: nice,
     catalogue: false,
-    leviers: false,
     emprise: [
       [7.14, 43.64],
       [7.36, 43.76],
@@ -259,36 +292,39 @@ export const VILLES: Record<IdVille, Ville> = {
     densite: [100, 450, 1200, 2000],
     repere: 'Pour comparer, le tram L1, long de 9,2 km, transporte environ 120 000 voyageurs par jour.',
   },
-  paris: {
-    id: 'paris',
-    nom: 'Paris',
-    titrePage: 'Simulateur transport : construisez le réseau parisien de 2038',
-    reseau: 'parisien',
+  idf: {
+    id: 'idf',
+    nom: 'Île-de-France Mobilités',
+    lieu: 'Île-de-France',
+    ou: 'en Île-de-France',
+    chemin: 'ile-de-france',
+    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    titrePage: 'Simulateur transport : construisez le réseau francilien de 2038',
+    reseau: 'francilien',
     autorite: 'Île-de-France Mobilités',
-    territoire: 'de Paris et de la petite couronne',
-    dossier: 'paris',
+    territoire: 'd’Île-de-France',
+    dossier: 'idf',
     latitude: 48.86,
     centre: [2.3522, 48.8566],
-    budget: paris,
+    budget: idf,
     catalogue: false,
-    leviers: false,
     emprise: [
-      [2.22, 48.8],
-      [2.48, 48.92],
+      [2.2, 48.79],
+      [2.5, 48.93],
     ],
     limites: [
-      [2.0, 48.6],
-      [2.8, 49.1],
+      [1.2, 47.95],
+      [3.8, 49.4],
     ],
     zoneQuartiers: [
-      [2.14, 48.68],
-      [2.62, 49.02],
+      [1.43, 48.1],
+      [3.57, 49.25],
     ],
     zoneRecherche: [
-      [2.1, 48.66],
-      [2.66, 49.04],
+      [1.43, 48.1],
+      [3.57, 49.25],
     ],
-    exempleRecherche: 'Châtelet, Saint-Denis, Créteil…',
+    exempleRecherche: 'Châtelet, Versailles, Évry…',
     lieux: [
       { nom: 'Paris', pos: [2.3522, 48.8566], grand: true },
       { nom: 'Saint-Denis', pos: [2.358, 48.936] },
@@ -296,15 +332,23 @@ export const VILLES: Record<IdVille, Ville> = {
       { nom: 'Boulogne-Billancourt', pos: [2.24, 48.835] },
       { nom: 'Nanterre', pos: [2.206, 48.892] },
       { nom: 'Créteil', pos: [2.455, 48.79] },
-      { nom: 'Vitry-sur-Seine', pos: [2.393, 48.787] },
-      { nom: 'Colombes', pos: [2.254, 48.922] },
-      { nom: 'Champigny-sur-Marne', pos: [2.515, 48.817] },
-      { nom: 'Aulnay-sous-Bois', pos: [2.497, 48.938] },
-      { nom: 'Bobigny', pos: [2.44, 48.908] },
-      { nom: 'Noisy-le-Grand', pos: [2.553, 48.848] },
+      { nom: 'Argenteuil', pos: [2.25, 48.948] },
+      { nom: 'Versailles', pos: [2.13, 48.805] },
+      { nom: 'Cergy', pos: [2.064, 49.036] },
+      { nom: 'Évry-Courcouronnes', pos: [2.441, 48.629] },
+      { nom: 'Massy', pos: [2.27, 48.73] },
+      { nom: 'Saint-Quentin-en-Yvelines', pos: [2.037, 48.771] },
+      { nom: 'Roissy', pos: [2.52, 49.004] },
+      { nom: 'Marne-la-Vallée', pos: [2.6, 48.84] },
+      { nom: 'Meaux', pos: [2.878, 48.96] },
+      { nom: 'Melun', pos: [2.655, 48.54] },
+      { nom: 'Mantes-la-Jolie', pos: [1.717, 48.99] },
+      { nom: 'Poissy', pos: [2.047, 48.929] },
+      { nom: 'Corbeil-Essonnes', pos: [2.482, 48.61] },
+      { nom: 'Saclay', pos: [2.17, 48.73] },
     ],
-    densite: [500, 1500, 2600, 4000],
-    repere: 'Pour comparer, le tram T3a, long de 12 km, transporte environ 250 000 voyageurs par jour.',
+    densite: [300, 1200, 2600, 4000],
+    repere: 'Pour comparer, le tram T3a, long de 12 km, transporte environ 220 000 voyageurs par jour.',
   },
 }
 
@@ -316,8 +360,15 @@ export const estVille = (id: unknown): id is IdVille => typeof id === 'string' &
 /** La ville d'un identifiant venu de l'extérieur, Lyon par défaut. */
 export const villeDe = (id: unknown): Ville => (estVille(id) ? VILLES[id] : VILLES.lyon)
 
-/** L'adresse de l'accueil d'une ville : la racine du site pour Lyon. */
-export const adresseAccueil = (ville: IdVille) => (ville === 'lyon' ? '/' : `/${ville}`)
+/** L'adresse de l'accueil d'un réseau : la racine du site pour Lyon. */
+export const adresseAccueil = (ville: IdVille) => `/${VILLES[ville].chemin}`
+
+/** L'adresse de la page qui explique le budget et le calcul des voyageurs d'un réseau. */
+export const adresseMethode = (ville: IdVille) => (VILLES[ville].chemin ? `/${VILLES[ville].chemin}/methode` : '/methode')
+
+/** Les couleurs d'un réseau, en variables CSS, pour la première peinture d'une page. */
+export const cssCouleurs = (c: Couleurs) =>
+  `:root{--color-rouge:${c.principale};--color-rouge-fonce:${c.fonce};--color-rouge-pale:${c.pale};--color-rouge-moyen:${c.moyen}}`
 
 /** L'adresse des réseaux publiés d'une ville. */
 export const adresseReseaux = (ville: IdVille) => (ville === 'lyon' ? '/communaute' : `/communaute?ville=${ville}`)

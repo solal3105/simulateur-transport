@@ -9,6 +9,7 @@
  * une explication lisible par un joueur et ses sources. L'écran « Comment nous calculons votre budget »
  * les affiche tels quels ; scripts/verifier-budgets.ts contrôle qu'aucun chiffre n'est sans source.
  */
+import type { ParametresLeviers } from './leviers.ts'
 import type { Mandat } from './types.ts'
 
 /** Un document cité à l'appui d'un chiffre. */
@@ -24,7 +25,9 @@ export interface Source {
 export interface Poste {
   /** En millions d'euros, pour chacun des deux mandats. */
   montants: Record<Mandat, number>
-  /** Comment nous avons établi ces montants, en quelques phrases qu'un joueur peut lire. */
+  /** Ce que couvre ce poste, en une phrase courte que tout le monde comprend, avec un ou deux chiffres. */
+  simple: string
+  /** Le détail du calcul, pour qui veut vérifier. */
   explication: string
   sources: Source[]
 }
@@ -40,6 +43,8 @@ export interface BudgetVille {
   bus: Poste
   /** L'entretien, le renouvellement et la modernisation des lignes existantes. */
   lignes: Poste
+  /** Ce que rapportent ou coûtent les leviers de financement ; sans eux, le réseau n'en propose pas. */
+  leviers?: ParametresLeviers
   /** Ce que nous n'avons pas pu vérifier, une phrase par point. */
   limites: string[]
   /** Le mois où les chiffres ont été relevés : « septembre 2026 ». */

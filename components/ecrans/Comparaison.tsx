@@ -19,6 +19,8 @@ export interface Reseau {
   sujet: string
   /** Les deux réseaux comparés sont toujours de la même ville. */
   ville: IdVille
+  /** Un réseau fait en jeu libre n'a pas de budget à tenir. */
+  libre: boolean
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<Mandat, Leviers>
@@ -151,8 +153,8 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
           />
           <Ligne
             label="Budget des deux mandats"
-            a={ra.equilibre ? 'Tenu' : `Déficit de ${n(-ra.deficit)} M€`}
-            b={rb.equilibre ? 'Tenu' : `Déficit de ${n(-rb.deficit)} M€`}
+            a={a.libre ? 'Jeu libre' : ra.equilibre ? 'Tenu' : `Déficit de ${n(-ra.deficit)} M€`}
+            b={b.libre ? 'Jeu libre' : rb.equilibre ? 'Tenu' : `Déficit de ${n(-rb.deficit)} M€`}
           />
           {catalogue ? <Ligne label="Projets et lignes retenus" a={n(ra.retenus)} b={n(rb.retenus)} /> : null}
           <Ligne label="Lignes tracées par le joueur" a={n(a.lignes.length)} b={n(b.lignes.length)} />

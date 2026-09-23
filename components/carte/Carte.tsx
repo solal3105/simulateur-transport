@@ -28,8 +28,8 @@ import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
 if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
 
+/** Les couleurs du fond de carte ; la couleur du réseau (zones denses, dernier arrêt) vient de lib/villes. */
 const COULEURS = {
-  rouge: '#e3051b',
   encre: '#1b1b1f',
   sol: '#f4f1ec',
   parc: '#dfe8d2',
@@ -162,7 +162,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'densite',
         layout: { visibility: 'none' },
         paint: {
-          'fill-color': COULEURS.rouge,
+          'fill-color': ville.couleurs.principale,
           'fill-opacity': ['interpolate', ['linear'], ['get', 'poids'], d1, 0.06, d2, 0.18, d3, 0.34, d4, 0.55],
         },
       },
@@ -319,7 +319,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         filter: ['==', ['geometry-type'], 'Point'],
         paint: {
           'circle-radius': ['case', ['get', 'dernier'], 8, 6],
-          'circle-color': ['case', ['get', 'dernier'], COULEURS.rouge, '#fff'],
+          'circle-color': ['case', ['get', 'dernier'], ville.couleurs.principale, '#fff'],
           'circle-stroke-color': COULEURS.encre,
           'circle-stroke-width': 2.5,
         },
@@ -568,7 +568,7 @@ export function Carte({
           const projet = CATALOGUE.find((p) => p.trace === nomTrace)
           const c = projet && chantiers.find((x) => x.id === projet.id)
           if (!f) continue
-          eclat(m, f.geometry.coordinates, projet ? couleurProjet(projet.id, c) : '#e3051b')
+          eclat(m, f.geometry.coordinates, projet ? couleurProjet(projet.id, c) : ville.couleurs.principale)
           if (projet && c && !reduit()) gainFlottant(m, milieu(f.geometry), `+${n(resoudre(projet, c).voyageurs)}`)
         }
       }

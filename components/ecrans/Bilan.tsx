@@ -4,9 +4,10 @@ import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 
+import { libre as libreDuMandat } from '@/lib/budget'
 import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
-import { n } from '@/lib/format'
+import { enLettres, n } from '@/lib/format'
 import { ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
 import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
@@ -16,6 +17,7 @@ import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type Ville }
 
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
+import { useCouleursReseau } from '../couleurs'
 import { EnTetePublication, PiedPublication, type Publication } from '../communaute/EnTetePublication'
 import { Publier } from '../communaute/Publier'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
@@ -36,9 +38,13 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const jeu = useJeu()
   // Un réseau reçu garde sa ville, même si la partie du visiteur est ailleurs.
   const ville = VILLES[partage?.ville ?? jeu.ville]
+  useCouleursReseau(ville.id)
   const chantiers = partage?.chantiers ?? jeu.chantiers
   const lignes = partage?.lignes ?? jeu.lignes
   const leviers = partage?.leviers ?? jeu.leviers
+  // Le jeu libre n'a pas de budget à tenir : le bilan compare son coût au budget réel des deux mandats.
+  const libre = partage?.libre ?? jeu.libre
+  const budgetReel = libreDuMandat(ville.budget, 1) + libreDuMandat(ville.budget, 2)
   // Le visiteur d'un lien a peut-être déjà une partie enregistrée dans ce navigateur.
   const aUnePartie = jeu.chantiers.length + jeu.lignes.length > 0
   // On ne compare que deux réseaux de la même ville.
@@ -52,7 +58,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
   // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
   const quitterPartage = () => {
-    if (!aUnePartie) jeu.commencer(ville.id)
+    if (!aUnePartie) jeu.commencer(ville.id, libre)
     quitter?.()
   }
   const reprendre = () => {
@@ -84,7 +90,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       ? `${window.location.origin}/reseau/${publication.id}`
       : partage
         ? window.location.href
-        : await lienDePartage({ ville: ville.id, chantiers, lignes, leviers })
+        : await lienDePartage({ ville: ville.id, libre, chantiers, lignes, leviers })
     if (navigator.share && window.innerWidth < 1024) {
       try {
         await navigator.share({ url, title: 'Mon réseau de transport en 2038' })
@@ -115,6 +121,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         voyageurs: resultat.voyageurs,
         contenu: ville.catalogue ? `${resultat.retenus} projets sur ${AVEC_TRACE.length}` : lignesTracees(lignes.length),
         equilibre: resultat.equilibre,
+        libre,
         traces,
         lignes: lignes.map((l) => ({ arrets: l.arrets, couleur: couleurLigne(l.mode) })),
         adresse: window.location.host,
@@ -209,18 +216,25 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               className="-mt-1 flex min-h-10 items-center gap-2 self-start text-[14px] font-extrabold text-gris hover:text-encre"
             >
               <Icone nom="retour" taille={17} epaisseur={2.4} />
-              Réseaux publiés à {ville.nom}
+              Les réseaux {ville.nom} publiés
             </Link>
             <EnTetePublication publication={publication} />
           </>
         ) : null}
 
-        <span
-          className={`flex items-center gap-2 self-start rounded-full px-3.5 py-1.5 text-[13.5px] font-extrabold ${resultat.equilibre ? 'bg-rouge text-white' : 'bg-encre text-white'}`}
-        >
-          <Icone nom={resultat.equilibre ? 'valider' : 'info'} taille={16} epaisseur={2.8} />
-          {resultat.equilibre ? 'Budget tenu sur les deux mandats' : `Déficit de ${n(-resultat.deficit)} M€`}
-        </span>
+        {libre ? (
+          <span className="flex items-center gap-2 self-start rounded-full bg-encre px-3.5 py-1.5 text-[13.5px] font-extrabold text-white">
+            <Icone nom="info" taille={16} epaisseur={2.8} />
+            Jeu libre, sans budget à tenir
+          </span>
+        ) : (
+          <span
+            className={`flex items-center gap-2 self-start rounded-full px-3.5 py-1.5 text-[13.5px] font-extrabold ${resultat.equilibre ? 'bg-rouge text-white' : 'bg-encre text-white'}`}
+          >
+            <Icone nom={resultat.equilibre ? 'valider' : 'info'} taille={16} epaisseur={2.8} />
+            {resultat.equilibre ? 'Budget tenu sur les deux mandats' : `Déficit de ${n(-resultat.deficit)} M€`}
+          </span>
+        )}
 
         <div className="flex flex-col gap-2">
           {publication ? (
@@ -245,7 +259,9 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               ? [`${resultat.retenus} sur ${AVEC_TRACE.length}`, 'projets retenus']
               : [String(lignes.length), lignes.length > 1 ? 'lignes tracées' : 'ligne tracée'],
             [n(resultat.investi), 'M€ investis'],
-            [resultat.equilibre ? '0' : n(-resultat.deficit), resultat.equilibre ? '€ de déficit' : 'M€ de déficit'],
+            libre
+              ? [n(budgetReel), 'M€ de budget réel en douze ans']
+              : [resultat.equilibre ? '0' : n(-resultat.deficit), resultat.equilibre ? '€ de déficit' : 'M€ de déficit'],
           ].map(([v, l]) => (
             <div key={l} className="rounded-2xl bg-sable p-3.5">
               <div className="chiffres text-xl font-black lg:text-2xl">{v}</div>
@@ -283,7 +299,15 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
           </section>
         ) : null}
 
-        {resultat.nonDepense > 0 ? (
+        {libre ? (
+          <p className="text-[14.5px] leading-relaxed text-gris">
+            {resultat.investi <= budgetReel
+              ? `Ce réseau tiendrait dans le budget réel : ${ville.nom} peut consacrer ${enLettres(budgetReel)} d’euros à de nouvelles lignes en douze ans.`
+              : `Ce réseau coûte ${(resultat.investi / budgetReel).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} fois ce que ${ville.nom} peut réellement consacrer à de nouvelles lignes en douze ans, soit ${enLettres(budgetReel)} d’euros.`}
+          </p>
+        ) : null}
+
+        {!libre && resultat.nonDepense > 0 ? (
           <p className="text-[14.5px] leading-relaxed text-gris">
             {partage ? 'Il reste' : 'Il vous reste'} {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer{' '}
             {ville.catalogue ? 'un projet de plus' : 'une ligne de plus'}, ou un premier chantier pour le mandat suivant.
@@ -353,7 +377,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               {aUnePartie ? 'Reprendre ma partie' : 'Commencer ma propre partie'}
             </Bouton>
           ) : (
-            <Suite ville={ville} publie={jeu.publie !== null} />
+            <Suite ville={ville} libre={libre} publie={jeu.publie !== null} />
           )}
         </div>
 
@@ -363,7 +387,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       <AnimatePresence>
         {!partage && publier ? (
           <Publier
-            partie={{ ville: ville.id, chantiers, lignes, leviers }}
+            partie={{ ville: ville.id, libre, chantiers, lignes, leviers }}
             voyageurs={resultat.voyageurs}
             investi={resultat.investi}
             inspire={jeu.inspire}
@@ -382,6 +406,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               titre: jeu.ecran === 'bilan' ? 'Votre réseau' : 'Votre partie en cours',
               sujet: 'votre réseau',
               ville: jeu.ville,
+              libre: jeu.libre,
               chantiers: jeu.chantiers,
               lignes: jeu.lignes,
               leviers: jeu.leviers,
@@ -395,7 +420,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 }
 
 /** Après la partie : rejouer ici ou dans une autre ville, revenir à l'accueil, voir les réseaux des autres. */
-function Suite({ ville, publie }: { ville: Ville; publie: boolean }) {
+function Suite({ ville, libre, publie }: { ville: Ville; libre: boolean; publie: boolean }) {
   const { commencer, allerAccueil } = useJeu()
   const autres = ID_VILLES.filter((id) => id !== ville.id).map((id) => VILLES[id])
   return (
@@ -409,12 +434,12 @@ function Suite({ ville, publie }: { ville: Ville; publie: boolean }) {
           : 'Une nouvelle partie remplace ce réseau dans ce navigateur : publiez-le ou partagez son lien avant, pour le garder.'}
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Bouton genre="encre" iconeAGauche="rejouer" onClick={() => commencer(ville.id)}>
-          Rejouer à {ville.nom}
+        <Bouton genre="encre" iconeAGauche="rejouer" onClick={() => commencer(ville.id, libre)}>
+          Rejouer {ville.ou}
         </Bouton>
         {autres.map((v) => (
-          <Bouton key={v.id} genre="contour" icone="fleche" onClick={() => commencer(v.id)}>
-            Jouer à {v.nom}
+          <Bouton key={v.id} genre="contour" icone="fleche" onClick={() => commencer(v.id, libre)}>
+            Jouer {v.ou}
           </Bouton>
         ))}
       </div>

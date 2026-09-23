@@ -26,18 +26,18 @@ Chaque ville a ses propres paliers de densité pour la couche rouge du traceur (
 
 Le budget de chaque ville suit la méthode commune de `docs/budgets.md` : l'investissement prévu, moins ce qui reste à payer sur les projets décidés déjà dessinés sur la carte, moins le renouvellement des bus et des lignes existantes. Le détail, les sources et les limites de chaque ville sont dans `lib/budgets/<ville>.ts`, et le jeu les affiche dans « Comment nous calculons votre budget ». Les montants retenus en septembre 2026, en millions d'euros :
 
-| Ville     | Mandat    | Investissement prévu | Projets décidés dessinés | Bus   | Lignes existantes | Pour le joueur |
-| --------- | --------- | -------------------- | ------------------------ | ----- | ----------------- | -------------- |
-| Toulouse  | 2026-2032 | 2 600                | 1 800                    | 150   | 450               | 200            |
-| Toulouse  | 2032-2038 | 1 300                | 0                        | 200   | 450               | 650            |
-| Marseille | 2026-2032 | 1 800                | 50                       | 400   | 650               | 700            |
-| Marseille | 2032-2038 | 1 800                | 0                        | 400   | 650               | 750            |
-| Nice      | 2026-2032 | 725                  | 0                        | 160   | 35                | 530            |
-| Nice      | 2032-2038 | 290                  | 0                        | 160   | 35                | 95             |
-| Paris     | 2026-2032 | 17 360               | 360                      | 1 300 | 13 000            | 2 700          |
-| Paris     | 2032-2038 | 17 050               | 50                       | 1 300 | 13 000            | 2 700          |
+| Ville         | Mandat    | Investissement prévu | Projets décidés dessinés | Bus   | Lignes existantes | Pour le joueur |
+| ------------- | --------- | -------------------- | ------------------------ | ----- | ----------------- | -------------- |
+| Toulouse      | 2026-2032 | 2 600                | 1 800                    | 150   | 450               | 200            |
+| Toulouse      | 2032-2038 | 1 300                | 0                        | 200   | 450               | 650            |
+| Marseille     | 2026-2032 | 1 800                | 50                       | 400   | 650               | 700            |
+| Marseille     | 2032-2038 | 1 800                | 0                        | 400   | 650               | 750            |
+| Nice          | 2026-2032 | 725                  | 0                        | 160   | 35                | 530            |
+| Nice          | 2032-2038 | 290                  | 0                        | 160   | 35                | 95             |
+| Île-de-France | 2026-2032 | 46 100               | 17 900                   | 3 000 | 21 200            | 4 000          |
+| Île-de-France | 2032-2038 | 28 100               | 950                      | 3 000 | 20 150            | 4 000          |
 
-À Nice, l'investissement du premier mandat comprend les 435 M€ inscrits pour la ligne 5 : elle n'est pas dessinée, donc son argent reste au joueur. À Paris, seules les opérations liées aux gares du Grand Paris Express sont retirées ; le T1 prolongé à Val de Fontenay, le T8 sud et les autres projets décidés ne sont pas dessinés et restent dans le budget du joueur.
+À Nice, l'investissement du premier mandat comprend les 435 M€ inscrits pour la ligne 5 : elle n'est pas dessinée, donc son argent reste au joueur. En Île-de-France, l'investissement comprend le Grand Paris Express, aussitôt retiré puisqu'il est dessiné, ainsi que les chantiers de RER et de trains que le joueur ne peut pas construire, comme Eole ; le T1 prolongé à Val de Fontenay, le T8 sud et les autres projets de tram, de métro ou de bus décidés ne sont pas dessinés et restent dans le budget du joueur.
 
 ### Les prix au kilomètre
 

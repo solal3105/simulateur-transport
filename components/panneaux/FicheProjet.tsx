@@ -41,7 +41,7 @@ function Voie({ titre, detail, onClick, possible }: { titre: string; detail: str
 
 export function FicheProjet({ id }: { id: string }) {
   const projet = PROJETS.get(id)!
-  const { chantiers, mandat, construire, retirer, ouvrir, setApercu, changerPaiement, ecran, tuto } = useJeu()
+  const { chantiers, mandat, construire, retirer, ouvrir, setApercu, changerPaiement, ecran, tuto, libre } = useJeu()
   const { verbe } = mots(id)
   const guide = ecran === 'tuto' && tuto === 1
   const bilan = useBilan()
@@ -52,10 +52,11 @@ export function FicheProjet({ id }: { id: string }) {
 
   const dependance = projet.requiert ? PROJETS.get(projet.requiert) : undefined
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
-  const reste = bilan.reste
+  // En jeu libre, il n'y a pas de budget à tenir : rien n'est trop cher, et tout se paie en une fois.
+  const reste = libre ? Infinity : bilan.reste
   const annee = ouverture(existant?.mandat ?? mandat, r.duree)
   const apresFin = annee > MANDATS[2].fin
-  const peutEtaler = mandat === 1
+  const peutEtaler = mandat === 1 && !libre
   const moitie = Math.round(r.cout / 2)
 
   useEffect(() => {
@@ -195,7 +196,7 @@ export function FicheProjet({ id }: { id: string }) {
         </div>
       ) : null}
 
-      {existant && existant.mandat === mandat && mandat === 1 ? (
+      {existant && existant.mandat === mandat && mandat === 1 && !libre ? (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-[15px] font-extrabold">Comment le payer</legend>
           {[

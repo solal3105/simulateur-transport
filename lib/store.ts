@@ -8,7 +8,7 @@ import { approx } from './format'
 import type { PartiePartagee } from './lien'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
-import { VILLES, type IdVille } from './villes'
+import { estVille, VILLES, type IdVille } from './villes'
 
 export type Ecran = 'accueil' | 'tuto' | 'jeu' | 'fin-mandat' | 'bilan'
 
@@ -43,6 +43,8 @@ export interface Inspiration {
 interface Etat {
   /** La ville de la partie ; à l'accueil, celle qui est proposée. */
   ville: IdVille
+  /** Jeu libre : pas de budget à tenir, une seule étape de 2026 à 2038, et un réseau signalé comme tel. */
+  libre: boolean
   ecran: Ecran
   tuto: number
   mandat: Mandat
@@ -61,8 +63,11 @@ interface Etat {
   /** L'accueil est affiché par-dessus la partie enregistrée, qui reste intacte jusqu'à une nouvelle partie. */
   pause: boolean
 
-  /** Commence une partie dans une ville : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. */
-  commencer: (ville: IdVille) => void
+  /**
+   * Commence une partie : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. Le jeu
+   * libre saute le tutoriel, qui explique surtout le budget.
+   */
+  commencer: (ville: IdVille, libre?: boolean) => void
   etapeTuto: (n: number) => void
   finirTuto: () => void
   ouvrir: (p: Panneau) => void
@@ -92,6 +97,7 @@ interface Etat {
 
 const DEPART = {
   ville: 'lyon' as IdVille,
+  libre: false,
   ecran: 'accueil' as Ecran,
   tuto: 0,
   mandat: 1 as Mandat,
@@ -112,11 +118,11 @@ export const useJeu = create<Etat>()(
   persist(
     (set, get) => ({
       ...DEPART,
-      commencer: (ville) =>
+      commencer: (ville, libre = false) =>
         set(
           VILLES[ville].catalogue
-            ? { ...DEPART, ville, ecran: 'tuto', tuto: 0 }
-            : { ...DEPART, ville, ecran: 'jeu', brouillon: { mode: 'tram', arrets: [] }, panneau: { type: 'trace' } },
+            ? { ...DEPART, ville, libre, ecran: libre ? 'jeu' : 'tuto', tuto: 0 }
+            : { ...DEPART, ville, libre, ecran: 'jeu', brouillon: { mode: 'tram', arrets: [] }, panneau: { type: 'trace' } },
         ),
       etapeTuto: (tuto) => set({ tuto }),
       finirTuto: () => set({ ecran: 'jeu', panneau: null }),
@@ -143,7 +149,9 @@ export const useJeu = create<Etat>()(
           lignes: s.lignes.map((l) => (l.id === id && l.mandat === s.mandat && s.mandat === 1 ? { ...l, etale } : l)),
         })),
       levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
-      finirMandat: () => set({ ecran: get().mandat === 1 ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null }),
+      // Le jeu libre n'a qu'une étape : il passe directement au bilan.
+      finirMandat: () =>
+        set({ ecran: get().mandat === 1 && !get().libre ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null }),
       commencerMandat2: () =>
         set((s) => {
           const suite = {
@@ -181,6 +189,7 @@ export const useJeu = create<Etat>()(
         set({
           ...DEPART,
           ville: p.ville,
+          libre: p.libre,
           ecran: 'jeu',
           chantiers: p.chantiers.filter((c) => c.mandat === 1),
           lignes: lignes.filter((l) => l.mandat === 1),
@@ -189,7 +198,9 @@ export const useJeu = create<Etat>()(
           inspire: inspire ?? null,
           message: {
             titre: 'Vous partez de ce réseau.',
-            texte: 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
+            texte: p.libre
+              ? 'C’est un réseau fait en jeu libre : vous continuez sans budget à tenir. Vous pouvez tout modifier.'
+              : 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
           },
         })
       },
@@ -229,12 +240,20 @@ export const useJeu = create<Etat>()(
     }),
     {
       name: 'simulateur-tcl-partie',
-      version: 3,
+      version: 4,
       skipHydration: true,
       storage: createJSONStorage(() => localStorage),
+      // Une partie enregistrée avant le jeu libre se joue avec le budget.
+      migrate: (etat) => ({ libre: false, ...(etat as object) }),
+      // Une partie d'un réseau qui n'existe plus (l'ancien « paris ») repart de zéro plutôt que de casser la page.
+      merge: (enregistre, actuel) => {
+        const e = enregistre as Partial<Etat> | undefined
+        return e && estVille(e.ville) ? { ...actuel, ...e } : actuel
+      },
       // Une partie enregistrée avant l'ouverture de Toulouse n'a pas de ville : elle reste à Lyon, valeur de départ.
       partialize: (s) => ({
         ville: s.ville,
+        libre: s.libre,
         ecran: s.ecran === 'tuto' ? 'jeu' : s.ecran,
         mandat: s.mandat,
         chantiers: s.chantiers,

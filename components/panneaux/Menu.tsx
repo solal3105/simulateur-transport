@@ -1,6 +1,5 @@
 'use client'
 
-import { estSource } from '@/lib/budget'
 import { MANDATS } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { useJeu, useVille } from '@/lib/store'
@@ -14,15 +13,17 @@ import { Panneau } from './Panneau'
  * réseaux publiés, l'explication des estimations et du budget, ou l'accueil, d'où l'on reprend la partie ou en commence une autre.
  */
 export function Menu() {
-  const { mandat, fermer, ouvrir, allerAccueil } = useJeu()
+  const { mandat, fermer, ouvrir, allerAccueil, libre } = useJeu()
   const ville = useVille()
   const { debut, fin } = MANDATS[mandat]
 
   return (
     <Panneau titre="Votre partie">
       <p className="text-[15px] leading-relaxed">
-        Vous jouez à {ville.nom}, au {mandat === 1 ? 'premier' : 'second'} mandat, de {debut} à {fin}. La partie est enregistrée dans ce
-        navigateur : vous pouvez quitter la page et la reprendre plus tard.
+        {libre
+          ? `Vous jouez ${ville.ou}, en jeu libre : il n’y a pas de budget à tenir.`
+          : `Vous jouez ${ville.ou}, au ${mandat === 1 ? 'premier' : 'second'} mandat, de ${debut} à ${fin}.`}{' '}
+        La partie est enregistrée dans ce navigateur : vous pouvez quitter la page et la reprendre plus tard.
       </p>
       <div className="flex flex-col gap-2">
         <Bouton genre="rouge" icone="fleche" onClick={fermer}>
@@ -36,11 +37,9 @@ export function Menu() {
         <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'methode' })}>
           Comment nous estimons les lignes
         </Bouton>
-        {estSource(ville.budget) ? (
-          <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'budget' })}>
-            Comment nous calculons votre budget
-          </Bouton>
-        ) : null}
+        <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'budget' })}>
+          Comment nous calculons votre budget
+        </Bouton>
       </div>
       <div className="border-t border-trait pt-4">
         <Bouton genre="sable" iconeAGauche="retour" className="w-full justify-start" onClick={allerAccueil}>

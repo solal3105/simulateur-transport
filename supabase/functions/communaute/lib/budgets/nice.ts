@@ -41,6 +41,8 @@ export const nice: BudgetVille = {
   payeur: 'la Métropole Nice Côte d’Azur',
   total: {
     montants: { 1: 725, 2: 290 },
+    simple:
+      'La Métropole investit environ 290 millions d’euros par mandat dans ses transports, plus 435 millions pour la ligne 5 du tram au premier mandat.',
     explication:
       'La Métropole n’a publié aucun programme d’investissement pour 2026-2032. De 2020 à 2025, son budget des transports a investi 157,8 M€ en dehors des lignes nouvelles, et sa régie Ligne d’Azur environ 22 M€ par an, surtout en bus : cela fait environ 290 M€ par mandat. Au premier mandat s’ajoutent les 435 M€ inscrits pour la ligne 5 du tram, de Nice à Drap. Elle n’est pas encore sur notre carte : cet argent reste dans votre budget, pour que vous puissiez la tracer vous-même ou en faire autre chose. Au second mandat, nous ne vous rendons pas sa place : payée presque entièrement par l’emprunt, elle laissera la Métropole plus endettée.',
     sources: [
@@ -56,6 +58,7 @@ export const nice: BudgetVille = {
   },
   decides: {
     montants: { 1: 0, 2: 0 },
+    simple: 'La ligne 5 n’est pas encore sur notre carte : son argent reste dans votre budget, pour que vous puissiez la tracer.',
     explication:
       'La ligne 5 est le seul grand projet décidé, et elle n’est pas sur notre carte : nous ne retirons rien. Le parc-relais Tzarewitch, qui ouvre en 2026, est soldé la même année.',
     sources: [
@@ -67,6 +70,7 @@ export const nice: BudgetVille = {
   },
   bus: {
     montants: { 1: 160, 2: 160 },
+    simple: 'Renouveler les bus et leurs dépôts coûte environ 160 millions par mandat.',
     explication:
       'La régie Ligne d’Azur achète les bus de la Métropole et les paie avec ce que la Métropole lui verse : environ 130 M€ par mandat au rythme de 2023 à 2026. S’y ajoutent les 30 M€ encore inscrits pour les dépôts de bus et les parcs-relais, alors qu’un nouveau dépôt est à l’étude à l’ouest de Nice. La Métropole prévoyait un parc entièrement décarboné au début de 2026 : il ne resterait ensuite qu’à le renouveler.',
     sources: [
@@ -86,6 +90,7 @@ export const nice: BudgetVille = {
   },
   lignes: {
     montants: { 1: 35, 2: 35 },
+    simple: 'Entretenir le tram et le reste du réseau coûte environ 35 millions par mandat.',
     explication:
       'L’entretien et la modernisation du réseau existant ont coûté 33,8 M€ de 2020 à 2025 : nous gardons ce rythme. Le rallongement des rames de la ligne 1 sera payé en 2026, et aucun gros renouvellement n’est chiffré ensuite.',
     sources: [

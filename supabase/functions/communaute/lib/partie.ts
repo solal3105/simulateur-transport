@@ -1,5 +1,6 @@
 // Copie de lib/partie.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import { PROJETS } from './catalogue.ts'
+import { leviersPossibles } from './leviers.ts'
 import { estimer, type Carreaux } from './modele.ts'
 import { LEVIERS_NEUTRES } from './regles.ts'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types.ts'
@@ -12,6 +13,8 @@ import { estVille, VILLES, type IdVille } from './villes.ts'
  */
 export interface PartiePartagee {
   ville: IdVille
+  /** Jeu libre : sans budget à tenir ni mandats, et signalé comme tel partout où le réseau se montre. */
+  libre: boolean
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<1 | 2, Leviers>
@@ -24,6 +27,8 @@ export interface PartieCompacte {
   v: number
   /** La ville, absente pour Lyon : les liens et les réseaux publiés avant l'ouverture de Toulouse restent lisibles. */
   w?: IdVille
+  /** 1 pour une partie en jeu libre, absent sinon. */
+  x?: 1
   c: [string, number, number, string, number][]
   l: { n: string; m: string; d: number; e: number; a: [number, number][] }[]
   f: Record<1 | 2, Leviers>
@@ -33,6 +38,7 @@ export function compacter(p: PartiePartagee): PartieCompacte {
   return {
     v: VERSION_PARTIE,
     ...(p.ville === 'lyon' ? {} : { w: p.ville }),
+    ...(p.libre ? { x: 1 as const } : {}),
     c: p.chantiers.map((c) => [c.id, c.mandat, c.etale ? 1 : 0, c.varianteId ?? '', c.option ? 1 : 0]),
     l: p.lignes.map((l) => ({
       n: l.nom,
@@ -71,6 +77,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   if (!ville || ville !== carreaux.ville) return null
   // Une ville sans catalogue n'a que des lignes tracées.
   const catalogue = VILLES[ville].catalogue
+  // Le jeu libre n'a qu'une étape : tout y est décidé d'un coup, payé en une fois, sans leviers.
+  const libre = b.x === 1
 
   const vus = new Set<string>()
   const chantiers: Chantier[] = []
@@ -82,9 +90,9 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     vus.add(projet.id)
     chantiers.push({
       id: projet.id,
-      mandat: mandat === 2 ? 2 : 1,
+      mandat: mandat === 2 && !libre ? 2 : 1,
       // Seul un projet décidé au premier mandat peut être payé en deux fois.
-      etale: etale === 1 && mandat !== 2,
+      etale: etale === 1 && mandat !== 2 && !libre,
       varianteId: projet.variantes?.some((v) => v.id === varianteId) ? (varianteId as string) : undefined,
       option: option === 1 && Boolean(projet.option),
     })
@@ -106,8 +114,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       id: `partage-${i}`,
       nom: String(l.n ?? '').slice(0, 60) || `Ligne ${i + 1}`,
       mode,
-      mandat: l.d === 2 ? 2 : 1,
-      etale: l.e === 1 && l.d !== 2,
+      mandat: l.d === 2 && !libre ? 2 : 1,
+      etale: l.e === 1 && l.d !== 2 && !libre,
       arrets: l.a,
       estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
     })
@@ -128,6 +136,10 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     tva: l?.tva === true,
   })
   const f = (b.f ?? {}) as Partial<Record<1 | 2, Partial<Leviers>>>
-  const leviers = VILLES[ville].leviers ? { 1: lire(f[1]), 2: lire(f[2]) } : { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES }
-  return { ville, chantiers: chantiersValides, lignes, leviers }
+  const parametres = VILLES[ville].budget.leviers
+  const leviers =
+    parametres && !libre
+      ? { 1: leviersPossibles(lire(f[1]), parametres), 2: leviersPossibles(lire(f[2]), parametres) }
+      : { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES }
+  return { ville, libre, chantiers: chantiersValides, lignes, leviers }
 }

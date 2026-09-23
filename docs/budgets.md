@@ -1,13 +1,15 @@
 # Le budget de chaque ville
 
-Toutes les villes calculent le budget du joueur de la même façon, et le détaillent de la même façon. Chaque ville a son fichier dans `lib/budgets/<ville>.ts`, qui suit le type `BudgetVille` de `lib/budget.ts` : quatre postes, chacun avec ses montants pour les deux mandats, une explication lisible par un joueur et ses sources, puis ce que nous n'avons pas pu vérifier et le mois du relevé. Le jeu en tire tout le reste sans rien écrire à la main : la jauge du mandat, l'accueil, la fin de mandat, le résumé de l'écran « Comment nous estimons une ligne » et l'écran « Comment nous calculons votre budget », ouvert depuis le menu de la partie.
+Tous les réseaux calculent le budget du joueur de la même façon, et le détaillent de la même façon. Chaque réseau a son fichier dans `lib/budgets/<réseau>.ts`, qui suit le type `BudgetVille` de `lib/budget.ts` : quatre postes, chacun avec ses montants pour les deux mandats, une phrase simple, le détail du calcul et ses sources, puis les leviers de financement, ce que nous n'avons pas pu vérifier et le mois du relevé. Le jeu en tire tout le reste sans rien écrire à la main : la jauge du mandat, l'accueil, la fin de mandat, l'écran « Trouver de l'argent », l'écran « Comment nous calculons votre budget » de la partie, et la page publique qui explique le budget et les voyageurs de chaque réseau (`/methode`, `/toulouse/methode`, etc.).
+
+Les phrases simples sont ce que le joueur lit d'abord : une phrase courte par poste, avec un ou deux chiffres, que tout le monde comprend. Le détail et les sources sont repliés sous un bouton, pour qui veut vérifier.
 
 ## La méthode
 
 Le calcul part de l'investissement prévu et en retire, dans l'ordre, trois postes. Ce qui reste est le budget du joueur pour ses lignes, et il doit être positif à chaque mandat.
 
 1. L'investissement prévu (`total`) est ce que l'autorité organisatrice, et les autres financeurs quand ils paient des lignes du territoire, investiront dans les transports publics du territoire du jeu pendant chaque mandat de six ans, 2026-2032 puis 2032-2038, projets décidés compris.
-2. Les projets décidés (`decides`) sont ce qui reste à payer, mandat par mandat, sur les projets décidés que la carte dessine comme des lignes existantes. Un projet décidé qui n'est pas dessiné reste dans le budget du joueur, qui peut le tracer lui-même : c'est le cas de la ligne 5 à Nice, du prolongement du T1 et du T8 sud à Paris.
+2. Les projets décidés (`decides`) sont ce qui reste à payer, mandat par mandat, sur les projets décidés que la carte dessine comme des lignes existantes, et sur ceux que le joueur ne peut pas construire lui-même, comme les chantiers de RER et de trains (Eole en Île-de-France). Un projet décidé de tram, de métro ou de bus qui n'est pas dessiné reste dans le budget du joueur, qui peut le tracer lui-même : c'est le cas de la ligne 5 à Nice, du prolongement du T1 et du T8 sud en Île-de-France.
 3. Les bus (`bus`) couvrent le renouvellement du parc et des dépôts. L'entretien courant, payé par l'exploitant dans son contrat, n'est pas un investissement et n'y entre pas.
 4. Les lignes existantes (`lignes`) couvrent le renouvellement des rames, des voies et des équipements, la modernisation et l'accessibilité. Une opération qui augmente la capacité d'une ligne, comme un doublement, reste dans la part du joueur quand elle n'est pas décidée.
 
@@ -19,7 +21,20 @@ Quelques règles valent partout :
 - Chaque chiffre d'une explication vient d'une source citée, ou se présente comme notre estimation.
 - On préfère, dans l'ordre, les budgets votés et les comptes, les programmes pluriannuels, les prospectus obligataires et les analyses de notation, les rapports d'orientation budgétaire, puis les rapports des chambres régionales des comptes. La presse ne sert qu'en dernier recours, et la liste des limites le signale.
 
-Lyon garde pour l'instant la règle d'origine du jeu, 2 000 M€ par mandat dont 400 M€ pour l'entretien des bus, sans source : l'écran détaillé ne s'affiche donc pas pour Lyon, et le contrôle le signale.
+Lyon garde pour l'instant la règle d'origine du jeu, 2 000 M€ par mandat dont 400 M€ pour l'entretien des bus, et ses leviers d'origine, sans source : les écrans l'affichent comme la règle du jeu, et le contrôle le signale.
+
+## Les leviers de financement
+
+Chaque réseau propose les mêmes leviers, calculés à partir de ses propres recettes, sur un mandat de six ans et sans baisse de fréquentation quand les prix montent :
+
+- Une hausse de 1 % du prix des abonnements rapporte 1 % des recettes d'abonnements, et de même pour les tickets.
+- Une hausse de 1 % du versement mobilité rapporte 1 % de son produit ; au-delà du taux maximal, il faut une loi.
+- La gratuité totale coûte toutes les recettes tarifaires, et la gratuité des moins de 25 ans ce qu'ils paient aujourd'hui.
+- La suppression des tarifs sociaux rapporte la différence entre ce que paient leurs bénéficiaires et le plein tarif.
+- Le service de nuit le week-end coûte ce que coûtent les heures de métro ou de tram en plus, d'après une étude publiée ou le coût d'exploitation du réseau.
+- La TVA à 5,5 % au lieu de 10 % laisse au réseau la différence sur ce que paient les voyageurs.
+
+Les montants vont dans le champ `leviers` du fichier du réseau, avec leurs sources. Une mesure qu'on ne sait pas chiffrer pour un réseau est simplement absente : le jeu ne la propose pas. Un réseau sans leviers sourcés n'a pas de bouton « Trouver de l'argent ».
 
 ## Ajouter une ville
 

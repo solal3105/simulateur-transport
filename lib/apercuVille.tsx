@@ -1,20 +1,20 @@
 import { ImageResponse } from 'next/og'
 
 import { cadreMiniature, cheminsFond } from './miniature'
-import { polices, ROUGE, SABLE } from './og'
+import { polices, SABLE } from './og'
 import { MARQUE, type Ville } from './villes'
 
-/** Les dimensions de l'image d'aperçu d'un accueil de ville, celles des réseaux sociaux. */
+/** Les dimensions de l'image d'aperçu d'un accueil de réseau, celles des réseaux sociaux. */
 export const TAILLE_APERCU = { width: 1200, height: 630 }
 
 /**
- * L'image qui accompagne un lien vers l'accueil d'une ville en tracé libre : la carte de son réseau
+ * L'image qui accompagne un lien vers l'accueil d'un réseau en tracé libre : la carte de son réseau
  * actuel, avec la mer s'il y en a, et ce qu'on y fait.
  */
 export async function imageVille(ville: Ville, fond: unknown) {
   const chemins = cheminsFond(fond as Parameters<typeof cheminsFond>[0], ville)
   return new ImageResponse(
-    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ROUGE, fontFamily: 'Figtree' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ville.couleurs.principale, fontFamily: 'Figtree' }}>
       <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'space-between', marginRight: 44, color: 'white' }}>
         <div style={{ fontSize: 26, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{`${MARQUE}, ${ville.nom}`}</div>
         <div style={{ fontSize: 76, fontWeight: 900, lineHeight: 0.98, letterSpacing: -2.5 }}>{`Construisez le réseau ${ville.reseau} de 2038.`}</div>

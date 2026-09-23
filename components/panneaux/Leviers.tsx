@@ -2,10 +2,9 @@
 
 import { clsx } from 'clsx'
 
-import { TARIFS } from '@/lib/catalogue'
 import { n, signe } from '@/lib/format'
-import { LEVIERS_FIXES, RENDEMENT } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
+import { useJeu, useVille } from '@/lib/store'
 import type { Leviers as TLeviers } from '@/lib/types'
 
 import { segmentsBudget, useBilan } from '../partie/budget'
@@ -157,15 +156,24 @@ function Interrupteur({
   )
 }
 
+/** Le taux du versement mobilité après la hausse choisie : 2 % relevé de 3 % donne 2,06 %. */
+const taux = (t: number) => `${t.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
+
 export function Leviers() {
+  const ville = useVille()
+  const p = ville.budget.leviers
+  return p ? <Contenu p={p} /> : null
+}
+
+function Contenu({ p }: { p: ParametresLeviers }) {
   const { leviers, mandat, levier, fermer } = useJeu()
   const l = leviers[mandat]
   const bilan = useBilan()
   const { segments, total } = segmentsBudget(bilan)
-  const gratuit = l.gratuiteTotale
+  const gratuit = l.gratuiteTotale && p.fixes.gratuiteTotale !== undefined
   const sansObjet = 'Sans objet : le réseau est gratuit.'
-  const nouveauMois = TARIFS.abonnement * (1 + l.abonnements / 100)
-  const nouveauTicket = TARIFS.ticket * (1 + l.tickets / 100)
+  const nouveauMois = p.tarifs.abonnement * (1 + l.abonnements / 100)
+  const nouveauTicket = p.tarifs.ticket * (1 + l.tickets / 100)
 
   const groupe = (titre: string, contenu: React.ReactNode, intro?: string, icone?: boolean) => (
     <section className="flex flex-col gap-2.5">
@@ -216,8 +224,8 @@ export function Leviers() {
               unite="%"
               min={-20}
               max={30}
-              gain={gratuit ? 0 : l.abonnements * RENDEMENT.abonnements}
-              detail={`Chaque point rapporte ${RENDEMENT.abonnements} M€ par mandat.`}
+              gain={gratuit ? 0 : l.abonnements * p.rendement.abonnements}
+              detail={`Chaque point rapporte ${n(p.rendement.abonnements)} M€ par mandat.`}
               onChange={maj('abonnements')}
               desactive={gratuit ? sansObjet : undefined}
               enPlus={
@@ -225,7 +233,7 @@ export function Leviers() {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl bg-sable px-3 py-2.5">
                       <div className="chiffres text-lg font-black">{euros(nouveauMois)} €</div>
-                      <div className="text-xs leading-snug text-gris">par mois, au lieu de {euros(TARIFS.abonnement)} €</div>
+                      <div className="text-xs leading-snug text-gris">par mois, au lieu de {euros(p.tarifs.abonnement)} €</div>
                     </div>
                     <div className="rounded-xl bg-sable px-3 py-2.5">
                       <div className="chiffres text-lg font-black">{euros(nouveauMois / 2)} €</div>
@@ -242,8 +250,8 @@ export function Leviers() {
               unite="%"
               min={-20}
               max={30}
-              gain={gratuit ? 0 : l.tickets * RENDEMENT.tickets}
-              detail={`Le ticket passe de ${euros(TARIFS.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${RENDEMENT.tickets} M€ par mandat.`}
+              gain={gratuit ? 0 : l.tickets * p.rendement.tickets}
+              detail={`Le ticket passe de ${euros(p.tarifs.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${n(p.rendement.tickets)} M€ par mandat.`}
               onChange={maj('tickets')}
               desactive={gratuit ? sansObjet : undefined}
               enPlus={<Repere hausse={l.tickets} />}
@@ -258,68 +266,47 @@ export function Leviers() {
         {groupe(
           'La gratuité et les services',
           <>
-            <Interrupteur
-              titre="Gratuité pour tout le monde"
-              detail="Plus aucune recette de billets ni d’abonnements."
-              gain={LEVIERS_FIXES.gratuiteTotale}
-              actif={l.gratuiteTotale}
-              onChange={maj('gratuiteTotale')}
-            />
-            <Interrupteur
-              titre="Gratuité pour les moins de 25 ans"
-              detail="Sans condition de ressources."
-              gain={LEVIERS_FIXES.gratuiteMoins25}
-              actif={l.gratuiteMoins25}
-              onChange={maj('gratuiteMoins25')}
-              desactive={gratuit ? sansObjet : undefined}
-            />
-            <Interrupteur
-              titre="Gratuité des 11-18 ans enfants d’abonnés"
-              detail="Dès qu’un parent a un abonnement."
-              gain={LEVIERS_FIXES.gratuiteJeunesAbonnes}
-              actif={l.gratuiteJeunesAbonnes}
-              onChange={maj('gratuiteJeunesAbonnes')}
-              desactive={gratuit ? sansObjet : undefined}
-            />
-            <Interrupteur
-              titre="Métro toute la nuit le week-end"
-              detail="Les vendredis et samedis, sur les quatre lignes."
-              gain={LEVIERS_FIXES.metroNuit}
-              actif={l.metroNuit}
-              onChange={maj('metroNuit')}
-            />
-            <Interrupteur
-              titre="Supprimer les tarifs sociaux"
-              detail="Les abonnés aux revenus modestes paient le plein tarif."
-              gain={LEVIERS_FIXES.suppressionTarifSocial}
-              actif={l.suppressionTarifSocial}
-              onChange={maj('suppressionTarifSocial')}
-              desactive={gratuit ? sansObjet : undefined}
-            />
+            {MESURES.filter((m) => m.cle !== 'tva' && p.fixes[m.cle] !== undefined && (m.cle !== 'metroNuit' || p.nuit)).map((m) => (
+              <Interrupteur
+                key={m.cle}
+                titre={titreMesure(m, p)}
+                detail={m.cle === 'metroNuit' ? p.nuit!.detail : m.detail}
+                gain={p.fixes[m.cle]!}
+                actif={l[m.cle]}
+                onChange={maj(m.cle)}
+                desactive={gratuit && m.tarifaire ? sansObjet : undefined}
+              />
+            ))}
           </>,
         )}
         {groupe(
           'Ce que seule une loi nationale peut changer',
           <>
-            <Interrupteur
-              titre="TVA des transports à 5,5 %"
-              detail="Au lieu de 10 % aujourd’hui."
-              gain={LEVIERS_FIXES.tva}
-              actif={l.tva}
-              onChange={maj('tva')}
-            />
+            {p.fixes.tva !== undefined ? (
+              <Interrupteur
+                titre="TVA des transports à 5,5 %"
+                detail="Au lieu de 10 % aujourd’hui."
+                gain={p.fixes.tva}
+                actif={l.tva}
+                onChange={maj('tva')}
+              />
+            ) : null}
             <Pas
               titre="Versement mobilité des entreprises"
               valeur={l.versementMobilite}
-              unite={Math.abs(l.versementMobilite) > 1 ? 'points' : 'point'}
+              unite="%"
               min={0}
               max={5}
-              gain={l.versementMobilite * RENDEMENT.versementMobilite}
-              detail={`Cette taxe est payée par les employeurs de 11 salariés et plus, en plus du remboursement des abonnements. Chaque point de hausse rapporte ${RENDEMENT.versementMobilite} M€ par mandat.`}
+              gain={l.versementMobilite * p.rendement.versementMobilite}
+              detail={`Cette taxe est payée par les employeurs de 11 salariés et plus, en plus du remboursement des abonnements.${
+                p.tauxVersement
+                  ? ` Son taux passe de ${taux(p.tauxVersement)} à ${taux(p.tauxVersement * (1 + l.versementMobilite / 100))} de la masse salariale.`
+                  : ''
+              } Chaque hausse de 1 % rapporte ${n(p.rendement.versementMobilite)} M€ par mandat.`}
               onChange={maj('versementMobilite')}
             />
           </>,
-          'La Métropole ne peut pas décider seule de ces deux mesures. Vous pouvez les activer pour voir ce qu’elles changeraient.',
+          'Ces deux mesures demandent une loi nationale. Vous pouvez les activer pour voir ce qu’elles changeraient.',
           true,
         )}
       </div>

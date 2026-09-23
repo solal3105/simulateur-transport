@@ -19,7 +19,7 @@ const TIRETS = /[–—]/
 for (const ville of Object.values(VILLES)) {
   const b = ville.budget
   if (!estSource(b)) {
-    avertissements.push(`${ville.nom} : budget sans source, l’écran détaillé du budget ne s’affiche pas.`)
+    avertissements.push(`${ville.nom} : budget sans source, affiché comme la règle d’origine du jeu.`)
     continue
   }
   const textes = [b.payeur, ...b.limites]
@@ -27,6 +27,9 @@ for (const ville of Object.values(VILLES)) {
     const poste = b[p]
     const porte = poste.montants[1] !== 0 || poste.montants[2] !== 0
     if (porte && !poste.explication.trim()) erreurs.push(`${ville.nom}, ${p} : un montant sans explication.`)
+    if (porte && !poste.simple.trim()) erreurs.push(`${ville.nom}, ${p} : un montant sans phrase simple.`)
+    if (poste.simple.length > 200) erreurs.push(`${ville.nom}, ${p} : la phrase simple dépasse 200 signes, elle doit se lire d’un coup d’œil.`)
+    textes.push(poste.simple)
     if (porte && !poste.sources.length) erreurs.push(`${ville.nom}, ${p} : un montant sans source.`)
     textes.push(poste.explication)
     poste.sources.forEach((s: Source) => {
@@ -38,6 +41,19 @@ for (const ville of Object.values(VILLES)) {
   }
   for (const m of [1, 2] as const) {
     if (libre(b, m) < 0) erreurs.push(`${ville.nom}, mandat ${m} : la part réservée dépasse l’enveloppe.`)
+  }
+  const l = b.leviers
+  if (!l) avertissements.push(`${ville.nom} : pas de leviers de financement, le bouton « Trouver de l’argent » n’apparaît pas.`)
+  else {
+    if (!l.sources.length) erreurs.push(`${ville.nom} : des leviers de financement sans source.`)
+    if (!l.simple.trim() || !l.explication.trim()) erreurs.push(`${ville.nom} : des leviers de financement sans explication.`)
+    textes.push(l.simple, l.explication, l.nuit?.titre ?? '', l.nuit?.detail ?? '')
+    l.sources.forEach((s: Source) => {
+      textes.push(s.titre, s.pages ?? '')
+      if (!/^https:\/\/\S+$/.test(s.url)) erreurs.push(`${ville.nom}, leviers : une adresse qui n’est pas en https, ${s.url}`)
+      adresses.set(s.url, `${ville.nom}, ${s.titre}`)
+    })
+    if (l.fixes.metroNuit !== undefined && !l.nuit) erreurs.push(`${ville.nom} : un service de nuit sans titre.`)
   }
   if (textes.some((t) => TIRETS.test(t))) erreurs.push(`${ville.nom} : un tiret long ou demi-long dans les textes.`)
   if (!b.releve) erreurs.push(`${ville.nom} : il manque le mois du relevé.`)

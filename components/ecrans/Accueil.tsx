@@ -8,15 +8,16 @@ import { useEffect, useState } from 'react'
 import { enveloppe, libre, nomReserve } from '@/lib/budget'
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
-import { de, n } from '@/lib/format'
+import { enLettres, n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
-import { Bouton, Icone, Logo } from '../ui'
+import { useCouleursReseau } from '../couleurs'
+import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
 
 const TOTAL = totauxCatalogue(CATALOGUE.filter((p) => p.trace))
 const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
@@ -24,22 +25,9 @@ const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
-/**
- * 4 000 M€ donne « 4 milliards », 3 120 M€ « 3,1 milliards », 1 580 M€ « 1,6 milliard » : le pluriel commence
- * à 2. En dessous d'un milliard, on garde les millions : 850 M€ donne « 850 millions ».
- */
-const enLettres = (v: number) => {
-  if (v < 1000) return `${n(v)} millions`
-  const x = Math.round(v / 100) / 10
-  return `${x.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} ${x >= 2 ? 'milliards' : 'milliard'}`
-}
-
-/** « de Tisséo Collectivités », « d’Île-de-France Mobilités », et « du » ou « des » devant un nom qui commence par « le » ou « les ». */
-const dePayeur = (nom: string) => (nom.startsWith('le ') ? `du ${nom.slice(3)}` : nom.startsWith('les ') ? `des ${nom.slice(4)}` : de(nom))
-
 const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Ce que l'accueil dit de chaque ville. */
+/** Ce que l'accueil dit de chaque réseau. */
 function textes(ville: Ville) {
   const b = ville.budget
   const budget = enLettres(enveloppe(b, 1) + enveloppe(b, 2))
@@ -54,19 +42,21 @@ function textes(ville: Ville) {
         'Vous finissez chaque mandat sans déficit.',
         'Votre score est le nombre de voyageurs gagnés.',
       ],
+      pourLignes,
       sources:
         'Les coûts, les voyageurs et les durées de chantier viennent d’études et de délibérations publiques ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap, et le traceur de ligne les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.',
     }
   return {
     titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats. ${majuscule(nomReserve(b).payes)}, il vous reste ${enLettres(pourLignes)} d’euros pour de nouvelles lignes. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
+    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats. ${majuscule(nomReserve(b).payes)}, il vous reste ${enLettres(pourLignes)} d’euros pour de nouvelles lignes. Vous tracez vos lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
     pastilles: ['Tracé libre', `${n(pourLignes)} M€ pour vos lignes`],
     etapes: [
       'Vous tracez vos lignes sur la carte.',
       'Vous finissez chaque mandat sans déficit.',
       'Votre score est le nombre de voyageurs gagnés.',
     ],
-    sources: `Le budget part des comptes et des plans d’investissement ${dePayeur(b.payeur)}, moins ce que demandent les bus et les lignes existantes ; le détail et ses sources sont dans le menu de la partie. Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule calée sur plus d’une centaine de lignes de ${FORMULE.villes} villes françaises ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
+    pourLignes,
+    sources: `Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule calée sur plus d’une centaine de lignes de ${FORMULE.villes} villes françaises ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
   }
 }
 
@@ -89,10 +79,19 @@ function Etapes({ etapes }: { etapes: string[] }) {
   )
 }
 
-/** Le choix de la ville : il change l'accueil et l'adresse de la page, sans rien toucher à une partie. */
+/**
+ * Le choix du réseau : il change l'accueil, ses couleurs et l'adresse de la page, sans rien toucher à une
+ * partie. Sur téléphone, les réseaux défilent sur une seule rangée.
+ */
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
+  const rangee = useChoixVisible<HTMLDivElement>(ville)
   return (
-    <div role="radiogroup" aria-label="Ville" className="flex flex-wrap gap-1.5">
+    <div
+      ref={rangee}
+      role="radiogroup"
+      aria-label="Réseau"
+      className="-mx-6 flex snap-x gap-1.5 overflow-x-auto px-6 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
+    >
       {ID_VILLES.map((id) => (
         <button
           key={id}
@@ -101,13 +100,57 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
           aria-checked={ville === id}
           onClick={() => choisir(id)}
           className={clsx(
-            'min-h-10 rounded-full px-4 text-[14px] font-extrabold transition-colors',
+            'flex shrink-0 snap-start flex-col items-start rounded-2xl px-3.5 py-2 text-left transition-colors',
             ville === id ? 'bg-white text-rouge' : 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] hover:bg-white/10',
           )}
         >
-          {VILLES[id].nom}
+          <span className="text-[14px] leading-tight font-extrabold whitespace-nowrap">{VILLES[id].nom}</span>
+          <span className={clsx('text-[11.5px] leading-tight font-semibold whitespace-nowrap', ville === id ? 'text-gris' : 'opacity-85')}>
+            {VILLES[id].lieu}
+          </span>
         </button>
       ))}
+    </div>
+  )
+}
+
+/** Les deux façons de jouer, proposées quand on commence une partie. */
+function ChoixMode({ pourLignes, choisir, annuler }: { pourLignes: number; choisir: (libre: boolean) => void; annuler: () => void }) {
+  const carte =
+    'flex w-full flex-col items-start gap-1.5 rounded-2xl p-4 text-left transition-transform active:scale-[0.99] lg:min-h-[150px]'
+  return (
+    <div role="group" aria-labelledby="choix-mode" className="flex flex-col gap-3">
+      <p id="choix-mode" className="text-[15px] font-extrabold">
+        Comment voulez-vous jouer ?
+      </p>
+      <div className="grid gap-2.5 lg:grid-cols-2">
+        <button type="button" onClick={() => choisir(false)} className={clsx(carte, 'bg-white text-encre hover:bg-white/95')}>
+          <span className="flex w-full items-center justify-between gap-2 text-[17px] font-black text-rouge">
+            Jouer avec le vrai budget
+            <Icone nom="fleche" taille={19} epaisseur={2.4} />
+          </span>
+          <span className="text-[14px] leading-snug text-gris">
+            Deux mandats de six ans, {enLettres(pourLignes)} d’euros pour vos lignes, et pas de déficit à la fin de chaque mandat.
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => choisir(true)}
+          className={clsx(carte, 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.75)] hover:bg-white/10')}
+        >
+          <span className="flex w-full items-center justify-between gap-2 text-[17px] font-black">
+            Jouer sans limite de budget
+            <Icone nom="fleche" taille={19} epaisseur={2.4} />
+          </span>
+          <span className="text-[14px] leading-snug opacity-90">
+            Tracez le réseau dont vous rêvez. Nous calculons son coût et ses voyageurs, et le comparons au budget réel. Il sera
+            marqué « jeu libre » si vous le publiez.
+          </span>
+        </button>
+      </div>
+      <button type="button" onClick={annuler} className="min-h-10 self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start">
+        Revenir
+      </button>
     </div>
   )
 }
@@ -137,12 +180,16 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
   }
   const ville = VILLES[choix]
   const t = textes(ville)
-  // Une nouvelle partie remplace celle qui est enregistrée : on le dit avant, pour la ville affichée.
-  const [confirmerPour, setConfirmerPour] = useState<IdVille | null>(null)
-  const confirmer = confirmerPour === choix
+  useCouleursReseau(choix)
+  // Commencer propose d'abord les deux modes ; une nouvelle partie remplace celle qui est enregistrée :
+  // on le dit ensuite, avant d'effacer quoi que ce soit.
+  const [etape, setEtape] = useState<{ ville: IdVille; libre?: boolean } | null>(null)
+  const choixMode = etape?.ville === choix && etape.libre === undefined
+  const confirmer = etape?.ville === choix && etape.libre !== undefined
   const enregistree = partieEnCours ?? null
   const ici = enregistree?.ville === choix
-  const villeEnregistree = enregistree ? VILLES[enregistree.ville].nom : ''
+  const reseauEnregistre = enregistree ? VILLES[enregistree.ville] : null
+  const choisirMode = (libre: boolean) => (enregistree ? setEtape({ ville: choix, libre }) : commencer(choix, libre))
 
   // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
   // d'origine après un changement d'adresse : le titre est corrigé juste après.
@@ -166,15 +213,9 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         animate="show"
         className="flex min-h-dvh flex-col gap-5 px-6 pt-5 pb-7 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[640px] lg:gap-7 lg:overflow-y-auto lg:rounded-r-[36px] lg:bg-rouge lg:px-14 lg:pt-10 lg:pb-12"
       >
-        <motion.div variants={cascade.enfant} className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Logo taille={38} inverse />
-            <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-          </div>
-          {/* Sur ordinateur, les sources restent affichées en bas à droite : le lien ne sert que sur téléphone. */}
-          <a href="#sources" className="text-[13px] font-bold underline underline-offset-3 lg:hidden">
-            D’où viennent les chiffres
-          </a>
+        <motion.div variants={cascade.enfant} className="flex items-center gap-2.5">
+          <Logo taille={38} inverse />
+          <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
         </motion.div>
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-3 lg:mt-2 lg:gap-5">
@@ -183,6 +224,13 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
             {t.titre}
           </h1>
           <p className="max-w-[500px] text-base leading-relaxed font-medium lg:text-[19px]">{t.intro}</p>
+          <Link
+            href={adresseMethode(choix)}
+            className="flex min-h-10 items-center gap-2 self-start text-[14.5px] font-extrabold underline decoration-white/60 decoration-2 underline-offset-4 hover:decoration-white lg:text-[15px]"
+          >
+            Comment nous calculons le budget et les voyageurs
+            <Icone nom="fleche" taille={17} epaisseur={2.4} />
+          </Link>
         </motion.div>
 
         {/* Une seule carte : une vignette sur téléphone, le fond de l'écran sur ordinateur. */}
@@ -202,34 +250,36 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         <Etapes key={choix} etapes={t.etapes} />
 
         <motion.div variants={cascade.enfant} className="mt-auto flex flex-col gap-3">
-          {confirmer && enregistree ? (
+          {choixMode ? (
+            <ChoixMode pourLignes={t.pourLignes} choisir={choisirMode} annuler={() => setEtape(null)} />
+          ) : confirmer && enregistree && reseauEnregistre ? (
             <div role="group" aria-labelledby="remplacer-partie" className="flex flex-col gap-3 rounded-2xl bg-white/12 p-4">
               <p id="remplacer-partie" className="text-[15px] leading-relaxed font-semibold">
                 {!enregistree.terminee
-                  ? `Votre partie en cours à ${villeEnregistree} sera effacée.`
+                  ? `Votre partie en cours ${reseauEnregistre.ou} sera effacée.`
                   : enregistree.publiee
-                    ? `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Il reste dans les réseaux publiés.`
-                    : `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Pour le garder, revoyez-le d’abord et publiez-le ou copiez son lien.`}
+                    ? `Votre réseau ${reseauEnregistre.nom} sera effacé de ce navigateur. Il reste dans les réseaux publiés.`
+                    : `Votre réseau ${reseauEnregistre.nom} sera effacé de ce navigateur. Pour le garder, revoyez-le d’abord et publiez-le ou copiez son lien.`}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Bouton genre="blanc" onClick={() => commencer(choix)}>
+                <Bouton genre="blanc" onClick={() => commencer(choix, etape?.libre)}>
                   Effacer et commencer
                 </Bouton>
-                <Bouton genre="contourBlanc" onClick={() => setConfirmerPour(null)}>
+                <Bouton genre="contourBlanc" onClick={() => setEtape(null)}>
                   {enregistree.terminee ? 'Garder mon réseau' : 'Garder ma partie'}
                 </Bouton>
               </div>
             </div>
-          ) : enregistree ? (
+          ) : enregistree && reseauEnregistre ? (
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-              {/* Dans la ville de la partie enregistrée, on la retrouve d'abord ; ailleurs, on commence d'abord. */}
+              {/* Sur le réseau de la partie enregistrée, on la retrouve d'abord ; ailleurs, on commence d'abord. */}
               {ici ? (
                 <>
                   <Bouton genre="blanc" icone="fleche" taille="grand" onClick={enregistree.reprendre} className="w-full lg:w-[250px]">
                     {enregistree.terminee ? 'Revoir mon réseau' : 'Reprendre ma partie'}
                   </Bouton>
-                  <Bouton genre="contourBlanc" taille="grand" onClick={() => setConfirmerPour(choix)} className="whitespace-nowrap">
-                    Nouvelle partie à {ville.nom}
+                  <Bouton genre="contourBlanc" taille="grand" onClick={() => setEtape({ ville: choix })} className="whitespace-nowrap">
+                    Nouvelle partie
                   </Bouton>
                 </>
               ) : (
@@ -238,20 +288,20 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
                     genre="blanc"
                     icone="fleche"
                     taille="grand"
-                    onClick={() => setConfirmerPour(choix)}
+                    onClick={() => setEtape({ ville: choix })}
                     className="w-full lg:w-[250px]"
                   >
-                    Commencer à {ville.nom}
+                    Commencer la partie
                   </Bouton>
-                  <Bouton genre="contourBlanc" taille="grand" onClick={enregistree.reprendre} className="whitespace-nowrap">
-                    {enregistree.terminee ? `Revoir mon réseau de ${villeEnregistree}` : `Reprendre ma partie à ${villeEnregistree}`}
+                  <Bouton genre="contourBlanc" taille="grand" onClick={enregistree.reprendre} className="lg:whitespace-nowrap">
+                    {enregistree.terminee ? `Revoir mon réseau ${reseauEnregistre.nom}` : `Reprendre ma partie ${reseauEnregistre.ou}`}
                   </Bouton>
                 </>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-              <Bouton genre="blanc" icone="fleche" taille="grand" onClick={() => commencer(choix)} className="w-full lg:w-[250px]">
+              <Bouton genre="blanc" icone="fleche" taille="grand" onClick={() => setEtape({ ville: choix })} className="w-full lg:w-[250px]">
                 Commencer la partie
               </Bouton>
               {communauteActive ? (
@@ -265,7 +315,7 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
               ) : null}
             </div>
           )}
-          {enregistree ? (
+          {choixMode ? null : enregistree ? (
             communauteActive && !confirmer ? (
               <Link
                 href={adresseReseaux(choix)}

@@ -2,7 +2,7 @@
  * Prépare les données servies au navigateur, dans public/data (Lyon) ou public/data/<ville>.
  *
  *   npm run data
- *   node scripts/build-data.mjs toulouse      (ou marseille, nice, paris)
+ *   node scripts/build-data.mjs toulouse      (ou marseille, nice, idf)
  *
  * Entrées :
  *   data/osm/*.json      extractions OpenStreetMap (voir scripts/fetch-osm.mjs)
@@ -30,13 +30,13 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const ville = process.argv[2] ?? 'lyon'
-if (!['lyon', 'toulouse', 'marseille', 'nice', 'paris'].includes(ville)) throw new Error(`Ville inconnue : ${ville}`)
+if (!['lyon', 'toulouse', 'marseille', 'nice', 'idf'].includes(ville)) throw new Error(`Ville inconnue : ${ville}`)
 const src = (...p) => join(root, 'data', ...p)
 const osm = (nom) => (ville === 'lyon' ? src('osm', nom) : src('osm', ville, nom))
 const out = join(root, 'public', 'data', ...(ville === 'lyon' ? [] : [ville]))
 mkdirSync(out, { recursive: true })
 /** Latitude de référence, pour les surfaces. */
-const LATITUDE = { lyon: 45.76, toulouse: 43.6, marseille: 43.3, nice: 43.7, paris: 48.86 }[ville]
+const LATITUDE = { lyon: 45.76, toulouse: 43.6, marseille: 43.3, nice: 43.7, idf: 48.86 }[ville]
 
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'))
 const round = (v, d = 5) => Math.round(v * 10 ** d) / 10 ** d
@@ -170,14 +170,14 @@ function fondToulouse() {
 }
 
 /**
- * Marseille, Nice et Paris : les fleuves, le métro et le tram d'OpenStreetMap, y compris les lignes en
+ * Marseille, Nice et l'Île-de-France : les fleuves, le métro et le tram d'OpenStreetMap, y compris les lignes en
  * chantier, qui ouvrent avant celles du joueur. Au bord de la mer, le trait de côte s'ajoute au fond
  * pour les miniatures, et la mer elle-même au décor.
  */
 const FONDS = {
   marseille: { fleuves: /Huveaune|Durance|^Arc$|Touloubre/, cote: [43.1, 4.65, 43.82, 5.9] },
   nice: { fleuves: /^(Le )?(Var|Paillon)$|^(La )?(Tinée|Vésubie)$/, cote: [43.55, 6.7, 43.85, 7.55] },
-  paris: { fleuves: /^(La )?(Seine|Marne)$/ },
+  idf: { fleuves: /^(La |L'|L’)?(Seine|Marne|Oise)$/ },
 }
 
 /**
@@ -474,19 +474,22 @@ const communesOsm = ville === 'lyon' ? lire('communes').filter((e) => e.tags?.na
 const contours = ville === 'lyon' ? [] : readJson(osm('contours.json')).features
 const anneauxExterieurs = (g) =>
   g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map((p) => p[0]) : []
-// Les grands territoires (Marseille, Nice) ont des centaines de bois et de routes de campagne : on ne garde
+// Les grands territoires (Marseille, Nice, Île-de-France) ont des centaines de bois et de routes de campagne : on ne garde
 // que les bois assez grands, on simplifie davantage, et on écarte ce qui sort du cadre de la ville.
 const ALLEGEMENT = {
   marseille: { parcMin: 200000, parcTol: 0.0003, eauMin: 30000, routeTol: 1.6, cadre: [43.14, 4.7, 43.8, 5.85], raccorder: true },
   nice: { parcMin: 250000, parcTol: 0.0003, eauMin: 20000, routeTol: 1.6, cadre: [43.62, 6.76, 44.38, 7.46], raccorder: true },
-  paris: { parcMin: 40000, parcTol: 0.00018, eauMin: 10000, routeTol: 2, cadre: [48.66, 2.1, 49.04, 2.66], raccorder: true },
+  // En Île-de-France, les routes principales ne sont gardées qu'autour de l'agglomération parisienne.
+  idf: { parcMin: 200000, parcTol: 0.0005, eauMin: 40000, routeTol: 2.8, cadre: [48.1, 1.43, 49.25, 3.57], coeur: [48.55, 1.85, 49.15, 2.95], raccorder: true },
 }[ville] ?? { parcMin: 25000, parcTol: 0.00014, eauMin: 10000, routeTol: 1 }
-const dansLeCadre = (e) => {
-  if (!ALLEGEMENT.cadre) return true
-  const [s, o, n, est] = ALLEGEMENT.cadre
+const dansCadre = (cadre) => (e) => {
+  if (!cadre) return true
+  const [s, o, n, est] = cadre
   const points = e.geometry ?? e.members?.flatMap((m) => m.geometry ?? []) ?? []
   return points.some((g) => g.lat >= s && g.lat <= n && g.lon >= o && g.lon <= est)
 }
+const dansLeCadre = dansCadre(ALLEGEMENT.cadre)
+const dansLeCoeur = dansCadre(ALLEGEMENT.coeur)
 const decor = {
   type: 'FeatureCollection',
   features: [
@@ -503,7 +506,7 @@ const decor = {
     feature(
       { kind: 'route', rang: 2 },
       lignesDe(
-        routes.filter((e) => e.tags?.highway === 'primary' && dansLeCadre(e)),
+        routes.filter((e) => e.tags?.highway === 'primary' && dansLeCadre(e) && dansLeCoeur(e)),
         0.00012 * ALLEGEMENT.routeTol,
       ),
     ),
@@ -550,7 +553,7 @@ const arrondissements =
     : []
 writeFileSync(join(out, 'lieux.json'), JSON.stringify({ communes, quartiers, arrondissements }))
 
-// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse et à Paris, les stations des lignes
+// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse et en Île-de-France, les stations des lignes
 // de métro qui ouvrent avant celles du joueur (data/<ville>/stations-futures.json) comptent aussi.
 const futures = (() => {
   try {
