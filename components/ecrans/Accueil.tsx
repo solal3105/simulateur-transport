@@ -143,12 +143,16 @@ function ChoixMode({ pourLignes, choisir, annuler }: { pourLignes: number; chois
             <Icone nom="fleche" taille={19} epaisseur={2.4} />
           </span>
           <span className="text-[14px] leading-snug opacity-90">
-            Tracez le réseau dont vous rêvez. Nous calculons son coût et ses voyageurs, et le comparons au budget réel. Il sera
-            marqué « jeu libre » si vous le publiez.
+            Tracez le réseau dont vous rêvez. Nous calculons son coût et ses voyageurs, et le comparons au budget réel. Il sera marqué « jeu
+            libre » si vous le publiez.
           </span>
         </button>
       </div>
-      <button type="button" onClick={annuler} className="min-h-10 self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start">
+      <button
+        type="button"
+        onClick={annuler}
+        className="min-h-10 self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start"
+      >
         Revenir
       </button>
     </div>
@@ -220,7 +224,13 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-3 lg:mt-2 lg:gap-5">
           <ChoixVille ville={choix} choisir={setChoix} />
-          <h1 className="text-[44px] leading-[0.95] font-black tracking-[-0.035em] text-balance lg:text-[72px] lg:leading-[0.93]">
+          {/* Un titre long, comme celui d'Aix-Marseille-Provence, s'écrit plus petit pour tenir en quelques lignes. */}
+          <h1
+            className={clsx(
+              'leading-[0.95] font-black tracking-[-0.035em] text-balance lg:leading-[0.93]',
+              t.titre.length > 50 ? 'text-[36px] lg:text-[54px]' : 'text-[44px] lg:text-[72px]',
+            )}
+          >
             {t.titre}
           </h1>
           <p className="max-w-[500px] text-base leading-relaxed font-medium lg:text-[19px]">{t.intro}</p>
@@ -301,7 +311,13 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
             </div>
           ) : (
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-              <Bouton genre="blanc" icone="fleche" taille="grand" onClick={() => setEtape({ ville: choix })} className="w-full lg:w-[250px]">
+              <Bouton
+                genre="blanc"
+                icone="fleche"
+                taille="grand"
+                onClick={() => setEtape({ ville: choix })}
+                className="w-full lg:w-[250px]"
+              >
                 Commencer la partie
               </Bouton>
               {communauteActive ? (

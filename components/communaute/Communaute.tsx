@@ -19,7 +19,7 @@ type Onglet = 'populaires' | 'recents' | 'miens'
 const titre = (onglet: Onglet, ville: IdVille, libre: boolean) =>
   onglet === 'miens'
     ? 'Vos réseaux publiés'
-    : `${onglet === 'populaires' ? `Les réseaux ${VILLES[ville].nom} les plus soutenus` : `Les derniers réseaux ${VILLES[ville].nom} publiés`}${
+    : `${onglet === 'populaires' ? `Les réseaux les plus soutenus pour ${VILLES[ville].nom}` : `Les derniers réseaux publiés pour ${VILLES[ville].nom}`}${
         libre ? ', en jeu libre' : ''
       }`
 

@@ -101,6 +101,53 @@ export const nice: BudgetVille = {
       },
     ],
   },
+  leviers: {
+    tarifs: { abonnement: 45, ticket: 1.7 },
+    rendement: { abonnements: 1.3, tickets: 2.8, versementMobilite: 6.1 },
+    tauxVersement: 2,
+    fixes: { gratuiteTotale: -424, gratuiteMoins25: -51, suppressionTarifSocial: 13, metroNuit: -6, tva: 18 },
+    textes: {
+      metroNuit: {
+        titre: 'Tram toute la nuit le week-end',
+        detail: 'Les vendredis et samedis, sur les trois lignes, avec deux agents par rame.',
+      },
+    },
+    simple:
+      'Les billets et les abonnements rapportent environ 71 millions d’euros par an, et le versement mobilité des entreprises 101 millions. Les tickets pèsent deux fois plus que les abonnements.',
+    explication:
+      'La billetterie a rapporté 73,7 M€ hors taxes en 2025. Nous en retirons environ 3 M€ par an pour les gratuités votées en 2026, dont celle des 65 ans et plus, ce qui laisse 70,7 M€ : d’après la régie, environ 46 M€ de tickets et 21 M€ d’abonnements. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 101,5 M€ en 2025. La gratuité des moins de 25 ans coûterait ce qu’ils paient aujourd’hui, environ 8,5 M€ par an ; celle des moins de 11 ans existe déjà. L’abonnement social coûte la moitié du plein tarif : le supprimer rapporterait environ 2,2 M€ par an. Un tram toute la nuit le week-end, avec une rame toutes les 30 minutes et deux agents par rame, coûterait environ 1 M€ par an, d’après le coût d’exploitation que la Métropole retient pour la ligne 5. Les hausses de prix supposent que la fréquentation ne baisse pas.',
+    sources: [
+      {
+        titre: 'Métropole Nice Côte d’Azur, compte financier 2025',
+        url: `${NCA}/2026/06/MNCA-Rapport-CFU-2025-vf.pdf`,
+        pages: 'p. 7 et 13',
+      },
+      {
+        titre:
+          'Métropole Nice Côte d’Azur, séance du 5 décembre 2025, délibération n° 20.3, rapport d’activité 2024 de la régie Ligne d’Azur et ses annexes',
+        url: WEBDELIB,
+        pages: 'rapport p. 40 à 44 et 49, annexes p. 59, 63 et 65',
+      },
+      {
+        titre: 'Lignes d’Azur, guide des tarifs, septembre 2026',
+        url: 'https://www.lignesdazur.com/uploads/Guide_des_tarifs_Septembre_2026_compressed_1_4e2d1aa321.pdf',
+        pages: 'p. 6, 10, 11 et 13',
+      },
+      {
+        titre: 'Urssaf, taux du versement mobilité, septembre 2026',
+        url: 'https://open.urssaf.fr/explore/dataset/table_taux_vmrr/',
+      },
+      {
+        titre: 'Métropole Nice Côte d’Azur, séance du 8 juin 2026, délibération n° 9.1, évaluation de la ligne 5',
+        url: WEBDELIB,
+        pages: 'annexe 1, p. 40',
+      },
+      {
+        titre: 'Lignes d’Azur, le réseau de soirée',
+        url: 'https://www.lignesdazur.com/fr/reseau-soiree',
+      },
+    ],
+  },
   limites: [
     'Les comptes 2025 de la régie Ligne d’Azur ne sont pas encore publiés.',
     'Aucun document ne chiffre le renouvellement des rames et des voies du tram : la part des lignes existantes est sans doute trop basse pour le second mandat, quand la ligne 1 aura plus de 25 ans.',

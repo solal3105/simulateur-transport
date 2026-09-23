@@ -19,8 +19,11 @@ export interface ParametresLeviers {
   tauxVersement?: number
   /** Ce que rapporte (positif) ou coûte (négatif) chaque mesure sur un mandat. */
   fixes: Partial<Record<MesureFixe, number>>
-  /** Le service de nuit proposé : le métro à Lyon, le tram là où il n'y a pas de métro. */
-  nuit?: { titre: string; detail: string }
+  /**
+   * Le texte d'une mesure quand il diffère d'un réseau à l'autre : le service de nuit (le métro à Lyon, le
+   * tram à Nice) doit toujours en avoir un, et une mesure que la loi encadre peut changer de nom.
+   */
+  textes?: Partial<Record<MesureFixe, { titre: string; detail: string }>>
   /** En une ou deux phrases simples : d'où viennent ces montants. */
   simple: string
   /** Le détail du calcul, pour qui veut vérifier. */
@@ -59,7 +62,12 @@ export function leviersPossibles(l: Leviers, p: ParametresLeviers): Leviers {
 
 /** Les mesures à coût fixe, dans l'ordre où elles s'affichent, avec leur texte. */
 export const MESURES: { cle: MesureFixe; titre: string; detail: string; tarifaire: boolean }[] = [
-  { cle: 'gratuiteTotale', titre: 'Gratuité pour tout le monde', detail: 'Plus aucune recette de billets ni d’abonnements.', tarifaire: false },
+  {
+    cle: 'gratuiteTotale',
+    titre: 'Gratuité pour tout le monde',
+    detail: 'Plus aucune recette de billets ni d’abonnements.',
+    tarifaire: false,
+  },
   { cle: 'gratuiteMoins25', titre: 'Gratuité pour les moins de 25 ans', detail: 'Sans condition de ressources.', tarifaire: true },
   {
     cle: 'gratuiteJeunesAbonnes',
@@ -77,6 +85,6 @@ export const MESURES: { cle: MesureFixe; titre: string; detail: string; tarifair
   { cle: 'tva', titre: 'TVA des transports à 5,5 %', detail: 'Au lieu de 10 % aujourd’hui.', tarifaire: false },
 ]
 
-/** Le titre d'une mesure sur un réseau : le service de nuit porte le nom du mode qui roule la nuit. */
-export const titreMesure = (m: (typeof MESURES)[number], p: ParametresLeviers) =>
-  m.cle === 'metroNuit' && p.nuit ? p.nuit.titre : m.titre
+/** Le titre et le détail d'une mesure sur un réseau : les siens s'il en a, sinon ceux de tous. */
+export const titreMesure = (m: (typeof MESURES)[number], p: ParametresLeviers) => p.textes?.[m.cle]?.titre ?? m.titre
+export const detailMesure = (m: (typeof MESURES)[number], p: ParametresLeviers) => p.textes?.[m.cle]?.detail ?? m.detail

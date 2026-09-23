@@ -201,7 +201,12 @@ export function ExplicationLeviers({ ville }: { ville: Ville }) {
           {liste.map((m) => (
             <li key={m.titre} className="flex items-baseline justify-between gap-3">
               <span>{m.titre}</span>
-              <span className="chiffres font-extrabold whitespace-nowrap">{n(Math.abs(m.montant))} M€</span>
+              <span className="chiffres font-extrabold whitespace-nowrap">
+                {Math.abs(m.montant) < 10
+                  ? Math.abs(m.montant).toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+                  : n(Math.abs(m.montant))}{' '}
+                M€
+              </span>
             </li>
           ))}
         </ul>

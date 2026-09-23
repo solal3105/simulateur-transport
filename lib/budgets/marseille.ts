@@ -89,6 +89,62 @@ export const marseille: BudgetVille = {
       },
     ],
   },
+  leviers: {
+    tarifs: { abonnement: 49.5, ticket: 1.7 },
+    rendement: { abonnements: 4.5, tickets: 3.8, versementMobilite: 26 },
+    tauxVersement: 2,
+    fixes: { gratuiteTotale: -892, gratuiteMoins25: -108, suppressionTarifSocial: 9, metroNuit: -18, tva: 37 },
+    textes: {
+      gratuiteMoins25: {
+        titre: 'Gratuité pour les 11 à 25 ans',
+        detail: 'Les moins de 11 ans voyagent déjà gratuitement, comme les 65 ans et plus.',
+      },
+      suppressionTarifSocial: {
+        titre: 'Ramener les réductions solidaires à 50 %',
+        detail: 'La loi impose au moins 50 % de réduction aux plus modestes : on ne peut que reprendre les gratuités accordées au-delà.',
+      },
+      metroNuit: {
+        titre: 'Métro toute la nuit le week-end',
+        detail: 'Les vendredis et samedis, sur les deux lignes, qui ferment aujourd’hui à 0 h 30.',
+      },
+    },
+    simple:
+      'Les billets et les abonnements rapportent environ 143 millions d’euros par an, et le versement mobilité des entreprises 438 millions.',
+    explication:
+      'Les recettes voyageurs du budget des transports ont atteint 142,7 M€ hors taxes en 2025. Seule la RTM publie leur partage : à Marseille, 52 % d’abonnements et 45 % de tickets et de titres occasionnels, que nous appliquons à toute la Métropole. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 437,9 M€. Les moins de 11 ans et les 65 ans et plus voyagent gratuitement depuis 2025, pour environ 10 M€ par an ; la gratuité des 11 à 25 ans coûterait environ 18 M€ par an de plus. La loi impose au moins 50 % de réduction aux plus modestes, et la Métropole applique ce minimum sur presque tout son territoire : ramener les autres réductions à 50 % rapporterait au plus 1 à 2 M€ par an. Le métro toute la nuit le week-end coûterait environ 3 M€ par an, d’après le coût du service prolongé pendant les Jeux de 2024. Les hausses de prix supposent que la fréquentation ne baisse pas.',
+    sources: [
+      {
+        titre: 'Métropole d’Aix-Marseille-Provence, compte financier 2025 du budget des transports',
+        url: `${DELIBERATIONS}/2026/06/24/ANNEXE/161433_171717_Rapport%20de%20presentation%20CFU%202025%20-%20budget%20annexe%20transport%20V5.pdf`,
+        pages: 'p. 10 à 12',
+      },
+      {
+        titre: 'RTM, rapport annuel 2025',
+        url: 'https://www.rtm.fr/sites/default/files/docs/RTM_Rapport_Activite_2025.pdf',
+        pages: 'p. 57 à 60 et 102',
+      },
+      {
+        titre: 'Métropole d’Aix-Marseille-Provence, grille tarifaire approuvée le 24 juin 2026',
+        url: `${DELIBERATIONS}/2026/06/24/ANNEXE/168836_172068_202606_ANNEXE%20TARIFAIRE_VF8%201.pdf`,
+        pages: 'p. 3 à 15',
+      },
+      { ...ROB_2026, pages: 'p. 131 à 139' },
+      {
+        titre: 'Chambre régionale des comptes, avis n° 2026-04 sur le budget 2026',
+        url: 'https://www.ccomptes.fr/sites/default/files/2026-06/PAA2026-04.pdf',
+        pages: 'p. 8, 106 et 112 à 115',
+      },
+      {
+        titre: 'Métropole d’Aix-Marseille-Provence, avenant 22 au contrat de la RTM, service des Jeux de 2024',
+        url: `${DELIBERATIONS}/2024/12/05/ANNEXE/108730_AVENANT%2022%20-%20ANNEXES.pdf`,
+        pages: 'p. 10',
+      },
+      {
+        titre: 'Code des transports, article L1113-1, réduction solidaire d’au moins 50 %',
+        url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042005921',
+      },
+    ],
+  },
   limites: [
     'Aucun document ne détaille le partage du 1,2 milliard repris de la RTM entre les bus et les lignes existantes : notre découpage est une estimation.',
     'Si la Métropole restait au niveau de 2026, environ 250 M€ par an, votre part tomberait vers 400 M€ par mandat.',

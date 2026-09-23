@@ -40,7 +40,7 @@ Le score, le coût et l'équilibre du budget ne viennent jamais du navigateur. L
 
 Il n'y a ni compte ni mot de passe. Chaque navigateur tire au hasard une clé secrète qu'il garde, et la base n'en conserve qu'une empreinte. Cette clé suffit pour publier sous un pseudo, soutenir un réseau une seule fois et retirer ses propres réseaux. Elle ne suit pas le joueur d'un appareil à l'autre : un lien de récupération par e-mail pourra s'ajouter plus tard, si le besoin s'en fait sentir.
 
-## Les autres villes
+## Les autres réseaux
 
 Deux niveaux, pour ouvrir vite sans rien inventer.
 
@@ -48,13 +48,17 @@ Le tracé libre fonctionne dans n'importe quelle ville française avec des donn�
 
 Le catalogue ajoute les projets réels d'une ville, avec leurs coûts et leurs fréquentations sourcés, comme pour Lyon. Il demande un travail de recherche ville par ville.
 
-Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. `docs/villes.md` rassemble les réseaux, les projets et les budgets sourcés de ces quatre villes. Toulouse est ouverte en tracé libre depuis le 23 septembre 2026, Marseille, Nice et Paris depuis le 24 septembre.
+Le jeu compte cinq réseaux, chacun sur le territoire de son autorité organisatrice : TCL avec son catalogue, et en tracé libre Tisséo, Aix-Marseille-Provence, Lignes d'Azur et Île-de-France Mobilités, sur toute l'Île-de-France. `docs/villes.md` rassemble les recherches sur ces réseaux. Tisséo est en ligne depuis le 23 septembre 2026 ; les trois autres sont prêts et ouvrent à la prochaine mise en ligne (`docs/mise-en-ligne.md`).
 
-Toutes les villes partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de près de trente villes françaises, chaque ville gardant son propre niveau (`docs/modele.md`).
+Tous les réseaux partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de près de trente villes françaises, chaque réseau gardant son propre niveau (`docs/modele.md`).
 
-Le budget d'une ville est l'investissement prévu par son autorité, moins les projets décidés déjà dessinés, les bus et les lignes existantes, selon la méthode de `docs/budgets.md`. Le jeu en montre le calcul et chaque source.
+Le budget d'un réseau est l'investissement prévu, moins les projets décidés déjà dessinés ou que le joueur ne peut pas construire, les bus et les lignes existantes, et ses leviers de financement viennent de ses propres recettes, selon la méthode de `docs/budgets.md`. Le jeu en montre le calcul et chaque source.
 
-Paris est un cas à part : l'autorité est régionale (Île-de-France Mobilités) et le Grand Paris Express relève d'un autre maître d'ouvrage. Le jeu s'y limite à Paris et à la petite couronne, et compte les lignes 15 à 18 du Grand Paris Express comme existantes.
+L'Île-de-France est un cas à part : l'autorité est régionale et le Grand Paris Express relève d'un autre maître d'ouvrage. Le jeu couvre toute la région, compte les lignes 15 à 18 du Grand Paris Express comme existantes, et montre le RER et les trains en fond, sans que le joueur puisse en construire.
+
+## Le jeu libre
+
+En commençant une partie, le joueur choisit entre le vrai budget et le jeu libre. En jeu libre, il n'y a qu'une étape, de 2026 à 2038, et pas de budget à tenir : le coût du réseau se compare seulement au budget réel du réseau sur deux mandats. Un réseau fait en jeu libre peut être publié : la forme compacte de la partie porte `x: 1`, la fonction serveur l'accepte même s'il dépasse le budget et remplit la colonne `libre` de la table `reseaux`. La communauté les liste à part, derrière l'interrupteur « Jeu libre », et les marque partout où ils se montrent : vignettes, bilan, image d'aperçu.
 
 Toulouse a été ouverte en premier : Tisséo publie la fréquentation de chaque ligne, la formule s'y recale bien, et la ligne C, qui ouvre fin 2028, donne un vrai sujet de partie. On y joue depuis `/toulouse`, et ses réseaux publiés ont leur propre liste dans la communauté.
 
@@ -62,17 +66,15 @@ Toulouse a été ouverte en premier : Tisséo publie la fréquentation de chaque
 
 La base est un projet Supabase dédié, « simulateur-transport », hébergé à Paris dans l'organisation gratuite TCL2040. Les tables et les règles d'accès sont dans `supabase/migrations/`. Le site lit directement les réseaux publiés et les pseudos, avec la clé publique déclarée dans `.env.example` et `netlify.toml`. Il n'écrit jamais lui-même : les règles d'accès refusent toute écriture venue du navigateur.
 
-Toutes les écritures passent par la fonction serveur `communaute` (`supabase/functions/communaute/`). Elle reçoit la clé du navigateur, en calcule l'empreinte, puis publie, soutient, compte une reprise, enregistre un signalement ou retire un réseau. Avant de publier, elle relit la partie avec le code même du jeu (`lib/partie.ts`, `lib/regles.ts`, `lib/modele.ts`, copiés par `scripts/fonction-communaute.mjs`), recalcule les lignes tracées, le score, le coût et l'équilibre du budget, et refuse un réseau en déficit. Les compteurs de soutiens, de reprises et de signalements sont tenus par la base elle-même.
+Toutes les écritures passent par la fonction serveur `communaute` (`supabase/functions/communaute/`). Elle reçoit la clé du navigateur, en calcule l'empreinte, puis publie, soutient, compte une reprise, enregistre un signalement ou retire un réseau. Avant de publier, elle relit la partie avec le code même du jeu (`lib/partie.ts`, `lib/regles.ts`, `lib/leviers.ts`, `lib/budget.ts`, `lib/budgets/`, `lib/modele.ts`, copiés par `scripts/fonction-communaute.mjs`), recalcule les lignes tracées, le score, le coût et l'équilibre du budget, et refuse un réseau en déficit, sauf en jeu libre. Les compteurs de soutiens, de reprises et de signalements sont tenus par la base elle-même.
 
 Pour recalculer les lignes, la fonction a besoin des habitants et des emplois par carreau. Ils sont rangés dans la table privée `modele`, déposés une seule fois par l'action `deposer`, qui n'accepte que les données exactes du modèle, reconnues par leur empreinte. Si ces données changent, il faut vider cette table, mettre à jour l'empreinte dans la fonction, la redéployer et redéposer les données.
 
-Une modification de `lib/partie.ts`, `lib/regles.ts`, `lib/modele.ts` ou du catalogue doit être suivie de `node scripts/fonction-communaute.mjs`, puis d'un nouveau déploiement de la fonction, sinon le serveur et le jeu ne compteraient plus de la même façon.
+Une modification de `lib/partie.ts`, `lib/regles.ts`, `lib/leviers.ts`, `lib/budget.ts`, d'un budget de `lib/budgets/`, de `lib/modele.ts` ou du catalogue doit être suivie de `node scripts/fonction-communaute.mjs`, puis d'un nouveau déploiement de la fonction, sinon le serveur et le jeu ne compteraient plus de la même façon.
 
 Une partie porte sa ville : la forme compacte a un champ `w` (absent pour Lyon, pour que les liens et les réseaux publiés avant Toulouse restent lisibles), et la table `reseaux` une colonne `ville`, qui sert aux listes de la communauté. La fonction serveur recalcule chaque réseau avec les habitants, les emplois et le budget de sa ville. Elle garde les données de chaque ville dans la table `modele`, une ligne par ville, déposées une fois par l'action `deposer` avec la ville en paramètre et vérifiées par leur empreinte. Une ville ne peut être publiée que si la table `villes` la dit ouverte.
 
 Chaque réseau publié a sa propre adresse, `/reseau/<identifiant>`, dont le titre et la description reprennent ceux du réseau pour l'aperçu sur les réseaux sociaux. L'image d'aperçu (`app/reseau/[id]/opengraph-image.tsx`) est dessinée à la demande : la carte du réseau en miniature, avec les mêmes tracés que les cartes de la communauté (`lib/miniature.ts`), son titre, son auteur et ses voyageurs. Elle utilise la police Figtree, rangée dans `assets/polices/` avec sa licence libre, parce que le moteur d'image ne lit que les fichiers TTF. Un réseau retiré ou masqué donne l'image générique du jeu.
-
-Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par ville (emprise, liste des communes de l'autorité organisatrice), pour produire les mêmes fichiers dans `public/data/<ville>/`.
 
 ## Ordre de réalisation proposé
 
@@ -81,4 +83,4 @@ Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par vil
 3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule. C'est fait.
 4. La carte des envies et les réactions aux lignes.
 5. Les défis.
-6. Les trois autres villes. C'est fait : Marseille, Nice et Paris sont ouvertes en tracé libre, avec une formule de fréquentation commune.
+6. Les autres réseaux. C'est prêt : Aix-Marseille-Provence, Lignes d'Azur et Île-de-France Mobilités en tracé libre, avec une formule de fréquentation commune, un budget et des leviers sourcés pour chacun, et le jeu libre.

@@ -102,6 +102,66 @@ export const idf: BudgetVille = {
       CONTRAT_DE_PLAN,
     ],
   },
+  leviers: {
+    tarifs: { abonnement: 90.8, ticket: 2.55 },
+    rendement: { abonnements: 173, tickets: 85, versementMobilite: 390 },
+    fixes: { gratuiteTotale: -26200, gratuiteMoins25: -3900, suppressionTarifSocial: 1300, metroNuit: -400, tva: 1100 },
+    textes: {
+      suppressionTarifSocial: {
+        titre: 'Ramener les réductions solidaires à 50 %',
+        detail:
+          'La loi impose au moins 50 % de réduction aux plus modestes : on ne peut que reprendre les réductions de 75 % et la gratuité.',
+      },
+      metroNuit: {
+        titre: 'Métro toute la nuit le week-end',
+        detail: 'Les vendredis et samedis, sur six grandes lignes, comme lors des essais de 2019.',
+      },
+    },
+    simple:
+      'Les billets et les abonnements rapportent 4,3 milliards d’euros par an, dont les deux tiers en abonnements, et le versement mobilité des entreprises 6,5 milliards.',
+    explication:
+      'Les recettes tarifaires ont atteint 4 308 M€ hors taxes en 2025, dont environ 67 % d’abonnements, part des employeurs comprise, et 33 % de tickets et de titres occasionnels. Le versement mobilité a rapporté 6 496 M€ ; il est déjà à son taux maximal, 3,2 % de la masse salariale à Paris et en petite couronne, 2,01 % ou 1,6 % ailleurs. La gratuité totale coûterait ces recettes et environ 400 M€ de subventions régionales aux tarifs réduits. Celle des moins de 25 ans coûterait environ 650 M€ par an : 350 M€ de passes Imagine R et environ 300 M€ payés par les jeunes salariés et les acheteurs de tickets, ce dernier chiffre étant notre estimation. Ramener toutes les réductions solidaires à 50 % rapporterait au plus 217 M€ par an. Le métro toute la nuit le week-end, sur six lignes, coûterait 60 à 65 M€ par an. Les hausses de prix supposent que la fréquentation ne baisse pas ; avec la baisse qu’Île-de-France Mobilités attend elle-même, un point d’abonnement rapporterait plutôt 156 M€ par mandat.',
+    sources: [
+      {
+        titre: 'Île-de-France Mobilités, compte administratif 2025',
+        // La même pièce que sur iledefrance-mobilites.fr, servie par sa plateforme de contenu.
+        url: 'https://portail-idfm.cdn.prismic.io/portail-idfm/ajAZ_41P9HI4UhaP_RapportCA2025.pdf',
+        pages: 'p. 7 à 11',
+      },
+      {
+        titre: 'Île-de-France Mobilités, présentation aux investisseurs, septembre 2026',
+        url: 'https://portail-idfm.cdn.prismic.io/portail-idfm/qDEQ3jhKWfwuUfVR_Pr%C3%A9sentationpageinvestisseurSeptember2026.pdf',
+        pages: 'p. 17',
+      },
+      {
+        titre: 'Île-de-France Mobilités, prospectus du 24 septembre 2025',
+        url: 'https://portail-idfm.cdn.prismic.io/portail-idfm/aNuLvZ5xUNkB1QQM_ProgrammeEMTNsign%C3%A9.pdf',
+        pages: 'p. 101 et 116 à 118',
+      },
+      {
+        titre: 'Chambre régionale des comptes d’Île-de-France, la mobilité des jeunes, avril 2025',
+        url: 'https://www.ccomptes.fr/sites/default/files/2025-04/IDR2024-72.pdf',
+        pages: 'p. 19 à 32',
+      },
+      {
+        ...CHAMBRE_REGIONALE,
+        pages: 'p. 40 à 52',
+      },
+      {
+        titre: 'Code général des collectivités territoriales, article L2531-4, taux du versement mobilité en Île-de-France',
+        url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042003618',
+      },
+      {
+        titre: 'Inspection générale des finances et IGEDD, rapport sur la TVA des transports, mai 2023',
+        url: 'https://www.igedd.developpement-durable.gouv.fr/IMG/pdf/rapport_014875-01_cle259de1.pdf',
+        pages: 'p. 43 et 44',
+      },
+      {
+        titre: 'France 3 Paris Île-de-France, le métro toute la nuit, 27 juin 2026',
+        url: 'https://france3-regions.franceinfo.fr/paris-ile-de-france/paris/ouvrir-le-metro-toute-la-nuit-a-paris-la-solution-est-elle-enfin-a-portee-de-main-3376102.html',
+      },
+    ],
+  },
   limites: [
     'Aucun document ne donne ce qui reste à payer sur le Grand Paris Express, Eole ou le nouveau système des RER B et D : ces montants sont nos estimations.',
     'Le niveau d’investissement d’Île-de-France Mobilités après 2030, celui de la RATP après 2029 et le rythme des prochains contrats de plan ne sont pas encore connus.',

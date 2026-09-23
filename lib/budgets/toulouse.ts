@@ -105,6 +105,52 @@ export const toulouse: BudgetVille = {
       },
     ],
   },
+  leviers: {
+    tarifs: { abonnement: 59, ticket: 1.9 },
+    rendement: { abonnements: 3, tickets: 3.3, versementMobilite: 21 },
+    tauxVersement: 2,
+    fixes: { gratuiteTotale: -694, gratuiteMoins25: -150, suppressionTarifSocial: 155, metroNuit: -11, tva: 30 },
+    textes: {
+      metroNuit: {
+        titre: 'Métro toute la nuit le week-end',
+        detail: 'Les vendredis et samedis, sur les lignes A et B, qui roulent déjà jusqu’à 3 h.',
+      },
+    },
+    simple:
+      'Les billets et les abonnements rapportent environ 116 millions d’euros par an, et le versement mobilité des entreprises 352 millions.',
+    explication:
+      'Les recettes de trafic ont atteint 115,7 M€ hors taxes en 2025 : 55,1 M€ de tickets et de titres occasionnels, 50,2 M€ d’abonnements, et 9,9 M€ de titres payés par le Département pour les scolaires et les allocataires du RSA. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 351,6 M€. Les moins de 26 ans font 22,5 % des recettes : leur gratuité coûterait environ 25 M€ par an avant 25 ans. Tisséo ne publie pas ce que coûte sa tarification solidaire, qui va jusqu’à la gratuité : si ses bénéficiaires payaient autant par voyage que les abonnés au plein tarif, ils rapporteraient au plus 26 M€ de plus par an, selon notre estimation. Le métro roule déjà jusqu’à 3 h les jeudis, vendredis et samedis : le faire rouler toute la nuit le week-end coûterait environ 1,8 M€ par an, d’après son coût au kilomètre. Les hausses de prix supposent que la fréquentation ne baisse pas.',
+    sources: [
+      {
+        titre: 'Tisséo Voyageurs, rapport d’activité 2025, annexe à la séance du 24 juin 2026',
+        url: 'https://www.tisseo.fr/sites/default/files/media/Seance-2026-06-24_02-Resolution-2.1-Annexe.pdf',
+        pages: 'p. 51 à 55',
+      },
+      {
+        titre: 'Tisséo Collectivités, chiffres clés 2025',
+        url: `${TISSEO}/downloads/TISSEO_Chiffres%20cles_2025_WEB.pdf`,
+        pages: 'p. 25 à 30',
+      },
+      {
+        titre: 'Tisséo Collectivités, délibération sur le compte administratif 2025, 24 juin 2026',
+        url: `${TISSEO}/pdfs/deliberations/2026/CS%2024.06.2026/D.2026.06.24.5.3.pdf`,
+        pages: 'p. 3',
+      },
+      {
+        titre: 'Tisséo Collectivités, supplément au prospectus, 1er juillet 2026',
+        url: `${TISSEO}/downloads/Suppl%C3%A9ment%20prospectus%20CA%202025%20Vfinale.pdf`,
+        pages: 'p. 4',
+      },
+      {
+        titre: 'Code général des collectivités territoriales, article L2333-67, plafond du versement mobilité',
+        url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043343028',
+      },
+      {
+        titre: 'Tisséo, droits à réduction des jeunes et des étudiants, 2026',
+        url: 'https://www.tisseo.fr/sites/default/files/media/Droits-a-reduction_Jeunes-etudiants-scolaires.pdf',
+      },
+    ],
+  },
   limites: [
     'Tisséo n’a publié ni les montants de sa programmation 2026-2038 ni son étude de soutenabilité financière : les montants après 2027 sont déduits de ses documents, pas lus dedans.',
     'Le coût final de la ligne C en euros d’aujourd’hui n’est publié nulle part : ce qui reste à payer peut s’écarter de 300 M€ de notre estimation, dans un sens ou dans l’autre.',

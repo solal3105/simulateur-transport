@@ -14,7 +14,7 @@ import { VILLES } from '../lib/villes'
 const erreurs: string[] = []
 const avertissements: string[] = []
 const adresses = new Map<string, string>()
-const TIRETS = /[–—]/
+const TIRETS = /[\u2013\u2014]/
 
 for (const ville of Object.values(VILLES)) {
   const b = ville.budget
@@ -28,7 +28,8 @@ for (const ville of Object.values(VILLES)) {
     const porte = poste.montants[1] !== 0 || poste.montants[2] !== 0
     if (porte && !poste.explication.trim()) erreurs.push(`${ville.nom}, ${p} : un montant sans explication.`)
     if (porte && !poste.simple.trim()) erreurs.push(`${ville.nom}, ${p} : un montant sans phrase simple.`)
-    if (poste.simple.length > 200) erreurs.push(`${ville.nom}, ${p} : la phrase simple dépasse 200 signes, elle doit se lire d’un coup d’œil.`)
+    if (poste.simple.length > 200)
+      erreurs.push(`${ville.nom}, ${p} : la phrase simple dépasse 200 signes, elle doit se lire d’un coup d’œil.`)
     textes.push(poste.simple)
     if (porte && !poste.sources.length) erreurs.push(`${ville.nom}, ${p} : un montant sans source.`)
     textes.push(poste.explication)
@@ -47,13 +48,13 @@ for (const ville of Object.values(VILLES)) {
   else {
     if (!l.sources.length) erreurs.push(`${ville.nom} : des leviers de financement sans source.`)
     if (!l.simple.trim() || !l.explication.trim()) erreurs.push(`${ville.nom} : des leviers de financement sans explication.`)
-    textes.push(l.simple, l.explication, l.nuit?.titre ?? '', l.nuit?.detail ?? '')
+    textes.push(l.simple, l.explication, ...Object.values(l.textes ?? {}).flatMap((t) => [t.titre, t.detail]))
     l.sources.forEach((s: Source) => {
       textes.push(s.titre, s.pages ?? '')
       if (!/^https:\/\/\S+$/.test(s.url)) erreurs.push(`${ville.nom}, leviers : une adresse qui n’est pas en https, ${s.url}`)
       adresses.set(s.url, `${ville.nom}, ${s.titre}`)
     })
-    if (l.fixes.metroNuit !== undefined && !l.nuit) erreurs.push(`${ville.nom} : un service de nuit sans titre.`)
+    if (l.fixes.metroNuit !== undefined && !l.textes?.metroNuit) erreurs.push(`${ville.nom} : un service de nuit sans titre.`)
   }
   if (textes.some((t) => TIRETS.test(t))) erreurs.push(`${ville.nom} : un tiret long ou demi-long dans les textes.`)
   if (!b.releve) erreurs.push(`${ville.nom} : il manque le mois du relevé.`)

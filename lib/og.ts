@@ -11,5 +11,5 @@ export const polices = Promise.all(
   })),
 ).catch(() => [])
 
-export const ROUGE = '#e3051b'
+export const ROUGE = '#e30613'
 export const SABLE = '#f4f1ec'

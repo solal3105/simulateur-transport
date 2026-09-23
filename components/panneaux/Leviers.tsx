@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 
 import { n, signe } from '@/lib/format'
-import { MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
+import { detailMesure, MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
 import { useJeu, useVille } from '@/lib/store'
 import type { Leviers as TLeviers } from '@/lib/types'
 
@@ -156,6 +156,9 @@ function Interrupteur({
   )
 }
 
+/** Un rendement par point : 12 M€, mais 1,3 M€ pour un petit réseau. */
+const millions = (v: number) => (v < 10 ? v.toLocaleString('fr-FR', { maximumFractionDigits: 1 }) : n(v))
+
 /** Le taux du versement mobilité après la hausse choisie : 2 % relevé de 3 % donne 2,06 %. */
 const taux = (t: number) => `${t.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
 
@@ -225,7 +228,7 @@ function Contenu({ p }: { p: ParametresLeviers }) {
               min={-20}
               max={30}
               gain={gratuit ? 0 : l.abonnements * p.rendement.abonnements}
-              detail={`Chaque point rapporte ${n(p.rendement.abonnements)} M€ par mandat.`}
+              detail={`Chaque point rapporte ${millions(p.rendement.abonnements)} M€ par mandat.`}
               onChange={maj('abonnements')}
               desactive={gratuit ? sansObjet : undefined}
               enPlus={
@@ -251,7 +254,7 @@ function Contenu({ p }: { p: ParametresLeviers }) {
               min={-20}
               max={30}
               gain={gratuit ? 0 : l.tickets * p.rendement.tickets}
-              detail={`Le ticket passe de ${euros(p.tarifs.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${n(p.rendement.tickets)} M€ par mandat.`}
+              detail={`Le ticket passe de ${euros(p.tarifs.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${millions(p.rendement.tickets)} M€ par mandat.`}
               onChange={maj('tickets')}
               desactive={gratuit ? sansObjet : undefined}
               enPlus={<Repere hausse={l.tickets} />}
@@ -266,11 +269,11 @@ function Contenu({ p }: { p: ParametresLeviers }) {
         {groupe(
           'La gratuité et les services',
           <>
-            {MESURES.filter((m) => m.cle !== 'tva' && p.fixes[m.cle] !== undefined && (m.cle !== 'metroNuit' || p.nuit)).map((m) => (
+            {MESURES.filter((m) => m.cle !== 'tva' && p.fixes[m.cle] !== undefined).map((m) => (
               <Interrupteur
                 key={m.cle}
                 titre={titreMesure(m, p)}
-                detail={m.cle === 'metroNuit' ? p.nuit!.detail : m.detail}
+                detail={detailMesure(m, p)}
                 gain={p.fixes[m.cle]!}
                 actif={l[m.cle]}
                 onChange={maj(m.cle)}
@@ -302,7 +305,7 @@ function Contenu({ p }: { p: ParametresLeviers }) {
                 p.tauxVersement
                   ? ` Son taux passe de ${taux(p.tauxVersement)} à ${taux(p.tauxVersement * (1 + l.versementMobilite / 100))} de la masse salariale.`
                   : ''
-              } Chaque hausse de 1 % rapporte ${n(p.rendement.versementMobilite)} M€ par mandat.`}
+              } Chaque hausse de 1 % rapporte ${millions(p.rendement.versementMobilite)} M€ par mandat.`}
               onChange={maj('versementMobilite')}
             />
           </>,

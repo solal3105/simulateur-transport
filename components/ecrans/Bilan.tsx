@@ -216,7 +216,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               className="-mt-1 flex min-h-10 items-center gap-2 self-start text-[14px] font-extrabold text-gris hover:text-encre"
             >
               <Icone nom="retour" taille={17} epaisseur={2.4} />
-              Les réseaux {ville.nom} publiés
+              Les réseaux publiés pour {ville.nom}
             </Link>
             <EnTetePublication publication={publication} />
           </>

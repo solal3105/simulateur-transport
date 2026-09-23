@@ -34,7 +34,7 @@ export const lyon: BudgetVille = {
       metroNuit: -24,
       tva: 96,
     },
-    nuit: { titre: 'Métro toute la nuit le week-end', detail: 'Les vendredis et samedis, sur les quatre lignes.' },
+    textes: { metroNuit: { titre: 'Métro toute la nuit le week-end', detail: 'Les vendredis et samedis, sur les quatre lignes.' } },
     simple:
       'Chaque point de hausse des abonnements rapporte 12 millions d’euros par mandat, et chaque point de hausse des tickets 8 millions.',
     explication:

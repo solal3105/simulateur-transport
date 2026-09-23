@@ -11,7 +11,7 @@ import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, ModeLigne } from '@/lib/types'
 
-import { useBilan } from '../partie/budget'
+import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
 import { Panneau } from './Panneau'
 
@@ -173,8 +173,9 @@ function AjoutParNom() {
 
 /** Le panneau affiché pendant qu'on pose les arrêts. */
 export function Traceur() {
-  const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir } = useJeu()
+  const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir, libre } = useJeu()
   const bilan = useBilan()
+  const depenses = useDepenses()
   const e = useEstimation()
   const noms = useNomsArrets()
   // Fermer le panneau efface le tracé : au-delà d'un arrêt posé, on demande d'abord.
@@ -307,9 +308,11 @@ export function Traceur() {
             <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
           </div>
           <p className="text-[13px] leading-snug text-gris">
-            {e.cout <= bilan.reste
-              ? `Il vous resterait ${n(bilan.reste - e.cout)} M€ sur ce mandat.`
-              : `Il manquerait ${n(e.cout - Math.max(0, bilan.reste))} M€ sur ce mandat.`}{' '}
+            {libre
+              ? `Votre réseau coûterait alors ${n(depenses.investi + e.cout)} M€.`
+              : e.cout <= bilan.reste
+                ? `Il vous resterait ${n(bilan.reste - e.cout)} M€ sur ce mandat.`
+                : `Il manquerait ${n(e.cout - Math.max(0, bilan.reste))} M€ sur ce mandat.`}{' '}
             Nous recalculons à chaque arrêt à partir des données INSEE.
           </p>
         </>

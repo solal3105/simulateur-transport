@@ -92,7 +92,8 @@ export const VILLES: Record<IdVille, Ville> = {
     lieu: 'Métropole de Lyon',
     ou: 'sur le réseau TCL',
     chemin: '',
-    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    // Le rouge et le rouge foncé déclarés par la feuille de style de tcl.fr, relevés le 24 septembre 2026.
+    couleurs: { principale: '#e30613', fonce: '#b40014', pale: '#fce9ea', moyen: '#f18289' },
     titrePage: 'Simulateur transport : construisez le réseau TCL de 2038',
     reseau: 'TCL',
     autorite: 'Métropole de Lyon, réseau TCL',
@@ -145,7 +146,8 @@ export const VILLES: Record<IdVille, Ville> = {
     lieu: 'Agglomération toulousaine',
     ou: 'sur le réseau Tisséo',
     chemin: 'toulouse',
-    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    // Le magenta déclaré par la feuille de style de tisseo.fr, relevé le 24 septembre 2026.
+    couleurs: { principale: '#e5056e', fonce: '#b30456', pale: '#fde8f2', moyen: '#f282b6' },
     titrePage: 'Simulateur transport : construisez le réseau Tisséo de 2038',
     reseau: 'Tisséo',
     autorite: 'Tisséo Collectivités',
@@ -193,11 +195,13 @@ export const VILLES: Record<IdVille, Ville> = {
   },
   marseille: {
     id: 'marseille',
-    nom: 'Aix-Marseille-Provence',
-    lieu: 'Métropole Aix-Marseille-Provence',
+    nom: 'La Métropole Mobilité',
+    lieu: 'Aix-Marseille-Provence',
     ou: 'dans la métropole Aix-Marseille-Provence',
     chemin: 'marseille',
-    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    // L'ocre de La Métropole Mobilité (#e94e1b) est trop clair pour du texte blanc : on prend la teinte plus
+    // soutenue que rtm.fr utilise pour ses onglets actifs, relevée le 24 septembre 2026.
+    couleurs: { principale: '#d14415', fonce: '#a33511', pale: '#fbede8', moyen: '#e8a28a' },
     titrePage: 'Simulateur transport : construisez le réseau d’Aix-Marseille-Provence de 2038',
     reseau: 'd’Aix-Marseille-Provence',
     autorite: 'Métropole d’Aix-Marseille-Provence',
@@ -249,7 +253,8 @@ export const VILLES: Record<IdVille, Ville> = {
     lieu: 'Métropole Nice Côte d’Azur',
     ou: 'sur le réseau Lignes d’Azur',
     chemin: 'nice',
-    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    // L'orange de lignesdazur.com (#ec6608), assombri juste assez pour que le texte blanc reste lisible.
+    couleurs: { principale: '#c25407', fonce: '#974105', pale: '#f9f0e9', moyen: '#e0a983' },
     titrePage: 'Simulateur transport : construisez le réseau Lignes d’Azur de 2038',
     reseau: 'Lignes d’Azur',
     autorite: 'Métropole Nice Côte d’Azur',
@@ -298,7 +303,8 @@ export const VILLES: Record<IdVille, Ville> = {
     lieu: 'Île-de-France',
     ou: 'en Île-de-France',
     chemin: 'ile-de-france',
-    couleurs: { principale: '#e3051b', fonce: '#b5000f', pale: '#fdebed', moyen: '#f58b96' },
+    // Le bleu des boutons du site d'Île-de-France Mobilités, avec son bleu ciel identitaire (#64b5f6) en nuance.
+    couleurs: { principale: '#1972d2', fonce: '#1459a4', pale: '#eaf2fb', moyen: '#64b5f6' },
     titrePage: 'Simulateur transport : construisez le réseau francilien de 2038',
     reseau: 'francilien',
     autorite: 'Île-de-France Mobilités',
