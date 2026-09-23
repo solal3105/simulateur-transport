@@ -10,6 +10,6 @@ Le fond de carte vient d'OpenStreetMap par `node scripts/fetch-osm.mjs marseille
 
 Le tram d'Aubagne et le Val'Tram, en essais depuis décembre 2025, sont dessinés avec le réseau existant. Les projets qui n'ont pas de déclaration d'utilité publique (prolongement du T2 au 4-Septembre, T3 jusqu'à La Bricarde, tram de la Belle de Mai) ne le sont pas : le joueur peut les tracer lui-même.
 
-Le budget reprend l'objectif de 300 M€ d'investissement par an de la Métropole : 1 800 M€ par mandat, dont 360 M€ pour l'entretien des bus. Les sources sont dans `docs/villes.md`.
+Le budget, ses sources et ses limites sont dans `lib/budgets/marseille.ts`, calculés selon la méthode de `docs/budgets.md`.
 
 Si `carreaux.json` ou `arrets.json` changent, leur empreinte doit être mise à jour dans la fonction serveur `communaute`, et les données redéposées (voir `docs/communaute.md`).

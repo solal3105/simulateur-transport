@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react'
 
+import { nomReserve } from '@/lib/budget'
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { bilanMandat, ouvertures } from '@/lib/regles'
@@ -116,8 +117,8 @@ export function FinMandat() {
             />
             <p className="text-[13.5px] leading-relaxed font-medium lg:text-[15px]">
               Sur {n(bilan2.enveloppe + bilan2.leviers + bilan2.reliquat)} M€
-              {bilan2.reliquat > 0 ? `, dont ${n(bilan2.reliquat)} M€ économisés au premier mandat` : ''}, une fois retirés l’entretien des
-              bus
+              {bilan2.reliquat > 0 ? `, dont ${n(bilan2.reliquat)} M€ économisés au premier mandat` : ''}, une fois retirés les{' '}
+              {n(bilan2.reserve)} M€ réservés {nomReserve(ville.budget).phrase}
               {bilan2.reports > 0
                 ? ` et les ${n(bilan2.reports)} M€ ${reportes.length > 1 ? `des ${reportes.length} projets payés` : 'du projet payé'} en deux fois`
                 : ''}

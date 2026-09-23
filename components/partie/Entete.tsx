@@ -3,6 +3,7 @@
 import { clsx } from 'clsx'
 import { motion } from 'motion/react'
 
+import { nomReserve } from '@/lib/budget'
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { useJeu, useVille } from '@/lib/store'
@@ -53,7 +54,8 @@ export function Entete({ attenue }: { attenue?: boolean }) {
   const voyageursAnimes = useCompteur(voyageurs, 1.1)
   const reste = libelleReste(Math.round(resteAnime), apercu)
   const { debut, fin } = MANDATS[mandat]
-  const labelJauge = `Budget du mandat : ${n(bilan.bus)} M€ pour l'entretien des bus, ${n(bilan.projets + bilan.reports)} M€ de projets, ${reste.valeur} ${reste.texte}.`
+  const part = nomReserve(ville.budget)
+  const labelJauge = `Budget du mandat : ${n(bilan.reserve)} M€ réservés ${part.phrase}, ${n(bilan.projets + bilan.reports)} M€ de projets, ${reste.valeur} ${reste.texte}.`
 
   return (
     <header className={clsx('absolute inset-x-0 top-0 z-20 bg-rouge text-white transition-opacity', attenue && 'opacity-60')}>
@@ -121,7 +123,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
             <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]" />
-                Entretien des bus, {n(bilan.bus)}
+                {part.court}, {n(bilan.reserve)}
               </span>
               {bilan.reliquat > 0 ? (
                 <span className="flex items-center gap-1.5">

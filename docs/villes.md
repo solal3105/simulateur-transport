@@ -24,19 +24,20 @@ Chaque ville a ses propres paliers de densité pour la couche rouge du traceur (
 
 ### Le budget par mandat
 
-Nous n'avons trouvé de programmation d'investissement pour 2026-2032 dans aucune des quatre autorités. Voici ce que donne la règle prévue dans `docs/communaute.md`, le budget de Lyon rapporté au nombre d'habitants du recensement 2022.
+Le budget de chaque ville suit la méthode commune de `docs/budgets.md` : l'investissement prévu, moins ce qui reste à payer sur les projets décidés déjà dessinés sur la carte, moins le renouvellement des bus et des lignes existantes. Le détail, les sources et les limites de chaque ville sont dans `lib/budgets/<ville>.ts`, et le jeu les affiche dans « Comment nous calculons votre budget ». Les montants retenus en septembre 2026, en millions d'euros :
 
-| Autorité                            | Habitants | Budget par mandat | Dont entretien |
-| ----------------------------------- | --------- | ----------------- | -------------- |
-| Tisséo, 114 communes                | 1 115 836 | 1 560 M€          | 310 M€         |
-| Aix-Marseille-Provence, 92 communes | 1 922 626 | 2 680 M€          | 540 M€         |
-| Nice Côte d'Azur, 51 communes       | 568 596   | 790 M€            | 160 M€         |
+| Ville     | Mandat    | Investissement prévu | Projets décidés dessinés | Bus   | Lignes existantes | Pour le joueur |
+| --------- | --------- | -------------------- | ------------------------ | ----- | ----------------- | -------------- |
+| Toulouse  | 2026-2032 | 2 600                | 1 800                    | 150   | 450               | 200            |
+| Toulouse  | 2032-2038 | 1 300                | 0                        | 200   | 450               | 650            |
+| Marseille | 2026-2032 | 1 800                | 50                       | 400   | 650               | 700            |
+| Marseille | 2032-2038 | 1 800                | 0                        | 400   | 650               | 750            |
+| Nice      | 2026-2032 | 725                  | 0                        | 160   | 35                | 530            |
+| Nice      | 2032-2038 | 290                  | 0                        | 160   | 35                | 95             |
+| Paris     | 2026-2032 | 17 360               | 360                      | 1 300 | 13 000            | 2 700          |
+| Paris     | 2032-2038 | 17 050               | 50                       | 1 300 | 13 000            | 2 700          |
 
-Cette règle s'explique en une phrase, mais elle ignore la situation de chaque réseau. À Marseille, la Métropole s'est donné pour objectif 300 M€ d'équipement par an dans son plan de mobilité, soit 1 800 M€ par mandat ([AMP, plan de mobilité](https://ampmetropole.fr/missions/mobilite/une-mobilite-de-projets-davenir/le-plan-de-mobilite/)) : ce chiffre publié vaut mieux que la règle. À Toulouse, la dette de Tisséo est passée de 1,4 à 2,3 milliards entre fin 2022 et fin 2024 avec la ligne C ([ROB 2026 de Toulouse Métropole](https://deliberations.toulouse.fr/data/archive/20251020_TM_DELIBERATION_DEL-25-0681.pdf)), ce qui pèsera sur les mandats suivants.
-
-Nous proposons de garder la règle de population quand rien n'est publié, de prendre l'objectif publié quand il existe, et de le dire à l'écran dans les deux cas.
-
-Paris n'entre dans aucune de ces règles. L'autorité est régionale, Île-de-France Mobilités investit à elle seule 4,3 milliards en 2026 ([IDFM, budget 2026](https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-vote-un-budget-ambitieux-pour-continuer-la-modernisation-du-reseau/)), et le Grand Paris Express relève de la Société des grands projets. Il faudra définir un périmètre de jeu à part, par exemple un département.
+À Nice, l'investissement du premier mandat comprend les 435 M€ inscrits pour la ligne 5 : elle n'est pas dessinée, donc son argent reste au joueur. À Paris, seules les opérations liées aux gares du Grand Paris Express sont retirées ; le T1 prolongé à Val de Fontenay, le T8 sud et les autres projets décidés ne sont pas dessinés et restent dans le budget du joueur.
 
 ### Les prix au kilomètre
 
@@ -156,11 +157,11 @@ La fréquentation de chaque ligne de métro et de tram vient du classeur « Traf
 1. Les données de base : le réseau actuel et le fond de carte d'OpenStreetMap, la liste des communes de l'autorité organisatrice, le carroyage Filosofi et le recensement de l'INSEE, la base Sirene. Tout est national et se télécharge sans compte.
 2. La fréquentation d'au moins trois lignes, pour recaler la formule. Sans elle, l'écran « Notre calcul » doit dire que l'estimation n'est qu'un ordre de grandeur.
 3. La liste des chantiers déjà décidés, affichés sur la carte et exclus du budget du joueur. Leurs stations comptent comme déjà desservies.
-4. Le budget par mandat : l'objectif publié s'il existe, sinon la règle de population, avec la phrase qui l'explique à l'écran.
+4. Le budget par mandat, calculé et sourcé selon `docs/budgets.md`, dans `lib/budgets/<ville>.ts`.
 5. Les prix au kilomètre, lyonnais par défaut ou locaux s'ils sont sourcés.
 6. Les leviers de financement : les recettes des tarifs et le versement mobilité dépendent de chaque réseau et doivent être recalculés.
 7. Côté code, la latitude de référence des distances, les classes de densité et les noms d'arrêts par ville, et un script de données paramétrable qui produit les mêmes fichiers dans `public/data/<ville>/`.
 
 Toulouse est ouverte en tracé libre depuis le 23 septembre 2026, Marseille, Nice et Paris depuis le 24 septembre. Les données de chaque ville sont décrites dans `data/<ville>/SOURCES.md`. Toutes partagent la formule de `docs/modele.md`, avec leur propre niveau. Les lignes décidées qui ouvrent avant celles du joueur comptent comme existantes : la ligne C et la connexion de la ligne B à Toulouse, les lignes 15 à 18 du Grand Paris Express à Paris. À Nice, la ligne 5 n'est pas encore dans OpenStreetMap et reste à tracer par le joueur.
 
-Pour le budget, le jeu prend l'objectif publié à Marseille (1 800 M€ par mandat) et la règle de population ailleurs (1 560 M€ à Toulouse, 790 à Nice, 9 570 à Paris), et le dit dans « Comment nous estimons une ligne » et sur l'accueil. Les prix au kilomètre restent ceux de Lyon. Les leviers de financement ne sont proposés qu'à Lyon : ailleurs, un déficit ne se comble qu'en retirant une ligne. Les paliers de densité de la carte sont propres à chaque ville.
+Le budget de chaque ville suit la méthode commune de `docs/budgets.md`, et le jeu en montre le calcul et les sources dans « Comment nous calculons votre budget ». Les prix au kilomètre restent ceux de Lyon. Les leviers de financement ne sont proposés qu'à Lyon : ailleurs, un déficit ne se comble qu'en retirant une ligne. Les paliers de densité de la carte sont propres à chaque ville.

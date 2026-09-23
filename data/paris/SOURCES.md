@@ -10,7 +10,7 @@ Le fond de carte vient d'OpenStreetMap par `node scripts/fetch-osm.mjs paris`, p
 
 Les lignes 15, 16, 17 et 18 du Grand Paris Express ouvrent entre 2026 et 2031, avant les lignes du joueur : elles sont dessinées d'après leurs tronçons en chantier dans OpenStreetMap et comptent comme existantes. `stations-futures.json` donne leurs gares, d'après Wikidata (ligne 15 : Q3240151, 16 : Q16655715, 17 : Q16655720, 18 : Q3240157) et la liste de la Société des grands projets.
 
-Le budget est celui de Lyon rapporté au nombre d'habitants : 9 570 M€ par mandat, dont 1 910 M€ pour l'entretien des bus. Les sources sont dans `docs/villes.md`.
+Le budget, ses sources et ses limites sont dans `lib/budgets/paris.ts`, calculés selon la méthode de `docs/budgets.md`.
 
 Le métro parisien compte ses voyageurs aux entrées, sans les correspondances d'une ligne à l'autre : le jeu estime les lignes de métro du joueur de la même façon (voir `docs/modele.md`).
 

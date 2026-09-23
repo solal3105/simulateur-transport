@@ -10,4 +10,6 @@ Les habitants et les emplois par carreau de 200 m (`public/data/toulouse/carreau
 
 Le fond de carte (Garonne, métro, tram, Téléo, parcs, eau, grands axes, quartiers, arrêts) vient d'OpenStreetMap par `node scripts/fetch-osm.mjs toulouse`, puis `node scripts/build-data.mjs toulouse` prépare les fichiers de `public/data/toulouse/`. Au 23 septembre 2026, la couche des voies ferrées manque : les serveurs Overpass refusaient la requête. Il suffira de relancer `node scripts/fetch-osm.mjs toulouse rail` puis le script de préparation.
 
+Le budget, ses sources et ses limites sont dans `lib/budgets/toulouse.ts`, calculés selon la méthode de `docs/budgets.md`.
+
 Si `carreaux.json` ou `arrets.json` changent, leur empreinte doit être mise à jour dans la fonction serveur `communaute`, et les données redéposées (voir `docs/communaute.md`).

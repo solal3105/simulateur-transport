@@ -2,7 +2,7 @@
 
 Un jeu pour comprendre l'arbitrage budgétaire des transports publics, né à Lyon sous le nom de Simulateur TCL. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
-Le jeu se joue aussi à Toulouse (`/toulouse`), Marseille (`/marseille`), Nice (`/nice`) et Paris (`/paris`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes, avec le budget publié par l'autorité organisatrice quand il existe, sinon celui de Lyon rapporté au nombre d'habitants. Les leviers de financement n'y sont pas encore calculés.
+Le jeu se joue aussi à Toulouse (`/toulouse`), Marseille (`/marseille`), Nice (`/nice`) et Paris (`/paris`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes. Son budget est l'investissement prévu par l'autorité organisatrice, moins ce que demandent les projets déjà décidés, les bus et les lignes existantes, avec une source pour chaque chiffre : voir `docs/budgets.md`. Les leviers de financement n'y sont pas encore calculés.
 
 Les voyageurs d'une ligne tracée viennent d'une formule choisie par un moteur parmi des dizaines de milliers, calées sur plus d'une centaine de lignes de près de trente villes françaises : voir `docs/modele.md`.
 

@@ -8,6 +8,7 @@ import { useJeu, useVille } from '@/lib/store'
 import { MARQUE } from '@/lib/villes'
 
 import { Carte } from '../carte/Carte'
+import { Budget } from '../panneaux/Budget'
 import { FicheProjet } from '../panneaux/FicheProjet'
 import { Leviers } from '../panneaux/Leviers'
 import { Liste } from '../panneaux/Liste'
@@ -149,6 +150,7 @@ export function Partie() {
         {panneau?.type === 'trace' ? <Traceur key="trace" /> : null}
         {panneau?.type === 'ligne' ? <MaLigne key="ligne" /> : null}
         {panneau?.type === 'methode' ? <Methode key="methode" /> : null}
+        {panneau?.type === 'budget' ? <Budget key="budget" /> : null}
         {panneau?.type === 'menu' ? <Menu key="menu" /> : null}
       </AnimatePresence>
 

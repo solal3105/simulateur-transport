@@ -21,12 +21,12 @@ export function useScore() {
 }
 
 /**
- * Découpe la jauge du mandat : entretien des bus, moitiés reportées, projets du mandat,
+ * Découpe la jauge du mandat : part réservée aux bus et aux lignes existantes, moitiés reportées, projets du mandat,
  * aperçu d'un projet en cours d'examen, puis ce qui reste libre ou ce qui manque.
  */
 export function segmentsBudget(bilan: Bilan, apercu = 0): { segments: Segment[]; total: number } {
-  const segments: Segment[] = [{ montant: bilan.bus, style: 'bus' }]
-  if (bilan.leviers < 0) segments.push({ montant: -bilan.leviers, style: 'bus' })
+  const segments: Segment[] = [{ montant: bilan.reserve, style: 'reserve' }]
+  if (bilan.leviers < 0) segments.push({ montant: -bilan.leviers, style: 'reserve' })
   segments.push({ montant: bilan.reports, style: 'report' })
   segments.push({ montant: bilan.projets, style: 'fait' })
   const libreAvant = bilan.reste

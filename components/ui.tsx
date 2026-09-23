@@ -236,10 +236,10 @@ export function CarteChiffre({
   )
 }
 
-export type Segment = { montant: number; style: 'bus' | 'fait' | 'report' | 'apercu' | 'manque' | 'libre' | 'levier' }
+export type Segment = { montant: number; style: 'reserve' | 'fait' | 'report' | 'apercu' | 'manque' | 'libre' | 'levier' }
 
 const SEGMENTS_ROUGE: Record<Segment['style'], string> = {
-  bus: 'bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]',
+  reserve: 'bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]',
   fait: 'bg-white',
   report: 'bg-[repeating-linear-gradient(135deg,#fff_0_3px,rgba(255,255,255,0.45)_3px_6px)]',
   apercu: 'bg-encre',
@@ -248,7 +248,7 @@ const SEGMENTS_ROUGE: Record<Segment['style'], string> = {
   levier: 'bg-white/60',
 }
 const SEGMENTS_CLAIR: Record<Segment['style'], string> = {
-  bus: 'bg-[repeating-linear-gradient(135deg,#b9b5af_0_3px,#dad6d0_3px_6px)]',
+  reserve: 'bg-[repeating-linear-gradient(135deg,#b9b5af_0_3px,#dad6d0_3px_6px)]',
   fait: 'bg-rouge',
   report: 'bg-[repeating-linear-gradient(135deg,#e3051b_0_3px,#f58b96_3px_6px)]',
   apercu: 'bg-encre',

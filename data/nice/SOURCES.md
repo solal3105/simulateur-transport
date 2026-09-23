@@ -10,6 +10,6 @@ Le fond de carte vient d'OpenStreetMap par `node scripts/fetch-osm.mjs nice`, pu
 
 La ligne 5 du tram, de Nice à Drap, déclarée d'utilité publique le 27 juillet 2026, n'est pas encore dans OpenStreetMap et n'est donc pas dessinée : le joueur peut la tracer lui-même, et l'écran « Comment nous estimons une ligne » le dit. La ligne 4 vers Cagnes-sur-Mer, dont l'abandon a été annoncé en avril 2026, ne l'est pas non plus.
 
-Le budget est celui de Lyon rapporté au nombre d'habitants : 790 M€ par mandat, dont 160 M€ pour l'entretien des bus. La Métropole ne publie pas de programme d'investissement pour ses transports au-delà de 2026. Les sources sont dans `docs/villes.md`.
+Le budget, ses sources et ses limites sont dans `lib/budgets/nice.ts`, calculés selon la méthode de `docs/budgets.md`. L'argent prévu pour la ligne 5 reste au joueur au premier mandat, puisqu'elle n'est pas dessinée.
 
 Si `carreaux.json` ou `arrets.json` changent, leur empreinte doit être mise à jour dans la fonction serveur `communaute`, et les données redéposées.

@@ -3,9 +3,17 @@
  * et quelques repères pour les textes. Ce module ne dépend d'aucun navigateur : la fonction serveur de
  * la communauté l'utilise pour recalculer un réseau publié avec les règles de sa ville.
  *
- * Les chiffres de Toulouse, Marseille, Nice et Paris et leurs sources sont dans docs/villes.md. La
- * constante de la formule de fréquentation de chaque ville est dans lib/formule.ts, écrit par le moteur.
+ * Les chiffres de Toulouse, Marseille, Nice et Paris et leurs sources sont dans docs/villes.md, sauf le
+ * budget, que chaque ville détaille dans lib/budgets selon la méthode de docs/budgets.md. La constante de
+ * la formule de fréquentation de chaque ville est dans lib/formule.ts, écrit par le moteur.
  */
+
+import type { BudgetVille } from './budget'
+import { lyon } from './budgets/lyon'
+import { marseille } from './budgets/marseille'
+import { nice } from './budgets/nice'
+import { paris } from './budgets/paris'
+import { toulouse } from './budgets/toulouse'
 
 export type IdVille = 'lyon' | 'toulouse' | 'marseille' | 'nice' | 'paris'
 
@@ -31,14 +39,8 @@ export interface Ville {
   latitude: number
   /** Le centre de la ville, [lon, lat], d'où la formule de fréquentation mesure la distance au centre. */
   centre: [number, number]
-  /** Enveloppe d'investissement de chaque mandat, en millions d'euros. */
-  enveloppe: number
-  /** D'où vient l'enveloppe, en une phrase pour l'écran « Comment nous estimons une ligne ». */
-  budget: string
-  /** La même chose en quelques mots, pour les sources de l'accueil. */
-  sourceBudget: string
-  /** Entretien et renouvellement du parc de bus, réservé d'office sur chaque mandat. */
-  entretienBus: number
+  /** Le budget de chaque mandat, poste par poste et avec ses sources : lib/budgets/<ville>.ts. */
+  budget: BudgetVille
   /** Un catalogue de projets réels ; sans lui, le joueur trace toutes ses lignes. */
   catalogue: boolean
   /** Les leviers de financement (tarifs, versement mobilité) sont calculés pour ce réseau. */
@@ -72,10 +74,7 @@ export const VILLES: Record<IdVille, Ville> = {
     dossier: '',
     latitude: 45.755,
     centre: [4.8357, 45.764],
-    enveloppe: 2000,
-    budget: 'Chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d’office à l’entretien des bus.',
-    sourceBudget: 'Chaque mandat dispose de 2 000 M€.',
-    entretienBus: 400,
+    budget: lyon,
     catalogue: true,
     leviers: true,
     emprise: [
@@ -125,12 +124,7 @@ export const VILLES: Record<IdVille, Ville> = {
     dossier: 'toulouse',
     latitude: 43.604,
     centre: [1.444, 43.6045],
-    // Le budget de Lyon rapporté aux 1 115 836 habitants des 114 communes de Tisséo (recensement 2022).
-    enveloppe: 1560,
-    budget:
-      'Nous n’avons pas trouvé de programme d’investissement de Tisséo pour 2026-2038. Nous prenons donc le budget du jeu à Lyon, rapporté au nombre d’habitants des 114 communes de Tisséo : 1 560 M€ par mandat, dont 310 M€ pour l’entretien des bus.',
-    sourceBudget: 'Le budget est celui du jeu à Lyon, rapporté au nombre d’habitants.',
-    entretienBus: 310,
+    budget: toulouse,
     catalogue: false,
     leviers: false,
     emprise: [
@@ -179,12 +173,7 @@ export const VILLES: Record<IdVille, Ville> = {
     dossier: 'marseille',
     latitude: 43.3,
     centre: [5.3698, 43.2965],
-    // L'objectif de 300 M€ d'équipement par an du pacte financier de la Métropole, sur six ans.
-    enveloppe: 1800,
-    entretienBus: 360,
-    budget:
-      'La Métropole d’Aix-Marseille-Provence s’est fixé l’objectif de 300 M€ d’investissement par an. Nous le reprenons : 1 800 M€ par mandat, dont 360 M€ pour l’entretien des bus.',
-    sourceBudget: 'Le budget reprend l’objectif d’investissement publié par la Métropole.',
+    budget: marseille,
     catalogue: false,
     leviers: false,
     emprise: [
@@ -233,12 +222,7 @@ export const VILLES: Record<IdVille, Ville> = {
     dossier: 'nice',
     latitude: 43.7,
     centre: [7.27, 43.6975],
-    // Le budget de Lyon rapporté aux 568 596 habitants des 51 communes de la Métropole (recensement 2022).
-    enveloppe: 790,
-    entretienBus: 160,
-    budget:
-      'Nous n’avons pas trouvé de programme d’investissement de la Métropole Nice Côte d’Azur pour ses transports au-delà de 2026. Nous prenons donc le budget du jeu à Lyon, rapporté au nombre d’habitants de ses 51 communes : 790 M€ par mandat, dont 160 M€ pour l’entretien des bus.',
-    sourceBudget: 'Le budget est celui du jeu à Lyon, rapporté au nombre d’habitants.',
+    budget: nice,
     catalogue: false,
     leviers: false,
     emprise: [
@@ -284,12 +268,7 @@ export const VILLES: Record<IdVille, Ville> = {
     dossier: 'paris',
     latitude: 48.86,
     centre: [2.3522, 48.8566],
-    // Le budget de Lyon rapporté aux 6 862 396 habitants de Paris et des trois départements de la petite couronne (recensement 2022).
-    enveloppe: 9570,
-    entretienBus: 1910,
-    budget:
-      'Île-de-France Mobilités investit pour toute la région, et la Société des grands projets finance à part le Grand Paris Express. Nous prenons donc le budget du jeu à Lyon, rapporté aux 6,9 millions d’habitants de Paris et de la petite couronne : 9 570 M€ par mandat, dont 1 910 M€ pour l’entretien des bus.',
-    sourceBudget: 'Le budget est celui du jeu à Lyon, rapporté au nombre d’habitants.',
+    budget: paris,
     catalogue: false,
     leviers: false,
     emprise: [

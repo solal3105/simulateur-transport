@@ -19,6 +19,7 @@ export type Panneau =
   | { type: 'trace' }
   | { type: 'ligne' }
   | { type: 'methode' }
+  | { type: 'budget' }
   | { type: 'menu' }
 
 export interface Brouillon {

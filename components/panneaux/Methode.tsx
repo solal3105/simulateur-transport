@@ -1,11 +1,14 @@
 'use client'
 
+import { estSource } from '@/lib/budget'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { FOURCHETTE } from '@/lib/modele'
 import { useJeu, useVille } from '@/lib/store'
 import type { IdVille, Ville } from '@/lib/villes'
 
+import { Bouton } from '../ui'
+import { phraseLibre } from './Budget'
 import { Panneau } from './Panneau'
 
 type Calage = { ligne: string; reel: number; ecart: number }[]
@@ -54,7 +57,9 @@ const metres = (m: number) => (m >= 1000 ? `${String(m / 1000).replace('.', ',')
 const phraseMetro = (gain: number) => {
   const loin = `Un métro compte les habitants et les emplois jusqu’à ${metres(FORMULE.rayonMetro)}, contre ${metres(FORMULE.rayonAutres)} pour les autres modes : c’est surtout par là qu’il attire plus de monde.`
   if (Math.abs(gain) < 0.1) return `${loin} À bassin égal, il fait à peu près comme un tram.`
-  return gain > 0 ? `${loin} À bassin égal, il attire encore ${pourcent(gain)} de voyageurs de plus qu’un tram.` : `${loin} À bassin égal, il en attire ${pourcent(-gain)} de moins qu’un tram.`
+  return gain > 0
+    ? `${loin} À bassin égal, il attire encore ${pourcent(gain)} de voyageurs de plus qu’un tram.`
+    : `${loin} À bassin égal, il en attire ${pourcent(-gain)} de moins qu’un tram.`
 }
 
 /** Comment les voyageurs suivent le bassin, selon son exposant dans la formule. */
@@ -80,7 +85,7 @@ const LIGNES_DECIDEES: Partial<Record<IdVille, string>> = {
   nice: 'La ligne 5 du tram, de Nice à Drap par L’Ariane, a été décidée en 2026 mais n’est pas encore sur notre carte : vous pouvez la tracer vous-même.',
 }
 
-function Contenu({ ville }: { ville: Ville }) {
+function Contenu({ ville, voirBudget }: { ville: Ville; voirBudget?: () => void }) {
   const c = FORMULE.coefficients
   const calage = FORMULE.calage[ville.id]
   const max = Math.max(...calage.map((l) => Math.max(l.reel, l.reel * (1 + l.ecart / 100)))) * 1.05
@@ -92,7 +97,15 @@ function Contenu({ ville }: { ville: Ville }) {
       {ville.catalogue ? null : (
         <>
           <h3 className="text-lg font-black">Le budget</h3>
-          <p className="text-[15px] leading-relaxed">{ville.budget}</p>
+          <p className="text-[15px] leading-relaxed">
+            Nous partons de l’investissement prévu par {ville.budget.payeur}, et nous en retirons les projets déjà décidés, les bus et les
+            lignes existantes. {phraseLibre(ville.budget)}
+          </p>
+          {estSource(ville.budget) && voirBudget ? (
+            <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={voirBudget}>
+              Voir le calcul du budget
+            </Bouton>
+          ) : null}
         </>
       )}
       <h3 className="text-lg font-black">Le prix</h3>
@@ -105,8 +118,10 @@ function Contenu({ ville }: { ville: Ville }) {
       <p className="text-[15px] leading-relaxed">
         Nous comptons les habitants et les emplois à moins de {metres(FORMULE.rayonMetro)} d’une station de métro, et à moins de{' '}
         {metres(FORMULE.rayonAutres)} d’un arrêt de tram, de bus ou de téléphérique
-        {FORMULE.poidsCouronne ? `, plus ${pourcent(FORMULE.poidsCouronne)} de ceux qui vivent ou travaillent un peu plus loin, jusqu’à 1 km` : ''}.
-        Un emploi compte pour {String(FORMULE.poidsEmplois).replace('.', ',')} habitant. Les habitants viennent du carroyage de l’INSEE à
+        {FORMULE.poidsCouronne
+          ? `, plus ${pourcent(FORMULE.poidsCouronne)} de ceux qui vivent ou travaillent un peu plus loin, jusqu’à 1 km`
+          : ''}
+        . Un emploi compte pour {String(FORMULE.poidsEmplois).replace('.', ',')} habitant. Les habitants viennent du carroyage de l’INSEE à
         200 m, les emplois du recensement 2022 répartis selon la base Sirene.
       </p>
       <p className="text-[15px] leading-relaxed">
@@ -125,32 +140,32 @@ function Contenu({ ville }: { ville: Ville }) {
         </p>
       ) : null}
       <p className="text-[15px] leading-relaxed">
-        Pour arriver à cette formule, nous en avons essayé {n(FORMULE.formules)}, avec ou sans les correspondances, les gares, la distance au
-        centre, le bassin de vie ou le bassin d’emploi de la ville, sur {FORMULE.lignes} lignes de métro, de tram et de bus de{' '}
+        Pour arriver à cette formule, nous en avons essayé {n(FORMULE.formules)}, avec ou sans les correspondances, les gares, la distance
+        au centre, le bassin de vie ou le bassin d’emploi de la ville, sur {FORMULE.lignes} lignes de métro, de tram et de bus de{' '}
         {FORMULE.villes} villes françaises. Chacune a été jugée sur des lignes qu’elle n’avait pas vues. Celle que nous gardons s’écarte du
-        réel de {FORMULE.ecartVilleConnue} % en moyenne sur une ligne qu’elle ne connaît pas, et de {FORMULE.ecartVilleInconnue} % quand elle ne
-        connaît aucune ligne de la ville.
+        réel de {FORMULE.ecartVilleConnue} % en moyenne sur une ligne qu’elle ne connaît pas, et de {FORMULE.ecartVilleInconnue} % quand
+        elle ne connaît aucune ligne de la ville.
       </p>
       {calage.length ? (
         <>
           <p className="text-[15px] leading-relaxed">
-            Voici ce qu’elle donne pour {calage.length > 1 ? `les lignes de ${ville.nom}` : `la ligne de ${ville.nom}`} dont nous connaissons la
-            fréquentation, chacune prédite sans elle.
+            Voici ce qu’elle donne pour {calage.length > 1 ? `les lignes de ${ville.nom}` : `la ligne de ${ville.nom}`} dont nous
+            connaissons la fréquentation, chacune prédite sans elle.
           </p>
           <Barres calage={calage.slice(0, 10)} max={max} />
         </>
       ) : null}
       <p className="text-[15px] leading-relaxed">
         C’est pourquoi nous affichons toujours une fourchette, de {String(FOURCHETTE.bas).replace('.', ',')} à{' '}
-        {String(FOURCHETTE.haut).replace('.', ',')} fois notre estimation : sur les lignes que nous connaissons, le réel s’y trouve huit fois
-        sur dix.
+        {String(FOURCHETTE.haut).replace('.', ',')} fois notre estimation : sur les lignes que nous connaissons, le réel s’y trouve huit
+        fois sur dix.
       </p>
       <h3 className="text-lg font-black">Ce que nous ne savons pas faire</h3>
       <p className="text-[15px] leading-relaxed">
         La formule ne connaît ni la vitesse ni la fréquence de la ligne, ni les grands équipements comme les hôpitaux ou les campus. Les
-        correspondances ne l’améliorent pas : une fois comptés les habitants autour des arrêts et les lignes voisines, elles n’apportent rien
-        de mesurable. Pour le téléphérique, aucune ligne dont nous connaissons la fréquentation ne permet de la caler : nous nous appuyons sur
-        Téléo à Toulouse et sur le téléphérique de Brest, ce qui reste fragile.
+        correspondances ne l’améliorent pas : une fois comptés les habitants autour des arrêts et les lignes voisines, elles n’apportent
+        rien de mesurable. Pour le téléphérique, aucune ligne dont nous connaissons la fréquentation ne permet de la caler : nous nous
+        appuyons sur Téléo à Toulouse et sur le téléphérique de Brest, ce qui reste fragile.
       </p>
       {LIGNES_DECIDEES[ville.id] ? <p className="text-[15px] leading-relaxed">{LIGNES_DECIDEES[ville.id]}</p> : null}
       <p className="text-[15px] leading-relaxed">
@@ -175,7 +190,7 @@ export function Methode() {
       hauteurTelephone="pleine"
       onFermer={() => (brouillon ? ouvrir({ type: 'ligne' }) : fermer())}
     >
-      <Contenu ville={ville} />
+      <Contenu ville={ville} voirBudget={() => ouvrir({ type: 'budget' })} />
     </Panneau>
   )
 }

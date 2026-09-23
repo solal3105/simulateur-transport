@@ -1,5 +1,6 @@
 'use client'
 
+import { estSource } from '@/lib/budget'
 import { MANDATS } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { useJeu, useVille } from '@/lib/store'
@@ -10,7 +11,7 @@ import { Panneau } from './Panneau'
 
 /**
  * Le menu de la partie : ce qu'on est en train de faire, et de quoi en sortir sans rien perdre : les
- * réseaux publiés, l'explication du calcul, ou l'accueil, d'où l'on reprend la partie ou en commence une autre.
+ * réseaux publiés, l'explication des estimations et du budget, ou l'accueil, d'où l'on reprend la partie ou en commence une autre.
  */
 export function Menu() {
   const { mandat, fermer, ouvrir, allerAccueil } = useJeu()
@@ -35,6 +36,11 @@ export function Menu() {
         <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'methode' })}>
           Comment nous estimons les lignes
         </Bouton>
+        {estSource(ville.budget) ? (
+          <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'budget' })}>
+            Comment nous calculons votre budget
+          </Bouton>
+        ) : null}
       </div>
       <div className="border-t border-trait pt-4">
         <Bouton genre="sable" iconeAGauche="retour" className="w-full justify-start" onClick={allerAccueil}>

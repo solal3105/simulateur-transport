@@ -52,7 +52,7 @@ Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice 
 
 Toutes les villes partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de près de trente villes françaises, chaque ville gardant son propre niveau (`docs/modele.md`).
 
-Le budget d'une ville vient de son objectif d'investissement publié quand il existe (300 M€ par an à Marseille), sinon de celui de Lyon rapporté au nombre d'habitants (1 560 M€ par mandat à Toulouse, 790 à Nice, 9 570 à Paris). L'écran dit toujours d'où vient le chiffre.
+Le budget d'une ville est l'investissement prévu par son autorité, moins les projets décidés déjà dessinés, les bus et les lignes existantes, selon la méthode de `docs/budgets.md`. Le jeu en montre le calcul et chaque source.
 
 Paris est un cas à part : l'autorité est régionale (Île-de-France Mobilités) et le Grand Paris Express relève d'un autre maître d'ouvrage. Le jeu s'y limite à Paris et à la petite couronne, et compte les lignes 15 à 18 du Grand Paris Express comme existantes.
 

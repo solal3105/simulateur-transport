@@ -5,9 +5,10 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { enveloppe, libre, nomReserve } from '@/lib/budget'
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
-import { n } from '@/lib/format'
+import { de, n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
@@ -23,15 +24,26 @@ const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
-/** 4 000 M€ donne « 4 milliards », 3 120 M€ « 3,1 milliards », 1 580 M€ « 1,6 milliard » : le pluriel commence à 2. */
-const milliards = (v: number) => {
+/**
+ * 4 000 M€ donne « 4 milliards », 3 120 M€ « 3,1 milliards », 1 580 M€ « 1,6 milliard » : le pluriel commence
+ * à 2. En dessous d'un milliard, on garde les millions : 850 M€ donne « 850 millions ».
+ */
+const enLettres = (v: number) => {
+  if (v < 1000) return `${n(v)} millions`
   const x = Math.round(v / 100) / 10
   return `${x.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} ${x >= 2 ? 'milliards' : 'milliard'}`
 }
 
+/** « de Tisséo Collectivités », « d’Île-de-France Mobilités », et « du » ou « des » devant un nom qui commence par « le » ou « les ». */
+const dePayeur = (nom: string) => (nom.startsWith('le ') ? `du ${nom.slice(3)}` : nom.startsWith('les ') ? `des ${nom.slice(4)}` : de(nom))
+
+const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
 /** Ce que l'accueil dit de chaque ville. */
 function textes(ville: Ville) {
-  const budget = milliards(ville.enveloppe * 2)
+  const b = ville.budget
+  const budget = enLettres(enveloppe(b, 1) + enveloppe(b, 2))
+  const pourLignes = libre(b, 1) + libre(b, 2)
   if (ville.catalogue)
     return {
       titre: `Construisez le réseau ${ville.reseau} de 2038.`,
@@ -47,14 +59,14 @@ function textes(ville: Ville) {
     }
   return {
     titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} d’euros. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
-    pastilles: ['Tracé libre', `${n(ville.enveloppe * 2)} M€ sur deux mandats`],
+    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats. ${majuscule(nomReserve(b).payes)}, il vous reste ${enLettres(pourLignes)} d’euros pour de nouvelles lignes. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
+    pastilles: ['Tracé libre', `${n(pourLignes)} M€ pour vos lignes`],
     etapes: [
       'Vous tracez vos lignes sur la carte.',
       'Vous finissez chaque mandat sans déficit.',
       'Votre score est le nombre de voyageurs gagnés.',
     ],
-    sources: `${ville.sourceBudget} Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule calée sur plus d’une centaine de lignes de ${FORMULE.villes} villes françaises ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
+    sources: `Le budget part des comptes et des plans d’investissement ${dePayeur(b.payeur)}, moins ce que demandent les bus et les lignes existantes ; le détail et ses sources sont dans le menu de la partie. Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule calée sur plus d’une centaine de lignes de ${FORMULE.villes} villes françaises ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
   }
 }
 
