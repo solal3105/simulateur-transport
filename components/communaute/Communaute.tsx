@@ -7,9 +7,10 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { communauteActive, listerReseaux, reseauxDe, useProfilLocal, type ReseauPublie } from '@/lib/communaute'
 import { n } from '@/lib/format'
 import { villeDePartie } from '@/lib/partie'
-import { estVille, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
+import { useJeu } from '@/lib/store'
+import { adresseAccueil, adresseReseaux, estVille, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
 
-import { Bouton, Icone, Logo } from '../ui'
+import { Bouton, BoutonLien, Icone, Logo } from '../ui'
 import { MiniCarte } from './MiniCarte'
 
 type Onglet = 'populaires' | 'recents' | 'miens'
@@ -36,21 +37,38 @@ function useVilleAdresse() {
 
 const pluriel = (nombre: number, mot: string) => `${n(nombre)} ${mot}${nombre > 1 ? 's' : ''}`
 
-export function EnteteCommunaute({ children }: { children?: React.ReactNode }) {
+/**
+ * Où mène « jouer » depuis les réseaux publiés : la partie enregistrée dans ce navigateur s'il y en a
+ * une, sinon une nouvelle partie dans la ville affichée.
+ */
+function useVersLaPartie(ville: IdVille) {
+  const enCours = useJeu((s) => s.ecran !== 'accueil')
+  const villePartie = useJeu((s) => s.ville)
+  useEffect(() => {
+    void useJeu.persist.rehydrate()
+  }, [])
+  return { enCours, href: adresseAccueil(enCours ? villePartie : ville) }
+}
+
+/** L'en-tête des réseaux publiés : leur nom, et un bouton qui dit où il mène. */
+export function EnteteCommunaute({ ville = 'lyon', children }: { ville?: IdVille; children?: React.ReactNode }) {
+  const { enCours, href } = useVersLaPartie(ville)
   return (
     <header className="bg-rouge text-white">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-5 pt-4 lg:px-8 lg:pt-5">
         <div className="flex items-center justify-between gap-3">
-          <Link href="/communaute" className="flex items-center gap-2.5">
+          <Link href={adresseReseaux(ville)} className="flex items-center gap-2.5">
             <Logo taille={36} inverse />
-            <span className="text-[21px] font-black tracking-tight lg:text-[24px]">Communauté</span>
+            <span className="text-[20px] leading-tight font-black tracking-tight lg:text-[24px]">Réseaux publiés</span>
           </Link>
           <Link
-            href="/"
-            className="flex min-h-10 items-center gap-2 rounded-full bg-white/18 px-4 text-[13.5px] font-extrabold transition-colors hover:bg-white/28"
+            href={href}
+            className="flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-white/18 px-4 text-[13.5px] font-extrabold transition-colors hover:bg-white/28"
           >
-            <Icone nom="retour" taille={16} epaisseur={2.4} />
-            Retour au jeu
+            {/* Sur téléphone, un libellé court laisse le titre sur une ligne. */}
+            <span className="lg:hidden">{enCours ? 'Ma partie' : 'Jouer'}</span>
+            <span className="hidden lg:inline">{enCours ? 'Reprendre ma partie' : 'Commencer une partie'}</span>
+            <Icone nom="fleche" taille={16} epaisseur={2.4} />
           </Link>
         </div>
         {children ?? <div className="h-3" />}
@@ -101,6 +119,7 @@ export function Communaute() {
   const [choix, setChoix] = useState<IdVille | null>(null)
   const ville = choix ?? villeAdresse
   const profil = useProfilLocal()
+  const versLaPartie = useVersLaPartie(ville)
   // Chaque réponse porte la clé de sa demande : un changement d'onglet affiche le chargement sans effacer d'état.
   const [essai, setEssai] = useState(0)
   const demande = `${onglet}:${ville}:${profil?.id ?? ''}:${essai}`
@@ -114,7 +133,10 @@ export function Communaute() {
       (reseaux) => actif && setReponse({ demande, reseaux }),
       (e: unknown) =>
         actif &&
-        setReponse({ demande, erreur: e instanceof Error ? e.message : 'Nous n’arrivons pas à joindre la communauté pour l’instant.' }),
+        setReponse({
+          demande,
+          erreur: e instanceof Error ? e.message : 'Nous n’arrivons pas à charger les réseaux publiés pour l’instant.',
+        }),
     )
     return () => {
       actif = false
@@ -133,8 +155,8 @@ export function Communaute() {
 
   return (
     <div className="min-h-dvh bg-[#faf9f7]">
-      <EnteteCommunaute>
-        <nav aria-label="Sections de la communauté" className="-mb-px flex gap-6">
+      <EnteteCommunaute ville={ville}>
+        <nav aria-label="Listes de réseaux" className="-mb-px flex gap-6">
           {onglets.map((o) => (
             <button
               key={o}
@@ -176,7 +198,7 @@ export function Communaute() {
 
         {!communauteActive ? (
           <p className="max-w-[640px] text-[15px] leading-relaxed text-gris">
-            La communauté n’est pas disponible sur cette version du site.
+            Les réseaux publiés ne sont pas disponibles sur cette version du site.
           </p>
         ) : erreur ? (
           <div className="flex max-w-[640px] flex-col items-start gap-3">
@@ -196,13 +218,9 @@ export function Communaute() {
                 ? 'Vous n’avez encore rien publié depuis ce navigateur.'
                 : 'Aucun réseau n’a encore été publié. Terminez une partie, puis publiez votre réseau depuis le bilan : il apparaîtra ici.'}
             </p>
-            <Link
-              href={ville === 'lyon' ? '/' : `/${ville}`}
-              className="flex min-h-13 items-center gap-2.5 rounded-full bg-rouge px-5 text-[15px] font-extrabold text-white"
-            >
-              Jouer une partie
-              <Icone nom="fleche" taille={19} epaisseur={2.3} />
-            </Link>
+            <BoutonLien href={versLaPartie.href} icone="fleche">
+              {versLaPartie.enCours ? 'Reprendre ma partie' : 'Commencer une partie'}
+            </BoutonLien>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">

@@ -77,7 +77,7 @@ function cleNavigateur() {
 
 async function lire<T>(chemin: string): Promise<T> {
   const r = await fetch(`${URL_BASE}/rest/v1/${chemin}`, { headers: { apikey: CLE_PUBLIQUE } })
-  if (!r.ok) throw new Error('Nous n’arrivons pas à joindre la communauté pour l’instant.')
+  if (!r.ok) throw new Error('Nous n’arrivons pas à charger les réseaux publiés pour l’instant.')
   return r.json() as Promise<T>
 }
 
@@ -90,7 +90,7 @@ async function appeler<T>(action: string, donnees: Record<string, unknown> = {})
       body: JSON.stringify({ action, cle: cleNavigateur(), ...donnees }),
     })
   } catch {
-    throw new Error('Nous n’arrivons pas à joindre la communauté. Vérifiez votre connexion et réessayez.')
+    throw new Error('Nous n’arrivons pas à joindre notre serveur. Vérifiez votre connexion et réessayez.')
   }
   const corps = (await r.json().catch(() => ({}))) as { erreur?: string }
   if (!r.ok) throw new Error(corps.erreur ?? 'Une erreur est survenue. Réessayez dans un instant.')

@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -9,7 +8,7 @@ import { lirePartie, type PartiePartagee } from '@/lib/lien'
 import { useJeu } from '@/lib/store'
 
 import { Bilan } from '../ecrans/Bilan'
-import { Icone } from '../ui'
+import { BoutonLien } from '../ui'
 import { EnteteCommunaute } from './Communaute'
 import type { Publication } from './EnTetePublication'
 
@@ -72,15 +71,11 @@ export function ReseauPage({ id }: { id: string }) {
             <p className="max-w-[560px] text-[15px] leading-relaxed text-gris">
               {etat === 'introuvable'
                 ? 'Son auteur l’a peut-être retiré, ou il a été masqué après plusieurs signalements.'
-                : 'La communauté ne répond pas pour l’instant. Réessayez dans un moment.'}
+                : 'Nous n’arrivons pas à le charger pour l’instant. Réessayez dans un moment.'}
             </p>
-            <Link
-              href="/communaute"
-              className="flex min-h-13 items-center gap-2.5 rounded-full bg-rouge px-5 text-[15px] font-extrabold text-white"
-            >
-              Voir les autres réseaux
-              <Icone nom="fleche" taille={19} epaisseur={2.3} />
-            </Link>
+            <BoutonLien href="/communaute" icone="fleche">
+              Voir les réseaux publiés
+            </BoutonLien>
           </>
         )}
       </main>

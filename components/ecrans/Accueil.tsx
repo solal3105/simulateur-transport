@@ -3,14 +3,14 @@
 import { clsx } from 'clsx'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { n } from '@/lib/format'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
-import { ID_VILLES, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, ID_VILLES, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -20,8 +20,6 @@ const TOTAL = totauxCatalogue(CATALOGUE.filter((p) => p.trace))
 const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 
-/** L'adresse de l'accueil d'une ville. */
-export const adresseVille = (ville: IdVille) => (ville === 'lyon' ? '/' : `/${ville}`)
 /** 4 000 M€ donne « 4 », 3 120 M€ donne « 3,1 ». */
 const milliards = (v: number) => (Math.round(v / 100) / 10).toLocaleString('fr-FR', { maximumFractionDigits: 1 })
 
@@ -109,17 +107,31 @@ export function Accueil({
 }) {
   const commencer = useJeu((s) => s.commencer)
   const [choix, setChoix] = useState<IdVille>(villeInitiale)
+  // La ville proposée peut arriver après la lecture de la partie enregistrée : elle remplace alors le choix.
+  const [initiale, setInitiale] = useState(villeInitiale)
+  if (initiale !== villeInitiale) {
+    setInitiale(villeInitiale)
+    setChoix(villeInitiale)
+  }
   const ville = VILLES[choix]
   const t = textes(ville)
   // Revenir sur la ville de la partie enregistrée, c'est retrouver cette partie.
   const retour = partieEnCours?.ville === choix ? partieEnCours.reprendre : null
   const ailleurs = partieEnCours && !retour ? partieEnCours : null
 
-  const choisir = (id: IdVille) => {
-    setChoix(id)
-    window.history.replaceState(null, '', adresseVille(id))
-    document.title = VILLES[id].titrePage
-  }
+  // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
+  // d'origine après un changement d'adresse : le titre est corrigé juste après.
+  useEffect(() => {
+    const titre = VILLES[choix].titrePage
+    const adresse = adresseAccueil(choix)
+    if (window.location.pathname === adresse) {
+      document.title = titre
+      return
+    }
+    window.history.replaceState(null, '', adresse)
+    const t = window.setTimeout(() => (document.title = titre), 50)
+    return () => window.clearTimeout(t)
+  }, [choix])
 
   return (
     <main className="min-h-dvh bg-rouge text-white lg:fixed lg:inset-0 lg:bg-sable">
@@ -134,13 +146,14 @@ export function Accueil({
             <Logo taille={38} inverse />
             <span className="text-[15px] font-extrabold lg:text-[17px]">{ville.marque}</span>
           </div>
-          <a href="#sources" className="text-[13px] font-bold underline underline-offset-3 lg:text-sm">
+          {/* Sur ordinateur, les sources restent affichées en bas à droite : le lien ne sert que sur téléphone. */}
+          <a href="#sources" className="text-[13px] font-bold underline underline-offset-3 lg:hidden">
             D’où viennent les chiffres
           </a>
         </motion.div>
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-3 lg:mt-2 lg:gap-5">
-          <ChoixVille ville={choix} choisir={choisir} />
+          <ChoixVille ville={choix} choisir={setChoix} />
           <h1 className="text-[44px] leading-[0.95] font-black tracking-[-0.035em] text-balance lg:text-[72px] lg:leading-[0.93]">
             {t.titre}
           </h1>
@@ -184,7 +197,7 @@ export function Accueil({
               </button>
             ) : communauteActive ? (
               <Link
-                href={choix === 'lyon' ? '/communaute' : `/communaute?ville=${choix}`}
+                href={adresseReseaux(choix)}
                 className="flex min-h-14 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
               >
                 <Icone nom="voyageurs" taille={19} />

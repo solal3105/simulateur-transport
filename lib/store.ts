@@ -13,7 +13,13 @@ import { VILLES, type IdVille } from './villes'
 export type Ecran = 'accueil' | 'tuto' | 'jeu' | 'fin-mandat' | 'bilan'
 
 export type Panneau =
-  { type: 'projet'; id: string } | { type: 'liste' } | { type: 'leviers' } | { type: 'trace' } | { type: 'ligne' } | { type: 'methode' }
+  | { type: 'projet'; id: string }
+  | { type: 'liste' }
+  | { type: 'leviers' }
+  | { type: 'trace' }
+  | { type: 'ligne' }
+  | { type: 'methode' }
+  | { type: 'menu' }
 
 export interface Brouillon {
   mode: ModeLigne

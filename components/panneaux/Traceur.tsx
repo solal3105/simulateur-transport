@@ -171,16 +171,19 @@ export function Traceur() {
   const bilan = useBilan()
   const e = useEstimation()
   const noms = useNomsArrets()
+  // Fermer le panneau efface le tracé : au-delà d'un arrêt posé, on demande d'abord.
+  const [confirmer, setConfirmer] = useState(false)
   if (!brouillon) return null
   const arrets = brouillon.arrets.length
   const pret = arrets >= 2 && e
+  const fermer = () => (arrets >= 2 && !confirmer ? setConfirmer(true) : abandonnerTrace())
 
   return (
     <Panneau
       titre={`Tracer un ${NOM_MODE[brouillon.mode]}`}
-      onFermer={abandonnerTrace}
+      onFermer={fermer}
       pied={
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
           <Bouton
             genre="sable"
             iconeAGauche="annuler"
@@ -193,9 +196,8 @@ export function Traceur() {
           </Bouton>
           <Bouton
             genre="rouge"
-            icone="valider"
             taille="petit"
-            className="min-h-13"
+            className="min-h-13 whitespace-nowrap"
             disabled={!pret}
             onClick={() => ouvrir({ type: 'ligne' })}
           >
@@ -204,6 +206,21 @@ export function Traceur() {
         </div>
       }
     >
+      {confirmer ? (
+        <div role="group" aria-labelledby="abandon-trace" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
+          <p id="abandon-trace" className="text-[14.5px] leading-relaxed">
+            Abandonner ce tracé ? Les {arrets} arrêts posés seront effacés.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Bouton genre="rouge" taille="petit" onClick={abandonnerTrace}>
+              Abandonner
+            </Bouton>
+            <Bouton genre="contour" taille="petit" onClick={() => setConfirmer(false)}>
+              Continuer le tracé
+            </Bouton>
+          </div>
+        </div>
+      ) : null}
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">Type de ligne</legend>
         {/* Téléphone : une rangée compacte pour laisser la carte visible. */}
