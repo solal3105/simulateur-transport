@@ -6,7 +6,9 @@ import { n, signe } from '@/lib/format'
 import { detailMesure, MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
 import { useJeu, useVille } from '@/lib/store'
 import type { Leviers as TLeviers } from '@/lib/types'
+import type { Ville } from '@/lib/villes'
 
+import { EcrireBudget } from '../explications/Budget'
 import { segmentsBudget, useBilan } from '../partie/budget'
 import { Bouton, Icone, Jauge, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
@@ -165,10 +167,10 @@ const taux = (t: number) => `${t.toLocaleString('fr-FR', { maximumFractionDigits
 export function Leviers() {
   const ville = useVille()
   const p = ville.budget.leviers
-  return p ? <Contenu p={p} /> : null
+  return p ? <Contenu p={p} ville={ville} /> : null
 }
 
-function Contenu({ p }: { p: ParametresLeviers }) {
+function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
   const { leviers, mandat, levier, fermer } = useJeu()
   const l = leviers[mandat]
   const bilan = useBilan()
@@ -313,6 +315,7 @@ function Contenu({ p }: { p: ParametresLeviers }) {
           true,
         )}
       </div>
+      <EcrireBudget ville={ville} compact />
     </Panneau>
   )
 }
