@@ -25,6 +25,13 @@ export interface AVenir {
   lignes: LigneJoueur[]
 }
 
+/** Le réseau publié dont la partie est partie, cité quand on publie la sienne. */
+export interface Inspiration {
+  id: string
+  titre: string
+  pseudo: string
+}
+
 interface Etat {
   ecran: Ecran
   tuto: number
@@ -33,6 +40,9 @@ interface Etat {
   lignes: LigneJoueur[]
   leviers: Record<Mandat, Leviers>
   aVenir: AVenir | null
+  inspire: Inspiration | null
+  /** Identifiant du réseau publié depuis ce bilan, pour ne pas le publier deux fois. */
+  publie: string | null
   panneau: Panneau | null
   brouillon: Brouillon | null
   message: { titre: string; texte: string } | null
@@ -53,7 +63,8 @@ interface Etat {
   commencerMandat2: () => void
   rejouer: () => void
   /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
-  reprendre: (p: PartiePartagee) => void
+  reprendre: (p: PartiePartagee, inspire?: Inspiration) => void
+  marquerPublie: (id: string) => void
   tracer: (mode?: ModeLigne) => void
   changerMode: (mode: ModeLigne) => void
   ajouterArret: (p: [number, number]) => void
@@ -72,6 +83,8 @@ const DEPART = {
   lignes: [] as LigneJoueur[],
   leviers: { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES },
   aVenir: null as AVenir | null,
+  inspire: null as Inspiration | null,
+  publie: null as string | null,
   panneau: null,
   brouillon: null,
   message: null,
@@ -141,7 +154,7 @@ export const useJeu = create<Etat>()(
           }
         }),
       rejouer: () => set({ ...DEPART }),
-      reprendre: (p) => {
+      reprendre: (p, inspire) => {
         const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
         const lignes = p.lignes.map(renommer)
         set({
@@ -151,12 +164,14 @@ export const useJeu = create<Etat>()(
           lignes: lignes.filter((l) => l.mandat === 1),
           leviers: { 1: { ...p.leviers[1] }, 2: { ...p.leviers[1] } },
           aVenir: { chantiers: p.chantiers.filter((c) => c.mandat === 2), lignes: lignes.filter((l) => l.mandat === 2) },
+          inspire: inspire ?? null,
           message: {
             titre: 'Vous partez de ce réseau.',
             texte: 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
           },
         })
       },
+      marquerPublie: (publie) => set({ publie }),
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
       changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
       ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
@@ -200,6 +215,8 @@ export const useJeu = create<Etat>()(
         lignes: s.lignes,
         leviers: s.leviers,
         aVenir: s.aVenir,
+        inspire: s.inspire,
+        publie: s.publie,
       }),
     },
   ),

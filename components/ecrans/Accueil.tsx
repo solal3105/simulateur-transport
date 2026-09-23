@@ -1,15 +1,17 @@
 'use client'
 
 import { motion } from 'motion/react'
+import Link from 'next/link'
 
 import { CATALOGUE, ENVELOPPE } from '@/lib/catalogue'
+import { communauteActive } from '@/lib/communaute'
 import { n } from '@/lib/format'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
-import { Bouton, Logo } from '../ui'
+import { Bouton, Icone, Logo } from '../ui'
 
 const TOTAL = totauxCatalogue(CATALOGUE.filter((p) => p.trace))
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
@@ -87,10 +89,21 @@ export function Accueil() {
 
         <Etapes />
 
-        <motion.div variants={cascade.enfant} className="mt-auto flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-5">
-          <Bouton genre="blanc" icone="fleche" taille="grand" onClick={commencer} className="w-full lg:w-[300px]">
-            Commencer la partie
-          </Bouton>
+        <motion.div variants={cascade.enfant} className="mt-auto flex flex-col gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
+            <Bouton genre="blanc" icone="fleche" taille="grand" onClick={commencer} className="w-full lg:w-[300px]">
+              Commencer la partie
+            </Bouton>
+            {communauteActive ? (
+              <Link
+                href="/communaute"
+                className="flex min-h-14 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-extrabold shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
+              >
+                <Icone nom="voyageurs" taille={19} />
+                Voir les réseaux publiés
+              </Link>
+            ) : null}
+          </div>
           <p className="text-center text-[13px] leading-snug font-semibold opacity-90 lg:text-left lg:text-sm">
             Sans compte. Votre partie reste dans ce navigateur.
           </p>

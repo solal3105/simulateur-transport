@@ -1,18 +1,22 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
+import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 
 import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
+import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
 
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
+import { EnTetePublication, PiedPublication, type Publication } from '../communaute/EnTetePublication'
+import { Publier } from '../communaute/Publier'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
 import { Comparaison } from './Comparaison'
 
@@ -21,10 +25,12 @@ const TOTAL = totauxCatalogue(AVEC_TRACE)
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
 
 /**
- * Le bilan de fin de partie. Avec `partage`, il montre le réseau reçu par un lien, en lecture seule : le
- * visiteur peut alors partir de ce réseau pour sa propre partie, le comparer au sien, ou retrouver sa partie.
+ * Le bilan de fin de partie. Avec `partage`, il montre un réseau reçu par un lien ou publié dans la
+ * communauté, en lecture seule : le visiteur peut alors partir de ce réseau pour sa propre partie, le
+ * comparer au sien, ou retrouver sa partie. Avec `publication`, il montre aussi son titre, son auteur
+ * et de quoi le soutenir ou le signaler.
  */
-export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?: () => void }) {
+export function Bilan({ partage, quitter, publication }: { partage?: PartiePartagee; quitter?: () => void; publication?: Publication }) {
   const jeu = useJeu()
   const chantiers = partage?.chantiers ?? jeu.chantiers
   const lignes = partage?.lignes ?? jeu.lignes
@@ -34,6 +40,8 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
   const [confirmer, setConfirmer] = useState(false)
   const [comparer, setComparer] = useState(false)
   const fermerComparaison = useCallback(() => setComparer(false), [])
+  const [publier, setPublier] = useState(false)
+  const fermerPublication = useCallback(() => setPublier(false), [])
   const [envoi, setEnvoi] = useState<string | null>(null)
 
   const rejouer = () => {
@@ -44,7 +52,11 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
   }
   const reprendre = () => {
     if (!partage) return
-    jeu.reprendre(partage)
+    if (publication) {
+      jeu.reprendre(partage, { id: publication.id, titre: publication.titre, pseudo: publication.auteur?.pseudo ?? '' })
+      // La reprise compte pour le réseau publié ; si le serveur ne répond pas, la partie commence quand même.
+      void compterReprise(publication.id).catch(() => {})
+    } else jeu.reprendre(partage)
     quitter?.()
   }
 
@@ -63,7 +75,11 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
 
   // Le lien contient toute la partie : qui l'ouvre voit ce réseau se construire, sans compte ni serveur.
   const copierLien = async () => {
-    const url = partage ? window.location.href : await lienDePartage({ chantiers, lignes, leviers })
+    const url = publication
+      ? `${window.location.origin}/reseau/${publication.id}`
+      : partage
+        ? window.location.href
+        : await lienDePartage({ chantiers, lignes, leviers })
     if (navigator.share && window.innerWidth < 1024) {
       try {
         await navigator.share({ url, title: 'Mon réseau de transport en 2038' })
@@ -160,6 +176,8 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
       </div>
 
       <div className="relative -mt-6 flex flex-col gap-5 rounded-t-[26px] bg-white px-5 pt-6 pb-8 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:w-[620px] lg:gap-6 lg:overflow-y-auto lg:rounded-l-[32px] lg:rounded-tr-none lg:px-12 lg:py-10 lg:shadow-[-8px_0_30px_rgb(0_0_0/0.08)]">
+        {publication ? <EnTetePublication publication={publication} /> : null}
+
         <span
           className={`flex items-center gap-2 self-start rounded-full px-3.5 py-1.5 text-[13.5px] font-extrabold ${resultat.equilibre ? 'bg-rouge text-white' : 'bg-encre text-white'}`}
         >
@@ -168,9 +186,13 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
         </span>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-[15px] font-semibold text-gris lg:text-base">
-            {partage ? 'Ce réseau, partagé avec vous, transporte chaque jour en 2038' : 'Votre réseau en 2038 transporte chaque jour'}
-          </h1>
+          {publication ? (
+            <h2 className="text-[15px] font-semibold text-gris lg:text-base">Ce réseau transporte chaque jour en 2038</h2>
+          ) : (
+            <h1 className="text-[15px] font-semibold text-gris lg:text-base">
+              {partage ? 'Ce réseau, partagé avec vous, transporte chaque jour en 2038' : 'Votre réseau en 2038 transporte chaque jour'}
+            </h1>
+          )}
           <div className="flex items-baseline gap-2.5">
             <span className="chiffres text-[50px] leading-none font-black tracking-[-0.04em] text-rouge lg:text-[72px]">
               +{n(voyageursAnimes)}
@@ -266,8 +288,23 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
               Comparer avec mon réseau
             </Bouton>
           ) : null}
+          {!partage && communauteActive ? (
+            jeu.publie ? (
+              <Link
+                href={`/reseau/${jeu.publie}`}
+                className="flex min-h-14 items-center justify-between gap-2.5 rounded-full bg-rouge px-6 text-base font-extrabold text-white hover:bg-rouge-fonce"
+              >
+                Voir mon réseau publié
+                <Icone nom="fleche" taille={19} epaisseur={2.3} />
+              </Link>
+            ) : (
+              <Bouton genre="rouge" icone="partager" taille="grand" onClick={() => setPublier(true)}>
+                Publier mon réseau dans la communauté
+              </Bouton>
+            )
+          ) : null}
           <div className="grid gap-2 sm:grid-cols-2">
-            <Bouton genre={partage ? 'contour' : 'rouge'} icone="partager" onClick={copierLien}>
+            <Bouton genre={partage || communauteActive ? 'contour' : 'rouge'} icone="partager" onClick={copierLien}>
               {partage ? 'Copier le lien de ce réseau' : 'Partager le lien de mon réseau'}
             </Bouton>
             <Bouton genre="contour" icone="telecharger" onClick={() => partager(window.innerWidth < 1024 ? 'story' : 'paysage')}>
@@ -280,13 +317,34 @@ export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?
           <Bouton genre="contour" icone={partage ? 'fleche' : 'rejouer'} onClick={rejouer}>
             {!partage ? 'Rejouer une partie' : aUnePartie ? 'Retrouver ma partie' : 'Commencer ma propre partie'}
           </Bouton>
+          {!partage && communauteActive ? (
+            <Link href="/communaute" className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3">
+              Voir les réseaux des autres joueurs
+            </Link>
+          ) : null}
         </div>
+
+        {publication ? <PiedPublication publication={publication} /> : null}
       </div>
 
       <AnimatePresence>
+        {!partage && publier ? (
+          <Publier
+            partie={{ chantiers, lignes, leviers }}
+            voyageurs={resultat.voyageurs}
+            investi={resultat.investi}
+            inspire={jeu.inspire}
+            fermer={fermerPublication}
+            publie={jeu.marquerPublie}
+          />
+        ) : null}
         {partage && comparer ? (
           <Comparaison
-            a={{ titre: 'Le réseau reçu', sujet: 'le réseau reçu', ...partage }}
+            a={
+              publication
+                ? { titre: publication.titre, sujet: 'ce réseau', ...partage }
+                : { titre: 'Le réseau reçu', sujet: 'le réseau reçu', ...partage }
+            }
             b={{
               titre: jeu.ecran === 'bilan' ? 'Votre réseau' : 'Votre partie en cours',
               sujet: 'votre réseau',

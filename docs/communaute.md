@@ -1,6 +1,6 @@
 # La communauté et les autres villes
 
-Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté, téléphone », « Communauté, ordinateur » et « Communauté, la réflexion ». Le partage d'un réseau par lien est déjà construit dans le site, avec la reprise et la comparaison ; le reste est à faire.
+Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté, téléphone », « Communauté, ordinateur » et « Communauté, la réflexion ». Le site sait déjà partager un réseau par lien, le reprendre et le comparer au sien. La communauté elle-même fonctionne aussi : publication depuis le bilan, réseaux populaires et récents, page de chaque réseau, soutiens, reprises, signalements et retrait par son auteur. Restent à faire la carte des envies, les réactions aux lignes, les défis et les autres villes.
 
 ## Le principe : le jeu reste le jeu
 
@@ -38,7 +38,7 @@ Les textes libres sont courts : 30 caractères pour le pseudo, 60 pour le titre,
 
 Le score, le coût et l'équilibre du budget ne viennent jamais du navigateur. La publication passe par une fonction côté serveur qui recalcule tout à partir des choix de la partie ; un réseau truqué ne peut donc pas apparaître au classement.
 
-Il n'y a pas de mot de passe. La connexion anonyme de Supabase suffit pour publier sous un pseudo ; une adresse e-mail facultative permet de recevoir un lien magique pour retrouver ses réseaux sur un autre appareil. L'adresse n'est jamais affichée.
+Il n'y a ni compte ni mot de passe. Chaque navigateur tire au hasard une clé secrète qu'il garde, et la base n'en conserve qu'une empreinte. Cette clé suffit pour publier sous un pseudo, soutenir un réseau une seule fois et retirer ses propres réseaux. Elle ne suit pas le joueur d'un appareil à l'autre : un lien de récupération par e-mail pourra s'ajouter plus tard, si le besoin s'en fait sentir.
 
 ## Les autres villes
 
@@ -60,16 +60,22 @@ Toulouse est la ville à ouvrir en premier : Tisséo publie la fréquentation de
 
 ## Côté technique
 
-Le schéma de base de données est dans `supabase/schema.sql` : villes, profils, réseaux, lignes, soutiens, réactions, signalements et défis, avec les règles d'accès (chacun lit ce qui est public et n'écrit que ce qui est à lui) et une vue pour la carte des envies.
+La base est un projet Supabase dédié, « simulateur-transport », hébergé à Paris dans l'organisation gratuite TCL2040. Les tables et les règles d'accès sont dans `supabase/migrations/`. Le site lit directement les réseaux publiés et les pseudos, avec la clé publique déclarée dans `.env.example` et `netlify.toml`. Il n'écrit jamais lui-même : les règles d'accès refusent toute écriture venue du navigateur.
 
-Il restera à écrire la fonction de publication, qui reprendra les règles de `lib/regles.ts` et le modèle de `lib/modele.ts` pour recalculer le score. Chaque réseau publié aura sa propre adresse (par exemple `/r/<identifiant>`) avec une image d'aperçu générée à partir de sa carte, pour que les liens partagés sur les réseaux sociaux s'affichent bien.
+Toutes les écritures passent par la fonction serveur `communaute` (`supabase/functions/communaute/`). Elle reçoit la clé du navigateur, en calcule l'empreinte, puis publie, soutient, compte une reprise, enregistre un signalement ou retire un réseau. Avant de publier, elle relit la partie avec le code même du jeu (`lib/partie.ts`, `lib/regles.ts`, `lib/modele.ts`, copiés par `scripts/fonction-communaute.mjs`), recalcule les lignes tracées, le score, le coût et l'équilibre du budget, et refuse un réseau en déficit. Les compteurs de soutiens, de reprises et de signalements sont tenus par la base elle-même.
+
+Pour recalculer les lignes, la fonction a besoin des habitants et des emplois par carreau. Ils sont rangés dans la table privée `modele`, déposés une seule fois par l'action `deposer`, qui n'accepte que les données exactes du modèle, reconnues par leur empreinte. Si ces données changent, il faut vider cette table, mettre à jour l'empreinte dans la fonction, la redéployer et redéposer les données.
+
+Une modification de `lib/partie.ts`, `lib/regles.ts`, `lib/modele.ts` ou du catalogue doit être suivie de `node scripts/fonction-communaute.mjs`, puis d'un nouveau déploiement de la fonction, sinon le serveur et le jeu ne compteraient plus de la même façon.
+
+Chaque réseau publié a sa propre adresse, `/reseau/<identifiant>`, dont le titre et la description reprennent ceux du réseau pour l'aperçu sur les réseaux sociaux. L'image d'aperçu tirée de sa carte reste à faire.
 
 Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par ville (emprise, liste des communes de l'autorité organisatrice), pour produire les mêmes fichiers dans `public/data/<ville>/`.
 
 ## Ordre de réalisation proposé
 
 1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. C'est fait. Le bilan donne une adresse qui affiche le réseau, recalculé, chez n'importe qui. Le visiteur peut partir de ce réseau pour sa propre partie : les choix du premier mandat sont chargés tout de suite, ceux du second s'ajoutent quand ce mandat commence, et une confirmation protège une partie en cours. S'il a déjà une partie, il peut aussi la comparer au réseau reçu, cartes côte à côte.
-2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau.
+2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau. C'est fait, avec les signalements et le retrait d'un réseau par son auteur.
 3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule.
 4. La carte des envies et les réactions aux lignes.
 5. Les défis.

@@ -19,13 +19,15 @@ Chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entr
 
 À la fin de la partie, le bilan donne un lien qui contient tout le réseau, sans compte ni serveur. Qui ouvre ce lien voit le réseau se construire, peut partir de ce réseau pour sa propre partie, ou le comparer à la sienne.
 
+Le bilan permet aussi de publier son réseau dans la communauté, sous un pseudo et sans compte. Les réseaux publiés se consultent sur `/communaute`, chacun a sa page `/reseau/<identifiant>`, et chacun peut les soutenir, les signaler ou partir d'eux pour sa partie. La communauté repose sur Supabase ; son fonctionnement est décrit dans `docs/communaute.md`. Sans les deux réglages de `.env.example`, le jeu tourne sans elle.
+
 Le score est le nombre de voyageurs gagnés par jour. Pour une ligne tracée par le joueur, seuls comptent les voyageurs qui vivent ou travaillent loin d'un tram ou d'un métro existant.
 
 Sur la carte, chaque mode a sa couleur (métro, tramway, bus rapide, téléphérique, bateau), une modernisation prend la couleur de la ligne modernisée, et le réseau actuel reste en gris. Les couleurs sont définies dans `lib/couleurs.ts`.
 
 ## Organisation du code
 
-`app/` contient la page et le style global. `components/` contient l'interface : la carte (`carte/`), l'écran de jeu (`partie/`), les panneaux qui s'ouvrent au-dessus de la carte (`panneaux/`) et les écrans d'accueil, de fin de mandat et de bilan (`ecrans/`). `lib/` contient la logique sans interface : le catalogue des projets, les règles de budget, le modèle de fréquentation des lignes tracées, l'état de la partie et le dessin de l'image de partage.
+`app/` contient la page et le style global. `components/` contient l'interface : la carte (`carte/`), l'écran de jeu (`partie/`), les panneaux qui s'ouvrent au-dessus de la carte (`panneaux/`) et les écrans d'accueil, de fin de mandat et de bilan (`ecrans/`). `lib/` contient la logique sans interface : le catalogue des projets, les règles de budget, le modèle de fréquentation des lignes tracées, l'état de la partie, la lecture d'une partie partagée ou publiée, l'accès à la communauté et le dessin de l'image de partage. `components/communaute/` contient les pages de la communauté, et `supabase/` la base et la fonction serveur qui en garde l'entrée.
 
 ## Les données
 

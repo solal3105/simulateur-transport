@@ -1,0 +1,256 @@
+// La fonction « communaute » : la seule porte d'écriture de la communauté.
+//
+// Le site lit directement les réseaux publiés, mais tout ce qui écrit passe ici : publier, soutenir,
+// reprendre, signaler, retirer. Chaque navigateur se présente avec sa clé secrète, dont la base ne
+// garde que l'empreinte. Avant d'enregistrer un réseau, la fonction recalcule ses lignes, son score,
+// son coût et l'équilibre de son budget avec le code même du jeu (copié dans ./lib).
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+
+import { PROJETS } from './lib/catalogue.ts'
+import { preparerCarreaux, type Carreaux } from './lib/modele.ts'
+import { compacter, normaliserPartie } from './lib/partie.ts'
+import { resoudre, resumer } from './lib/regles.ts'
+
+const base = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+  auth: { persistSession: false, autoRefreshToken: false },
+})
+
+// Empreinte des données du modèle (public/data/carreaux.json et arrets.json de Lyon) : seules ces
+// données exactes peuvent être déposées, et une seule fois tant que la table est vide.
+const EMPREINTE_DONNEES = 'a2127334171f48f6fd596c2b0bc21474867bfd188eb8e65bd723ad1097519631'
+
+const ENTETES = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+const repondre = (corps: unknown, statut = 200) =>
+  new Response(JSON.stringify(corps), { status: statut, headers: { ...ENTETES, 'Content-Type': 'application/json' } })
+const refuser = (message: string, statut = 400) => repondre({ erreur: message }, statut)
+
+async function empreinte(texte: string) {
+  const octets = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texte))
+  return [...new Uint8Array(octets)].map((o) => o.toString(16).padStart(2, '0')).join('')
+}
+
+let carreaux: Promise<Carreaux> | null = null
+function chargerCarreaux() {
+  carreaux ??= (async () => {
+    const { data, error } = await base.from('modele').select('carreaux, arrets').eq('ville', 'lyon').single()
+    if (error || !data) throw new Error('Données du modèle absentes')
+    return preparerCarreaux(data.carreaux as number[][], data.arrets as number[][])
+  })().catch((e) => {
+    carreaux = null
+    throw e
+  })
+  return carreaux
+}
+
+// Quelques insultes et termes haineux, comparés mot à mot une fois les accents et les chiffres déguisés retirés.
+const INTERDITS = new Set([
+  'con',
+  'conne',
+  'connard',
+  'connasse',
+  'salope',
+  'salaud',
+  'pute',
+  'putain',
+  'encule',
+  'enculer',
+  'nique',
+  'niquer',
+  'batard',
+  'pd',
+  'pede',
+  'tapette',
+  'gouine',
+  'negre',
+  'negro',
+  'bougnoule',
+  'youpin',
+  'raton',
+  'bicot',
+  'fdp',
+  'ntm',
+  'tg',
+  'abruti',
+  'debile',
+  'merde',
+  'nazi',
+  'hitler',
+])
+function convenable(texte: string) {
+  const mots = texte
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4|@/g, 'a')
+    .replace(/5|\$/g, 's')
+    .split(/[^a-z]+/)
+  return !mots.some((m) => INTERDITS.has(m))
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+const texte = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '')
+
+async function profilDe(cle: string) {
+  const { data } = await base.from('cles').select('profil, profils(id, pseudo)').eq('empreinte', cle).maybeSingle()
+  return (data?.profils as { id: string; pseudo: string } | null) ?? null
+}
+
+async function reseauExiste(id: unknown) {
+  if (typeof id !== 'string' || !UUID.test(id)) return null
+  const { data } = await base.from('reseaux').select('id, auteur').eq('id', id).maybeSingle()
+  return data
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: ENTETES })
+  if (req.method !== 'POST') return refuser('Méthode non prise en charge.', 405)
+  try {
+    const corps = await req.json()
+    const action = corps?.action
+
+    // Dépôt unique des données du modèle, vérifiées par leur empreinte.
+    if (action === 'deposer') {
+      const { count } = await base.from('modele').select('ville', { count: 'exact', head: true }).eq('ville', 'lyon')
+      if (count) return refuser('Les données sont déjà déposées.', 409)
+      if (!Array.isArray(corps.carreaux) || !Array.isArray(corps.arrets)) return refuser('Données incomplètes.')
+      if ((await empreinte(`${JSON.stringify(corps.carreaux)}|${JSON.stringify(corps.arrets)}`)) !== EMPREINTE_DONNEES) {
+        return refuser('Ces données ne sont pas celles du modèle.', 403)
+      }
+      const { error } = await base.from('modele').insert({ ville: 'lyon', carreaux: corps.carreaux, arrets: corps.arrets })
+      if (error) throw error
+      return repondre({ ok: true })
+    }
+
+    if (typeof corps?.cle !== 'string' || corps.cle.length < 20 || corps.cle.length > 200) return refuser('Clé manquante.', 401)
+    const cle = await empreinte(corps.cle)
+    await base.from('cles').upsert({ empreinte: cle }, { onConflict: 'empreinte', ignoreDuplicates: true })
+
+    switch (action) {
+      case 'profil': {
+        return repondre({ profil: await profilDe(cle) })
+      }
+
+      case 'publier': {
+        const titre = texte(corps.titre, 60)
+        const intention = texte(corps.intention, 200)
+        const visibilite = corps.visibilite === 'lien' ? 'lien' : 'publique'
+        if (titre.length < 3) return refuser('Le titre doit faire au moins 3 caractères.')
+        if (!convenable(titre) || !convenable(intention))
+          return refuser('Le titre ou la phrase contiennent un mot que nous ne publions pas.')
+
+        let profil = await profilDe(cle)
+        const pseudo = texte(corps.pseudo, 30)
+        if (pseudo) {
+          if (pseudo.length < 2) return refuser('Le pseudo doit faire au moins 2 caractères.')
+          if (!convenable(pseudo)) return refuser('Ce pseudo contient un mot que nous ne publions pas.')
+        }
+        if (!profil) {
+          if (!pseudo) return refuser('Choisissez un pseudo pour publier.')
+          const { data, error } = await base.from('profils').insert({ pseudo }).select('id, pseudo').single()
+          if (error) throw error
+          profil = data
+          await base.from('cles').update({ profil: data.id }).eq('empreinte', cle)
+        } else if (pseudo && pseudo !== profil.pseudo) {
+          await base.from('profils').update({ pseudo }).eq('id', profil.id)
+          profil = { ...profil, pseudo }
+        }
+
+        // Pas plus de dix publications par jour et par personne.
+        const hier = new Date(Date.now() - 86_400_000).toISOString()
+        const { count } = await base
+          .from('reseaux')
+          .select('id', { count: 'exact', head: true })
+          .eq('auteur', profil.id)
+          .gte('cree_le', hier)
+        if ((count ?? 0) >= 10) return refuser('Vous avez déjà publié dix réseaux aujourd’hui. Revenez demain.', 429)
+
+        const partie = normaliserPartie(corps.partie, await chargerCarreaux())
+        if (!partie) return refuser('Ce réseau est illisible.')
+        if (partie.chantiers.length + partie.lignes.length === 0) return refuser('Ce réseau ne contient aucun projet.')
+        const r = resumer(partie.chantiers, partie.lignes, partie.leviers)
+        if (!r.equilibre) return refuser('Ce réseau ne tient pas le budget des deux mandats : il ne peut pas être publié.')
+
+        const modes = new Set<string>(partie.lignes.map((l) => l.mode))
+        for (const c of partie.chantiers) {
+          const p = PROJETS.get(c.id)
+          if (p) modes.add(resoudre(p, c).mode)
+        }
+        const source = await reseauExiste(corps.inspire_de)
+
+        const { data, error } = await base
+          .from('reseaux')
+          .insert({
+            auteur: profil.id,
+            titre,
+            intention: intention || null,
+            visibilite,
+            partie: compacter(partie),
+            voyageurs: r.voyageurs,
+            investi: Math.round(r.investi),
+            retenus: r.retenus,
+            lignes: partie.lignes.length,
+            modes: [...modes],
+            inspire_de: source?.id ?? null,
+          })
+          .select('id')
+          .single()
+        if (error) throw error
+        return repondre({ id: data.id, profil })
+      }
+
+      case 'soutenir': {
+        const reseau = await reseauExiste(corps.reseau)
+        if (!reseau) return refuser('Ce réseau n’existe plus.', 404)
+        const profil = await profilDe(cle)
+        if (profil && profil.id === reseau.auteur) return refuser('Vous ne pouvez pas soutenir votre propre réseau.')
+        if (corps.oui === false) await base.from('soutiens').delete().eq('reseau', reseau.id).eq('empreinte', cle)
+        else
+          await base
+            .from('soutiens')
+            .upsert({ reseau: reseau.id, empreinte: cle }, { onConflict: 'reseau,empreinte', ignoreDuplicates: true })
+        const { data } = await base.from('reseaux').select('soutiens').eq('id', reseau.id).single()
+        return repondre({ soutiens: data?.soutiens ?? 0, soutenu: corps.oui !== false })
+      }
+
+      case 'reprendre': {
+        const reseau = await reseauExiste(corps.reseau)
+        if (!reseau) return refuser('Ce réseau n’existe plus.', 404)
+        await base
+          .from('reprises')
+          .upsert({ reseau: reseau.id, empreinte: cle }, { onConflict: 'reseau,empreinte', ignoreDuplicates: true })
+        return repondre({ ok: true })
+      }
+
+      case 'signaler': {
+        const reseau = await reseauExiste(corps.reseau)
+        if (!reseau) return refuser('Ce réseau n’existe plus.', 404)
+        const motif = ['propos', 'triche', 'autre'].includes(corps.motif) ? corps.motif : 'autre'
+        await base
+          .from('signalements')
+          .upsert({ reseau: reseau.id, empreinte: cle, motif }, { onConflict: 'reseau,empreinte', ignoreDuplicates: true })
+        return repondre({ ok: true })
+      }
+
+      case 'retirer': {
+        const reseau = await reseauExiste(corps.reseau)
+        const profil = await profilDe(cle)
+        if (!reseau || !profil || reseau.auteur !== profil.id) return refuser('Seul l’auteur d’un réseau peut le retirer.', 403)
+        await base.from('reseaux').delete().eq('id', reseau.id)
+        return repondre({ ok: true })
+      }
+
+      default:
+        return refuser('Action inconnue.')
+    }
+  } catch (e) {
+    console.error(e)
+    return refuser('Une erreur est survenue de notre côté. Réessayez dans un instant.', 500)
+  }
+})
