@@ -68,14 +68,14 @@ Pour recalculer les lignes, la fonction a besoin des habitants et des emplois pa
 
 Une modification de `lib/partie.ts`, `lib/regles.ts`, `lib/modele.ts` ou du catalogue doit être suivie de `node scripts/fonction-communaute.mjs`, puis d'un nouveau déploiement de la fonction, sinon le serveur et le jeu ne compteraient plus de la même façon.
 
-Chaque réseau publié a sa propre adresse, `/reseau/<identifiant>`, dont le titre et la description reprennent ceux du réseau pour l'aperçu sur les réseaux sociaux. L'image d'aperçu tirée de sa carte reste à faire.
+Chaque réseau publié a sa propre adresse, `/reseau/<identifiant>`, dont le titre et la description reprennent ceux du réseau pour l'aperçu sur les réseaux sociaux. L'image d'aperçu (`app/reseau/[id]/opengraph-image.tsx`) est dessinée à la demande : la carte du réseau en miniature, avec les mêmes tracés que les cartes de la communauté (`lib/miniature.ts`), son titre, son auteur et ses voyageurs. Elle utilise la police Figtree, rangée dans `assets/polices/` avec sa licence libre, parce que le moteur d'image ne lit que les fichiers TTF. Un réseau retiré ou masqué donne l'image générique du jeu.
 
 Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par ville (emprise, liste des communes de l'autorité organisatrice), pour produire les mêmes fichiers dans `public/data/<ville>/`.
 
 ## Ordre de réalisation proposé
 
 1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. C'est fait. Le bilan donne une adresse qui affiche le réseau, recalculé, chez n'importe qui. Le visiteur peut partir de ce réseau pour sa propre partie : les choix du premier mandat sont chargés tout de suite, ceux du second s'ajoutent quand ce mandat commence, et une confirmation protège une partie en cours. S'il a déjà une partie, il peut aussi la comparer au réseau reçu, cartes côte à côte.
-2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau. C'est fait, avec les signalements et le retrait d'un réseau par son auteur.
+2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau. C'est fait, avec les signalements, le retrait d'un réseau par son auteur et l'image d'aperçu des liens. En ligne depuis le 23 septembre 2026.
 3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule.
 4. La carte des envies et les réactions aux lignes.
 5. Les défis.
