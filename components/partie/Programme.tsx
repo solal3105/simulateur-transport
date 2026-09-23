@@ -65,7 +65,8 @@ export function useProgramme() {
 }
 
 export function Programme() {
-  const { mandat, ouvrir, finirMandat, ecran, tuto } = useJeu()
+  const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir } = useJeu()
+  const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
   const guide = ecran === 'tuto' && tuto === 2
   const { lignesProgramme } = useProgramme()
   const bilan = useBilan()
@@ -120,6 +121,12 @@ export function Programme() {
           {precedent.length > 0 ? (
             <p className="pt-3 text-[13px] leading-relaxed text-gris">
               Décidés au premier mandat : {precedent.map((l) => l.nom).join(', ')}.
+            </p>
+          ) : null}
+          {nombreAVenir > 0 ? (
+            <p className="pt-3 text-[13px] leading-relaxed text-gris">
+              Au second mandat, {nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du réseau que vous avez repris{' '}
+              {nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme. Vous pourrez les garder ou les retirer.
             </p>
           ) : null}
         </section>

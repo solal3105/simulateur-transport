@@ -1,12 +1,12 @@
 'use client'
 
-import { motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
-import { bilanMandat, ouvertures, resoudre, score, totauxCatalogue } from '@/lib/regles'
+import { ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
@@ -14,46 +14,46 @@ import { useJeu } from '@/lib/store'
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
+import { Comparaison } from './Comparaison'
 
 const AVEC_TRACE = CATALOGUE.filter((p) => p.trace)
 const TOTAL = totauxCatalogue(AVEC_TRACE)
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
 
 /**
- * Le bilan de fin de partie. Avec `partage`, il montre le réseau reçu par un lien, en lecture seule,
- * et invite à jouer sa propre partie.
+ * Le bilan de fin de partie. Avec `partage`, il montre le réseau reçu par un lien, en lecture seule : le
+ * visiteur peut alors partir de ce réseau pour sa propre partie, le comparer au sien, ou retrouver sa partie.
  */
-export function Bilan({ partage }: { partage?: PartiePartagee }) {
+export function Bilan({ partage, quitter }: { partage?: PartiePartagee; quitter?: () => void }) {
   const jeu = useJeu()
   const chantiers = partage?.chantiers ?? jeu.chantiers
   const lignes = partage?.lignes ?? jeu.lignes
   const leviers = partage?.leviers ?? jeu.leviers
-  const rejouer = () => {
-    if (partage) {
-      // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
-      window.history.replaceState(null, '', window.location.pathname)
-      window.location.reload()
-      return
-    }
-    jeu.rejouer()
-  }
+  // Le visiteur d'un lien a peut-être déjà une partie enregistrée dans ce navigateur.
+  const aUnePartie = jeu.chantiers.length + jeu.lignes.length > 0
+  const [confirmer, setConfirmer] = useState(false)
+  const [comparer, setComparer] = useState(false)
+  const fermerComparaison = useCallback(() => setComparer(false), [])
   const [envoi, setEnvoi] = useState<string | null>(null)
 
+  const rejouer = () => {
+    if (!partage) return jeu.rejouer()
+    // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
+    if (!aUnePartie) jeu.commencer()
+    quitter?.()
+  }
+  const reprendre = () => {
+    if (!partage) return
+    jeu.reprendre(partage)
+    quitter?.()
+  }
+
   const resultat = useMemo(() => {
-    const b1 = bilanMandat(1, chantiers, lignes, leviers)
-    const b2 = bilanMandat(2, chantiers, lignes, leviers)
-    const investi =
-      chantiers.reduce((t, c) => t + resoudre(PROJETS.get(c.id)!, c).cout, 0) + lignes.reduce((t, l) => t + l.estimation.cout, 0)
     const faits = new Set(chantiers.map((c) => c.id))
     const laisses = AVEC_TRACE.filter((p) => !faits.has(p.id))
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
-      voyageurs: score(chantiers, lignes),
-      equilibre: b1.reste >= 0 && b2.reste >= 0,
-      nonDepense: Math.max(0, b2.reste),
-      deficit: Math.min(0, b1.reste) + Math.min(0, b2.reste),
-      investi,
-      retenus: chantiers.filter((c) => PROJETS.get(c.id)?.trace).length + lignes.length,
+      ...resumer(chantiers, lignes, leviers),
       laisses,
       coutLaisse: laisses.reduce((t, p) => t + resoudre(p).cout, 0),
       plusGros,
@@ -140,7 +140,7 @@ export function Bilan({ partage }: { partage?: PartiePartagee }) {
         <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
           <div className="rounded-2xl bg-white/90 px-4 py-2.5 shadow-flotte backdrop-blur">
             <div className="text-xs font-extrabold tracking-[0.08em] text-muet uppercase">
-              {termine ? 'Votre réseau' : 'Le réseau se construit'}
+              {termine ? (partage ? 'Ce réseau' : 'Votre réseau') : 'Le réseau se construit'}
             </div>
             <div className="chiffres text-[34px] leading-none font-black tracking-tight lg:text-[52px]" aria-live="off">
               {annee}
@@ -200,7 +200,7 @@ export function Bilan({ partage }: { partage?: PartiePartagee }) {
 
         {resultat.ouvertures.length > 0 ? (
           <section className="flex flex-col gap-2.5">
-            <Surtitre>Vos ouvertures</Surtitre>
+            <Surtitre>{partage ? 'Les ouvertures' : 'Vos ouvertures'}</Surtitre>
             <ol className="flex flex-col gap-2.5">
               {resultat.ouvertures.map((o) => {
                 const tard = o.annee > MANDATS[2].fin
@@ -242,9 +242,28 @@ export function Bilan({ partage }: { partage?: PartiePartagee }) {
         ) : null}
 
         <div className="flex flex-col gap-2 lg:mt-auto">
-          {partage ? (
-            <Bouton genre="rouge" icone="fleche" taille="grand" onClick={rejouer}>
-              Faire mieux : jouer ma partie
+          {partage && confirmer ? (
+            <div role="group" aria-labelledby="remplacer" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
+              <p id="remplacer" className="text-[14.5px] leading-relaxed">
+                Votre partie en cours sera remplacée par ce réseau, et vous ne pourrez pas la récupérer.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Bouton genre="rouge" onClick={reprendre}>
+                  Remplacer ma partie
+                </Bouton>
+                <Bouton genre="contour" onClick={() => setConfirmer(false)}>
+                  Garder ma partie
+                </Bouton>
+              </div>
+            </div>
+          ) : partage ? (
+            <Bouton genre="rouge" icone="fleche" taille="grand" onClick={() => (aUnePartie ? setConfirmer(true) : reprendre())}>
+              Jouer à partir de ce réseau
+            </Bouton>
+          ) : null}
+          {partage && aUnePartie ? (
+            <Bouton genre="encre" icone="carte" onClick={() => setComparer(true)}>
+              Comparer avec mon réseau
             </Bouton>
           ) : null}
           <div className="grid gap-2 sm:grid-cols-2">
@@ -258,13 +277,27 @@ export function Bilan({ partage }: { partage?: PartiePartagee }) {
           <p aria-live="polite" className="min-h-5 text-center text-[13px] font-semibold text-gris">
             {envoi ?? ''}
           </p>
-          {partage ? null : (
-            <Bouton genre="contour" icone="rejouer" onClick={rejouer}>
-              Rejouer une partie
-            </Bouton>
-          )}
+          <Bouton genre="contour" icone={partage ? 'fleche' : 'rejouer'} onClick={rejouer}>
+            {!partage ? 'Rejouer une partie' : aUnePartie ? 'Retrouver ma partie' : 'Commencer ma propre partie'}
+          </Bouton>
         </div>
       </div>
+
+      <AnimatePresence>
+        {partage && comparer ? (
+          <Comparaison
+            a={{ titre: 'Le réseau reçu', sujet: 'le réseau reçu', ...partage }}
+            b={{
+              titre: jeu.ecran === 'bilan' ? 'Votre réseau' : 'Votre partie en cours',
+              sujet: 'votre réseau',
+              chantiers: jeu.chantiers,
+              lignes: jeu.lignes,
+              leviers: jeu.leviers,
+            }}
+            fermer={fermerComparaison}
+          />
+        ) : null}
+      </AnimatePresence>
     </main>
   )
 }

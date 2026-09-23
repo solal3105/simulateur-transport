@@ -1,6 +1,6 @@
 # La communauté et les autres villes
 
-Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté, téléphone », « Communauté, ordinateur » et « Communauté, la réflexion ». Seul le partage d'un réseau par lien est déjà construit dans le site ; le reste est à faire.
+Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté, téléphone », « Communauté, ordinateur » et « Communauté, la réflexion ». Le partage d'un réseau par lien est déjà construit dans le site, avec la reprise et la comparaison ; le reste est à faire.
 
 ## Le principe : le jeu reste le jeu
 
@@ -68,7 +68,7 @@ Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par vil
 
 ## Ordre de réalisation proposé
 
-1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. L'ouverture est faite : le bilan donne une adresse qui affiche le réseau, recalculé, chez n'importe qui. Il reste la comparaison et la reprise.
+1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. C'est fait. Le bilan donne une adresse qui affiche le réseau, recalculé, chez n'importe qui. Le visiteur peut partir de ce réseau pour sa propre partie : les choix du premier mandat sont chargés tout de suite, ceux du second s'ajoutent quand ce mandat commence, et une confirmation protège une partie en cours. S'il a déjà une partie, il peut aussi la comparer au réseau reçu, cartes côte à côte.
 2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau.
 3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule.
 4. La carte des envies et les réactions aux lignes.

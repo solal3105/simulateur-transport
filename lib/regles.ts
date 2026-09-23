@@ -161,6 +161,26 @@ export function score(chantiers: Chantier[], lignes: LigneJoueur[]): number {
   return total
 }
 
+/** Les chiffres qui résument un réseau, pour le bilan comme pour la comparaison de deux réseaux. */
+export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>) {
+  const b1 = bilanMandat(1, chantiers, lignes, leviers)
+  const b2 = bilanMandat(2, chantiers, lignes, leviers)
+  const investi =
+    chantiers.reduce((t, c) => {
+      const p = PROJETS.get(c.id)
+      return p ? t + resoudre(p, c).cout : t
+    }, 0) + lignes.reduce((t, l) => t + l.estimation.cout, 0)
+  return {
+    voyageurs: score(chantiers, lignes),
+    investi,
+    equilibre: b1.reste >= 0 && b2.reste >= 0,
+    nonDepense: Math.max(0, b2.reste),
+    deficit: Math.min(0, b1.reste) + Math.min(0, b2.reste),
+    /** Projets du catalogue qui ont un tracé, plus les lignes du joueur. */
+    retenus: chantiers.filter((c) => PROJETS.get(c.id)?.trace).length + lignes.length,
+  }
+}
+
 /** Totaux du catalogue, qui servent de repère au bilan. */
 export function totauxCatalogue(projets: Iterable<Projet>) {
   let cout = 0

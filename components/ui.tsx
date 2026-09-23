@@ -1,7 +1,7 @@
 'use client'
 
 import { clsx } from 'clsx'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 
 const TRACES = {
   fleche: 'M5 12h14M13 6l6 6-6 6',
@@ -128,14 +128,17 @@ export function BoutonRond({
   icone,
   onClick,
   className,
+  ref,
 }: {
   label: string
   icone: NomIcone
   onClick: () => void
   className?: string
+  ref?: Ref<HTMLButtonElement>
 }) {
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={label}
       onClick={onClick}

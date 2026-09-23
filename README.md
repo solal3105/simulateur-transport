@@ -17,6 +17,8 @@ Le site s'ouvre sur http://localhost:3000. `npm run build` prépare la version d
 
 Chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entretien des bus. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit.
 
+À la fin de la partie, le bilan donne un lien qui contient tout le réseau, sans compte ni serveur. Qui ouvre ce lien voit le réseau se construire, peut partir de ce réseau pour sa propre partie, ou le comparer à la sienne.
+
 Le score est le nombre de voyageurs gagnés par jour. Pour une ligne tracée par le joueur, seuls comptent les voyageurs qui vivent ou travaillent loin d'un tram ou d'un métro existant.
 
 Sur la carte, chaque mode a sa couleur (métro, tramway, bus rapide, téléphérique, bateau), une modernisation prend la couleur de la ligne modernisée, et le réseau actuel reste en gris. Les couleurs sont définies dans `lib/couleurs.ts`.

@@ -15,7 +15,8 @@ import { Bouton, EtapesMandat, Icone, Jauge, Surtitre } from '../ui'
 const MARGES_CARTE = { top: 20, left: 20, right: 20, bottom: 20 }
 
 export function FinMandat() {
-  const { chantiers, lignes, leviers, commencerMandat2 } = useJeu()
+  const { chantiers, lignes, leviers, commencerMandat2, aVenir } = useJeu()
+  const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
   const bilan1 = useBilan(1)
   const liste = ouvertures(chantiers, lignes)
   const ouverts = liste.filter((o) => o.annee <= MANDATS[1].fin)
@@ -120,6 +121,9 @@ export function FinMandat() {
                 ? ` et les ${n(bilan2.reports)} M€ ${reportes.length > 1 ? `des ${reportes.length} projets payés` : 'du projet payé'} en deux fois`
                 : ''}
               . Vos choix de tarifs restent en place, et vous pourrez les revoir.
+              {nombreAVenir > 0
+                ? ` En commençant, ${nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du second mandat du réseau que vous avez repris ${nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme.`
+                : ''}
             </p>
           </section>
 

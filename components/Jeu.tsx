@@ -27,7 +27,13 @@ export function Jeu() {
     window.scrollTo(0, 0)
   }, [ecran])
 
-  if (pret && partage) return <Bilan partage={partage} />
+  // Quitter le réseau reçu efface le lien de l'adresse et affiche la partie du visiteur, telle qu'elle est enregistrée.
+  const quitter = () => {
+    window.history.replaceState(null, '', window.location.pathname)
+    setPartage(null)
+  }
+
+  if (pret && partage) return <Bilan partage={partage} quitter={quitter} />
   if (!pret || ecran === 'accueil') return <Accueil />
   if (ecran === 'fin-mandat') return <FinMandat />
   if (ecran === 'bilan') return <Bilan />

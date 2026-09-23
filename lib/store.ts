@@ -3,7 +3,9 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { PROJETS } from './catalogue'
 import { approx } from './format'
+import type { PartiePartagee } from './lien'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 
@@ -17,6 +19,12 @@ export interface Brouillon {
   arrets: [number, number][]
 }
 
+/** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
+export interface AVenir {
+  chantiers: Chantier[]
+  lignes: LigneJoueur[]
+}
+
 interface Etat {
   ecran: Ecran
   tuto: number
@@ -24,6 +32,7 @@ interface Etat {
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<Mandat, Leviers>
+  aVenir: AVenir | null
   panneau: Panneau | null
   brouillon: Brouillon | null
   message: { titre: string; texte: string } | null
@@ -43,6 +52,8 @@ interface Etat {
   finirMandat: () => void
   commencerMandat2: () => void
   rejouer: () => void
+  /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
+  reprendre: (p: PartiePartagee) => void
   tracer: (mode?: ModeLigne) => void
   changerMode: (mode: ModeLigne) => void
   ajouterArret: (p: [number, number]) => void
@@ -60,6 +71,7 @@ const DEPART = {
   chantiers: [] as Chantier[],
   lignes: [] as LigneJoueur[],
   leviers: { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES },
+  aVenir: null as AVenir | null,
   panneau: null,
   brouillon: null,
   message: null,
@@ -97,8 +109,54 @@ export const useJeu = create<Etat>()(
         })),
       levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
       finirMandat: () => set({ ecran: get().mandat === 1 ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null }),
-      commencerMandat2: () => set((s) => ({ ecran: 'jeu', mandat: 2, leviers: { ...s.leviers, 2: { ...s.leviers[1] } }, panneau: null })),
+      commencerMandat2: () =>
+        set((s) => {
+          const suite = {
+            ecran: 'jeu' as Ecran,
+            mandat: 2 as Mandat,
+            leviers: { ...s.leviers, 2: { ...s.leviers[1] } },
+            panneau: null,
+            aVenir: null,
+          }
+          if (!s.aVenir) return suite
+          // Les choix repris s'ajoutent, sauf un projet déjà décidé ou un projet qui dépend d'un projet retiré.
+          const decides = new Set(s.chantiers.map((c) => c.id))
+          const repris = s.aVenir.chantiers.filter((c) => !decides.has(c.id))
+          const tous = new Set([...decides, ...repris.map((c) => c.id)])
+          const chantiers = repris.filter((c) => {
+            const requis = PROJETS.get(c.id)?.requiert
+            return !requis || tous.has(requis)
+          })
+          const nombre = chantiers.length + s.aVenir.lignes.length
+          return {
+            ...suite,
+            chantiers: [...s.chantiers, ...chantiers],
+            lignes: [...s.lignes, ...s.aVenir.lignes],
+            message: nombre
+              ? {
+                  titre: `${nombre} choix du réseau repris ${nombre > 1 ? 'sont ajoutés' : 'est ajouté'}.`,
+                  texte: 'Vous pouvez les garder ou les retirer avant de finir la partie.',
+                }
+              : null,
+          }
+        }),
       rejouer: () => set({ ...DEPART }),
+      reprendre: (p) => {
+        const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
+        const lignes = p.lignes.map(renommer)
+        set({
+          ...DEPART,
+          ecran: 'jeu',
+          chantiers: p.chantiers.filter((c) => c.mandat === 1),
+          lignes: lignes.filter((l) => l.mandat === 1),
+          leviers: { 1: { ...p.leviers[1] }, 2: { ...p.leviers[1] } },
+          aVenir: { chantiers: p.chantiers.filter((c) => c.mandat === 2), lignes: lignes.filter((l) => l.mandat === 2) },
+          message: {
+            titre: 'Vous partez de ce réseau.',
+            texte: 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
+          },
+        })
+      },
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
       changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
       ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
@@ -141,6 +199,7 @@ export const useJeu = create<Etat>()(
         chantiers: s.chantiers,
         lignes: s.lignes,
         leviers: s.leviers,
+        aVenir: s.aVenir,
       }),
     },
   ),
