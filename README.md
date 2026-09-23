@@ -4,7 +4,7 @@ Un jeu pour comprendre l'arbitrage budgétaire des transports publics, né à Ly
 
 Le jeu se joue aussi à Toulouse (`/toulouse`), Marseille (`/marseille`), Nice (`/nice`) et Paris (`/paris`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes, avec le budget publié par l'autorité organisatrice quand il existe, sinon celui de Lyon rapporté au nombre d'habitants. Les leviers de financement n'y sont pas encore calculés.
 
-Les voyageurs d'une ligne tracée viennent d'une formule choisie par un moteur parmi des dizaines de milliers, calées sur plus d'une centaine de lignes de vingt villes françaises : voir `docs/modele.md`.
+Les voyageurs d'une ligne tracée viennent d'une formule choisie par un moteur parmi des dizaines de milliers, calées sur plus d'une centaine de lignes de près de trente villes françaises : voir `docs/modele.md`.
 
 ## Lancer le site
 

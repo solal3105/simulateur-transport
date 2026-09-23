@@ -61,6 +61,8 @@ REUNIONS = {
     ('valenciennes', 'tram'): {'T1+T2': ['T1', 'T2']},
     ('le-havre', 'tram'): {'A+B': ['A', 'B']},
     ('metz', 'bhns'): {'A+B': ['A', 'B']},
+    # La ligne 4 de Montpellier est circulaire : OpenStreetMap en fait deux lignes, une par sens.
+    ('montpellier', 'tram'): {'4': ['4A', '4B']},
 }
 ROLES_ARRET = {'stop', 'stop_entry_only', 'stop_exit_only'}
 ROLES_QUAI = {'platform', 'platform_entry_only', 'platform_exit_only'}

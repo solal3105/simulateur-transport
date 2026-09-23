@@ -6,9 +6,9 @@ Les coûts ne sont pas tous exprimés dans la même base : hors taxes ou non, en
 
 ## La formule de fréquentation
 
-Depuis le 24 septembre 2026, toutes les villes partagent une même formule, choisie par un moteur parmi 23 980 sur 107 lignes de métro, de tram et de bus de 22 villes françaises, et jugée sur des lignes et des villes absentes de son calage. Chaque ville garde son propre niveau, tiré de ses lignes actuelles. Tout est décrit dans `docs/modele.md` : les données, la méthode, la formule retenue, ses écarts ligne par ligne et ses limites.
+Depuis le 24 septembre 2026, toutes les villes partagent une même formule, choisie par un moteur parmi 23 980 sur 135 lignes de métro, de tram et de bus de 29 villes françaises, et jugée sur des lignes et des villes absentes de son calage. Chaque ville garde son propre niveau, tiré de ses lignes actuelles. Tout est décrit dans `docs/modele.md` : les données, la méthode, la formule retenue, ses écarts ligne par ligne et ses limites.
 
-Sur une ligne qu'elle ne connaît pas, la formule s'écarte du réel de 29 % en moyenne quand elle connaît les autres lignes de la ville, et de 36 % pour une ville sans aucun chiffre. L'ancienne formule lyonnaise, recalée ville par ville sur une seule constante, ne donnait rien de fiable sans chiffres locaux ; la nouvelle donne un ordre de grandeur même sans eux.
+Sur une ligne qu'elle ne connaît pas, la formule s'écarte du réel de 32 % en moyenne quand elle connaît les autres lignes de la ville, et de 39 % pour une ville sans aucun chiffre. L'ancienne formule lyonnaise, recalée ville par ville sur une seule constante, ne donnait rien de fiable sans chiffres locaux ; la nouvelle donne un ordre de grandeur même sans eux.
 
 ### La densité sur la carte
 

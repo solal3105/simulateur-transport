@@ -50,6 +50,13 @@ const pourcent = (x: number) => `${Math.round(x * 100)} %`
 /** 1000 m s'écrit « 1 km ». */
 const metres = (m: number) => (m >= 1000 ? `${String(m / 1000).replace('.', ',')} km` : `${m} m`)
 
+/** Ce que la formule dit du métro : son avantage vient surtout de la distance où l'on compte ses voyageurs. */
+const phraseMetro = (gain: number) => {
+  const loin = `Un métro compte les habitants et les emplois jusqu’à ${metres(FORMULE.rayonMetro)}, contre ${metres(FORMULE.rayonAutres)} pour les autres modes : c’est surtout par là qu’il attire plus de monde.`
+  if (Math.abs(gain) < 0.1) return `${loin} À bassin égal, il fait à peu près comme un tram.`
+  return gain > 0 ? `${loin} À bassin égal, il attire encore ${pourcent(gain)} de voyageurs de plus qu’un tram.` : `${loin} À bassin égal, il en attire ${pourcent(-gain)} de moins qu’un tram.`
+}
+
 /** Comment les voyageurs suivent le bassin, selon son exposant dans la formule. */
 const rythme = (b: number) => (b > 1.15 ? 'plus vite que' : b < 0.85 ? 'moins vite que' : 'presque en proportion de')
 
@@ -108,8 +115,8 @@ function Contenu({ ville }: { ville: Ville }) {
         {c.concurrence
           ? ` Ils baissent aussi quand la ligne double des lignes existantes : si tous ses arrêts sont déjà à moins de 400 m d’une station, elle perd ${pourcent(perteConcurrence)} de ses voyageurs.`
           : ''}{' '}
-        À bassin égal, un métro attire {pourcent(gainMetro)} de voyageurs de plus qu’un tram, et un bus à haut niveau de service{' '}
-        {pourcent(perteBus)} de moins. Chaque ville a enfin son propre niveau, tiré de ses lignes actuelles{niveauDeVille()}.
+        {phraseMetro(gainMetro)} Un bus à haut niveau de service attire {pourcent(perteBus)} de voyageurs de moins qu’un tram sur les mêmes
+        arrêts. Chaque ville a enfin son propre niveau, tiré de ses lignes actuelles{niveauDeVille()}.
       </p>
       {FORMULE.ajustements[ville.id]?.metro ? (
         <p className="text-[15px] leading-relaxed">

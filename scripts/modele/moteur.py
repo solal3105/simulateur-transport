@@ -116,8 +116,11 @@ def variables_fixes(d):
 SIGNES = {
     'bassin': 1, 'correspondances': 1, 'gares': 1, 'part_centre': 1, 'distance_centre': -1, 'bassin_vie': 1,
     'bassin_vie_10k': 1, 'bassin_emploi': 1, 'emplois_centre': 1, 'bassin_large': 1, 'concurrence': -1, 'reseau': 1,
-    'metro': 1, 'bhns': -1,
+    'bhns': -1,
 }
+# Le métro n'a pas de sens imposé : on lui compte les habitants plus loin que pour le tram, et c'est
+# surtout par là qu'il gagne ; son coefficient propre peut alors être un peu négatif sans qu'un métro
+# attire moins de monde qu'un tram sur les mêmes arrêts.
 
 # Les groupes de variables que le moteur ajoute ou retire ensemble.
 GROUPES = {

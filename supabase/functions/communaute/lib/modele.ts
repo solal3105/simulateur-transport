@@ -169,7 +169,8 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
     concurrence: autour > 0 ? dejaServi / autour : 0,
     bassinLarge: Math.log1p(large),
   }
-  let exposant = carreaux.constante + FORMULE.modes[mode]
+  // À Paris, le métro compte ses voyageurs aux entrées, sans les correspondances : on estime pareil.
+  let exposant = carreaux.constante + FORMULE.modes[mode] + (FORMULE.ajustements[carreaux.ville]?.[mode] ?? 0)
   for (const [nom, coefficient] of Object.entries(c) as [keyof typeof variables, number][]) exposant += coefficient * variables[nom]
   const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(exposant) : 0
   const nouveaux = poids > 0 ? voyageurs * (poidsNouveau / poids) : 0

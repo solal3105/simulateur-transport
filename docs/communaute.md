@@ -50,7 +50,7 @@ Le catalogue ajoute les projets réels d'une ville, avec leurs coûts et leurs f
 
 Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. `docs/villes.md` rassemble les réseaux, les projets et les budgets sourcés de ces quatre villes. Toulouse est ouverte en tracé libre depuis le 23 septembre 2026, Marseille, Nice et Paris depuis le 24 septembre.
 
-Toutes les villes partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de vingt villes françaises, chaque ville gardant son propre niveau (`docs/modele.md`).
+Toutes les villes partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de près de trente villes françaises, chaque ville gardant son propre niveau (`docs/modele.md`).
 
 Le budget d'une ville vient de son objectif d'investissement publié quand il existe (300 M€ par an à Marseille), sinon de celui de Lyon rapporté au nombre d'habitants (1 560 M€ par mandat à Toulouse, 790 à Nice, 9 570 à Paris). L'écran dit toujours d'où vient le chiffre.
 
