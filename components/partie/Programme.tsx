@@ -6,7 +6,7 @@ import { PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 
 import { Bouton, Icone, Surtitre } from '../ui'
 import { useBilan } from './budget'
@@ -66,6 +66,9 @@ export function useProgramme() {
 
 export function Programme() {
   const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir } = useJeu()
+  const ville = useVille()
+  // Sans catalogue, le programme ne compte que des lignes tracées.
+  const mot = ville.catalogue ? 'projet' : 'ligne'
   const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
   const guide = ecran === 'tuto' && tuto === 2
   const { lignesProgramme } = useProgramme()
@@ -89,11 +92,16 @@ export function Programme() {
           <div className="flex items-baseline justify-between border-b border-trait pb-2">
             <h2 className="text-[17px] font-black">Votre programme</h2>
             <span className="text-[13px] font-bold text-gris">
-              {courant.length} projet{courant.length > 1 ? 's' : ''}
+              {courant.length} {mot}
+              {courant.length > 1 ? 's' : ''}
             </span>
           </div>
           {courant.length === 0 ? (
-            <p className="pt-3 text-sm leading-relaxed text-gris">Aucun projet pour l’instant. Ceux que vous construisez s’ajoutent ici.</p>
+            <p className="pt-3 text-sm leading-relaxed text-gris">
+              {ville.catalogue
+                ? 'Aucun projet pour l’instant. Ceux que vous construisez s’ajoutent ici.'
+                : 'Aucune ligne pour l’instant. Celles que vous construisez s’ajoutent ici.'}
+            </p>
           ) : (
             <ul>
               {courant.map((l) => (
@@ -132,7 +140,8 @@ export function Programme() {
         </section>
 
         <p className="text-sm leading-relaxed text-gris">
-          Choisissez des projets sur la carte ou tracez votre propre ligne. Quand vous avez fini, terminez le mandat.{' '}
+          {ville.catalogue ? 'Choisissez des projets sur la carte ou tracez votre propre ligne.' : 'Tracez vos lignes sur la carte.'} Quand
+          vous avez fini, terminez le mandat.{' '}
           {mandat === 1
             ? 'L’argent que vous n’aurez pas dépensé passera au second mandat.'
             : 'L’argent non dépensé restera disponible pour la suite.'}
@@ -141,15 +150,20 @@ export function Programme() {
 
       {/* Les deux actions de la partie restent fixées en bas, quelle que soit la longueur du programme. */}
       <div className="flex shrink-0 flex-col gap-2 border-t border-trait bg-white px-6.5 pt-4 pb-6">
-        <Bouton genre="sable" iconeAGauche="pieces" onClick={() => ouvrir({ type: 'leviers' })} className="justify-start">
-          Trouver de l’argent
-        </Bouton>
+        {ville.leviers ? (
+          <Bouton genre="sable" iconeAGauche="pieces" onClick={() => ouvrir({ type: 'leviers' })} className="justify-start">
+            Trouver de l’argent
+          </Bouton>
+        ) : null}
         <Bouton genre="rouge" icone="drapeau" onClick={finirMandat} disabled={bilan.reste < 0} data-guide={guide ? '' : undefined}>
           {mandat === 1 ? 'Finir le premier mandat' : 'Finir le second mandat'}
         </Bouton>
         {bilan.reste < 0 ? (
           <p className="text-[13px] leading-snug font-semibold text-rouge-fonce">
-            Le mandat est en déficit de {n(-bilan.reste)} M€. Retirez un projet ou trouvez de l’argent pour pouvoir le terminer.
+            Le mandat est en déficit de {n(-bilan.reste)} M€.{' '}
+            {ville.leviers
+              ? 'Retirez un projet ou trouvez de l’argent pour pouvoir le terminer.'
+              : 'Retirez une ligne pour pouvoir le terminer.'}
           </p>
         ) : null}
       </div>
@@ -159,29 +173,45 @@ export function Programme() {
 
 export function BarreBas() {
   const { ouvrir, finirMandat, mandat, ecran, tuto } = useJeu()
+  const ville = useVille()
   const guide = ecran === 'tuto' && tuto === 2
   const bilan = useBilan()
+  // Sans leviers de financement, un déficit se comble en retirant une ligne depuis la liste.
+  const combler = () => ouvrir(ville.leviers ? { type: 'leviers' } : { type: 'liste' })
   return (
-    <div className="absolute inset-x-0 bottom-0 z-20 grid grid-cols-2 gap-2 border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden">
-      <Bouton
-        genre="sable"
-        iconeAGauche="pieces"
-        taille="petit"
-        className="min-h-13 justify-start px-3.5! text-[13.5px]! whitespace-nowrap"
-        onClick={() => ouvrir({ type: 'leviers' })}
-      >
-        Trouver de l’argent
-      </Bouton>
+    <div
+      className={clsx(
+        'absolute inset-x-0 bottom-0 z-20 grid gap-2 border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden',
+        ville.leviers ? 'grid-cols-2' : 'grid-cols-1',
+      )}
+    >
+      {ville.leviers ? (
+        <Bouton
+          genre="sable"
+          iconeAGauche="pieces"
+          taille="petit"
+          className="min-h-13 justify-start px-3.5! text-[13.5px]! whitespace-nowrap"
+          onClick={() => ouvrir({ type: 'leviers' })}
+        >
+          Trouver de l’argent
+        </Bouton>
+      ) : null}
       <Bouton
         genre="rouge"
         icone="drapeau"
         taille="petit"
         className="min-h-13 text-[13.5px]! whitespace-nowrap"
         data-guide={guide ? '' : undefined}
-        onClick={() => (bilan.reste < 0 ? ouvrir({ type: 'leviers' }) : finirMandat())}
+        onClick={() => (bilan.reste < 0 ? combler() : finirMandat())}
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}
       >
-        {bilan.reste < 0 ? 'Combler le déficit' : mandat === 1 ? 'Finir le mandat' : 'Finir la partie'}
+        {bilan.reste < 0
+          ? ville.leviers
+            ? 'Combler le déficit'
+            : 'Retirer une ligne'
+          : mandat === 1
+            ? 'Finir le mandat'
+            : 'Finir la partie'}
       </Bouton>
       {bilan.reste < 0 ? (
         <span id="deficit" className="sr-only">

@@ -1,5 +1,6 @@
 // Copie de lib/modele.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import type { Estimation, ModeLigne } from './types.ts'
+import type { IdVille, Ville } from './villes.ts'
 
 /**
  * Estimation du coût et de la fréquentation d'une ligne tracée par le joueur.
@@ -15,16 +16,17 @@ import type { Estimation, ModeLigne } from './types.ts'
  *
  *   voyageurs par jour = exp(A) × (habitants + 0,3 × emplois) ^ B
  *
- * où habitants et emplois sont comptés à moins de 400 m d'un arrêt (600 m pour le métro).
- * En validation croisée, l'écart moyen est de 18 % et le pire de 39 %. La formule surestime
+ * où habitants et emplois sont comptés à moins de 400 m d'un arrêt (600 m pour le métro),
+ * A vaut -8,03 et B 1,678. En validation croisée, l'écart moyen est de 18 % et le pire de 39 %. La formule surestime
  * les lignes de rocade : elle donne environ 109 000 voyageurs pour le T6 complet, là où Sytral
  * Mobilités en prévoit 55 000. Les facteurs du bus et du téléphérique sont des hypothèses,
  * faute de ligne de ce type dans le calage. Pour le téléphérique Téléo de Toulouse, qui transporte
  * 5 800 voyageurs par jour, la formule en prévoit moins de 300 : ses voyageurs viennent des
- * correspondances et des équipements desservis. Ailleurs qu'à Lyon, la constante A doit être
- * recalée sur les lignes locales (voir docs/villes.md).
+ * correspondances et des équipements desservis.
+ *
+ * Ailleurs qu'à Lyon, la constante A est recalée sur les lignes locales (lib/villes.ts et
+ * docs/villes.md). Elle voyage avec les carreaux préparés, comme la latitude qui sert aux distances.
  */
-const A = -8.03
 const B = 1.678
 const POIDS_EMPLOI = 0.3
 
@@ -40,22 +42,29 @@ const DEJA_DESSERVI = 400
 /** Fourchette affichée, d'après les écarts constatés sur les lignes existantes. */
 export const FOURCHETTE = { bas: 0.7, haut: 1.4 }
 
-/** Latitude de Lyon. Dans une autre ville, elle doit devenir un paramètre, sinon les distances est-ouest sont faussées. */
-const LAT0 = 45.755
-const MX = 111320 * Math.cos((LAT0 * Math.PI) / 180)
 const MY = 111320
-export const metres = (a: [number, number], b: [number, number]) => Math.hypot((a[0] - b[0]) * MX, (a[1] - b[1]) * MY)
+/** Mètres par degré de longitude à une latitude donnée. */
+export const metresParDegre = (latitude: number) => 111320 * Math.cos((latitude * Math.PI) / 180)
+/** Distance en mètres, les longitudes comptées à la latitude de la ville. */
+export const distance = (mx: number) => (a: [number, number], b: [number, number]) => Math.hypot((a[0] - b[0]) * mx, (a[1] - b[1]) * MY)
 
 export interface Carreaux {
   /** [lon, lat, habitants, emplois, déjà desservi (0 ou 1)] */
   cellules: Float64Array[]
   index: Map<string, number[]>
+  /** Mètres par degré de longitude à la latitude de la ville. */
+  mx: number
+  /** Constante A de la formule, recalée pour la ville. */
+  constante: number
+  ville: IdVille
 }
 
 const TUILE = 500
-const cle = (lon: number, lat: number) => `${Math.floor((lon * MX) / TUILE)}:${Math.floor((lat * MY) / TUILE)}`
 
-export function preparerCarreaux(brut: number[][], arrets: number[][]): Carreaux {
+export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pick<Ville, 'id' | 'latitude' | 'constante'>): Carreaux {
+  const mx = metresParDegre(ville.latitude)
+  const metres = distance(mx)
+  const cle = (lon: number, lat: number) => `${Math.floor((lon * mx) / TUILE)}:${Math.floor((lat * MY) / TUILE)}`
   const indexArrets = new Map<string, [number, number][]>()
   for (const [lon, lat] of arrets) {
     const k = cle(lon!, lat!)
@@ -68,7 +77,7 @@ export function preparerCarreaux(brut: number[][], arrets: number[][]): Carreaux
   brut.forEach(([lon, lat, pop, jobs], i) => {
     const p: [number, number] = [lon!, lat!]
     let desservi = 0
-    const tx = Math.floor((lon! * MX) / TUILE)
+    const tx = Math.floor((lon! * mx) / TUILE)
     const ty = Math.floor((lat! * MY) / TUILE)
     for (let dx = -1; dx <= 1 && !desservi; dx += 1) {
       for (let dy = -1; dy <= 1 && !desservi; dy += 1) {
@@ -86,17 +95,20 @@ export function preparerCarreaux(brut: number[][], arrets: number[][]): Carreaux
     l.push(i)
     index.set(k, l)
   })
-  return { cellules, index }
+  return { cellules, index, mx, constante: ville.constante, ville: ville.id }
 }
 
-export function longueurKm(arrets: [number, number][], mode: ModeLigne) {
+export function longueurKm(arrets: [number, number][], mode: ModeLigne, mx: number) {
+  const metres = distance(mx)
   let m = 0
   for (let i = 1; i < arrets.length; i += 1) m += metres(arrets[i - 1]!, arrets[i]!)
   return (m / 1000) * DETOUR[mode]
 }
 
 export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: Carreaux): Estimation {
-  const km = longueurKm(arrets, mode)
+  const { mx } = carreaux
+  const metres = distance(mx)
+  const km = longueurKm(arrets, mode, mx)
   const cout = Math.round(km * PRIX_KM[mode])
   const r = RAYON[mode]
   const pas = Math.ceil(r / TUILE)
@@ -106,7 +118,7 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
   let habitantsNonDesservis = 0
   let poidsNouveau = 0
   for (const a of arrets) {
-    const tx = Math.floor((a[0] * MX) / TUILE)
+    const tx = Math.floor((a[0] * mx) / TUILE)
     const ty = Math.floor((a[1] * MY) / TUILE)
     for (let dx = -pas; dx <= pas; dx += 1) {
       for (let dy = -pas; dy <= pas; dy += 1) {
@@ -126,7 +138,7 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
     }
   }
   const poids = habitants + POIDS_EMPLOI * emplois
-  const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(A) * poids ** B * FACTEUR[mode] : 0
+  const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(carreaux.constante) * poids ** B * FACTEUR[mode] : 0
   const nouveaux = poids > 0 ? voyageurs * (poidsNouveau / poids) : 0
   return {
     km,

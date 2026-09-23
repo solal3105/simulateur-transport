@@ -1,6 +1,7 @@
 // Copie de lib/regles.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
-import { ENTRETIEN_BUS, ENVELOPPE, MANDATS, PROJETS } from './catalogue.ts'
+import { MANDATS, PROJETS } from './catalogue.ts'
 import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, ModeLigne, Projet } from './types.ts'
+import type { Ville } from './villes.ts'
 
 /** Ce qu'un projet coûte et rapporte, une fois sa version et son option choisies. */
 export interface Resolu {
@@ -81,9 +82,18 @@ export interface Bilan {
   reste: number
 }
 
-export function bilanMandat(mandat: Mandat, chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>): Bilan {
+/** Le budget d'une ville : son enveloppe, l'entretien des bus, et si ses leviers de financement sont calculés. */
+export type Budget = Pick<Ville, 'enveloppe' | 'entretienBus' | 'leviers'>
+
+export function bilanMandat(
+  mandat: Mandat,
+  chantiers: Chantier[],
+  lignes: LigneJoueur[],
+  leviers: Record<Mandat, Leviers>,
+  budget: Budget,
+): Bilan {
   // Ce qui n'a pas été dépensé au premier mandat reste disponible au second.
-  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers).reste) : 0
+  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers, budget).reste) : 0
   let projets = 0
   let reports = 0
   const ajouter = (cout: number, d: { mandat: Mandat; etale: boolean }) => {
@@ -96,13 +106,14 @@ export function bilanMandat(mandat: Mandat, chantiers: Chantier[], lignes: Ligne
     if (p) ajouter(resoudre(p, c).cout, c)
   }
   for (const l of lignes) ajouter(l.estimation.cout, l)
-  const effet = effetLeviers(leviers[mandat])
-  const reste = ENVELOPPE + effet + reliquat - ENTRETIEN_BUS - projets - reports
+  // Là où les leviers ne sont pas calculés, ils ne changent rien au budget.
+  const effet = budget.leviers ? effetLeviers(leviers[mandat]) : 0
+  const reste = budget.enveloppe + effet + reliquat - budget.entretienBus - projets - reports
   return {
-    enveloppe: ENVELOPPE,
+    enveloppe: budget.enveloppe,
     leviers: effet,
     reliquat,
-    bus: ENTRETIEN_BUS,
+    bus: budget.entretienBus,
     projets: Math.round(projets),
     reports: Math.round(reports),
     reste: Math.round(reste),
@@ -163,9 +174,9 @@ export function score(chantiers: Chantier[], lignes: LigneJoueur[]): number {
 }
 
 /** Les chiffres qui résument un réseau, pour le bilan comme pour la comparaison de deux réseaux. */
-export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>) {
-  const b1 = bilanMandat(1, chantiers, lignes, leviers)
-  const b2 = bilanMandat(2, chantiers, lignes, leviers)
+export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>, budget: Budget) {
+  const b1 = bilanMandat(1, chantiers, lignes, leviers, budget)
+  const b2 = bilanMandat(2, chantiers, lignes, leviers, budget)
   const investi =
     chantiers.reduce((t, c) => {
       const p = PROJETS.get(c.id)

@@ -8,16 +8,20 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 import { PROJETS } from './lib/catalogue.ts'
 import { preparerCarreaux, type Carreaux } from './lib/modele.ts'
-import { compacter, normaliserPartie } from './lib/partie.ts'
+import { compacter, normaliserPartie, villeDePartie } from './lib/partie.ts'
 import { resoudre, resumer } from './lib/regles.ts'
+import { estVille, VILLES, type IdVille } from './lib/villes.ts'
 
 const base = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
 
-// Empreinte des données du modèle (public/data/carreaux.json et arrets.json de Lyon) : seules ces
-// données exactes peuvent être déposées, et une seule fois tant que la table est vide.
-const EMPREINTE_DONNEES = 'a2127334171f48f6fd596c2b0bc21474867bfd188eb8e65bd723ad1097519631'
+// Empreinte des données du modèle de chaque ville (carreaux.json et arrets.json de public/data ou
+// public/data/<ville>) : seules ces données exactes peuvent être déposées, une fois par ville.
+const EMPREINTES: Record<IdVille, string> = {
+  lyon: 'a2127334171f48f6fd596c2b0bc21474867bfd188eb8e65bd723ad1097519631',
+  toulouse: '8bb4ba127285f7407c9a4df8fc00492e6c80f8de1ece55b5495cee124e9878fa',
+}
 
 const ENTETES = {
   'Access-Control-Allow-Origin': '*',
@@ -33,17 +37,21 @@ async function empreinte(texte: string) {
   return [...new Uint8Array(octets)].map((o) => o.toString(16).padStart(2, '0')).join('')
 }
 
-let carreaux: Promise<Carreaux> | null = null
-function chargerCarreaux() {
-  carreaux ??= (async () => {
-    const { data, error } = await base.from('modele').select('carreaux, arrets').eq('ville', 'lyon').single()
-    if (error || !data) throw new Error('Données du modèle absentes')
-    return preparerCarreaux(data.carreaux as number[][], data.arrets as number[][])
-  })().catch((e) => {
-    carreaux = null
-    throw e
-  })
-  return carreaux
+const carreaux = new Map<IdVille, Promise<Carreaux>>()
+function chargerCarreaux(ville: IdVille) {
+  let p = carreaux.get(ville)
+  if (!p) {
+    p = (async () => {
+      const { data, error } = await base.from('modele').select('carreaux, arrets').eq('ville', ville).single()
+      if (error || !data) throw new Error(`Données du modèle absentes pour ${ville}`)
+      return preparerCarreaux(data.carreaux as number[][], data.arrets as number[][], VILLES[ville])
+    })().catch((e) => {
+      carreaux.delete(ville)
+      throw e
+    })
+    carreaux.set(ville, p)
+  }
+  return p
 }
 
 // Quelques insultes et termes haineux, comparés mot à mot une fois les accents et les chiffres déguisés retirés.
@@ -115,15 +123,17 @@ Deno.serve(async (req) => {
     const corps = await req.json()
     const action = corps?.action
 
-    // Dépôt unique des données du modèle, vérifiées par leur empreinte.
+    // Dépôt unique des données du modèle d'une ville, vérifiées par leur empreinte.
     if (action === 'deposer') {
-      const { count } = await base.from('modele').select('ville', { count: 'exact', head: true }).eq('ville', 'lyon')
+      const ville = corps.ville ?? 'lyon'
+      if (!estVille(ville)) return refuser('Ville inconnue.')
+      const { count } = await base.from('modele').select('ville', { count: 'exact', head: true }).eq('ville', ville)
       if (count) return refuser('Les données sont déjà déposées.', 409)
       if (!Array.isArray(corps.carreaux) || !Array.isArray(corps.arrets)) return refuser('Données incomplètes.')
-      if ((await empreinte(`${JSON.stringify(corps.carreaux)}|${JSON.stringify(corps.arrets)}`)) !== EMPREINTE_DONNEES) {
+      if ((await empreinte(`${JSON.stringify(corps.carreaux)}|${JSON.stringify(corps.arrets)}`)) !== EMPREINTES[ville]) {
         return refuser('Ces données ne sont pas celles du modèle.', 403)
       }
-      const { error } = await base.from('modele').insert({ ville: 'lyon', carreaux: corps.carreaux, arrets: corps.arrets })
+      const { error } = await base.from('modele').insert({ ville, carreaux: corps.carreaux, arrets: corps.arrets })
       if (error) throw error
       return repondre({ ok: true })
     }
@@ -171,10 +181,14 @@ Deno.serve(async (req) => {
           .gte('cree_le', hier)
         if ((count ?? 0) >= 10) return refuser('Vous avez déjà publié dix réseaux aujourd’hui. Revenez demain.', 429)
 
-        const partie = normaliserPartie(corps.partie, await chargerCarreaux())
+        const ville = villeDePartie(corps.partie)
+        if (!ville) return refuser('Ce réseau est illisible.')
+        const { data: fiche } = await base.from('villes').select('ouverte').eq('slug', ville).maybeSingle()
+        if (!fiche?.ouverte) return refuser('Les réseaux de cette ville ne peuvent pas encore être publiés.')
+        const partie = normaliserPartie(corps.partie, await chargerCarreaux(ville))
         if (!partie) return refuser('Ce réseau est illisible.')
         if (partie.chantiers.length + partie.lignes.length === 0) return refuser('Ce réseau ne contient aucun projet.')
-        const r = resumer(partie.chantiers, partie.lignes, partie.leviers)
+        const r = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[ville])
         if (!r.equilibre) return refuser('Ce réseau ne tient pas le budget des deux mandats : il ne peut pas être publié.')
 
         const modes = new Set<string>(partie.lignes.map((l) => l.mode))
@@ -188,6 +202,7 @@ Deno.serve(async (req) => {
           .from('reseaux')
           .insert({
             auteur: profil.id,
+            ville,
             titre,
             intention: intention || null,
             visibilite,

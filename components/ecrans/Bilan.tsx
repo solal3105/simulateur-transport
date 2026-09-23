@@ -12,6 +12,7 @@ import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
+import { VILLES } from '@/lib/villes'
 
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -23,6 +24,7 @@ import { Comparaison } from './Comparaison'
 const AVEC_TRACE = CATALOGUE.filter((p) => p.trace)
 const TOTAL = totauxCatalogue(AVEC_TRACE)
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
+const lignesTracees = (nombre: number) => `${nombre} ligne${nombre > 1 ? 's' : ''} tracée${nombre > 1 ? 's' : ''}`
 
 /**
  * Le bilan de fin de partie. Avec `partage`, il montre un réseau reçu par un lien ou publié dans la
@@ -32,11 +34,15 @@ const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
  */
 export function Bilan({ partage, quitter, publication }: { partage?: PartiePartagee; quitter?: () => void; publication?: Publication }) {
   const jeu = useJeu()
+  // Un réseau reçu garde sa ville, même si la partie du visiteur est ailleurs.
+  const ville = VILLES[partage?.ville ?? jeu.ville]
   const chantiers = partage?.chantiers ?? jeu.chantiers
   const lignes = partage?.lignes ?? jeu.lignes
   const leviers = partage?.leviers ?? jeu.leviers
   // Le visiteur d'un lien a peut-être déjà une partie enregistrée dans ce navigateur.
   const aUnePartie = jeu.chantiers.length + jeu.lignes.length > 0
+  // On ne compare que deux réseaux de la même ville.
+  const comparable = aUnePartie && jeu.ville === ville.id
   const [confirmer, setConfirmer] = useState(false)
   const [comparer, setComparer] = useState(false)
   const fermerComparaison = useCallback(() => setComparer(false), [])
@@ -47,7 +53,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const rejouer = () => {
     if (!partage) return jeu.rejouer()
     // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
-    if (!aUnePartie) jeu.commencer()
+    if (!aUnePartie) jeu.commencer(ville.id)
     quitter?.()
   }
   const reprendre = () => {
@@ -62,16 +68,16 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
   const resultat = useMemo(() => {
     const faits = new Set(chantiers.map((c) => c.id))
-    const laisses = AVEC_TRACE.filter((p) => !faits.has(p.id))
+    const laisses = ville.catalogue ? AVEC_TRACE.filter((p) => !faits.has(p.id)) : []
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
-      ...resumer(chantiers, lignes, leviers),
+      ...resumer(chantiers, lignes, leviers, ville),
       laisses,
       coutLaisse: laisses.reduce((t, p) => t + resoudre(p).cout, 0),
       plusGros,
       ouvertures: ouvertures(chantiers, lignes),
     }
-  }, [chantiers, lignes, leviers])
+  }, [chantiers, lignes, leviers, ville])
 
   // Le lien contient toute la partie : qui l'ouvre voit ce réseau se construire, sans compte ni serveur.
   const copierLien = async () => {
@@ -79,7 +85,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       ? `${window.location.origin}/reseau/${publication.id}`
       : partage
         ? window.location.href
-        : await lienDePartage({ chantiers, lignes, leviers })
+        : await lienDePartage({ ville: ville.id, chantiers, lignes, leviers })
     if (navigator.share && window.innerWidth < 1024) {
       try {
         await navigator.share({ url, title: 'Mon réseau de transport en 2038' })
@@ -106,9 +112,9 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     )
     const blob = await dessinerPartage(
       {
+        ville,
         voyageurs: resultat.voyageurs,
-        retenus: resultat.retenus,
-        total: AVEC_TRACE.length,
+        contenu: ville.catalogue ? `${resultat.retenus} projets sur ${AVEC_TRACE.length}` : lignesTracees(lignes.length),
         equilibre: resultat.equilibre,
         traces,
         lignes: lignes.map((l) => ({ arrets: l.arrets, couleur: couleurLigne(l.mode) })),
@@ -116,10 +122,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       },
       format,
     )
-    const fichier = new File([blob], `mon-reseau-tcl-2038-${format}.png`, { type: 'image/png' })
+    const fichier = new File([blob], `mon-reseau-${ville.id}-2038-${format}.png`, { type: 'image/png' })
     if (navigator.canShare?.({ files: [fichier] })) {
       try {
-        await navigator.share({ files: [fichier], title: 'Mon réseau TCL en 2038' })
+        await navigator.share({ files: [fichier], title: `Mon réseau ${ville.reseau} en 2038` })
         setEnvoi(null)
         return
       } catch {
@@ -144,14 +150,23 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
   const partCatalogue = TOTAL.voyageurs > 0 ? Math.round((resultat.voyageurs / TOTAL.voyageurs) * 100) : 0
   const partCout = TOTAL.cout > 0 ? Math.round((resultat.investi / TOTAL.cout) * 100) : 0
+  // Sans catalogue, il n'y a rien à quoi rapporter le réseau : seule la remarque sur les ouvertures tardives reste.
+  const explication = [
+    ville.catalogue ? `C’est ${partCatalogue} % de ce que le catalogue entier apporterait, pour ${partCout} % de son coût.` : '',
+    resultat.ouvertures.some((o) => o.annee > MANDATS[2].fin)
+      ? 'Certains de ces voyageurs n’arriveront qu’après 2038, quand les derniers chantiers seront terminés.'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <main className="min-h-dvh bg-white lg:fixed lg:inset-0">
       <div className="relative h-[300px] lg:absolute lg:inset-y-0 lg:right-[620px] lg:left-0 lg:h-auto">
-        <Carte marges={MARGES_GRAND} decor anneeMax={annee} partie={partage} />
+        <Carte marges={MARGES_GRAND} decor anneeMax={annee} partie={partage} ville={ville.id} />
         <div className="absolute top-4 left-4 flex items-center gap-2.5 lg:top-7 lg:left-7">
           <Logo taille={40} />
-          <span className="hidden text-[17px] font-black lg:inline">Simulateur TCL</span>
+          <span className="hidden text-[17px] font-black lg:inline">{ville.marque}</span>
         </div>
         <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
           <div className="rounded-2xl bg-white/90 px-4 py-2.5 shadow-flotte backdrop-blur">
@@ -199,17 +214,14 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             </span>
             <span className="text-base font-extrabold lg:text-xl">voyageurs</span>
           </div>
-          <p className="text-[14.5px] leading-relaxed text-gris lg:text-[15px]">
-            C’est {partCatalogue} % de ce que le catalogue entier apporterait, pour {partCout} % de son coût.
-            {resultat.ouvertures.some((o) => o.annee > MANDATS[2].fin)
-              ? ' Certains de ces voyageurs n’arriveront qu’après 2038, quand les derniers chantiers seront terminés.'
-              : ''}
-          </p>
+          {explication ? <p className="text-[14.5px] leading-relaxed text-gris lg:text-[15px]">{explication}</p> : null}
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {[
-            [`${resultat.retenus} sur ${AVEC_TRACE.length}`, 'projets retenus'],
+            ville.catalogue
+              ? [`${resultat.retenus} sur ${AVEC_TRACE.length}`, 'projets retenus']
+              : [String(lignes.length), lignes.length > 1 ? 'lignes tracées' : 'ligne tracée'],
             [n(resultat.investi), 'M€ investis'],
             [resultat.equilibre ? '0' : n(-resultat.deficit), resultat.equilibre ? '€ de déficit' : 'M€ de déficit'],
           ].map(([v, l]) => (
@@ -251,8 +263,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
         {resultat.nonDepense > 0 ? (
           <p className="text-[14.5px] leading-relaxed text-gris">
-            {partage ? 'Il reste' : 'Il vous reste'} {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer un
-            projet de plus, ou un premier chantier pour le mandat suivant.
+            {partage ? 'Il reste' : 'Il vous reste'} {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer{' '}
+            {ville.catalogue ? 'un projet de plus' : 'une ligne de plus'}, ou un premier chantier pour le mandat suivant.
           </p>
         ) : null}
 
@@ -283,7 +295,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               Jouer à partir de ce réseau
             </Bouton>
           ) : null}
-          {partage && aUnePartie ? (
+          {partage && comparable ? (
             <Bouton genre="encre" icone="carte" onClick={() => setComparer(true)}>
               Comparer avec mon réseau
             </Bouton>
@@ -318,7 +330,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             {!partage ? 'Rejouer une partie' : aUnePartie ? 'Retrouver ma partie' : 'Commencer ma propre partie'}
           </Bouton>
           {!partage && communauteActive ? (
-            <Link href="/communaute" className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3">
+            <Link
+              href={ville.id === 'lyon' ? '/communaute' : `/communaute?ville=${ville.id}`}
+              className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3"
+            >
               Voir les réseaux des autres joueurs
             </Link>
           ) : null}
@@ -330,7 +345,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       <AnimatePresence>
         {!partage && publier ? (
           <Publier
-            partie={{ chantiers, lignes, leviers }}
+            partie={{ ville: ville.id, chantiers, lignes, leviers }}
             voyageurs={resultat.voyageurs}
             investi={resultat.investi}
             inspire={jeu.inspire}
@@ -348,6 +363,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             b={{
               titre: jeu.ecran === 'bilan' ? 'Votre réseau' : 'Votre partie en cours',
               sujet: 'votre réseau',
+              ville: jeu.ville,
               chantiers: jeu.chantiers,
               lignes: jeu.lignes,
               leviers: jeu.leviers,

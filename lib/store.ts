@@ -8,6 +8,7 @@ import { approx } from './format'
 import type { PartiePartagee } from './lien'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
+import { VILLES, type IdVille } from './villes'
 
 export type Ecran = 'accueil' | 'tuto' | 'jeu' | 'fin-mandat' | 'bilan'
 
@@ -33,6 +34,8 @@ export interface Inspiration {
 }
 
 interface Etat {
+  /** La ville de la partie ; à l'accueil, celle qui est proposée. */
+  ville: IdVille
   ecran: Ecran
   tuto: number
   mandat: Mandat
@@ -49,7 +52,8 @@ interface Etat {
   /** Coût du projet en cours d'examen, affiché en aperçu sur la jauge. */
   apercu: number
 
-  commencer: () => void
+  /** Commence une partie dans une ville : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. */
+  commencer: (ville: IdVille) => void
   etapeTuto: (n: number) => void
   finirTuto: () => void
   ouvrir: (p: Panneau) => void
@@ -76,6 +80,7 @@ interface Etat {
 }
 
 const DEPART = {
+  ville: 'lyon' as IdVille,
   ecran: 'accueil' as Ecran,
   tuto: 0,
   mandat: 1 as Mandat,
@@ -95,7 +100,12 @@ export const useJeu = create<Etat>()(
   persist(
     (set, get) => ({
       ...DEPART,
-      commencer: () => set({ ecran: 'tuto', tuto: 0 }),
+      commencer: (ville) =>
+        set(
+          VILLES[ville].catalogue
+            ? { ...DEPART, ville, ecran: 'tuto', tuto: 0 }
+            : { ...DEPART, ville, ecran: 'jeu', brouillon: { mode: 'tram', arrets: [] }, panneau: { type: 'trace' } },
+        ),
       etapeTuto: (tuto) => set({ tuto }),
       finirTuto: () => set({ ecran: 'jeu', panneau: null }),
       // Le tutoriel avance avec les gestes du joueur : ouvrir un projet, puis le lancer.
@@ -153,12 +163,14 @@ export const useJeu = create<Etat>()(
               : null,
           }
         }),
-      rejouer: () => set({ ...DEPART }),
+      // L'accueil propose ensuite la même ville.
+      rejouer: () => set((s) => ({ ...DEPART, ville: s.ville })),
       reprendre: (p, inspire) => {
         const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
         const lignes = p.lignes.map(renommer)
         set({
           ...DEPART,
+          ville: p.ville,
           ecran: 'jeu',
           chantiers: p.chantiers.filter((c) => c.mandat === 1),
           lignes: lignes.filter((l) => l.mandat === 1),
@@ -208,7 +220,9 @@ export const useJeu = create<Etat>()(
       version: 3,
       skipHydration: true,
       storage: createJSONStorage(() => localStorage),
+      // Une partie enregistrée avant l'ouverture de Toulouse n'a pas de ville : elle reste à Lyon, valeur de départ.
       partialize: (s) => ({
+        ville: s.ville,
         ecran: s.ecran === 'tuto' ? 'jeu' : s.ecran,
         mandat: s.mandat,
         chantiers: s.chantiers,
@@ -221,3 +235,6 @@ export const useJeu = create<Etat>()(
     },
   ),
 )
+
+/** La ville de la partie en cours. */
+export const useVille = () => VILLES[useJeu((s) => s.ville)]

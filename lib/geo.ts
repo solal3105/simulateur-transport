@@ -1,8 +1,10 @@
 import type { Feature, MultiLineString, Polygon } from 'geojson'
 
-const LAT0 = 45.755
-const MX = 111320 * Math.cos((LAT0 * Math.PI) / 180)
+import { metresParDegre } from './modele'
+
 const MY = 111320
+// Les longueurs ne servent ici qu'à comparer des morceaux de tracé : la latitude de Lyon suffit.
+const MX = metresParDegre(45.755)
 
 /** Point au milieu de la plus longue partie d'un tracé, pour y poser son étiquette. */
 export function milieu(geometry: MultiLineString): [number, number] {
@@ -35,19 +37,20 @@ export function milieu(geometry: MultiLineString): [number, number] {
   return [p[0]!, p[1]!]
 }
 
-/** Cercle de rayon donné en mètres, en polygone. */
-export function cercle(centre: [number, number], rayon: number, cotes = 40): Feature<Polygon> {
+/** Cercle de rayon donné en mètres, en polygone, à la latitude de la ville. */
+export function cercle(centre: [number, number], rayon: number, latitude: number, cotes = 40): Feature<Polygon> {
+  const mx = metresParDegre(latitude)
   const anneau: [number, number][] = []
   for (let i = 0; i <= cotes; i += 1) {
     const t = (i / cotes) * Math.PI * 2
-    anneau.push([centre[0] + (Math.cos(t) * rayon) / MX, centre[1] + (Math.sin(t) * rayon) / MY])
+    anneau.push([centre[0] + (Math.cos(t) * rayon) / mx, centre[1] + (Math.sin(t) * rayon) / MY])
   }
   return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [anneau] } }
 }
 
-/** Carré de 200 m centré sur un point, pour la couche de densité. */
-export function carreau(lon: number, lat: number): [number, number][] {
-  const dx = 100 / MX
+/** Carré de 200 m centré sur un point, pour la couche de densité, à la latitude de la ville. */
+export function carreau(lon: number, lat: number, latitude: number): [number, number][] {
+  const dx = 100 / metresParDegre(latitude)
   const dy = 100 / MY
   return [
     [lon - dx, lat - dy],
@@ -57,21 +60,3 @@ export function carreau(lon: number, lat: number): [number, number][] {
     [lon - dx, lat - dy],
   ]
 }
-
-export const LIEUX: { nom: string; pos: [number, number]; grand?: boolean }[] = [
-  { nom: 'Lyon', pos: [4.835, 45.76], grand: true },
-  { nom: 'Villeurbanne', pos: [4.88, 45.771] },
-  { nom: 'Vénissieux', pos: [4.886, 45.697] },
-  { nom: 'Bron', pos: [4.912, 45.738] },
-  { nom: 'Vaulx-en-Velin', pos: [4.925, 45.78] },
-  { nom: 'Décines', pos: [4.96, 45.769] },
-  { nom: 'Caluire', pos: [4.846, 45.797] },
-  { nom: 'Écully', pos: [4.777, 45.776] },
-  { nom: 'Tassin', pos: [4.762, 45.762] },
-  { nom: 'Oullins', pos: [4.806, 45.714] },
-  { nom: 'Saint-Priest', pos: [4.944, 45.696] },
-  { nom: 'Rillieux', pos: [4.899, 45.818] },
-  { nom: 'Craponne', pos: [4.724, 45.745] },
-  { nom: 'Meyzieu', pos: [5.004, 45.767] },
-  { nom: 'Saint-Fons', pos: [4.855, 45.708] },
-]

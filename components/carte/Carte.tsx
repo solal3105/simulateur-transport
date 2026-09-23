@@ -15,12 +15,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
-import { useDonnees, type Donnees } from '@/lib/donnees'
+import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
-import { carreau, cercle, LIEUX, milieu } from '@/lib/geo'
+import { carreau, cercle, milieu } from '@/lib/geo'
 import { nommerArrets } from '@/lib/lieux'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
+import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
 if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
@@ -39,11 +40,6 @@ const COULEURS = {
   metroActuel: '#958e84',
 }
 
-/** Emprise de départ : la Métropole, de Tassin à Meyzieu. */
-const EMPRISE: [[number, number], [number, number]] = [
-  [4.74, 45.69],
-  [5.02, 45.83],
-]
 /** En deçà de ce zoom, les noms de quartiers restent cachés. */
 const ZOOM_QUARTIERS = 13
 
@@ -73,16 +69,18 @@ const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
   ['>=', ['get', 'rang'], rangMin],
 ]
 
-function styleDeBase(donnees: Donnees): StyleSpecification {
+function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
+  // Les paliers de densité dépendent de la ville : Toulouse est bien moins dense que Lyon.
+  const [d1, d2, d3, d4] = ville.densite
   const densite: FeatureCollection<Polygon, { poids: number }> = {
     type: 'FeatureCollection',
     features: donnees.carreauxBruts
       .map(([lon, lat, pop, jobs]) => ({ poids: pop! + 0.3 * jobs!, lon: lon!, lat: lat! }))
-      .filter((c) => c.poids >= 150)
+      .filter((c) => c.poids >= d1)
       .map((c) => ({
         type: 'Feature',
         properties: { poids: c.poids },
-        geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat)] },
+        geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat, ville.latitude)] },
       })),
   }
   const stations: FeatureCollection<Point> = {
@@ -162,7 +160,7 @@ function styleDeBase(donnees: Donnees): StyleSpecification {
         layout: { visibility: 'none' },
         paint: {
           'fill-color': COULEURS.rouge,
-          'fill-opacity': ['interpolate', ['linear'], ['get', 'poids'], 150, 0.06, 600, 0.18, 1500, 0.34, 3000, 0.55],
+          'fill-opacity': ['interpolate', ['linear'], ['get', 'poids'], d1, 0.06, d2, 0.18, d3, 0.34, d4, 0.55],
         },
       },
       {
@@ -388,6 +386,7 @@ export function Carte({
   decor = false,
   anneeMax,
   partie,
+  ville: villeImposee,
 }: {
   marges: { top: number; right: number; bottom: number; left: number }
   /** Carte d'illustration : pas de clic sur les projets, pas d'étiquettes. */
@@ -396,8 +395,12 @@ export function Carte({
   anneeMax?: number
   /** Un réseau partagé par lien, affiché à la place de la partie en cours. */
   partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'>
+  /** La ville à montrer, si ce n'est pas celle de la partie en cours : l'accueil, un réseau reçu. */
+  ville?: IdVille
 }) {
-  const donnees = useDonnees()
+  const villePartie = useJeu((s) => s.ville)
+  const ville = VILLES[villeImposee ?? villePartie]
+  const donnees = useDonnees(ville.id)
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
   const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
@@ -439,15 +442,12 @@ export function Carte({
     const boite = conteneur.current
     const m = new CarteMaplibre({
       container: boite,
-      style: styleDeBase(donnees),
-      bounds: EMPRISE,
+      style: styleDeBase(donnees, ville),
+      bounds: ville.emprise,
       fitBoundsOptions: { padding: 20 },
       minZoom: 9.5,
       maxZoom: 16,
-      maxBounds: [
-        [4.55, 45.6],
-        [5.2, 45.92],
-      ],
+      maxBounds: ville.limites,
       attributionControl: { compact: true, customAttribution: '© OpenStreetMap, INSEE' },
       dragRotate: false,
       pitchWithRotate: false,
@@ -456,7 +456,7 @@ export function Carte({
     m.touchZoomRotate.disableRotation()
     carte.current = m
 
-    for (const lieu of LIEUX) {
+    for (const lieu of ville.lieux) {
       const el = document.createElement('div')
       el.className = 'lieu'
       el.dataset.grand = lieu.grand ? '1' : '0'
@@ -464,8 +464,9 @@ export function Carte({
       new Marker({ element: el }).setLngLat(lieu.pos).addTo(m)
     }
     // Les quartiers n'apparaissent qu'en zoomant, pour ne pas charger la vue d'ensemble.
+    const [[ouest, sud], [est, nord]] = ville.zoneQuartiers
     for (const [lon, lat, nom] of donnees.lieux.quartiers) {
-      if (lon < 4.76 || lon > 4.99 || lat < 45.69 || lat > 45.82) continue
+      if (lon < ouest || lon > est || lat < sud || lat > nord) continue
       const el = document.createElement('div')
       el.className = 'lieu quartier'
       el.textContent = nom
@@ -516,7 +517,7 @@ export function Carte({
       pret.current = true
       appliquerEtat.current()
       // Le décor est plus lourd : il arrive après les données du jeu.
-      fetch('/data/decor.json')
+      fetch(adresseDonnees(ville.id, 'decor'))
         .then((r) => r.json())
         .then((d) => (m.getSource('decor') as GeoJSONSource | undefined)?.setData(d))
         .catch(() => {})
@@ -527,7 +528,7 @@ export function Carte({
       pret.current = false
       etiquettes.clear()
     }
-  }, [donnees, decor, etiquettes])
+  }, [donnees, decor, etiquettes, ville])
 
   // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {
@@ -619,7 +620,10 @@ export function Carte({
       )
       ;(m.getSource('brouillon') as GeoJSONSource).setData({ type: 'FeatureCollection', features: traits })
       const rayon = brouillon?.mode === 'metro' ? 600 : 400
-      ;(m.getSource('zones') as GeoJSONSource).setData({ type: 'FeatureCollection', features: arrets.map((a) => cercle(a, rayon)) })
+      ;(m.getSource('zones') as GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: arrets.map((a) => cercle(a, rayon, ville.latitude)),
+      })
 
       // Le nom de chaque arrêt posé, d'après le quartier ou la commune.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
@@ -634,7 +638,7 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax])
+  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville])
 
   // Pendant la première étape du tutoriel, la carte montre le T8.
   useEffect(() => {
@@ -665,9 +669,9 @@ export function Carte({
   const ecranPrecedent = useRef(ecran)
   useEffect(() => {
     const m = carte.current
-    if (m && ecranPrecedent.current === 'tuto' && ecran !== 'tuto') m.fitBounds(EMPRISE, { padding: marges, duration: 1200 })
+    if (m && ecranPrecedent.current === 'tuto' && ecran !== 'tuto') m.fitBounds(ville.emprise, { padding: marges, duration: 1200 })
     ecranPrecedent.current = ecran
-  }, [ecran, marges])
+  }, [ecran, marges, ville])
 
   // Recadrage quand les panneaux changent de taille.
   useEffect(() => {

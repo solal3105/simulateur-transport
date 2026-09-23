@@ -4,31 +4,36 @@ import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
 import { chargerTraces } from '@/lib/donnees'
-import { CADRE_MINIATURE, cheminsFond, cheminsReseau } from '@/lib/miniature'
-import type { PartieCompacte } from '@/lib/partie'
+import { cadreMiniature, cheminsFond, cheminsReseau } from '@/lib/miniature'
+import { villeDePartie, type PartieCompacte } from '@/lib/partie'
+import { VILLES, type IdVille } from '@/lib/villes'
 
 type Traces = Awaited<ReturnType<typeof chargerTraces>>
 
 /**
- * Un réseau en miniature, dessiné en SVG sans carte interactive : le Rhône et la Saône, le métro et
- * le tram actuels en gris, puis les projets et les lignes du réseau dans la couleur de leur mode.
+ * Un réseau en miniature, dessiné en SVG sans carte interactive : les fleuves, le métro et le tram
+ * actuels en gris, puis les projets et les lignes du réseau dans la couleur de leur mode.
  */
 export function MiniCarte({ partie, className }: { partie: PartieCompacte; className?: string }) {
-  const [traces, setTraces] = useState<Traces | null>(null)
+  const ville = VILLES[villeDePartie(partie) ?? 'lyon']
+  const [traces, setTraces] = useState<{ ville: IdVille; traces: Traces } | null>(null)
   useEffect(() => {
     let actif = true
-    chargerTraces().then((t) => actif && setTraces(t))
+    chargerTraces(ville.id)
+      .then((t) => actif && setTraces({ ville: ville.id, traces: t }))
+      .catch(() => {})
     return () => {
       actif = false
     }
-  }, [])
+  }, [ville.id])
 
-  const fond = useMemo(() => (traces ? cheminsFond(traces.fond) : null), [traces])
-  const reseau = useMemo(() => (traces ? cheminsReseau(traces.projets, partie) : []), [traces, partie])
+  const pretes = traces?.ville === ville.id ? traces.traces : null
+  const fond = useMemo(() => (pretes ? cheminsFond(pretes.fond, ville) : null), [pretes, ville])
+  const reseau = useMemo(() => (pretes ? cheminsReseau(pretes.projets, partie, ville) : []), [pretes, partie, ville])
 
   return (
     <svg
-      viewBox={CADRE_MINIATURE}
+      viewBox={cadreMiniature(ville).viewBox}
       preserveAspectRatio="xMidYMid slice"
       className={clsx('block h-full w-full bg-[#f4f1ec]', className)}
       aria-hidden="true"

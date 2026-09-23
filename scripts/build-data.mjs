@@ -1,7 +1,8 @@
 /**
- * Prépare les données servies au navigateur, dans public/data.
+ * Prépare les données servies au navigateur, dans public/data (Lyon) ou public/data/<ville>.
  *
  *   npm run data
+ *   node scripts/build-data.mjs toulouse
  *
  * Entrées :
  *   data/osm/*.json      extractions OpenStreetMap (voir scripts/fetch-osm.mjs)
@@ -15,15 +16,24 @@
  *   public/data/carreaux.json  habitants et emplois par carreau de 200 m
  *   public/data/decor.json     parcs, eau, grands axes, voies ferrées et limites de communes
  *   public/data/lieux.json     quartiers et communes, pour nommer les arrêts des lignes tracées
+ *
+ * Pour Toulouse, les lignes en chantier (ligne C, connexion de la ligne B) viennent d'OpenStreetMap et
+ * leurs stations de data/toulouse/stations-futures.json. Les carreaux d'habitants et d'emplois sont
+ * produits à part par scripts/carreaux-ville.py, et il n'y a pas de projets.
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const ville = process.argv[2] ?? 'lyon'
+if (!['lyon', 'toulouse'].includes(ville)) throw new Error(`Ville inconnue : ${ville}`)
 const src = (...p) => join(root, 'data', ...p)
-const out = join(root, 'public', 'data')
+const osm = (nom) => (ville === 'lyon' ? src('osm', nom) : src('osm', ville, nom))
+const out = join(root, 'public', 'data', ...(ville === 'lyon' ? [] : [ville]))
 mkdirSync(out, { recursive: true })
+/** Latitude de référence, pour les surfaces. */
+const LATITUDE = { lyon: 45.76, toulouse: 43.6 }[ville]
 
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'))
 const round = (v, d = 5) => Math.round(v * 10 ** d) / 10 ** d
@@ -62,42 +72,104 @@ const feature = (properties, coordinates) => ({
   geometry: { type: 'MultiLineString', coordinates },
 })
 
-// Fond de carte : fleuves, métro par ligne, tram.
-const rivers = readJson(src('osm', 'rivers.json')).elements
-const fleuves = rivers
-  .filter((e) => /Rhône|Saône/.test(e.tags?.name ?? '') && !/Canal/.test(e.tags?.name ?? ''))
-  .map((e) => ({ name: /Saône/.test(e.tags.name) ? 'saone' : 'rhone', coords: line(e.geometry, 0.00012) }))
-
-const metroWays = readJson(src('osm', 'metro.json')).elements.filter(
-  (e) => !e.tags?.service && /^Ligne [ABCD]$/.test(e.tags?.name ?? ''),
-)
-const tramWays = readJson(src('osm', 'tram.json')).elements.filter((e) => e.geometry && !e.tags?.service)
-
-const fond = {
-  type: 'FeatureCollection',
-  features: [
-    feature({ kind: 'fleuve', name: 'rhone' }, fleuves.filter((f) => f.name === 'rhone').map((f) => f.coords)),
-    feature({ kind: 'fleuve', name: 'saone' }, fleuves.filter((f) => f.name === 'saone').map((f) => f.coords)),
-    feature({ kind: 'tram' }, tramWays.map((e) => line(e.geometry))),
-    ...['A', 'B', 'C', 'D'].map((letter) =>
-      feature(
-        { kind: 'metro', line: letter },
-        metroWays.filter((e) => e.tags.name === `Ligne ${letter}`).map((e) => line(e.geometry)),
-      ),
-    ),
-  ],
-}
-writeFileSync(join(out, 'fond.json'), JSON.stringify(fond))
-
-// Décor : parcs, eau, routes, rail, communes.
 const lire = (nom) => {
   try {
-    return readJson(src('osm', `${nom}.json`)).elements
+    return readJson(osm(`${nom}.json`)).elements
   } catch {
     console.log(`${nom}.json absent : couche ignorée`)
     return []
   }
 }
+
+// Fond de carte : fleuves, métro par ligne, tram.
+function fondLyon() {
+  const rivers = readJson(osm('rivers.json')).elements
+  const fleuves = rivers
+    .filter((e) => /Rhône|Saône/.test(e.tags?.name ?? '') && !/Canal/.test(e.tags?.name ?? ''))
+    .map((e) => ({ name: /Saône/.test(e.tags.name) ? 'saone' : 'rhone', coords: line(e.geometry, 0.00012) }))
+
+  const metroWays = readJson(osm('metro.json')).elements.filter((e) => !e.tags?.service && /^Ligne [ABCD]$/.test(e.tags?.name ?? ''))
+  const tramWays = readJson(osm('tram.json')).elements.filter((e) => e.geometry && !e.tags?.service)
+
+  return {
+    type: 'FeatureCollection',
+    features: [
+      feature(
+        { kind: 'fleuve', name: 'rhone' },
+        fleuves.filter((f) => f.name === 'rhone').map((f) => f.coords),
+      ),
+      feature(
+        { kind: 'fleuve', name: 'saone' },
+        fleuves.filter((f) => f.name === 'saone').map((f) => f.coords),
+      ),
+      feature(
+        { kind: 'tram' },
+        tramWays.map((e) => line(e.geometry)),
+      ),
+      ...['A', 'B', 'C', 'D'].map((letter) =>
+        feature(
+          { kind: 'metro', line: letter },
+          metroWays.filter((e) => e.tags.name === `Ligne ${letter}`).map((e) => line(e.geometry)),
+        ),
+      ),
+    ],
+  }
+}
+
+/**
+ * Toulouse : la Garonne, les métros A et B, et comme lignes existantes celles qui ouvrent avant les
+ * premières du joueur : la ligne C (fin 2028), la connexion de la ligne B à Labège (2027) et la ligne
+ * Aéroport. Téléo est dessiné comme un tram, d'un trait fin.
+ */
+function fondToulouse() {
+  const garonne = readJson(osm('rivers.json')).elements.filter((e) => e.geometry && /Garonne/.test(e.tags?.name ?? ''))
+  const metro = readJson(osm('metro.json')).elements.filter((e) => e.type === 'way' && e.geometry)
+  const chantiers = lire('chantiers').filter((e) => e.geometry)
+  const futures = readJson(src('toulouse', 'stations-futures.json')).lignes
+  const stationsC = futures.find((l) => l.ligne === 'C').stations.map((s) => s.pos)
+  // Beaucoup de tronçons de la ligne C n'ont pas de nom dans OpenStreetMap : on garde ceux qui passent près de ses stations.
+  const presDeC = (e) => {
+    const m = e.geometry[Math.floor(e.geometry.length / 2)]
+    return stationsC.some(([lon, lat]) => Math.hypot((lon - m.lon) * 80700, (lat - m.lat) * 111320) < 1200)
+  }
+  const metroEnChantier = chantiers.filter((e) => e.tags?.construction === 'subway')
+  const connexionB = metroEnChantier.filter((e) => e.tags?.name === 'Connexion Ligne B').map((e) => line(e.geometry))
+  const ligneC = metroEnChantier.filter((e) => e.tags?.name === 'Ligne C' || (!e.tags?.name && presDeC(e))).map((e) => line(e.geometry))
+  // Sans tracé en chantier dans OpenStreetMap, la ligne relie ses stations en ligne droite.
+  const parStations = (ligne) => [futures.find((l) => l.ligne === ligne).stations.map((s) => s.pos)]
+  const trams = [
+    ...readJson(osm('tram.json')).elements.filter((e) => e.geometry),
+    ...chantiers.filter((e) => /tram|light_rail/.test(e.tags?.construction ?? '')),
+    ...lire('cable').filter((e) => e.geometry),
+  ]
+  return {
+    type: 'FeatureCollection',
+    features: [
+      feature(
+        { kind: 'fleuve', name: 'garonne' },
+        garonne.map((e) => line(e.geometry, 0.00012)),
+      ),
+      feature(
+        { kind: 'tram' },
+        trams.map((e) => line(e.geometry)),
+      ),
+      feature(
+        { kind: 'metro', line: 'A' },
+        metro.filter((e) => e.tags?.name === 'Ligne A').map((e) => line(e.geometry)),
+      ),
+      feature({ kind: 'metro', line: 'B' }, [
+        ...metro.filter((e) => e.tags?.name !== 'Ligne A').map((e) => line(e.geometry)),
+        ...(connexionB.length ? connexionB : parStations('B')),
+      ]),
+      feature({ kind: 'metro', line: 'C' }, ligneC.length ? ligneC : parStations('C')),
+    ],
+  }
+}
+
+const fond = ville === 'lyon' ? fondLyon() : fondToulouse()
+writeFileSync(join(out, 'fond.json'), JSON.stringify(fond))
+
+// Décor : parcs, eau, routes, rail, communes.
 
 /** Assemble les morceaux d'un contour (membres « outer » d'une relation) en anneaux fermés. */
 function anneaux(morceaux) {
@@ -133,7 +205,7 @@ const simplifierAnneau = (anneau, tolerance) => {
 const aire = (anneau) => {
   let a = 0
   for (let i = 1; i < anneau.length; i += 1) a += anneau[i - 1][0] * anneau[i][1] - anneau[i][0] * anneau[i - 1][1]
-  return Math.abs(a / 2) * 111320 * 111320 * Math.cos((45.76 * Math.PI) / 180)
+  return Math.abs(a / 2) * 111320 * 111320 * Math.cos((LATITUDE * Math.PI) / 180)
 }
 
 function polygones(elements, aireMin, tolerance) {
@@ -159,54 +231,98 @@ const polygone = (properties, rings) => ({
   geometry: { type: 'MultiPolygon', coordinates: rings.map((r) => [r]) },
 })
 
-const lignesDe = (elements, tolerance) => elements.filter((e) => e.geometry).map((e) => line(e.geometry, tolerance, 4)).filter((l) => l.length > 1)
+const lignesDe = (elements, tolerance) =>
+  elements
+    .filter((e) => e.geometry)
+    .map((e) => line(e.geometry, tolerance, 4))
+    .filter((l) => l.length > 1)
 const routes = lire('routes')
-const communesOsm = lire('communes').filter((e) => e.tags?.name)
+const communesOsm = ville === 'lyon' ? lire('communes').filter((e) => e.tags?.name) : []
+// Hors de Lyon, les contours des communes viennent de geo.api.gouv.fr (voir scripts/fetch-osm.mjs).
+const contours = ville === 'lyon' ? [] : readJson(osm('contours.json')).features
+const anneauxExterieurs = (g) =>
+  g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map((p) => p[0]) : []
 const decor = {
   type: 'FeatureCollection',
   features: [
     polygone({ kind: 'parc' }, polygones(lire('parcs'), 25000, 0.00014)),
     polygone({ kind: 'eau' }, polygones(lire('eau'), 10000, 0.0001)),
-    feature({ kind: 'route', rang: 1 }, lignesDe(routes.filter((e) => /motorway|trunk/.test(e.tags?.highway ?? '')), 0.00012)),
-    feature({ kind: 'route', rang: 2 }, lignesDe(routes.filter((e) => e.tags?.highway === 'primary'), 0.00012)),
-    feature({ kind: 'route', rang: 3 }, lignesDe(routes.filter((e) => e.tags?.highway === 'secondary'), 0.00018)),
-    feature({ kind: 'rail' }, lignesDe(lire('rail'), 0.00012)),
     feature(
-      { kind: 'limite' },
-      communesOsm.flatMap((e) => e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => line(m.geometry, 0.0003, 4))),
+      { kind: 'route', rang: 1 },
+      lignesDe(
+        routes.filter((e) => /motorway|trunk/.test(e.tags?.highway ?? '')),
+        0.00012,
+      ),
     ),
+    feature(
+      { kind: 'route', rang: 2 },
+      lignesDe(
+        routes.filter((e) => e.tags?.highway === 'primary'),
+        0.00012,
+      ),
+    ),
+    feature(
+      { kind: 'route', rang: 3 },
+      lignesDe(
+        routes.filter((e) => e.tags?.highway === 'secondary'),
+        0.00018,
+      ),
+    ),
+    feature({ kind: 'rail' }, lignesDe(lire('rail'), 0.00012)),
+    feature({ kind: 'limite' }, [
+      ...communesOsm.flatMap((e) => e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => line(m.geometry, 0.0003, 4))),
+      ...contours.flatMap((f) =>
+        anneauxExterieurs(f.geometry).map((r) => simplify(r, 0.0003).map(([lon, lat]) => [round(lon, 4), round(lat, 4)])),
+      ),
+    ]),
   ],
 }
 writeFileSync(join(out, 'decor.json'), JSON.stringify(decor))
 
 // Noms de lieux : quartiers d'abord, communes pour le reste.
-const communes = communesOsm
-  .map((e) => ({
+const communes = [
+  ...communesOsm.map((e) => ({
     nom: e.tags.name,
     anneaux: anneaux(e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => m.geometry.map((g) => [g.lon, g.lat]))).map((r) =>
       simplifierAnneau(r, 0.0006).map(([lon, lat]) => [round(lon, 4), round(lat, 4)]),
     ),
-  }))
-  .filter((c) => c.anneaux.length)
+  })),
+  ...contours.map((f) => ({
+    nom: f.properties.nom,
+    anneaux: anneauxExterieurs(f.geometry).map((r) => simplifierAnneau(r, 0.0006).map(([lon, lat]) => [round(lon, 4), round(lat, 4)])),
+  })),
+].filter((c) => c.anneaux.length)
 const quartiers = lire('lieux')
   .filter((e) => /suburb|quarter|neighbourhood/.test(e.tags?.place ?? '') && e.tags?.name && !/Arrondissement/i.test(e.tags.name))
   .map((e) => [round(e.lon, 4), round(e.lat, 4), e.tags.name])
-const arrondissements = lire('lieux')
-  .filter((e) => /^(\d+)(er|e) Arrondissement$/i.test(e.tags?.name ?? ''))
-  .map((e) => [round(e.lon, 4), round(e.lat, 4), `Lyon ${e.tags.name.replace(/ Arrondissement/i, '')}`])
+// Les arrondissements ne servent qu'à Lyon, dont la commune est trop grande pour nommer un arrêt.
+const arrondissements =
+  ville === 'lyon'
+    ? lire('lieux')
+        .filter((e) => /^(\d+)(er|e) Arrondissement$/i.test(e.tags?.name ?? ''))
+        .map((e) => [round(e.lon, 4), round(e.lat, 4), `Lyon ${e.tags.name.replace(/ Arrondissement/i, '')}`])
+    : []
 writeFileSync(join(out, 'lieux.json'), JSON.stringify({ communes, quartiers, arrondissements }))
 
-// Arrêts existants, pour savoir qui est déjà desservi.
-const stops = readJson(src('osm', 'stops.json')).elements.map((e) => [
-  round(e.lon),
-  round(e.lat),
-  e.tags?.subway === 'yes' || e.tags?.station === 'subway' ? 1 : 0,
-])
+// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse, les stations des lignes qui ouvrent
+// avant celles du joueur comptent aussi.
+const stops = [
+  ...readJson(osm('stops.json')).elements.map((e) => [
+    round(e.lon),
+    round(e.lat),
+    e.tags?.subway === 'yes' || e.tags?.station === 'subway' ? 1 : 0,
+  ]),
+  ...(ville === 'toulouse'
+    ? readJson(src('toulouse', 'stations-futures.json')).lignes.flatMap((l) =>
+        l.stations.filter((s) => !s.existante).map((s) => [round(s.pos[0]), round(s.pos[1]), 1]),
+      )
+    : []),
+]
 writeFileSync(join(out, 'arrets.json'), JSON.stringify(stops))
 
-// Tracés des projets du catalogue.
+// Tracés des projets du catalogue : seule Lyon en a un.
 const projets = { type: 'FeatureCollection', features: [] }
-for (const file of readdirSync(src('projets')).filter((f) => f.endsWith('.geojson'))) {
+for (const file of ville === 'lyon' ? readdirSync(src('projets')).filter((f) => f.endsWith('.geojson')) : []) {
   const raw = readJson(src('projets', file))
   const features = raw.type === 'FeatureCollection' ? raw.features : [raw]
   const coords = []
@@ -222,7 +338,17 @@ for (const file of readdirSync(src('projets')).filter((f) => f.endsWith('.geojso
 }
 writeFileSync(join(out, 'projets.json'), JSON.stringify(projets))
 
-// Carreaux INSEE : habitants recalés sur le recensement, emplois plafonnés.
+// Carreaux INSEE : habitants recalés sur le recensement, emplois plafonnés. Hors de Lyon, ils viennent
+// de scripts/carreaux-ville.py, qui écrit directement public/data/<ville>/carreaux.json.
+if (ville !== 'lyon') {
+  const carreaux = readJson(join(out, 'carreaux.json'))
+  console.log(
+    `${ville} : décor ${decor.features.map((f) => f.geometry.coordinates.length).join('/')} éléments, ${quartiers.length} quartiers, ${communes.length} communes, ` +
+      `fond ${fond.features.map((f) => f.geometry.coordinates.length).join('/')}, ${stops.length} arrêts, ${carreaux.length} carreaux`,
+  )
+  process.exit(0)
+}
+
 /** Filosofi ignore foyers, résidences et hébergements collectifs : on recale sur le recensement 2022. */
 const POP_FACTOR = 1433613 / 1297490
 /** Les sièges des grandes administrations créent des pics artificiels dans la répartition Sirene. */
@@ -252,6 +378,6 @@ writeFileSync(join(out, 'carreaux.json'), JSON.stringify(carreaux))
 const total = carreaux.reduce((acc, c) => [acc[0] + c[2], acc[1] + c[3]], [0, 0])
 console.log(
   `décor ${decor.features.map((f) => f.geometry.coordinates.length).join('/')} éléments, ${quartiers.length} quartiers, ${communes.length} communes, ` +
-  `fond ${fond.features.length} couches, ${stops.length} arrêts, ${projets.features.length} tracés, ` +
+    `fond ${fond.features.length} couches, ${stops.length} arrêts, ${projets.features.length} tracés, ` +
     `${carreaux.length} carreaux (${Math.round(total[0])} habitants, ${Math.round(total[1])} emplois)`,
 )

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 
 import { Carte } from '../carte/Carte'
 import { FicheProjet } from '../panneaux/FicheProjet'
@@ -88,7 +88,8 @@ function Legende() {
 }
 
 export function Partie() {
-  const { panneau, brouillon, ecran, ouvrir, tracer, tuto: etapeTuto } = useJeu()
+  const { panneau, brouillon, ecran, ouvrir, tracer, tuto: etapeTuto, lignes } = useJeu()
+  const ville = useVille()
   const grand = useGrandEcran()
   const tuto = ecran === 'tuto'
 
@@ -103,7 +104,9 @@ export function Partie() {
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-sable" data-tuto={tuto ? etapeTuto : undefined}>
-      <h1 className="sr-only">Simulateur TCL, partie en cours</h1>
+      <h1 className="sr-only">
+        {ville.marque}, partie en cours à {ville.nom}
+      </h1>
       <Carte marges={marges} />
       <Entete />
       {!tuto || etapeTuto === 2 ? <Programme /> : null}
@@ -114,9 +117,18 @@ export function Partie() {
             <Bouton genre="encre" iconeAGauche="trace" taille="petit" onClick={() => tracer('tram')} className="shadow-flotte">
               Créer ma ligne
             </Bouton>
-            <Bouton genre="contour" iconeAGauche="liste" taille="petit" onClick={() => ouvrir({ type: 'liste' })} className="shadow-flotte">
-              Voir en liste
-            </Bouton>
+            {/* Sans catalogue, la liste ne montre que les lignes tracées. */}
+            {ville.catalogue || lignes.length > 0 ? (
+              <Bouton
+                genre="contour"
+                iconeAGauche="liste"
+                taille="petit"
+                onClick={() => ouvrir({ type: 'liste' })}
+                className="shadow-flotte"
+              >
+                {ville.catalogue ? 'Voir en liste' : 'Voir mes lignes'}
+              </Bouton>
+            ) : null}
           </div>
           <Legende />
         </>

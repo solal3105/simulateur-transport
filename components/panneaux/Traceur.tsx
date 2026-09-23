@@ -8,28 +8,29 @@ import { approx, km, n } from '@/lib/format'
 import { nommerArrets } from '@/lib/lieux'
 import { DUREE_CHANTIER, estimer, PRIX_KM } from '@/lib/modele'
 import { ouverture } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, ModeLigne } from '@/lib/types'
 
 import { useBilan } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
 import { Panneau } from './Panneau'
 
+// Les prix au kilomètre viennent de chantiers lyonnais, dans toutes les villes : les textes le disent.
 const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; repere: string }[] = [
-  { id: 'tram', nom: 'Tramway', court: 'Tram', icone: 'tram', repere: 'Moyenne des T6 nord, T9 et T10, entre 32 et 37 M€ par km.' },
+  { id: 'tram', nom: 'Tramway', court: 'Tram', icone: 'tram', repere: 'Moyenne des T6 nord, T9 et T10 de Lyon, entre 32 et 37 M€ par km.' },
   {
     id: 'bus',
     nom: 'Bus à haut niveau de service',
     court: 'Bus rapide',
     icone: 'bus',
-    repere: 'Comme la ligne TB12 Part-Dieu - Sept Chemins, entre 12 et 17 M€ par km.',
+    repere: 'Comme la ligne TB12 Part-Dieu - Sept Chemins à Lyon, entre 12 et 17 M€ par km.',
   },
   {
     id: 'metro',
     nom: 'Métro automatique',
     court: 'Métro',
     icone: 'metro',
-    repere: 'Le prolongement du métro B à Saint-Genis-Laval a coûté environ 160 M€ par km.',
+    repere: 'Le prolongement du métro B de Lyon à Saint-Genis-Laval a coûté environ 160 M€ par km.',
   },
   {
     id: 'cable',
@@ -42,7 +43,7 @@ const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; reper
 const NOM_MODE: Record<ModeLigne, string> = { tram: 'tramway', bus: 'bus rapide', metro: 'métro', cable: 'téléphérique' }
 
 export function useEstimation(): Estimation | null {
-  const donnees = useDonnees()
+  const donnees = useDonnees(useVille().id)
   const brouillon = useJeu((s) => s.brouillon)
   return useMemo(() => (donnees && brouillon ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux) : null), [donnees, brouillon])
 }
@@ -78,7 +79,8 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
 
 /** Poser un arrêt en tapant le nom d'un quartier ou d'une commune : l'alternative au toucher sur la carte. */
 function AjoutParNom() {
-  const donnees = useDonnees()
+  const ville = useVille()
+  const donnees = useDonnees(ville.id)
   const ajouterArret = useJeu((s) => s.ajouterArret)
   const [texte, setTexte] = useState('')
   const [erreur, setErreur] = useState('')
@@ -86,9 +88,10 @@ function AjoutParNom() {
   const [ouvert, setOuvert] = useState(false)
   const lieux = useMemo(() => {
     if (!donnees) return []
-    const dansMetropole = ([lon, lat]: [number, number]) => lon > 4.68 && lon < 5.12 && lat > 45.64 && lat < 45.88
+    const [[ouest, sud], [est, nord]] = ville.zoneRecherche
+    const dansLaZone = ([lon, lat]: [number, number]) => lon > ouest && lon < est && lat > sud && lat < nord
     const quartiers = donnees.lieux.quartiers
-      .filter(([lon, lat]) => dansMetropole([lon, lat]))
+      .filter(([lon, lat]) => dansLaZone([lon, lat]))
       .map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
     const communes = donnees.lieux.communes
       .map((c) => {
@@ -97,13 +100,14 @@ function AjoutParNom() {
         const lat = anneau.reduce((t, p) => t + p[1], 0) / Math.max(1, anneau.length)
         return { nom: c.nom, pos: [lon, lat] as [number, number] }
       })
-      .filter((c) => dansMetropole(c.pos) && c.nom !== 'Lyon')
+      // Lyon se cherche par arrondissement.
+      .filter((c) => dansLaZone(c.pos) && c.nom !== 'Lyon')
     const arrondissements = donnees.lieux.arrondissements.map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
     const vus = new Set<string>()
     return [...arrondissements, ...communes, ...quartiers]
       .filter((l) => (vus.has(l.nom) ? false : (vus.add(l.nom), true)))
       .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
-  }, [donnees])
+  }, [donnees, ville])
 
   const ajouter = (ev: React.FormEvent) => {
     ev.preventDefault()
@@ -111,7 +115,7 @@ function AjoutParNom() {
     const trouve =
       lieux.find((l) => l.nom.toLocaleLowerCase('fr') === cherche) ?? lieux.find((l) => l.nom.toLocaleLowerCase('fr').startsWith(cherche))
     if (!cherche || !trouve) {
-      setErreur('Nous ne trouvons pas ce lieu. Essayez un nom de commune ou de quartier de la Métropole.')
+      setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de commune ou de quartier ${ville.territoire}.`)
       return
     }
     ajouterArret(trouve.pos)
@@ -138,7 +142,7 @@ function AjoutParNom() {
             list="lieux-arrets"
             value={texte}
             onChange={(ev) => setTexte(ev.target.value)}
-            placeholder="Gratte-Ciel, Bron, Lyon 7e…"
+            placeholder={ville.exempleRecherche}
             aria-describedby={erreur ? 'erreur-arret' : undefined}
             className="min-h-11 min-w-0 flex-1 rounded-xl bg-sable px-3.5 text-[15px] font-semibold outline-none focus:shadow-[inset_0_0_0_2px_var(--color-encre)]"
           />
@@ -293,7 +297,7 @@ export function Traceur() {
 
 /** Noms des arrêts du tracé en cours, d'après les quartiers et les communes. */
 function useNomsArrets() {
-  const donnees = useDonnees()
+  const donnees = useDonnees(useVille().id)
   const brouillon = useJeu((s) => s.brouillon)
   return useMemo(() => (donnees && brouillon ? nommerArrets(brouillon.arrets, donnees.lieux) : []), [donnees, brouillon])
 }
@@ -301,6 +305,7 @@ function useNomsArrets() {
 /** Le résultat d'une ligne terminée, avant de la construire. */
 export function MaLigne() {
   const { brouillon, mandat, construireLigne, ouvrir } = useJeu()
+  const ville = useVille()
   const bilan = useBilan()
   const e = useEstimation()
   const noms = useNomsArrets()
@@ -382,7 +387,7 @@ export function MaLigne() {
         d’une ligne voisine. C’est ce chiffre qui s’ajoute à votre score.
       </p>
       <p className="text-[13.5px] leading-relaxed text-gris">
-        Pour comparer, le tram T9, long de 11,3 km, est attendu à 38 000 voyageurs par jour pour 290 M€.{' '}
+        {ville.repere}{' '}
         <button
           type="button"
           onClick={() => ouvrir({ type: 'methode' })}

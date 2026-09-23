@@ -1,0 +1,576 @@
+{
+ "autorite": "Tisséo Collectivités",
+ "source": "geo.api.gouv.fr, communes des cinq intercommunalités membres, consulté le 23 septembre 2026",
+ "communes": [
+  {
+   "code": "31003",
+   "nom": "Aigrefeuille",
+   "epci": "243100518"
+  },
+  {
+   "code": "31004",
+   "nom": "Ayguesvives",
+   "epci": "243100633"
+  },
+  {
+   "code": "31022",
+   "nom": "Aucamville",
+   "epci": "243100518"
+  },
+  {
+   "code": "31025",
+   "nom": "Aureville",
+   "epci": "243100633"
+  },
+  {
+   "code": "31032",
+   "nom": "Aussonne",
+   "epci": "243100518"
+  },
+  {
+   "code": "31035",
+   "nom": "Auzeville-Tolosane",
+   "epci": "243100633"
+  },
+  {
+   "code": "31036",
+   "nom": "Auzielle",
+   "epci": "243100633"
+  },
+  {
+   "code": "31044",
+   "nom": "Balma",
+   "epci": "243100518"
+  },
+  {
+   "code": "31048",
+   "nom": "Baziège",
+   "epci": "243100633"
+  },
+  {
+   "code": "31053",
+   "nom": "Beaupuy",
+   "epci": "243100518"
+  },
+  {
+   "code": "31056",
+   "nom": "Beauzelle",
+   "epci": "243100518"
+  },
+  {
+   "code": "31057",
+   "nom": "Belberaud",
+   "epci": "243100633"
+  },
+  {
+   "code": "31058",
+   "nom": "Belbèze-de-Lauragais",
+   "epci": "243100633"
+  },
+  {
+   "code": "31069",
+   "nom": "Blagnac",
+   "epci": "243100518"
+  },
+  {
+   "code": "31075",
+   "nom": "Bonrepos-sur-Aussonnelle",
+   "epci": "200068641"
+  },
+  {
+   "code": "31087",
+   "nom": "Bragayrac",
+   "epci": "200068641"
+  },
+  {
+   "code": "31088",
+   "nom": "Brax",
+   "epci": "243100518"
+  },
+  {
+   "code": "31091",
+   "nom": "Bruguières",
+   "epci": "243100518"
+  },
+  {
+   "code": "31113",
+   "nom": "Castanet-Tolosan",
+   "epci": "243100633"
+  },
+  {
+   "code": "31116",
+   "nom": "Castelginest",
+   "epci": "243100518"
+  },
+  {
+   "code": "31117",
+   "nom": "Castelmaurou",
+   "epci": "243100815"
+  },
+  {
+   "code": "31148",
+   "nom": "Clermont-le-Fort",
+   "epci": "243100633"
+  },
+  {
+   "code": "31149",
+   "nom": "Colomiers",
+   "epci": "243100518"
+  },
+  {
+   "code": "31150",
+   "nom": "Cornebarrieu",
+   "epci": "243100518"
+  },
+  {
+   "code": "31151",
+   "nom": "Corronsac",
+   "epci": "243100633"
+  },
+  {
+   "code": "31157",
+   "nom": "Cugnaux",
+   "epci": "243100518"
+  },
+  {
+   "code": "31161",
+   "nom": "Deyme",
+   "epci": "243100633"
+  },
+  {
+   "code": "31162",
+   "nom": "Donneville",
+   "epci": "243100633"
+  },
+  {
+   "code": "31163",
+   "nom": "Drémil-Lafage",
+   "epci": "243100518"
+  },
+  {
+   "code": "31165",
+   "nom": "Eaunes",
+   "epci": "200068641"
+  },
+  {
+   "code": "31166",
+   "nom": "Empeaux",
+   "epci": "200068641"
+  },
+  {
+   "code": "31169",
+   "nom": "Escalquens",
+   "epci": "243100633"
+  },
+  {
+   "code": "31171",
+   "nom": "Espanès",
+   "epci": "243100633"
+  },
+  {
+   "code": "31181",
+   "nom": "Le Fauga",
+   "epci": "200068641"
+  },
+  {
+   "code": "31182",
+   "nom": "Fenouillet",
+   "epci": "243100518"
+  },
+  {
+   "code": "31184",
+   "nom": "Flourens",
+   "epci": "243100518"
+  },
+  {
+   "code": "31186",
+   "nom": "Fonbeauzard",
+   "epci": "243100518"
+  },
+  {
+   "code": "31187",
+   "nom": "Fonsorbes",
+   "epci": "200068641"
+  },
+  {
+   "code": "31188",
+   "nom": "Fontenilles",
+   "epci": "243100781"
+  },
+  {
+   "code": "31192",
+   "nom": "Fourquevaux",
+   "epci": "243100633"
+  },
+  {
+   "code": "31203",
+   "nom": "Frouzins",
+   "epci": "200068641"
+  },
+  {
+   "code": "31205",
+   "nom": "Gagnac-sur-Garonne",
+   "epci": "243100518"
+  },
+  {
+   "code": "31227",
+   "nom": "Goyrans",
+   "epci": "243100633"
+  },
+  {
+   "code": "31230",
+   "nom": "Gratentour",
+   "epci": "243100518"
+  },
+  {
+   "code": "31240",
+   "nom": "Issus",
+   "epci": "243100633"
+  },
+  {
+   "code": "31248",
+   "nom": "Labarthe-sur-Lèze",
+   "epci": "200068641"
+  },
+  {
+   "code": "31249",
+   "nom": "Labastide-Beauvoir",
+   "epci": "243100633"
+  },
+  {
+   "code": "31252",
+   "nom": "Labastide-Saint-Sernin",
+   "epci": "243100815"
+  },
+  {
+   "code": "31253",
+   "nom": "Labastidette",
+   "epci": "200068641"
+  },
+  {
+   "code": "31254",
+   "nom": "Labège",
+   "epci": "243100633"
+  },
+  {
+   "code": "31259",
+   "nom": "Lacroix-Falgarde",
+   "epci": "243100633"
+  },
+  {
+   "code": "31269",
+   "nom": "Lamasquère",
+   "epci": "200068641"
+  },
+  {
+   "code": "31277",
+   "nom": "Lasserre-Pradère",
+   "epci": "243100781"
+  },
+  {
+   "code": "31282",
+   "nom": "Launaguet",
+   "epci": "243100518"
+  },
+  {
+   "code": "31284",
+   "nom": "Lauzerville",
+   "epci": "243100633"
+  },
+  {
+   "code": "31287",
+   "nom": "Lavernose-Lacasse",
+   "epci": "200068641"
+  },
+  {
+   "code": "31291",
+   "nom": "Léguevin",
+   "epci": "243100781"
+  },
+  {
+   "code": "31293",
+   "nom": "Lespinasse",
+   "epci": "243100518"
+  },
+  {
+   "code": "31297",
+   "nom": "Lévignac",
+   "epci": "243100781"
+  },
+  {
+   "code": "31339",
+   "nom": "Mérenvielle",
+   "epci": "243100781"
+  },
+  {
+   "code": "31340",
+   "nom": "Mervilla",
+   "epci": "243100633"
+  },
+  {
+   "code": "31351",
+   "nom": "Mondonville",
+   "epci": "243100518"
+  },
+  {
+   "code": "31352",
+   "nom": "Mondouzil",
+   "epci": "243100518"
+  },
+  {
+   "code": "31355",
+   "nom": "Mons",
+   "epci": "243100518"
+  },
+  {
+   "code": "31364",
+   "nom": "Montberon",
+   "epci": "243100815"
+  },
+  {
+   "code": "31366",
+   "nom": "Montbrun-Lauragais",
+   "epci": "243100633"
+  },
+  {
+   "code": "31381",
+   "nom": "Montgiscard",
+   "epci": "243100633"
+  },
+  {
+   "code": "31384",
+   "nom": "Montlaur",
+   "epci": "243100633"
+  },
+  {
+   "code": "31389",
+   "nom": "Montrabé",
+   "epci": "243100518"
+  },
+  {
+   "code": "31395",
+   "nom": "Muret",
+   "epci": "200068641"
+  },
+  {
+   "code": "31401",
+   "nom": "Noueilles",
+   "epci": "243100633"
+  },
+  {
+   "code": "31402",
+   "nom": "Odars",
+   "epci": "243100633"
+  },
+  {
+   "code": "31409",
+   "nom": "Péchabou",
+   "epci": "243100633"
+  },
+  {
+   "code": "31410",
+   "nom": "Pechbonnieu",
+   "epci": "243100815"
+  },
+  {
+   "code": "31411",
+   "nom": "Pechbusque",
+   "epci": "243100633"
+  },
+  {
+   "code": "31417",
+   "nom": "Pibrac",
+   "epci": "243100518"
+  },
+  {
+   "code": "31418",
+   "nom": "Pin-Balma",
+   "epci": "243100518"
+  },
+  {
+   "code": "31420",
+   "nom": "Pinsaguel",
+   "epci": "200068641"
+  },
+  {
+   "code": "31421",
+   "nom": "Pins-Justaret",
+   "epci": "200068641"
+  },
+  {
+   "code": "31424",
+   "nom": "Plaisance-du-Touch",
+   "epci": "243100781"
+  },
+  {
+   "code": "31429",
+   "nom": "Pompertuzat",
+   "epci": "243100633"
+  },
+  {
+   "code": "31433",
+   "nom": "Portet-sur-Garonne",
+   "epci": "200068641"
+  },
+  {
+   "code": "31437",
+   "nom": "Pouze",
+   "epci": "243100633"
+  },
+  {
+   "code": "31445",
+   "nom": "Quint-Fonsegrives",
+   "epci": "243100518"
+  },
+  {
+   "code": "31446",
+   "nom": "Ramonville-Saint-Agne",
+   "epci": "243100633"
+  },
+  {
+   "code": "31448",
+   "nom": "Rebigue",
+   "epci": "243100633"
+  },
+  {
+   "code": "31458",
+   "nom": "Roques",
+   "epci": "200068641"
+  },
+  {
+   "code": "31460",
+   "nom": "Roquettes",
+   "epci": "200068641"
+  },
+  {
+   "code": "31462",
+   "nom": "Rouffiac-Tolosan",
+   "epci": "243100815"
+  },
+  {
+   "code": "31464",
+   "nom": "Sabonnères",
+   "epci": "200068641"
+  },
+  {
+   "code": "31466",
+   "nom": "Saiguède",
+   "epci": "200068641"
+  },
+  {
+   "code": "31467",
+   "nom": "Saint-Alban",
+   "epci": "243100518"
+  },
+  {
+   "code": "31475",
+   "nom": "Saint-Clar-de-Rivière",
+   "epci": "200068641"
+  },
+  {
+   "code": "31484",
+   "nom": "Saint-Geniès-Bellevue",
+   "epci": "243100815"
+  },
+  {
+   "code": "31486",
+   "nom": "Saint-Hilaire",
+   "epci": "200068641"
+  },
+  {
+   "code": "31488",
+   "nom": "Saint-Jean",
+   "epci": "243100518"
+  },
+  {
+   "code": "31490",
+   "nom": "Saint-Jory",
+   "epci": "243100518"
+  },
+  {
+   "code": "31496",
+   "nom": "Sainte-Livrade",
+   "epci": "243100781"
+  },
+  {
+   "code": "31497",
+   "nom": "Saint-Loup-Cammas",
+   "epci": "243100815"
+  },
+  {
+   "code": "31499",
+   "nom": "Saint-Lys",
+   "epci": "200068641"
+  },
+  {
+   "code": "31506",
+   "nom": "Saint-Orens-de-Gameville",
+   "epci": "243100518"
+  },
+  {
+   "code": "31518",
+   "nom": "Saint-Thomas",
+   "epci": "200068641"
+  },
+  {
+   "code": "31526",
+   "nom": "La Salvetat-Saint-Gilles",
+   "epci": "243100781"
+  },
+  {
+   "code": "31533",
+   "nom": "Saubens",
+   "epci": "200068641"
+  },
+  {
+   "code": "31541",
+   "nom": "Seilh",
+   "epci": "243100518"
+  },
+  {
+   "code": "31547",
+   "nom": "Seysses",
+   "epci": "200068641"
+  },
+  {
+   "code": "31555",
+   "nom": "Toulouse",
+   "epci": "243100518"
+  },
+  {
+   "code": "31557",
+   "nom": "Tournefeuille",
+   "epci": "243100518"
+  },
+  {
+   "code": "31561",
+   "nom": "L'Union",
+   "epci": "243100518"
+  },
+  {
+   "code": "31568",
+   "nom": "Varennes",
+   "epci": "243100633"
+  },
+  {
+   "code": "31575",
+   "nom": "Vieille-Toulouse",
+   "epci": "243100633"
+  },
+  {
+   "code": "31578",
+   "nom": "Vigoulet-Auzil",
+   "epci": "243100633"
+  },
+  {
+   "code": "31580",
+   "nom": "Villate",
+   "epci": "200068641"
+  },
+  {
+   "code": "31588",
+   "nom": "Villeneuve-Tolosane",
+   "epci": "243100518"
+  }
+ ]
+}

@@ -3,6 +3,7 @@
 import { useMemo, useSyncExternalStore } from 'react'
 
 import type { PartieCompacte } from './partie'
+import type { IdVille } from './villes'
 
 /**
  * La communauté : lire les réseaux publiés, et demander à la fonction serveur de publier, soutenir,
@@ -16,7 +17,6 @@ const CLE_PUBLIQUE = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? ''
 /** Sans ces deux réglages, la communauté est absente et le jeu fonctionne comme avant. */
 export const communauteActive = Boolean(URL_BASE && CLE_PUBLIQUE)
 
-export type Ville = 'lyon'
 export type Tri = 'populaires' | 'recents'
 export type Motif = 'propos' | 'triche' | 'autre'
 
@@ -97,7 +97,7 @@ async function appeler<T>(action: string, donnees: Record<string, unknown> = {})
   return corps as T
 }
 
-export function listerReseaux(tri: Tri, ville: Ville = 'lyon', limite = 30) {
+export function listerReseaux(tri: Tri, ville: IdVille = 'lyon', limite = 30) {
   const ordre = tri === 'populaires' ? 'soutiens.desc,cree_le.desc' : 'cree_le.desc'
   return lire<ReseauPublie[]>(`reseaux?select=${COLONNES}&ville=eq.${ville}&visibilite=eq.publique&order=${ordre}&limit=${limite}`)
 }
