@@ -4,50 +4,21 @@ Ce document rassemble ce qu'il faut savoir pour ouvrir Toulouse, Marseille, Nice
 
 Les coûts ne sont pas tous exprimés dans la même base : hors taxes ou non, en euros de 2012, de 2017 ou courants. Il faut les normaliser avant de les comparer dans le jeu. Les maquettes « Toulouse en tracé libre » et « Notre calcul à Toulouse » de la planche de design s'appuient sur ce document.
 
-## Notre formule hors de Lyon
+## La formule de fréquentation
 
-### La méthode
+Depuis le 24 septembre 2026, toutes les villes partagent une même formule, choisie par un moteur parmi 23 980 sur 107 lignes de métro, de tram et de bus de 22 villes françaises, et jugée sur des lignes et des villes absentes de son calage. Chaque ville garde son propre niveau, tiré de ses lignes actuelles. Tout est décrit dans `docs/modele.md` : les données, la méthode, la formule retenue, ses écarts ligne par ligne et ses limites.
 
-Nous avons refait dans chaque ville le calcul de Lyon, avec les mêmes sources nationales.
-
-Les habitants viennent du carroyage Filosofi 2021 à 200 m, recalé sur le recensement 2022 des communes de l'autorité organisatrice (liste tirée de geo.api.gouv.fr). Le facteur de recalage vaut 1,105 pour Tisséo, 1,085 pour Aix-Marseille-Provence et 1,036 pour Nice Côte d'Azur, contre 1,105 pour la Métropole de Lyon. Dans la seule commune de Toulouse, il monte à 1,215, mais nous gardons un facteur unique par autorité, comme à Lyon.
-
-Les emplois sont ceux du recensement 2022 par commune, répartis entre les carreaux selon les effectifs des établissements employeurs de la base Sirene (milieu de chaque tranche d'effectif, export géolocalisé d'Opendatasoft), puis plafonnés à 4 000 par carreau.
-
-Les stations viennent des relations de lignes d'OpenStreetMap. On compte les habitants et les emplois à moins de 600 m d'une station de métro et à moins de 400 m d'un arrêt de tram ou de téléphérique, puis on applique la formule de `lib/modele.ts`. La fréquentation réelle est la fréquentation annuelle divisée par 265, comme pour le calage lyonnais.
-
-### Les résultats
-
-| Ligne                               | Formule de Lyon | Réel, par jour    | Écart       |
-| ----------------------------------- | --------------- | ----------------- | ----------- |
-| Toulouse, métro A                   | 130 300         | 228 300           | -43 %       |
-| Toulouse, métro B                   | 160 100         | 218 100           | -27 %       |
-| Toulouse, tram T1                   | 38 000          | 48 700            | -22 %       |
-| Toulouse, téléphérique Téléo        | 165             | 5 800             | -97 %       |
-| Marseille, métros M1 et M2 ensemble | 533 900         | 289 800 à 333 100 | +60 à +84 % |
-| Nice, tram L1                       | 118 500         | 120 000           | -1 %        |
-
-Pour Toulouse, les chiffres réels sont les 60,5, 57,8, 12,9 et 1,54 millions de validations de 2024 ([Tisséo, Chiffres clés 2024, p. 43 à 46](https://tisseo-collectivites.fr/sites/default/files/media/downloads/chiffres-cles_2024_web_interactif_pages_2.pdf)). Pour Marseille, les 76,8 millions de validations du métro en 2024, soit 289 800 par jour, et les 333 100 voyages par jour que compte la RTM avec une autre méthode ([RTM, chiffres 2024](https://www.rtm.fr/sites/default/files/docs/013bis%20RTM%20en%20chiffres_2024%201.pdf)). Pour Nice, les 120 000 passagers par jour annoncés par la Métropole, sans date, avant la réorganisation de janvier 2025 ([NCA, lignes de tram](https://www.nicecotedazur.org/services/transports-et-mobilites/transports-publics/les-lignes-de-tramway/)).
-
-La formule de Lyon ne donne donc qu'un ordre de grandeur ailleurs : d'une ville à l'autre, elle peut se tromper du simple au double. Elle ne voit ni la vitesse des lignes, ni le rabattement des bus, ni les correspondances, qui changent d'un réseau à l'autre. Il faut la recaler dans chaque ville en changeant sa constante, ce qui ne demande que la fréquentation de quelques lignes.
-
-À Toulouse, trois lignes suffisent. En multipliant les résultats par 1,45 (constante de -7,66 au lieu de -8,03), l'écart moyen sur A, B et T1 devient nul. Quand on recale sur deux lignes pour prédire la troisième, l'écart vaut -25 % pour A, +10 % pour B et +21 % pour T1. C'est du même ordre qu'à Lyon, où la validation croisée donne 18 % en moyenne et 39 % au pire : la fourchette affichée, de 0,7 à 1,4 fois l'estimation, reste valable.
-
-À Marseille, il faudrait multiplier par 0,54 à 0,62, mais sur un seul chiffre qui regroupe les deux lignes de métro. À Nice, le seul chiffre utilisable, celui du tram L1, tombe juste. Dans ces deux villes, il faut trouver la fréquentation par ligne avant d'ouvrir le jeu.
-
-### Le téléphérique
-
-La formule ne sait pas estimer un téléphérique. Pour Téléo, elle prévoit moins de 300 voyageurs par jour, même recalée, alors que la ligne en transporte 5 800. Téléo relie une station de métro, l'hôpital de Rangueil et l'Oncopole : ses voyageurs viennent des correspondances et de ces équipements, pas des habitants qui vivent autour des stations. La même limite vaut à Lyon, où le traceur propose le téléphérique avec un facteur de 0,6 qui n'a jamais été vérifié.
+Sur une ligne qu'elle ne connaît pas, la formule s'écarte du réel de 29 % en moyenne quand elle connaît les autres lignes de la ville, et de 36 % pour une ville sans aucun chiffre. L'ancienne formule lyonnaise, recalée ville par ville sur une seule constante, ne donnait rien de fiable sans chiffres locaux ; la nouvelle donne un ordre de grandeur même sans eux.
 
 ### La densité sur la carte
 
-Toulouse est environ 2,5 fois moins dense que Lyon dans ses quartiers centraux. Avec les classes de densité de Lyon, la carte de Toulouse paraîtrait presque vide : les maquettes utilisent les classes de Lyon multipliées par 0,4. Il faudra fixer des classes par ville, ce qui ne pose pas de problème puisque la légende ne donne pas de chiffres.
+Chaque ville a ses propres paliers de densité pour la couche rouge du traceur (`lib/villes.ts`), la légende ne donnant pas de chiffres : ceux de Lyon multipliés par 0,4 à Toulouse, 2,5 fois moins dense dans ses quartiers centraux, des paliers proches de ceux de Lyon à Marseille et à Nice, et des paliers plus hauts à Paris, dont le centre est environ trois fois plus dense.
 
 ### Les limites de ces calculs
 
-- OpenStreetMap ne connaît que 13 des 21 stations de la ligne C, sous forme de chantiers. Les « nouveaux voyageurs » des exemples toulousains sont donc un peu surestimés près des stations manquantes.
 - L'export Sirene utilisé a été mis à jour en décembre 2025. Les emplois d'un grand établissement sont rattachés à son adresse déclarée, d'où le plafond de 4 000 par carreau, comme à Lyon.
-- Le calcul des distances de `lib/modele.ts` suppose la latitude de Lyon. À Toulouse, il sous-estimerait les distances est-ouest d'environ 4 % : la latitude doit devenir un paramètre de la ville.
+- Les carreaux du jeu s'arrêtent aux limites du territoire de chaque ville. Une ligne qui en sort, comme les trams T5 et T6 à Paris, y perd une partie de ses habitants.
+- À Marseille et à Nice, les territoires sont grands et boisés : le décor n'y garde que les bois de plus de 20 à 25 hectares.
 
 ## Budgets et prix
 
@@ -140,7 +111,7 @@ En 2025, le métro a enregistré 76,2 millions de validations, le tram 22,7 mill
 
 Côté budget, le plan de mobilité approuvé en 2021 vise à tripler les dépenses d'équipement, de 100 à 300 M€ par an ([AMP](https://ampmetropole.fr/missions/mobilite/une-mobilite-de-projets-davenir/)). Le budget annexe des transports a réalisé 154 M€ en 2022, 196 en 2023, 278 en 2024 et 267 en 2025, et prévoit 223 M€ en 2026 ([ROB 2026 d'AMP](https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/04/16/ANNEXE/160507_165637_160507%20Annexe%20ROB%202026%20vDEF%20v2.pdf)). Le plan Marseille en Grand apporte 2 Md€ sur 2021-2030, dont 1 Md€ de l'État ([AMP, dossier de presse 2025](https://ampmetropole.fr/wp-content/uploads/2025/07/DP_Projets-Mobilite_VF.pdf)).
 
-Il manque la fréquentation de chaque ligne de métro, indispensable pour recaler la formule. Le calendrier de l'automatisation diffère d'environ un an selon les sources, et les « 240 millions de voyages » de la RTM couvrent tout le groupe, pas seulement Marseille.
+La RTM publie la fréquentation de chaque ligne en voyages par jour de semaine d'hiver, tirée de ses enquêtes origine-destination : en 2024, 162 600 pour M1, 170 500 pour M2, 32 200 pour T1, 67 000 pour T2 et 39 700 pour T3 avant son prolongement, 22 700 pour le bus B1 ([RTM, chiffres clés 2024, p. 12 et 13](https://www.rtm.fr/sites/default/files/docs/013bis%20RTM%20en%20chiffres_2024%201.pdf)). Le calendrier de l'automatisation diffère d'environ un an selon les sources, et les « 240 millions de voyages » de la RTM couvrent tout le groupe, pas seulement Marseille.
 
 ## Nice
 
@@ -157,7 +128,7 @@ Le tram L1 relie Henri Sappia à l'Hôpital Pasteur, sur 9,15 km et 22 stations.
 
 Côté budget, la Métropole prévoit en 2026 36 M€ de crédits de paiement sur son budget annexe des transports, et 449 M€ d'investissement en comptant ses opérateurs publics, dont la régie Ligne d'Azur. La dette du budget annexe des transports atteint 841,7 M€ au 1er janvier 2026 ([ROB 2026 de NCA](https://www.nicecotedazur.org/wp-content/uploads/2026/01/NCA-Rapport-sur-les-orientations-budgetaires-2026.pdf)).
 
-Les fréquentations par ligne datent d'avant la réorganisation de janvier 2025, le statut de la ligne 4 est contradictoire, et le coût de la ligne 5 ne vient que de la presse.
+Le tram L1 fait 120 000 validations par jour selon la Métropole ([NCA, rallongement des rames](https://www.nicecotedazur.org/projets/rallongement-des-rames-de-la-ligne-1-du-tramway/)). Le chiffre du L2 date d'avant la réorganisation de janvier 2025, qui fait partager son tronc au L3 : il n'entre pas dans le calage. Le statut de la ligne 4 est contradictoire, et la ligne 5, déclarée d'utilité publique le 27 juillet 2026, n'est pas encore dans OpenStreetMap.
 
 ## Paris
 
@@ -178,7 +149,7 @@ Le métro compte 16 lignes et 245,6 km, le RER 5 lignes et 602 km, le tram 15 li
 
 Côté budget, Île-de-France Mobilités vote 4,3 Md€ d'investissement pour 2026 et prévoit de revenir vers 3 Md€ par an après 2030 ([IDFM](https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-vote-un-budget-ambitieux-pour-continuer-la-modernisation-du-reseau/)). Le Grand Paris Express a un coût d'objectif de 36,1 Md€ HT en euros de 2012 ([Sénat](https://www.senat.fr/rap/l25-139-310-2/l25-139-310-27.html)). Les coûts par ligne du Grand Paris Express datent de 2017 et ne se comparent pas aux coûts d'IDFM ([Sénat, 2020](https://www.senat.fr/rap/r20-044/r20-044_mono.html)).
 
-Le site d'IDFM a refusé nos accès : les chiffres du métro et du tram viennent de Wikipédia, qui cite l'observatoire OMNIL, et plusieurs projets viennent de la presse.
+La fréquentation de chaque ligne de métro et de tram vient du classeur « Trafic annuel » 2025 de l'observatoire Omnil ([Omnil](https://omnil.cdn.prismic.io/omnil/ajFb3Y1P9HI4Uk5i_TCC_trafic_annuel_2025.xlsx)). Pour le métro, ce sont des entrées, sans les correspondances d'une ligne à l'autre. Plusieurs projets viennent de la presse.
 
 ## Ce qu'il faut pour ouvrir une ville
 
@@ -190,4 +161,6 @@ Le site d'IDFM a refusé nos accès : les chiffres du métro et du tram viennent
 6. Les leviers de financement : les recettes des tarifs et le versement mobilité dépendent de chaque réseau et doivent être recalculés.
 7. Côté code, la latitude de référence des distances, les classes de densité et les noms d'arrêts par ville, et un script de données paramétrable qui produit les mêmes fichiers dans `public/data/<ville>/`.
 
-Toulouse est ouverte en tracé libre depuis le 23 septembre 2026. Les points 1 à 3 sont faits : les données sont décrites dans `data/toulouse/SOURCES.md`, la formule y est recalée (constante de -7,66 dans `lib/villes.ts`), et la ligne C comme la connexion de la ligne B à Labège comptent comme des lignes existantes. Pour le point 4, le jeu applique la règle de population, 1 560 M€ par mandat dont 310 pour l'entretien des bus, et le dit dans « Notre calcul » et sur l'accueil. Pour le point 5, il garde les prix de Lyon, et les textes du traceur précisent que ce sont des chantiers lyonnais. Le point 6 reste à faire : les leviers de financement ne sont pas proposés à Toulouse, et un déficit ne se comble qu'en retirant une ligne. Les classes de densité de la carte sont celles de Lyon multipliées par 0,4.
+Toulouse est ouverte en tracé libre depuis le 23 septembre 2026, Marseille, Nice et Paris depuis le 24 septembre. Les données de chaque ville sont décrites dans `data/<ville>/SOURCES.md`. Toutes partagent la formule de `docs/modele.md`, avec leur propre niveau. Les lignes décidées qui ouvrent avant celles du joueur comptent comme existantes : la ligne C et la connexion de la ligne B à Toulouse, les lignes 15 à 18 du Grand Paris Express à Paris. À Nice, la ligne 5 n'est pas encore dans OpenStreetMap et reste à tracer par le joueur.
+
+Pour le budget, le jeu prend l'objectif publié à Marseille (1 800 M€ par mandat) et la règle de population ailleurs (1 560 M€ à Toulouse, 790 à Nice, 9 570 à Paris), et le dit dans « Comment nous estimons une ligne » et sur l'accueil. Les prix au kilomètre restent ceux de Lyon. Les leviers de financement ne sont proposés qu'à Lyon : ailleurs, un déficit ne se comble qu'en retirant une ligne. Les paliers de densité de la carte sont propres à chaque ville.

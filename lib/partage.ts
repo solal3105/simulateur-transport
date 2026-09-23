@@ -67,6 +67,21 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
   }
   const s = echelle / 2200
   for (const f of donnees.fond.features) {
+    // La mer : des anneaux fermés, la mer et ses îles, remplis en pair-impair.
+    if (f.properties.kind === 'cote') {
+      g.beginPath()
+      for (const anneau of f.geometry.coordinates) {
+        anneau.forEach(([lon, lat], i) => {
+          const [x, y] = px(lon!, lat!)
+          if (i === 0) g.moveTo(x, y)
+          else g.lineTo(x, y)
+        })
+        g.closePath()
+      }
+      g.fillStyle = '#cfe2ec'
+      g.fill('evenodd')
+      continue
+    }
     const couleur = f.properties.kind === 'fleuve' ? '#cfe2ec' : f.properties.kind === 'tram' ? '#e1ddd7' : '#b9b2a8'
     for (const part of f.geometry.coordinates) trait(part, couleur, (f.properties.kind === 'fleuve' ? 9 : 2.5) * s)
   }

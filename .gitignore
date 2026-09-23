@@ -15,3 +15,5 @@ data/osm/
 public/maplibre/
 public/_mock/
 data/insee-france/
+data/modele/grille.npz
+data/modele/osm/

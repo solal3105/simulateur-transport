@@ -1,0 +1,2045 @@
+{
+ "lignes": 107,
+ "villes": 22,
+ "formules_evaluees": 23980,
+ "duree_s": 58,
+ "retenue": {
+  "plausible": true,
+  "score_connue": 0.28304757394526175,
+  "score_villes": 0.3300199819584183,
+  "score_lignes": 0.30804845305122697,
+  "variables": 9,
+  "rayon_metro": 1000,
+  "rayon_autres": 400,
+  "poids_emplois": 0.75,
+  "bassin_propre": false,
+  "poids_couronne": 0.3,
+  "groupes": [
+   "distance_centre",
+   "concurrence",
+   "reseau"
+  ],
+  "score": 0.30653377795184,
+  "frequence_des_variables": {
+   "forme": 0.03,
+   "longueur": 0.03,
+   "centre": 0.42,
+   "distance_centre": 0.87,
+   "bassin_vie": 0.16,
+   "bassin_vie_proche": 0.23,
+   "bassin_emploi": 0.19,
+   "emplois_centre": 0.19,
+   "concurrence": 1.0,
+   "reseau": 0.65
+  },
+  "formules_indiscernables": 31,
+  "coefficients": {
+   "constante": -0.19496814673733454,
+   "bassin": 0.9351035853746421,
+   "distance_centre": -0.2188371194461397,
+   "concurrence": -0.7776180943513529,
+   "reseau": 0.31108676470656543,
+   "metro": 0.3427294000175589,
+   "bhns": -0.74001384154755,
+   "ligne_forte": -0.4510549193482324,
+   "entrees": -0.7316979218605353
+  },
+  "ecart_type_residus": 0.29638140454966416,
+  "correction_ville": {
+   "avignon": -0.09233383326304456,
+   "besancon": -0.03699708461929352,
+   "bordeaux": 0.003641895434938869,
+   "brest": 0.041283833040702156,
+   "caen": 0.014287428063648022,
+   "clermont-ferrand": 0.10460486794435164,
+   "le-havre": -0.0811638629171032,
+   "lille": -0.2646104825162798,
+   "lyon": -0.04045956648390103,
+   "marseille": 0.010877555281346374,
+   "metz": 0.2890766400201248,
+   "mulhouse": 0.07367386395760511,
+   "nancy": -0.1811379210852535,
+   "nantes": 0.23061040018180579,
+   "nice": 0.08768799577670006,
+   "nimes": -0.2166565200392624,
+   "orleans": -0.01649500627184719,
+   "paris": -0.026872733220569572,
+   "pau": -0.06650160785310488,
+   "rennes": 0.09776317693131747,
+   "strasbourg": -0.0060045279280478425,
+   "toulouse": 0.07572548956432401
+  },
+  "cable": {
+   "coefficient": -0.36750922779420625,
+   "lignes": [
+    {
+     "ville": "toulouse",
+     "ligne": "téléo",
+     "reel": 5811,
+     "ecart_log": 0.161
+    },
+    {
+     "ville": "brest",
+     "ligne": "C",
+     "reel": 1500,
+     "ecart_log": -0.896
+    }
+   ]
+  }
+ },
+ "meilleure_sans_filtre": {
+  "plausible": false,
+  "score_connue": 0.2823036824173668,
+  "score_villes": 0.32088020919082705,
+  "score_lignes": 0.29961798121257,
+  "variables": 10,
+  "rayon_metro": 1000,
+  "rayon_autres": 400,
+  "poids_emplois": 0.75,
+  "bassin_propre": false,
+  "poids_couronne": 0.3,
+  "groupes": [
+   "gares",
+   "distance_centre",
+   "bassin_emploi",
+   "concurrence"
+  ],
+  "score": 0.30159194580409693
+ },
+ "formules_plausibles": 2026,
+ "meilleures": [
+  {
+   "plausible": true,
+   "score_connue": 0.2804585298469857,
+   "score_villes": 0.32847994337377,
+   "score_lignes": 0.30604124315680836,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.30446923661037784,
+   "erreur_type": 0.0
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.280800157399052,
+   "score_villes": 0.3300792609744356,
+   "score_lignes": 0.3079990227704081,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.3054397091867438,
+   "erreur_type": 0.0038627168111237792
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.282352554369927,
+   "score_villes": 0.33066377939048086,
+   "score_lignes": 0.30695537295275965,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.30650816688020394,
+   "erreur_type": 0.00323028951438325
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28304757394526175,
+   "score_villes": 0.3300199819584183,
+   "score_lignes": 0.30804845305122697,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.30653377795184,
+   "erreur_type": 0.009914026295714973
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28078191227828886,
+   "score_villes": 0.33480157596501336,
+   "score_lignes": 0.3112282593001172,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie",
+    "concurrence"
+   ],
+   "score": 0.3077917441216511,
+   "erreur_type": 0.0035374844132303913
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28021038054723324,
+   "score_villes": 0.3356136519166374,
+   "score_lignes": 0.3086409174881692,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.3079120162319353,
+   "erreur_type": 0.003868029060549067
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2796115983733951,
+   "score_villes": 0.3375983462744998,
+   "score_lignes": 0.307035615352514,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_emploi",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.30860497232394746,
+   "erreur_type": 0.0057751623856914635
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28124946035997783,
+   "score_villes": 0.33608223095178863,
+   "score_lignes": 0.3092965334492423,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.30866584565588323,
+   "erreur_type": 0.004238937282335139
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2810532494678315,
+   "score_villes": 0.336556928798176,
+   "score_lignes": 0.3083945343540084,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie_proche",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.30880508913300375,
+   "erreur_type": 0.002607081019669225
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28392670606561493,
+   "score_villes": 0.33390998199750505,
+   "score_lignes": 0.3103792072359232,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.30891834403156,
+   "erreur_type": 0.0023151939266407725
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28480828737421227,
+   "score_villes": 0.3331387218187854,
+   "score_lignes": 0.31025660393741317,
+   "variables": 9,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.30897350459649886,
+   "erreur_type": 0.003024217195133659
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28466475704396027,
+   "score_villes": 0.3336758050860321,
+   "score_lignes": 0.31008055533555223,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.3091702810649962,
+   "erreur_type": 0.007749634593423051
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2840244900681062,
+   "score_villes": 0.3346171622539352,
+   "score_lignes": 0.3104676420172793,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.3093208261610207,
+   "erreur_type": 0.001164198598736922
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2795877270528579,
+   "score_villes": 0.3393492567074276,
+   "score_lignes": 0.31120103439114405,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.30946849188014275,
+   "erreur_type": 0.005646441388085783
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.278860997370317,
+   "score_villes": 0.34043417383768804,
+   "score_lignes": 0.31087828229802655,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.3096475856040025,
+   "erreur_type": 0.0043348932348037834
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.283795849253311,
+   "score_villes": 0.33565444915824694,
+   "score_lignes": 0.3117715222460596,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.309725149205779,
+   "erreur_type": 0.004046895880517455
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28567184570160015,
+   "score_villes": 0.3338401949390156,
+   "score_lignes": 0.3107476883365529,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.3097560203203079,
+   "erreur_type": 0.008631970032675145
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28470088295265666,
+   "score_villes": 0.3348716308420289,
+   "score_lignes": 0.3121537816085288,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.3097862568973428,
+   "erreur_type": 0.0036388857497779373
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2818904408206099,
+   "score_villes": 0.33778439693020784,
+   "score_lignes": 0.30905654233150226,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.30983741887540883,
+   "erreur_type": 0.0056549332712115775
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2868950070282758,
+   "score_villes": 0.3328103816480158,
+   "score_lignes": 0.31161719220328454,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.3098526943381458,
+   "erreur_type": 0.010018113112863585
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2853630064346472,
+   "score_villes": 0.3345674898339021,
+   "score_lignes": 0.3123093531104335,
+   "variables": 9,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.3099652481342746,
+   "erreur_type": 0.004306218172002304
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28659198901558797,
+   "score_villes": 0.33383054991082334,
+   "score_lignes": 0.3120356237664556,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.31021126946320565,
+   "erreur_type": 0.00960261402123358
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28774406963797966,
+   "score_villes": 0.33268350071217395,
+   "score_lignes": 0.3121516796460539,
+   "variables": 9,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.3102137851750768,
+   "erreur_type": 0.011058978928576718
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2825641729400169,
+   "score_villes": 0.33855482383747815,
+   "score_lignes": 0.3111063533712615,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "bassin_emploi",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.3105594983887475,
+   "erreur_type": 0.003729400073443729
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2830472456849713,
+   "score_villes": 0.3384531037916996,
+   "score_lignes": 0.31351457867288285,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie",
+    "concurrence"
+   ],
+   "score": 0.31075017473833544,
+   "erreur_type": 0.0049235974698877
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28678522590881084,
+   "score_villes": 0.33554117375700343,
+   "score_lignes": 0.31252839857925696,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.31116319983290713,
+   "erreur_type": 0.011006537427788116
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28661650326820587,
+   "score_villes": 0.33600535834508105,
+   "score_lignes": 0.3124537295467611,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.31131093080664346,
+   "erreur_type": 0.00987650094285532
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2861168160649018,
+   "score_villes": 0.33690541385576506,
+   "score_lignes": 0.31216036193696994,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.31151111496033346,
+   "erreur_type": 0.0036942297428719357
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2848702408324962,
+   "score_villes": 0.3382061915109426,
+   "score_lignes": 0.3111634022793481,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "forme",
+    "distance_centre",
+    "bassin_emploi",
+    "concurrence"
+   ],
+   "score": 0.3115382161717194,
+   "erreur_type": 0.004600298990560203
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2832572454883325,
+   "score_villes": 0.3401047820973697,
+   "score_lignes": 0.3076944148508304,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.31168101379285107,
+   "erreur_type": 0.010879185998910097
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28199200950372666,
+   "score_villes": 0.3413900246945066,
+   "score_lignes": 0.31265369759094397,
+   "variables": 8,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.3116910170991166,
+   "erreur_type": 0.01078017470642614
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2870773161554386,
+   "score_villes": 0.33633016722526143,
+   "score_lignes": 0.3119738907449995,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.31170374169035,
+   "erreur_type": 0.003789256638215443
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2853004119229983,
+   "score_villes": 0.33813845943412507,
+   "score_lignes": 0.3098704593184805,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "forme",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.3117194356785617,
+   "erreur_type": 0.002982791174743521
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28340600112069414,
+   "score_villes": 0.34030658180876233,
+   "score_lignes": 0.3120657241503793,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "bassin_vie_proche",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.31185629146472826,
+   "erreur_type": 0.002794119963790106
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28922108896356336,
+   "score_villes": 0.334868819605673,
+   "score_lignes": 0.312473762107994,
+   "variables": 11,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.3120449542846182,
+   "erreur_type": 0.00886056985344953
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2875902515674233,
+   "score_villes": 0.3365865767971677,
+   "score_lignes": 0.3129978128153601,
+   "variables": 10,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "centre",
+    "distance_centre",
+    "bassin_vie_proche",
+    "concurrence"
+   ],
+   "score": 0.3120884141822955,
+   "erreur_type": 0.004115037708837782
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2834682266702127,
+   "score_villes": 0.34098272648821065,
+   "score_lignes": 0.3126681597224741,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_emploi",
+    "emplois_centre",
+    "concurrence"
+   ],
+   "score": 0.3122254765792117,
+   "erreur_type": 0.0037014360483819653
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.28562883467500844,
+   "score_villes": 0.33891330426086835,
+   "score_lignes": 0.31256874722424915,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "emplois_centre",
+    "concurrence",
+    "reseau"
+   ],
+   "score": 0.31227106946793837,
+   "erreur_type": 0.007852844396102798
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2842290000829208,
+   "score_villes": 0.34050831423131495,
+   "score_lignes": 0.31543618979539795,
+   "variables": 10,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "longueur",
+    "distance_centre",
+    "bassin_vie",
+    "concurrence"
+   ],
+   "score": 0.31236865715711787,
+   "erreur_type": 0.00366898149307692
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.2846233842835331,
+   "score_villes": 0.3402755662934339,
+   "score_lignes": 0.3156615759771369,
+   "variables": 9,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [
+    "distance_centre",
+    "bassin_vie",
+    "concurrence"
+   ],
+   "score": 0.31244947528848355,
+   "erreur_type": 0.003836384275851117
+  }
+ ],
+ "premier_tour": [
+  {
+   "plausible": true,
+   "score_connue": 0.3031417350175596,
+   "score_villes": 0.35816378112217767,
+   "score_lignes": 0.33488581233514353,
+   "variables": 6,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3306527580698686
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3036167486105555,
+   "score_villes": 0.35830992263139044,
+   "score_lignes": 0.3349965196550504,
+   "variables": 6,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33096333562097296
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.304394028559876,
+   "score_villes": 0.3579736940051245,
+   "score_lignes": 0.3363058483936921,
+   "variables": 6,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33118386128250027
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30411540363772654,
+   "score_villes": 0.3586592767212228,
+   "score_lignes": 0.3353502638671393,
+   "variables": 6,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3313873401794747
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30495718676908257,
+   "score_villes": 0.35814441009312853,
+   "score_lignes": 0.3364702412923346,
+   "variables": 6,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3315507984311056
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30449497597998487,
+   "score_villes": 0.3590922907903297,
+   "score_lignes": 0.33623541544906826,
+   "variables": 6,
+   "rayon_metro": 800,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3317936333851573
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3051150785828645,
+   "score_villes": 0.3584864879484364,
+   "score_lignes": 0.3364960304376479,
+   "variables": 6,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33180078326565043
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3052214283678704,
+   "score_villes": 0.3587098825576612,
+   "score_lignes": 0.3370911250279563,
+   "variables": 6,
+   "rayon_metro": 500,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3319656554627658
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30447781227838533,
+   "score_villes": 0.35961892788614935,
+   "score_lignes": 0.3357371368784088,
+   "variables": 6,
+   "rayon_metro": 1000,
+   "rayon_autres": 400,
+   "poids_emplois": 1.0,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33204837008226734
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30492705512611856,
+   "score_villes": 0.35922967130100125,
+   "score_lignes": 0.3361796119292194,
+   "variables": 6,
+   "rayon_metro": 800,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3320783632135599
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30571251588188797,
+   "score_villes": 0.359145098393145,
+   "score_lignes": 0.33712163470551243,
+   "variables": 6,
+   "rayon_metro": 500,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3324288071375165
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3055545467543585,
+   "score_villes": 0.35944938745648114,
+   "score_lignes": 0.33738475765896936,
+   "variables": 6,
+   "rayon_metro": 600,
+   "rayon_autres": 400,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3325019671054198
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30540009798046613,
+   "score_villes": 0.3596164323858728,
+   "score_lignes": 0.33671478768132557,
+   "variables": 6,
+   "rayon_metro": 800,
+   "rayon_autres": 400,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33250826518316945
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3060159708882496,
+   "score_villes": 0.3590442225023382,
+   "score_lignes": 0.33747944353527043,
+   "variables": 6,
+   "rayon_metro": 500,
+   "rayon_autres": 400,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3325300966952939
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3061076714849629,
+   "score_villes": 0.3598253275758908,
+   "score_lignes": 0.3375659176957504,
+   "variables": 6,
+   "rayon_metro": 600,
+   "rayon_autres": 400,
+   "poids_emplois": 0.75,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33296649953042684
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3063104386630957,
+   "score_villes": 0.35973784099025186,
+   "score_lignes": 0.33773849068505063,
+   "variables": 6,
+   "rayon_metro": 600,
+   "rayon_autres": 400,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3330241398266738
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30584088484924615,
+   "score_villes": 0.3605364648113583,
+   "score_lignes": 0.3368530470552859,
+   "variables": 6,
+   "rayon_metro": 800,
+   "rayon_autres": 400,
+   "poids_emplois": 1.0,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33318867483030223
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.3064436941658228,
+   "score_villes": 0.36004798817867734,
+   "score_lignes": 0.3373355130679194,
+   "variables": 6,
+   "rayon_metro": 400,
+   "rayon_autres": 400,
+   "poids_emplois": 1.0,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.3332458411722501
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30634968107236504,
+   "score_villes": 0.3602769013820684,
+   "score_lignes": 0.3369366362401204,
+   "variables": 6,
+   "rayon_metro": 1000,
+   "rayon_autres": 500,
+   "poids_emplois": 0.5,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33331329122721676
+  },
+  {
+   "plausible": true,
+   "score_connue": 0.30533695256676374,
+   "score_villes": 0.3616080918984423,
+   "score_lignes": 0.338882228775235,
+   "variables": 6,
+   "rayon_metro": 300,
+   "rayon_autres": 300,
+   "poids_emplois": 0.3,
+   "bassin_propre": false,
+   "poids_couronne": 0.3,
+   "groupes": [],
+   "score": 0.33347252223260304
+  }
+ ],
+ "detail": [
+  {
+   "ville": "lyon",
+   "ligne": "A",
+   "mode": "metro",
+   "reel": 271274,
+   "ecart_ville_connue": 5,
+   "ecart_ville_inconnue": 12
+  },
+  {
+   "ville": "lyon",
+   "ligne": "B",
+   "mode": "metro",
+   "reel": 173176,
+   "ecart_ville_connue": 19,
+   "ecart_ville_inconnue": 21
+  },
+  {
+   "ville": "lyon",
+   "ligne": "D",
+   "mode": "metro",
+   "reel": 307384,
+   "ecart_ville_connue": -22,
+   "ecart_ville_inconnue": -15
+  },
+  {
+   "ville": "lyon",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 103889,
+   "ecart_ville_connue": -17,
+   "ecart_ville_inconnue": -7
+  },
+  {
+   "ville": "lyon",
+   "ligne": "T2",
+   "mode": "tram",
+   "reel": 98339,
+   "ecart_ville_connue": -21,
+   "ecart_ville_inconnue": -14
+  },
+  {
+   "ville": "lyon",
+   "ligne": "T3",
+   "mode": "tram",
+   "reel": 52191,
+   "ecart_ville_connue": 7,
+   "ecart_ville_inconnue": 13
+  },
+  {
+   "ville": "lyon",
+   "ligne": "T4",
+   "mode": "tram",
+   "reel": 107913,
+   "ecart_ville_connue": -17,
+   "ecart_ville_inconnue": -12
+  },
+  {
+   "ville": "lyon",
+   "ligne": "T5",
+   "mode": "tram",
+   "reel": 8538,
+   "ecart_ville_connue": 138,
+   "ecart_ville_inconnue": 121
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "A",
+   "mode": "metro",
+   "reel": 228302,
+   "ecart_ville_connue": -26,
+   "ecart_ville_inconnue": -36
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "B",
+   "mode": "metro",
+   "reel": 218113,
+   "ecart_ville_connue": -18,
+   "ecart_ville_inconnue": -32
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 48679,
+   "ecart_ville_connue": -1,
+   "ecart_ville_inconnue": -13
+  },
+  {
+   "ville": "paris",
+   "ligne": "1",
+   "mode": "metro",
+   "reel": 636755,
+   "ecart_ville_connue": -25,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "2",
+   "mode": "metro",
+   "reel": 348151,
+   "ecart_ville_connue": -6,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "3",
+   "mode": "metro",
+   "reel": 303472,
+   "ecart_ville_connue": 19,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "4",
+   "mode": "metro",
+   "reel": 631925,
+   "ecart_ville_connue": -49,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "5",
+   "mode": "metro",
+   "reel": 397094,
+   "ecart_ville_connue": -25,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "6",
+   "mode": "metro",
+   "reel": 379170,
+   "ecart_ville_connue": -15,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "7",
+   "mode": "metro",
+   "reel": 448830,
+   "ecart_ville_connue": 22,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "8",
+   "mode": "metro",
+   "reel": 398264,
+   "ecart_ville_connue": 20,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "9",
+   "mode": "metro",
+   "reel": 485925,
+   "ecart_ville_connue": 6,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "10",
+   "mode": "metro",
+   "reel": 165019,
+   "ecart_ville_connue": 82,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "11",
+   "mode": "metro",
+   "reel": 197623,
+   "ecart_ville_connue": 53,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "12",
+   "mode": "metro",
+   "reel": 317132,
+   "ecart_ville_connue": 24,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "13",
+   "mode": "metro",
+   "reel": 443887,
+   "ecart_ville_connue": -4,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "14",
+   "mode": "metro",
+   "reel": 574377,
+   "ecart_ville_connue": -28,
+   "ecart_ville_inconnue": null
+  },
+  {
+   "ville": "paris",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 177396,
+   "ecart_ville_connue": -22,
+   "ecart_ville_inconnue": -26
+  },
+  {
+   "ville": "paris",
+   "ligne": "T2",
+   "mode": "tram",
+   "reel": 242226,
+   "ecart_ville_connue": -4,
+   "ecart_ville_inconnue": -8
+  },
+  {
+   "ville": "paris",
+   "ligne": "T3a",
+   "mode": "tram",
+   "reel": 250189,
+   "ecart_ville_connue": -28,
+   "ecart_ville_inconnue": -29
+  },
+  {
+   "ville": "paris",
+   "ligne": "T3b",
+   "mode": "tram",
+   "reel": 305434,
+   "ecart_ville_connue": -15,
+   "ecart_ville_inconnue": -18
+  },
+  {
+   "ville": "paris",
+   "ligne": "T4",
+   "mode": "tram",
+   "reel": 73962,
+   "ecart_ville_connue": 14,
+   "ecart_ville_inconnue": 8
+  },
+  {
+   "ville": "paris",
+   "ligne": "T5",
+   "mode": "tram",
+   "reel": 78151,
+   "ecart_ville_connue": -16,
+   "ecart_ville_inconnue": -18
+  },
+  {
+   "ville": "paris",
+   "ligne": "T6",
+   "mode": "tram",
+   "reel": 80943,
+   "ecart_ville_connue": 36,
+   "ecart_ville_inconnue": 31
+  },
+  {
+   "ville": "paris",
+   "ligne": "T7",
+   "mode": "tram",
+   "reel": 37774,
+   "ecart_ville_connue": 12,
+   "ecart_ville_inconnue": 11
+  },
+  {
+   "ville": "paris",
+   "ligne": "T8",
+   "mode": "tram",
+   "reel": 60981,
+   "ecart_ville_connue": -7,
+   "ecart_ville_inconnue": -10
+  },
+  {
+   "ville": "paris",
+   "ligne": "T9",
+   "mode": "tram",
+   "reel": 82038,
+   "ecart_ville_connue": 75,
+   "ecart_ville_inconnue": 70
+  },
+  {
+   "ville": "paris",
+   "ligne": "T10",
+   "mode": "tram",
+   "reel": 29962,
+   "ecart_ville_connue": 45,
+   "ecart_ville_inconnue": 36
+  },
+  {
+   "ville": "paris",
+   "ligne": "T11",
+   "mode": "tram",
+   "reel": 43434,
+   "ecart_ville_connue": -16,
+   "ecart_ville_inconnue": -17
+  },
+  {
+   "ville": "nice",
+   "ligne": "L1",
+   "mode": "tram",
+   "reel": 120000,
+   "ecart_ville_connue": -26,
+   "ecart_ville_inconnue": -23
+  },
+  {
+   "ville": "marseille",
+   "ligne": "M1",
+   "mode": "metro",
+   "reel": 162600,
+   "ecart_ville_connue": 55,
+   "ecart_ville_inconnue": 43
+  },
+  {
+   "ville": "marseille",
+   "ligne": "M2",
+   "mode": "metro",
+   "reel": 170500,
+   "ecart_ville_connue": -8,
+   "ecart_ville_inconnue": -9
+  },
+  {
+   "ville": "marseille",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 32200,
+   "ecart_ville_connue": 70,
+   "ecart_ville_inconnue": 60
+  },
+  {
+   "ville": "marseille",
+   "ligne": "T2",
+   "mode": "tram",
+   "reel": 67000,
+   "ecart_ville_connue": -25,
+   "ecart_ville_inconnue": -19
+  },
+  {
+   "ville": "marseille",
+   "ligne": "B1",
+   "mode": "bhns",
+   "reel": 22700,
+   "ecart_ville_connue": -10,
+   "ecart_ville_inconnue": -20
+  },
+  {
+   "ville": "marseille",
+   "ligne": "B2",
+   "mode": "bhns",
+   "reel": 17900,
+   "ecart_ville_connue": -14,
+   "ecart_ville_inconnue": -27
+  },
+  {
+   "ville": "marseille",
+   "ligne": "B3",
+   "mode": "bhns",
+   "reel": 14000,
+   "ecart_ville_connue": -35,
+   "ecart_ville_inconnue": -44
+  },
+  {
+   "ville": "bordeaux",
+   "ligne": "B",
+   "mode": "tram",
+   "reel": 134884,
+   "ecart_ville_connue": -37,
+   "ecart_ville_inconnue": -28
+  },
+  {
+   "ville": "bordeaux",
+   "ligne": "D",
+   "mode": "tram",
+   "reel": 47597,
+   "ecart_ville_connue": 17,
+   "ecart_ville_inconnue": 15
+  },
+  {
+   "ville": "bordeaux",
+   "ligne": "G",
+   "mode": "bhns",
+   "reel": 30000,
+   "ecart_ville_connue": 36,
+   "ecart_ville_inconnue": 29
+  },
+  {
+   "ville": "rennes",
+   "ligne": "a",
+   "mode": "metro",
+   "reel": 147236,
+   "ecart_ville_connue": -28,
+   "ecart_ville_inconnue": -38
+  },
+  {
+   "ville": "rennes",
+   "ligne": "b",
+   "mode": "metro",
+   "reel": 95704,
+   "ecart_ville_connue": 10,
+   "ecart_ville_inconnue": -12
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C1",
+   "mode": "bhns",
+   "reel": 16959,
+   "ecart_ville_connue": -15,
+   "ecart_ville_inconnue": -21
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C2",
+   "mode": "bhns",
+   "reel": 10977,
+   "ecart_ville_connue": 7,
+   "ecart_ville_inconnue": -5
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C3",
+   "mode": "bhns",
+   "reel": 10991,
+   "ecart_ville_connue": -8,
+   "ecart_ville_inconnue": -17
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C4",
+   "mode": "bhns",
+   "reel": 20017,
+   "ecart_ville_connue": -28,
+   "ecart_ville_inconnue": -33
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C5",
+   "mode": "bhns",
+   "reel": 12943,
+   "ecart_ville_connue": -7,
+   "ecart_ville_inconnue": -15
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C6",
+   "mode": "bhns",
+   "reel": 12824,
+   "ecart_ville_connue": 2,
+   "ecart_ville_inconnue": -7
+  },
+  {
+   "ville": "rennes",
+   "ligne": "C7",
+   "mode": "bhns",
+   "reel": 4083,
+   "ecart_ville_connue": 16,
+   "ecart_ville_inconnue": -4
+  },
+  {
+   "ville": "lille",
+   "ligne": "1",
+   "mode": "metro",
+   "reel": 148459,
+   "ecart_ville_connue": -2,
+   "ecart_ville_inconnue": 36
+  },
+  {
+   "ville": "lille",
+   "ligne": "2",
+   "mode": "metro",
+   "reel": 186195,
+   "ecart_ville_connue": 41,
+   "ecart_ville_inconnue": 92
+  },
+  {
+   "ville": "lille",
+   "ligne": "R+T",
+   "mode": "tram",
+   "reel": 26325,
+   "ecart_ville_connue": 135,
+   "ecart_ville_inconnue": 197
+  },
+  {
+   "ville": "lille",
+   "ligne": "L1",
+   "mode": "bhns",
+   "reel": 9108,
+   "ecart_ville_connue": 65,
+   "ecart_ville_inconnue": 144
+  },
+  {
+   "ville": "lille",
+   "ligne": "L2",
+   "mode": "bhns",
+   "reel": 4037,
+   "ecart_ville_connue": -4,
+   "ecart_ville_inconnue": 36
+  },
+  {
+   "ville": "lille",
+   "ligne": "L3",
+   "mode": "bhns",
+   "reel": 5723,
+   "ecart_ville_connue": -41,
+   "ecart_ville_inconnue": -11
+  },
+  {
+   "ville": "lille",
+   "ligne": "L4",
+   "mode": "bhns",
+   "reel": 8340,
+   "ecart_ville_connue": 12,
+   "ecart_ville_inconnue": 64
+  },
+  {
+   "ville": "lille",
+   "ligne": "L5",
+   "mode": "bhns",
+   "reel": 17156,
+   "ecart_ville_connue": 4,
+   "ecart_ville_inconnue": 64
+  },
+  {
+   "ville": "lille",
+   "ligne": "L6",
+   "mode": "bhns",
+   "reel": 4211,
+   "ecart_ville_connue": -24,
+   "ecart_ville_inconnue": 9
+  },
+  {
+   "ville": "lille",
+   "ligne": "L7",
+   "mode": "bhns",
+   "reel": 3312,
+   "ecart_ville_connue": 67,
+   "ecart_ville_inconnue": 128
+  },
+  {
+   "ville": "lille",
+   "ligne": "L8",
+   "mode": "bhns",
+   "reel": 6211,
+   "ecart_ville_connue": 66,
+   "ecart_ville_inconnue": 126
+  },
+  {
+   "ville": "nantes",
+   "ligne": "1",
+   "mode": "tram",
+   "reel": 130000,
+   "ecart_ville_connue": -27,
+   "ecart_ville_inconnue": -39
+  },
+  {
+   "ville": "nantes",
+   "ligne": "4",
+   "mode": "bhns",
+   "reel": 35094,
+   "ecart_ville_connue": -55,
+   "ecart_ville_inconnue": -62
+  },
+  {
+   "ville": "nantes",
+   "ligne": "C1",
+   "mode": "bhns",
+   "reel": 22537,
+   "ecart_ville_connue": -19,
+   "ecart_ville_inconnue": -34
+  },
+  {
+   "ville": "nantes",
+   "ligne": "C3",
+   "mode": "bhns",
+   "reel": 20660,
+   "ecart_ville_connue": 2,
+   "ecart_ville_inconnue": -21
+  },
+  {
+   "ville": "nantes",
+   "ligne": "C6",
+   "mode": "bhns",
+   "reel": 23116,
+   "ecart_ville_connue": 3,
+   "ecart_ville_inconnue": -20
+  },
+  {
+   "ville": "strasbourg",
+   "ligne": "G",
+   "mode": "bhns",
+   "reel": 20000,
+   "ecart_ville_connue": 2,
+   "ecart_ville_inconnue": 1
+  },
+  {
+   "ville": "brest",
+   "ligne": "A",
+   "mode": "tram",
+   "reel": 44075,
+   "ecart_ville_connue": -13,
+   "ecart_ville_inconnue": -10
+  },
+  {
+   "ville": "clermont-ferrand",
+   "ligne": "A",
+   "mode": "tram",
+   "reel": 66642,
+   "ecart_ville_connue": -33,
+   "ecart_ville_inconnue": -36
+  },
+  {
+   "ville": "caen",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 26139,
+   "ecart_ville_connue": 14,
+   "ecart_ville_inconnue": 9
+  },
+  {
+   "ville": "caen",
+   "ligne": "T2",
+   "mode": "tram",
+   "reel": 15243,
+   "ecart_ville_connue": -19,
+   "ecart_ville_inconnue": -15
+  },
+  {
+   "ville": "orleans",
+   "ligne": "A",
+   "mode": "tram",
+   "reel": 45353,
+   "ecart_ville_connue": -17,
+   "ecart_ville_inconnue": -11
+  },
+  {
+   "ville": "orleans",
+   "ligne": "B",
+   "mode": "tram",
+   "reel": 28939,
+   "ecart_ville_connue": 29,
+   "ecart_ville_inconnue": 27
+  },
+  {
+   "ville": "besancon",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 20226,
+   "ecart_ville_connue": 9,
+   "ecart_ville_inconnue": 17
+  },
+  {
+   "ville": "besancon",
+   "ligne": "T2",
+   "mode": "tram",
+   "reel": 14453,
+   "ecart_ville_connue": 7,
+   "ecart_ville_inconnue": 17
+  },
+  {
+   "ville": "mulhouse",
+   "ligne": "1",
+   "mode": "tram",
+   "reel": 28963,
+   "ecart_ville_connue": -15,
+   "ecart_ville_inconnue": -18
+  },
+  {
+   "ville": "mulhouse",
+   "ligne": "2",
+   "mode": "tram",
+   "reel": 32293,
+   "ecart_ville_connue": -12,
+   "ecart_ville_inconnue": -16
+  },
+  {
+   "ville": "nancy",
+   "ligne": "T1",
+   "mode": "bhns",
+   "reel": 33000,
+   "ecart_ville_connue": -57,
+   "ecart_ville_inconnue": -36
+  },
+  {
+   "ville": "nancy",
+   "ligne": "T2",
+   "mode": "bhns",
+   "reel": 13899,
+   "ecart_ville_connue": 18,
+   "ecart_ville_inconnue": 50
+  },
+  {
+   "ville": "nancy",
+   "ligne": "T3",
+   "mode": "bhns",
+   "reel": 8912,
+   "ecart_ville_connue": 105,
+   "ecart_ville_inconnue": 137
+  },
+  {
+   "ville": "nancy",
+   "ligne": "T4",
+   "mode": "bhns",
+   "reel": 8710,
+   "ecart_ville_connue": 131,
+   "ecart_ville_inconnue": 166
+  },
+  {
+   "ville": "avignon",
+   "ligne": "T1",
+   "mode": "tram",
+   "reel": 10868,
+   "ecart_ville_connue": 49,
+   "ecart_ville_inconnue": 51
+  },
+  {
+   "ville": "avignon",
+   "ligne": "C2",
+   "mode": "bhns",
+   "reel": 9434,
+   "ecart_ville_connue": -4,
+   "ecart_ville_inconnue": 2
+  },
+  {
+   "ville": "avignon",
+   "ligne": "C3",
+   "mode": "bhns",
+   "reel": 5283,
+   "ecart_ville_connue": 8,
+   "ecart_ville_inconnue": 11
+  },
+  {
+   "ville": "le-havre",
+   "ligne": "A+B",
+   "mode": "tram",
+   "reel": 41660,
+   "ecart_ville_connue": 31,
+   "ecart_ville_inconnue": 36
+  },
+  {
+   "ville": "metz",
+   "ligne": "A+B",
+   "mode": "bhns",
+   "reel": 45000,
+   "ecart_ville_connue": -64,
+   "ecart_ville_inconnue": -66
+  },
+  {
+   "ville": "nimes",
+   "ligne": "T1",
+   "mode": "bhns",
+   "reel": 6415,
+   "ecart_ville_connue": 59,
+   "ecart_ville_inconnue": 86
+  },
+  {
+   "ville": "nimes",
+   "ligne": "T2",
+   "mode": "bhns",
+   "reel": 10189,
+   "ecart_ville_connue": 44,
+   "ecart_ville_inconnue": 71
+  },
+  {
+   "ville": "pau",
+   "ligne": "F",
+   "mode": "bhns",
+   "reel": 7547,
+   "ecart_ville_connue": 26,
+   "ecart_ville_inconnue": 19
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L1",
+   "mode": "bhns",
+   "reel": 21538,
+   "ecart_ville_connue": -24,
+   "ecart_ville_inconnue": -24
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L2",
+   "mode": "bhns",
+   "reel": 11455,
+   "ecart_ville_connue": -18,
+   "ecart_ville_inconnue": -29
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L3",
+   "mode": "bhns",
+   "reel": 8823,
+   "ecart_ville_connue": -26,
+   "ecart_ville_inconnue": -37
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L4",
+   "mode": "bhns",
+   "reel": 7269,
+   "ecart_ville_connue": 95,
+   "ecart_ville_inconnue": 84
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L5",
+   "mode": "bhns",
+   "reel": 5990,
+   "ecart_ville_connue": -6,
+   "ecart_ville_inconnue": -20
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L6",
+   "mode": "bhns",
+   "reel": 7137,
+   "ecart_ville_connue": -54,
+   "ecart_ville_inconnue": -64
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L8",
+   "mode": "bhns",
+   "reel": 8894,
+   "ecart_ville_connue": 49,
+   "ecart_ville_inconnue": 41
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L9",
+   "mode": "bhns",
+   "reel": 16834,
+   "ecart_ville_connue": 26,
+   "ecart_ville_inconnue": 22
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L10",
+   "mode": "bhns",
+   "reel": 7268,
+   "ecart_ville_connue": -28,
+   "ecart_ville_inconnue": -42
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L11",
+   "mode": "bhns",
+   "reel": 5335,
+   "ecart_ville_connue": 15,
+   "ecart_ville_inconnue": -15
+  },
+  {
+   "ville": "toulouse",
+   "ligne": "L14",
+   "mode": "bhns",
+   "reel": 11679,
+   "ecart_ville_connue": 44,
+   "ecart_ville_inconnue": 42
+  }
+ ]
+}

@@ -2,7 +2,9 @@
 
 Un jeu pour comprendre l'arbitrage budgétaire des transports publics, né à Lyon sous le nom de Simulateur TCL. Le joueur dirige les transports de la Métropole de Lyon pendant deux mandats, de 2026 à 2038, avec 2 000 M€ par mandat. Il choisit parmi 22 projets réels de métro, de tram et de bus, trouve l'argent qui manque en jouant sur les tarifs, et peut tracer sa propre ligne. Son score est le nombre de voyageurs gagnés par jour.
 
-Le jeu se joue aussi à Toulouse (`/toulouse`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes, avec 1 560 M€ par mandat (le budget de Lyon rapporté au nombre d'habitants) et une formule de fréquentation recalée sur les lignes de Tisséo. Les leviers de financement n'y sont pas encore calculés.
+Le jeu se joue aussi à Toulouse (`/toulouse`), Marseille (`/marseille`), Nice (`/nice`) et Paris (`/paris`), en tracé libre : il n'y a pas encore de catalogue de projets, le joueur trace toutes ses lignes, avec le budget publié par l'autorité organisatrice quand il existe, sinon celui de Lyon rapporté au nombre d'habitants. Les leviers de financement n'y sont pas encore calculés.
+
+Les voyageurs d'une ligne tracée viennent d'une formule choisie par un moteur parmi des dizaines de milliers, calées sur plus d'une centaine de lignes de vingt villes françaises : voir `docs/modele.md`.
 
 ## Lancer le site
 
@@ -37,11 +39,11 @@ Les chiffres des projets (coût, voyageurs, durée de chantier) sont dans `lib/c
 
 Le fond de carte ne dépend d'aucun service extérieur. `scripts/fetch-osm.mjs` télécharge depuis OpenStreetMap le Rhône et la Saône, les parcs, les plans d'eau, les grands axes, les voies ferrées, les limites de communes, les noms de quartiers et les lignes de métro et de tram actuelles, puis `npm run data` prépare les fichiers servis au navigateur dans `public/data/`. Les noms de quartiers servent aussi à nommer les arrêts des lignes tracées par le joueur (`lib/lieux.ts`). Les habitants et les emplois par carreau de 200 m viennent de l'INSEE ; leurs sources sont détaillées dans `data/insee/SOURCES.md`.
 
-Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`. Le commentaire en tête du fichier explique la formule, son calage sur les lignes lyonnaises existantes et ses limites.
+Le prix et la fréquentation d'une ligne tracée par le joueur sont calculés dans `lib/modele.ts`, avec la formule de `lib/formule.ts`, écrite par le moteur de fréquentation. `docs/modele.md` explique comment cette formule a été choisie, ce qu'elle vaut ligne par ligne et comment la recalculer.
 
 ## Ouvrir une autre ville
 
-Tout ce qui change d'une ville à l'autre est décrit dans `lib/villes.ts` : la carte, le budget, le réglage de la formule de fréquentation et quelques repères pour les textes. Les données d'une ville vont dans `public/data/<ville>/` : le fond de carte et les arrêts par `scripts/fetch-osm.mjs` et `scripts/build-data.mjs` (avec le nom de la ville en argument), les habitants et les emplois par `scripts/carreaux-ville.py`. `data/toulouse/SOURCES.md` montre ce qu'il a fallu pour Toulouse, et `docs/villes.md` rassemble les recherches sur Marseille, Nice et Paris. Côté communauté, la ville doit être ouverte dans la table `villes` et ses données déposées pour la fonction serveur (voir `docs/communaute.md`).
+Tout ce qui change d'une ville à l'autre est décrit dans `lib/villes.ts` : la carte, le budget, le centre d'où se mesure la distance au centre, et quelques repères pour les textes. La constante de la formule de fréquentation de chaque ville est dans `lib/formule.ts`. Les données d'une ville vont dans `public/data/<ville>/` : le fond de carte et les arrêts par `scripts/fetch-osm.mjs` et `scripts/build-data.mjs` (avec le nom de la ville en argument), les habitants et les emplois par `scripts/carreaux-ville.py`. `data/<ville>/SOURCES.md` décrit les données de chaque ville, et `docs/villes.md` rassemble les recherches sur les réseaux, les projets et les budgets. Côté communauté, la ville doit être ouverte dans la table `villes` et ses données déposées pour la fonction serveur (voir `docs/communaute.md`).
 
 ## Licence
 

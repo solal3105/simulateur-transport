@@ -41,6 +41,52 @@ const VILLES = {
     stops:
       '(node["railway"="tram_stop"](43.50,1.30,43.72,1.56);node["railway"="station"]["station"="subway"](43.50,1.30,43.72,1.56);node["public_transport"="stop_position"]["subway"="yes"](43.50,1.30,43.72,1.56);node["aerialway"="station"](43.52,1.40,43.60,1.50););out;',
   },
+  // Les 92 communes de la Métropole d'Aix-Marseille-Provence, de Martigues à La Ciotat et à Pertuis.
+  marseille: {
+    rivers: 'way["waterway"="river"]["name"~"Huveaune|Durance|^Arc$|Touloubre"](43.14,4.70,43.80,5.85);out geom;',
+    cote: 'way["natural"="coastline"](43.10,4.65,43.82,5.90);out geom;',
+    metro: 'way["railway"="subway"](43.24,5.34,43.36,5.46);out geom;',
+    tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](43.14,4.70,43.80,5.85);out geom;',
+    chantiers: 'way["railway"="construction"]["construction"~"^(subway|tram|light_rail)$"](43.14,4.70,43.80,5.85);out geom;',
+    parcs:
+      '(way["leisure"="park"](43.14,4.70,43.80,5.85);relation["leisure"="park"](43.14,4.70,43.80,5.85);way["landuse"="forest"](43.14,4.70,43.80,5.85);way["natural"="wood"](43.14,4.70,43.80,5.85););out geom;',
+    eau: '(way["natural"="water"](43.14,4.70,43.80,5.85);relation["natural"="water"](43.14,4.70,43.80,5.85););out geom;',
+    routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](43.14,4.70,43.80,5.85);out geom;',
+    rail: 'way["railway"="rail"][!"service"](43.14,4.70,43.80,5.85);out geom;',
+    lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.10,4.65,43.82,5.90);out;',
+    stops:
+      '(node["railway"="tram_stop"](43.14,4.70,43.80,5.85);node["railway"="station"]["station"="subway"](43.14,4.70,43.80,5.85);node["public_transport"="stop_position"]["subway"="yes"](43.14,4.70,43.80,5.85););out;',
+  },
+  // Les 51 communes de la Métropole Nice Côte d'Azur, de la mer aux vallées de la Tinée et de la Vésubie.
+  nice: {
+    rivers: 'way["waterway"="river"]["name"~"^(Var|Le Var|Paillon|Le Paillon|Tinée|La Tinée|Vésubie|La Vésubie)$"](43.63,6.77,44.37,7.45);out geom;',
+    cote: 'way["natural"="coastline"](43.55,6.70,43.85,7.55);out geom;',
+    tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](43.63,7.10,43.80,7.40);out geom;',
+    chantiers: 'way["railway"="construction"]["construction"~"^(tram|light_rail)$"](43.63,7.10,43.80,7.40);out geom;',
+    parcs:
+      '(way["leisure"="park"](43.63,6.77,44.37,7.45);relation["leisure"="park"](43.63,6.77,44.37,7.45);way["landuse"="forest"](43.63,6.77,44.37,7.45);way["natural"="wood"](43.63,6.77,44.37,7.45););out geom;',
+    eau: '(way["natural"="water"](43.63,6.77,44.37,7.45);relation["natural"="water"](43.63,6.77,44.37,7.45););out geom;',
+    routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](43.63,6.77,44.37,7.45);out geom;',
+    rail: 'way["railway"="rail"][!"service"](43.63,6.77,44.37,7.45);out geom;',
+    lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.60,6.74,44.40,7.50);out;',
+    stops: '(node["railway"="tram_stop"](43.63,7.10,43.80,7.40););out;',
+  },
+  // Paris et les 123 communes des Hauts-de-Seine, de la Seine-Saint-Denis et du Val-de-Marne.
+  paris: {
+    rivers: 'way["waterway"="river"]["name"~"^(La Seine|La Marne|Seine|Marne)$"](48.67,2.12,49.03,2.64);out geom;',
+    metro: 'way["railway"="subway"][!"service"](48.67,2.12,49.03,2.64);out geom;',
+    tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](48.67,2.12,49.03,2.64);out geom;',
+    cable: 'way["aerialway"~"^(gondola|cable_car)$"](48.72,2.42,48.80,2.50);out geom;',
+    chantiers: 'way["railway"="construction"]["construction"~"^(subway|tram|light_rail)$"](48.67,2.12,49.03,2.64);out geom;',
+    parcs:
+      '(way["leisure"="park"](48.67,2.12,49.03,2.64);relation["leisure"="park"](48.67,2.12,49.03,2.64);way["landuse"="forest"](48.67,2.12,49.03,2.64);way["natural"="wood"](48.67,2.12,49.03,2.64););out geom;',
+    eau: '(way["natural"="water"](48.67,2.12,49.03,2.64);relation["natural"="water"](48.67,2.12,49.03,2.64););out geom;',
+    routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](48.67,2.12,49.03,2.64);out geom;',
+    rail: 'way["railway"="rail"][!"service"](48.67,2.12,49.03,2.64);out geom;',
+    lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](48.65,2.10,49.05,2.66);out;',
+    stops:
+      '(node["railway"="tram_stop"](48.67,2.12,49.03,2.64);node["railway"="station"]["station"="subway"](48.67,2.12,49.03,2.64);node["aerialway"="station"](48.72,2.42,48.80,2.50););out;',
+  },
 }
 
 // On peut ne télécharger que certaines couches : node scripts/fetch-osm.mjs toulouse parcs routes
@@ -55,10 +101,16 @@ mkdirSync(dir, { recursive: true })
 // Hors de Lyon, les contours des communes viennent de geo.api.gouv.fr, plus sûr que les grosses requêtes Overpass.
 if (ville !== 'lyon' && (!demandees.length || demandees.includes('contours'))) {
   const { communes } = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'data', ville, 'communes.json'), 'utf8'))
-  const epcis = [...new Set(communes.map((c) => c.epci))]
+  // Les communes sont rattachées à une intercommunalité, ou à un département pour Paris et la petite couronne.
+  const epcis = [...new Set(communes.map((c) => c.epci).filter(Boolean))]
+  const departements = [...new Set(communes.filter((c) => !c.epci).map((c) => c.departement))]
   const features = []
   for (const epci of epcis) {
     const r = await fetch(`https://geo.api.gouv.fr/communes?codeEpci=${epci}&fields=nom,code&format=geojson&geometry=contour`)
+    features.push(...(await r.json()).features)
+  }
+  for (const dep of departements) {
+    const r = await fetch(`https://geo.api.gouv.fr/departements/${dep}/communes?fields=nom,code&format=geojson&geometry=contour`)
     features.push(...(await r.json()).features)
   }
   writeFileSync(join(dir, 'contours.json'), JSON.stringify({ type: 'FeatureCollection', features }))

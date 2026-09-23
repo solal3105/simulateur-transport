@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
 import { nommerArrets } from '@/lib/lieux'
-import { DUREE_CHANTIER, estimer, PRIX_KM } from '@/lib/modele'
+import { DUREE_CHANTIER, estimer, PRIX_KM, rayonBassin } from '@/lib/modele'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, ModeLigne } from '@/lib/types'
@@ -41,6 +41,12 @@ const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; reper
   },
 ]
 const NOM_MODE: Record<ModeLigne, string> = { tram: 'tramway', bus: 'bus rapide', metro: 'métro', cable: 'téléphérique' }
+
+/** La distance où nous comptons habitants et emplois autour des arrêts, en toutes lettres : « 1 km », « 400 m ». */
+const distanceBassin = (mode: ModeLigne) => {
+  const r = rayonBassin(mode)
+  return r >= 1000 ? `${String(r / 1000).replace('.', ',')} km` : `${r} m`
+}
 
 export function useEstimation(): Estimation | null {
   const donnees = useDonnees(useVille().id)
@@ -295,7 +301,7 @@ export function Traceur() {
             {noms.length > 2 ? <span className="text-gris">, par {noms.slice(1, -1).join(', ')}</span> : null}
           </p>
           <div className="hidden flex-col gap-0.5 lg:flex">
-            <Surtitre>Autour de vos arrêts, à moins de {brouillon.mode === 'metro' ? 600 : 400} m</Surtitre>
+            <Surtitre>Autour de vos arrêts, à moins de {distanceBassin(brouillon.mode)}</Surtitre>
             <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
             <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
             <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
@@ -382,7 +388,7 @@ export function MaLigne() {
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>
-          Autour de vos {brouillon.arrets.length} arrêts, à moins de {brouillon.mode === 'metro' ? 600 : 400} m
+          Autour de vos {brouillon.arrets.length} arrêts, à moins de {distanceBassin(brouillon.mode)}
         </Surtitre>
         <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />

@@ -17,8 +17,10 @@ import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
+import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu } from '@/lib/geo'
 import { nommerArrets } from '@/lib/lieux'
+import { rayonBassin } from '@/lib/modele'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
@@ -104,6 +106,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
     },
     layers: [
       { id: 'sol', type: 'background', paint: { 'background-color': COULEURS.sol } },
+      { id: 'mer', type: 'fill', source: 'decor', filter: genre('mer'), paint: { 'fill-color': COULEURS.eau } },
       { id: 'parcs', type: 'fill', source: 'decor', filter: genre('parc'), paint: { 'fill-color': COULEURS.parc } },
       { id: 'eau', type: 'fill', source: 'decor', filter: genre('eau'), paint: { 'fill-color': COULEURS.eau } },
       {
@@ -619,7 +622,7 @@ export function Carte({
         traits.push({ type: 'Feature', properties: { dernier: i === arrets.length - 1 }, geometry: { type: 'Point', coordinates: a } }),
       )
       ;(m.getSource('brouillon') as GeoJSONSource).setData({ type: 'FeatureCollection', features: traits })
-      const rayon = brouillon?.mode === 'metro' ? 600 : 400
+      const rayon = brouillon ? rayonBassin(brouillon.mode) : FORMULE.rayonAutres
       ;(m.getSource('zones') as GeoJSONSource).setData({
         type: 'FeatureCollection',
         features: arrets.map((a) => cercle(a, rayon, ville.latitude)),

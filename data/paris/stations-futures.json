@@ -1,0 +1,517 @@
+{
+ "source": "Wikidata, gares des lignes 15 (Q3240151), 16 (Q16655715), 17 (Q16655720) et 18 (Q3240157) du Grand Paris Express, consulté le 23 septembre 2026 ; listes des gares d'après la Société des grands projets. Les gares déjà ouvertes sur d'autres lignes (Villejuif - Gustave Roussy et Rosny-Bois-Perrier, par exemple) sont marquées existantes.",
+ "lignes": [
+  {
+   "ligne": "15",
+   "ouverture": "2027 au sud, 2031 à l'ouest et à l'est",
+   "stations": [
+    {
+     "nom": "Pont de Sèvres",
+     "wikidata": "Q1969904",
+     "pos": [
+      2.23083,
+      48.82944
+     ]
+    },
+    {
+     "nom": "Issy",
+     "wikidata": "Q19829177",
+     "pos": [
+      2.25994,
+      48.8211
+     ]
+    },
+    {
+     "nom": "Clamart",
+     "wikidata": "Q19829153",
+     "pos": [
+      2.2734,
+      48.8141
+     ]
+    },
+    {
+     "nom": "Châtillon - Montrouge",
+     "wikidata": "Q1090894",
+     "pos": [
+      2.30161,
+      48.81076
+     ]
+    },
+    {
+     "nom": "Bagneux - Lucie Aubrac",
+     "wikidata": "Q2879106",
+     "pos": [
+      2.31736,
+      48.8027
+     ]
+    },
+    {
+     "nom": "Arcueil - Cachan",
+     "wikidata": "Q19828947",
+     "pos": [
+      2.32823,
+      48.7975
+     ]
+    },
+    {
+     "nom": "Villejuif - Louis Aragon",
+     "wikidata": "Q1267664",
+     "pos": [
+      2.36756,
+      48.78717
+     ]
+    },
+    {
+     "nom": "Mairie de Vitry-sur-Seine",
+     "wikidata": "Q18745537",
+     "pos": [
+      2.38722,
+      48.78992
+     ]
+    },
+    {
+     "nom": "Les Ardoines",
+     "wikidata": "Q19860371",
+     "pos": [
+      2.40851,
+      48.7824
+     ]
+    },
+    {
+     "nom": "Le Vert de Maisons",
+     "wikidata": "Q19860375",
+     "pos": [
+      2.43251,
+      48.7894
+     ]
+    },
+    {
+     "nom": "Créteil - L'Échat",
+     "wikidata": "Q1142525",
+     "pos": [
+      2.44939,
+      48.79653
+     ]
+    },
+    {
+     "nom": "Saint-Maur - Créteil",
+     "wikidata": "Q19860553",
+     "pos": [
+      2.47277,
+      48.8069
+     ]
+    },
+    {
+     "nom": "Champigny Centre",
+     "wikidata": "Q19406860",
+     "pos": [
+      2.50216,
+      48.8161
+     ]
+    },
+    {
+     "nom": "Villiers - Champigny - Bry",
+     "wikidata": "Q18745100",
+     "pos": [
+      2.52621,
+      48.824
+     ]
+    },
+    {
+     "nom": "Noisy - Champs",
+     "wikidata": "Q19945187",
+     "pos": [
+      2.58,
+      48.8429
+     ]
+    },
+    {
+     "nom": "Saint-Cloud",
+     "wikidata": "Q61083329",
+     "pos": [
+      2.2171,
+      48.8437
+     ]
+    },
+    {
+     "nom": "Rueil – Suresnes Mont-Valérien",
+     "wikidata": "Q31190669",
+     "pos": [
+      2.2021,
+      48.8721
+     ]
+    },
+    {
+     "nom": "Nanterre La Boule",
+     "wikidata": "Q31190668",
+     "pos": [
+      2.20158,
+      48.88767
+     ]
+    },
+    {
+     "nom": "Nanterre La Folie",
+     "wikidata": "Q61084138",
+     "pos": [
+      2.22619,
+      48.89811
+     ]
+    },
+    {
+     "nom": "La Défense",
+     "wikidata": "Q140277",
+     "pos": [
+      2.23788,
+      48.89193
+     ]
+    },
+    {
+     "nom": "Bécon-les-Bruyères",
+     "wikidata": "Q65225820",
+     "pos": [
+      2.26697,
+      48.90533
+     ]
+    },
+    {
+     "nom": "Bois-Colombes",
+     "wikidata": "Q65225817",
+     "pos": [
+      2.27212,
+      48.91501
+     ]
+    },
+    {
+     "nom": "Les Agnettes",
+     "wikidata": "Q962861",
+     "pos": [
+      2.28644,
+      48.92318
+     ]
+    },
+    {
+     "nom": "Les Grésillons",
+     "wikidata": "Q65225899",
+     "pos": [
+      2.31285,
+      48.91977
+     ]
+    },
+    {
+     "nom": "Saint-Denis Pleyel",
+     "wikidata": "Q3462074",
+     "pos": [
+      2.34667,
+      48.9176
+     ]
+    },
+    {
+     "nom": "Stade de France",
+     "wikidata": "Q65225999",
+     "pos": [
+      2.36345,
+      48.91807
+     ]
+    },
+    {
+     "nom": "Mairie d'Aubervilliers",
+     "wikidata": "Q1612093",
+     "pos": [
+      2.38065,
+      48.9138
+     ]
+    },
+    {
+     "nom": "Fort d'Aubervilliers",
+     "wikidata": "Q1438901",
+     "pos": [
+      2.40361,
+      48.91417
+     ]
+    },
+    {
+     "nom": "Drancy - Bobigny",
+     "wikidata": "Q31190670",
+     "pos": [
+      2.42636,
+      48.91591
+     ]
+    },
+    {
+     "nom": "Bobigny - Pablo Picasso",
+     "wikidata": "Q593257",
+     "pos": [
+      2.44922,
+      48.9069
+     ]
+    },
+    {
+     "nom": "Pont de Bondy",
+     "wikidata": "Q76467149",
+     "pos": [
+      2.4705,
+      48.9049
+     ]
+    },
+    {
+     "nom": "Bondy",
+     "wikidata": "Q61084135",
+     "pos": [
+      2.4803,
+      48.8938
+     ]
+    },
+    {
+     "nom": "Val de Fontenay",
+     "wikidata": "Q61084127",
+     "pos": [
+      2.48967,
+      48.8556
+     ]
+    },
+    {
+     "nom": "Nogent - Le Perreux",
+     "wikidata": "Q61084132",
+     "pos": [
+      2.4948,
+      48.8382
+     ]
+    }
+   ]
+  },
+  {
+   "ligne": "16",
+   "ouverture": "2027 à 2028",
+   "stations": [
+    {
+     "nom": "Saint-Denis Pleyel",
+     "wikidata": "Q3462074",
+     "pos": [
+      2.34667,
+      48.9176
+     ]
+    },
+    {
+     "nom": "La Courneuve - Six Routes",
+     "wikidata": "Q75880160",
+     "pos": [
+      2.3845,
+      48.92929
+     ]
+    },
+    {
+     "nom": "Le Bourget",
+     "wikidata": "Q33052682",
+     "pos": [
+      2.42232,
+      48.93043
+     ]
+    },
+    {
+     "nom": "Parc du Blanc-Mesnil",
+     "wikidata": "Q39279937",
+     "pos": [
+      2.4632,
+      48.9457
+     ]
+    },
+    {
+     "nom": "Aulnay Val Francilia",
+     "wikidata": "Q39281462",
+     "pos": [
+      2.4882,
+      48.9514
+     ]
+    },
+    {
+     "nom": "Sevran - Beaudottes",
+     "wikidata": "Q39144423",
+     "pos": [
+      2.52554,
+      48.94717
+     ]
+    },
+    {
+     "nom": "Sevran - Livry",
+     "wikidata": "Q39076525",
+     "pos": [
+      2.5348,
+      48.9354
+     ]
+    },
+    {
+     "nom": "Clichy - Montfermeil",
+     "wikidata": "Q22248250",
+     "pos": [
+      2.55657,
+      48.90443
+     ]
+    },
+    {
+     "nom": "Chelles - Gournay",
+     "wikidata": "Q30050795",
+     "pos": [
+      2.58581,
+      48.87432
+     ]
+    },
+    {
+     "nom": "Noisy - Champs",
+     "wikidata": "Q19945187",
+     "pos": [
+      2.58,
+      48.8429
+     ]
+    }
+   ]
+  },
+  {
+   "ligne": "17",
+   "ouverture": "2027 à 2030",
+   "stations": [
+    {
+     "nom": "Saint-Denis Pleyel",
+     "wikidata": "Q3462074",
+     "pos": [
+      2.34667,
+      48.9176
+     ]
+    },
+    {
+     "nom": "La Courneuve - Six Routes",
+     "wikidata": "Q75880160",
+     "pos": [
+      2.3845,
+      48.92929
+     ]
+    },
+    {
+     "nom": "Le Bourget",
+     "wikidata": "Q33052682",
+     "pos": [
+      2.42232,
+      48.93043
+     ]
+    },
+    {
+     "nom": "Le Bourget - Aéroport",
+     "wikidata": "Q61039296",
+     "pos": [
+      2.43611,
+      48.94667
+     ]
+    },
+    {
+     "nom": "Gonesse",
+     "wikidata": "Q61039668",
+     "pos": [
+      2.47583,
+      48.97841
+     ]
+    },
+    {
+     "nom": "Parc des Expositions",
+     "wikidata": "Q65225937",
+     "pos": [
+      2.51444,
+      48.97361
+     ]
+    },
+    {
+     "nom": "Aéroport Charles-de-Gaulle 2 TGV",
+     "wikidata": "Q65225812",
+     "pos": [
+      2.57024,
+      49.0047
+     ]
+    },
+    {
+     "nom": "Le Mesnil-Amelot",
+     "wikidata": "Q61082805",
+     "pos": [
+      2.59583,
+      49.02556
+     ]
+    }
+   ]
+  },
+  {
+   "ligne": "18",
+   "ouverture": "fin 2026 à 2030",
+   "stations": [
+    {
+     "nom": "Antonypole - Wissous Centre",
+     "wikidata": "Q65225808",
+     "pos": [
+      2.30944,
+      48.73556
+     ]
+    },
+    {
+     "nom": "Massy Opéra",
+     "wikidata": "Q65225920",
+     "pos": [
+      2.29083,
+      48.73167
+     ]
+    },
+    {
+     "nom": "Massy - Palaiseau",
+     "wikidata": "Q65225917",
+     "pos": [
+      2.25861,
+      48.725
+     ]
+    },
+    {
+     "nom": "Polytechnique",
+     "wikidata": "Q61082679",
+     "pos": [
+      2.20111,
+      48.71556
+     ]
+    },
+    {
+     "nom": "Université Paris-Saclay",
+     "wikidata": "Q65225634",
+     "pos": [
+      2.17389,
+      48.71194
+     ]
+    },
+    {
+     "nom": "Christ de Saclay",
+     "wikidata": "Q65225822",
+     "pos": [
+      2.1618,
+      48.72986
+     ]
+    },
+    {
+     "nom": "Guyancourt",
+     "wikidata": "Q65225719",
+     "pos": [
+      2.07222,
+      48.76083
+     ]
+    },
+    {
+     "nom": "Satory",
+     "wikidata": "Q65225721",
+     "pos": [
+      2.10444,
+      48.78722
+     ]
+    },
+    {
+     "nom": "Versailles Chantiers",
+     "wikidata": "Q65226013",
+     "pos": [
+      2.13667,
+      48.79472
+     ]
+    }
+   ]
+  }
+ ]
+}

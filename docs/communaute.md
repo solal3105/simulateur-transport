@@ -48,13 +48,13 @@ Le tracé libre fonctionne dans n'importe quelle ville française avec des donn�
 
 Le catalogue ajoute les projets réels d'une ville, avec leurs coûts et leurs fréquentations sourcés, comme pour Lyon. Il demande un travail de recherche ville par ville.
 
-Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. `docs/villes.md` rassemble les réseaux, les projets et les budgets sourcés de ces quatre villes, et le détail des vérifications ci-dessous. Toulouse est ouverte en tracé libre depuis le 23 septembre 2026.
+Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. `docs/villes.md` rassemble les réseaux, les projets et les budgets sourcés de ces quatre villes. Toulouse est ouverte en tracé libre depuis le 23 septembre 2026, Marseille, Nice et Paris depuis le 24 septembre.
 
-La formule de fréquentation doit être recalée dans chaque ville. Telle quelle, elle tombe juste pour le tram L1 de Nice, mais elle sous-estime les lignes de Toulouse d'un tiers et surestime le métro de Marseille de 60 à 85 %. Recalée sur les métros A et B et le tram T1, elle prédit chaque ligne toulousaine à moins de 25 % près à partir des deux autres, comme à Lyon. Elle ne sait pas estimer un téléphérique, ni à Toulouse ni à Lyon.
+Toutes les villes partagent la même formule de fréquentation, choisie par un moteur sur plus d'une centaine de lignes de vingt villes françaises, chaque ville gardant son propre niveau (`docs/modele.md`).
 
-Le budget d'une ville vient de son objectif d'investissement publié quand il existe (300 M€ par an à Marseille), sinon de celui de Lyon rapporté au nombre d'habitants (1 560 M€ par mandat à Toulouse, 790 à Nice). L'écran dit toujours d'où vient le chiffre.
+Le budget d'une ville vient de son objectif d'investissement publié quand il existe (300 M€ par an à Marseille), sinon de celui de Lyon rapporté au nombre d'habitants (1 560 M€ par mandat à Toulouse, 790 à Nice, 9 570 à Paris). L'écran dit toujours d'où vient le chiffre.
 
-Paris est un cas à part : l'autorité est régionale (Île-de-France Mobilités), le Grand Paris Express relève d'un autre maître d'ouvrage, et les montants sont d'un autre ordre. Le budget et le périmètre de jeu devront être choisis avec soin.
+Paris est un cas à part : l'autorité est régionale (Île-de-France Mobilités) et le Grand Paris Express relève d'un autre maître d'ouvrage. Le jeu s'y limite à Paris et à la petite couronne, et compte les lignes 15 à 18 du Grand Paris Express comme existantes.
 
 Toulouse a été ouverte en premier : Tisséo publie la fréquentation de chaque ligne, la formule s'y recale bien, et la ligne C, qui ouvre fin 2028, donne un vrai sujet de partie. On y joue depuis `/toulouse`, et ses réseaux publiés ont leur propre liste dans la communauté.
 
@@ -81,4 +81,4 @@ Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par vil
 3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule. C'est fait.
 4. La carte des envies et les réactions aux lignes.
 5. Les défis.
-6. Les trois autres villes.
+6. Les trois autres villes. C'est fait : Marseille, Nice et Paris sont ouvertes en tracé libre, avec une formule de fréquentation commune.

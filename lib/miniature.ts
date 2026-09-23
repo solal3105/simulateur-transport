@@ -7,7 +7,7 @@ import type { ModeLigne } from './types'
 import type { Ville } from './villes'
 
 /**
- * Un réseau en miniature, en chemins SVG : le fond (fleuves, métro et tram actuels) et les tracés du
+ * Un réseau en miniature, en chemins SVG : le fond (mer, fleuves, métro et tram actuels) et les tracés du
  * réseau dans la couleur de leur mode. Sert aux cartes de la communauté et à l'image d'aperçu d'un
  * réseau publié ; ne dépend d'aucun navigateur.
  *
@@ -37,7 +37,8 @@ export function cheminsFond(fond: Fond, ville: Pick<Ville, 'emprise' | 'latitude
       .filter((f) => f.properties.kind === genre)
       .map((f) => chemin(f.geometry.coordinates))
       .join('')
-  return { fleuves: de('fleuve'), tram: de('tram'), metro: de('metro') }
+  // La mer est faite d'anneaux fermés, la mer et ses îles, à remplir avec la règle pair-impair.
+  return { mer: de('cote'), fleuves: de('fleuve'), tram: de('tram'), metro: de('metro') }
 }
 
 export function cheminsReseau(projets: Projets, partie: PartieCompacte, ville: Pick<Ville, 'emprise' | 'latitude'>) {

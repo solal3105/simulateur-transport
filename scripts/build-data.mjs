@@ -2,7 +2,7 @@
  * Prépare les données servies au navigateur, dans public/data (Lyon) ou public/data/<ville>.
  *
  *   npm run data
- *   node scripts/build-data.mjs toulouse
+ *   node scripts/build-data.mjs toulouse      (ou marseille, nice, paris)
  *
  * Entrées :
  *   data/osm/*.json      extractions OpenStreetMap (voir scripts/fetch-osm.mjs)
@@ -18,8 +18,11 @@
  *   public/data/lieux.json     quartiers et communes, pour nommer les arrêts des lignes tracées
  *
  * Pour Toulouse, les lignes en chantier (ligne C, connexion de la ligne B) viennent d'OpenStreetMap et
- * leurs stations de data/toulouse/stations-futures.json. Les carreaux d'habitants et d'emplois sont
- * produits à part par scripts/carreaux-ville.py, et il n'y a pas de projets.
+ * leurs stations de data/toulouse/stations-futures.json. Hors de Lyon, les carreaux d'habitants et
+ * d'emplois sont produits à part par scripts/carreaux-ville.py, et il n'y a pas de projets.
+ *
+ * À Marseille et à Nice, la mer n'existe dans OpenStreetMap que comme trait de côte : elle est
+ * reconstruite ici en surface (voir merDepuisCote).
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -27,13 +30,13 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const ville = process.argv[2] ?? 'lyon'
-if (!['lyon', 'toulouse'].includes(ville)) throw new Error(`Ville inconnue : ${ville}`)
+if (!['lyon', 'toulouse', 'marseille', 'nice', 'paris'].includes(ville)) throw new Error(`Ville inconnue : ${ville}`)
 const src = (...p) => join(root, 'data', ...p)
 const osm = (nom) => (ville === 'lyon' ? src('osm', nom) : src('osm', ville, nom))
 const out = join(root, 'public', 'data', ...(ville === 'lyon' ? [] : [ville]))
 mkdirSync(out, { recursive: true })
 /** Latitude de référence, pour les surfaces. */
-const LATITUDE = { lyon: 45.76, toulouse: 43.6 }[ville]
+const LATITUDE = { lyon: 45.76, toulouse: 43.6, marseille: 43.3, nice: 43.7, paris: 48.86 }[ville]
 
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'))
 const round = (v, d = 5) => Math.round(v * 10 ** d) / 10 ** d
@@ -166,7 +169,204 @@ function fondToulouse() {
   }
 }
 
-const fond = ville === 'lyon' ? fondLyon() : fondToulouse()
+/**
+ * Marseille, Nice et Paris : les fleuves, le métro et le tram d'OpenStreetMap, y compris les lignes en
+ * chantier, qui ouvrent avant celles du joueur. Au bord de la mer, le trait de côte s'ajoute au fond
+ * pour les miniatures, et la mer elle-même au décor.
+ */
+const FONDS = {
+  marseille: { fleuves: /Huveaune|Durance|^Arc$|Touloubre/, cote: [43.1, 4.65, 43.82, 5.9] },
+  nice: { fleuves: /^(Le )?(Var|Paillon)$|^(La )?(Tinée|Vésubie)$/, cote: [43.55, 6.7, 43.85, 7.55] },
+  paris: { fleuves: /^(La )?(Seine|Marne)$/ },
+}
+
+/**
+ * La mer à partir du trait de côte, découpé à l'emprise [sud, ouest, nord, est]. Dans OpenStreetMap,
+ * la terre est à gauche du sens de la côte : chaque morceau qui traverse l'emprise laisse la mer à sa
+ * droite, et on referme la surface en suivant le bord de l'emprise dans le sens des aiguilles d'une
+ * montre jusqu'au morceau suivant. Les côtes fermées à l'intérieur sont des îles, trouées dans la mer.
+ */
+function merDepuisCote(elements, [s, o, n, e]) {
+  const chemins = elements.filter((w) => w.type === 'way' && w.geometry?.length > 1).map((w) => w.geometry.map((g) => [g.lon, g.lat]))
+  const cle = (p) => `${p[0]},${p[1]}`
+  const parDebut = new Map(chemins.map((w, i) => [cle(w[0]), i]))
+  const finsDeChemin = new Set(chemins.map((w) => cle(w.at(-1))))
+  const vus = new Set()
+  const suivre = (i) => {
+    let chaine = [...chemins[i]]
+    vus.add(i)
+    for (let j = parDebut.get(cle(chaine.at(-1))); j !== undefined && !vus.has(j); j = parDebut.get(cle(chaine.at(-1)))) {
+      chaine = chaine.concat(chemins[j].slice(1))
+      vus.add(j)
+    }
+    return chaine
+  }
+  const chaines = []
+  chemins.forEach((w, i) => !vus.has(i) && !finsDeChemin.has(cle(w[0])) && chaines.push(suivre(i)))
+  chemins.forEach((w, i) => !vus.has(i) && chaines.push(suivre(i)))
+
+  // Découpe de chaque chaîne à l'emprise (Liang-Barsky, segment par segment).
+  const coupe = (p, q) => {
+    let t0 = 0
+    let t1 = 1
+    const dx = q[0] - p[0]
+    const dy = q[1] - p[1]
+    for (const [pp, qq] of [[-dx, p[0] - o], [dx, e - p[0]], [-dy, p[1] - s], [dy, n - p[1]]]) {
+      if (pp === 0) {
+        if (qq < 0) return null
+      } else {
+        const r = qq / pp
+        if (pp < 0) {
+          if (r > t1) return null
+          if (r > t0) t0 = r
+        } else {
+          if (r < t0) return null
+          if (r < t1) t1 = r
+        }
+      }
+    }
+    return [t0, t1]
+  }
+  const entre = (p, q, t) => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]
+  const morceaux = []
+  const iles = []
+  for (const c of chaines) {
+    const ferme = cle(c[0]) === cle(c.at(-1))
+    let courant = null
+    let toutDedans = true
+    for (let i = 1; i < c.length; i += 1) {
+      const t = coupe(c[i - 1], c[i])
+      if (!t || t[0] > 0 || t[1] < 1) toutDedans = false
+      if (!t) continue
+      if (!courant) courant = [entre(c[i - 1], c[i], t[0])]
+      courant.push(entre(c[i - 1], c[i], t[1]))
+      if (t[1] < 1) {
+        morceaux.push(courant)
+        courant = null
+      }
+    }
+    if (ferme && toutDedans) iles.push(c)
+    else if (courant) morceaux.push(courant)
+  }
+
+  // Position d'un point du bord, en tournant dans le sens des aiguilles d'une montre depuis le coin nord-ouest.
+  const W = e - o
+  const H = n - s
+  const P = 2 * (W + H)
+  const projeter = ([x, y]) => {
+    // Un bout de côte qui s'arrête à l'intérieur (données incomplètes) est prolongé jusqu'au bord le plus proche.
+    const d = [n - y, e - x, y - s, x - o]
+    const k = d.indexOf(Math.min(...d))
+    return [[x, n], [e, y], [x, s], [o, y]][k]
+  }
+  const eps = 1e-9
+  const surLeBord = ([x, y]) => Math.abs(y - n) < eps || Math.abs(x - e) < eps || Math.abs(y - s) < eps || Math.abs(x - o) < eps
+  const position = ([x, y]) => {
+    if (Math.abs(y - n) < eps) return x - o
+    if (Math.abs(x - e) < eps) return W + (n - y)
+    if (Math.abs(y - s) < eps) return W + H + (e - x)
+    return 2 * W + H + (y - s)
+  }
+  const coins = [
+    [o, n],
+    [e, n],
+    [e, s],
+    [o, s],
+  ].map((c) => ({ c, t: position(c) }))
+  for (const m of morceaux) {
+    if (!surLeBord(m[0])) m.unshift(projeter(m[0]))
+    if (!surLeBord(m.at(-1))) m.push(projeter(m.at(-1)))
+  }
+  const anneauxMer = []
+  const restants = new Set(morceaux.keys())
+  while (restants.size) {
+    const premier = restants.values().next().value
+    restants.delete(premier)
+    let anneau = [...morceaux[premier]]
+    let courant = premier
+    for (let garde = 0; garde < morceaux.length + 1; garde += 1) {
+      const tSortie = position(morceaux[courant].at(-1))
+      let suivant = null
+      let ecart = Infinity
+      for (const j of [...restants, premier]) {
+        const d = (position(morceaux[j][0]) - tSortie + P) % P
+        if (d < ecart) {
+          ecart = d
+          suivant = j
+        }
+      }
+      for (const { c } of coins.map((k) => ({ ...k, d: (k.t - tSortie + P) % P })).filter((k) => k.d > 0 && k.d < ecart).sort((a, b) => a.d - b.d)) {
+        anneau.push(c)
+      }
+      if (suivant === premier) break
+      anneau = anneau.concat(morceaux[suivant])
+      restants.delete(suivant)
+      courant = suivant
+    }
+    anneau.push(anneau[0])
+    anneauxMer.push(anneau)
+  }
+  // Une côte fermée tournant dans le sens des aiguilles d'une montre entoure de l'eau, pas une île.
+  const signe = (r) => {
+    let a = 0
+    for (let i = 1; i < r.length; i += 1) a += r[i - 1][0] * r[i][1] - r[i][0] * r[i - 1][1]
+    return a
+  }
+  const dansAnneau = ([x, y], r) => {
+    let dedans = false
+    for (let i = 0, j = r.length - 1; i < r.length; j = i, i += 1) {
+      if (r[i][1] > y !== r[j][1] > y && x < ((r[j][0] - r[i][0]) * (y - r[i][1])) / (r[j][1] - r[i][1]) + r[i][0]) dedans = !dedans
+    }
+    return dedans
+  }
+  const simplifier = (r) => simplifierAnneau(r, 0.00008).map(([lon, lat]) => [round(lon, 5), round(lat, 5)])
+  const polygonesMer = anneauxMer.map((r) => [simplifier(r)])
+  for (const ile of iles) {
+    if (signe(ile) < 0) {
+      polygonesMer.push([simplifier(ile)])
+      continue
+    }
+    const hote = polygonesMer.find((p) => dansAnneau(ile[0], p[0]))
+    if (hote && aire(ile) > 2000) hote.push(simplifier(ile))
+  }
+  return { polygones: polygonesMer, cote: morceaux.concat(iles).map((m) => line(m.map(([lon, lat]) => ({ lon, lat })), 0.0001)) }
+}
+
+function fondVille() {
+  const reglage = FONDS[ville]
+  const fleuves = new Map()
+  for (const e of readJson(osm('rivers.json')).elements.filter((e) => e.geometry && reglage.fleuves.test(e.tags?.name ?? ''))) {
+    const nom = e.tags.name.replace(/^(Le|La) /, '').toLowerCase()
+    fleuves.set(nom, [...(fleuves.get(nom) ?? []), line(e.geometry, 0.00012)])
+  }
+  const chantiers = lire('chantiers').filter((e) => e.geometry)
+  const trams = [
+    ...lire('tram').filter((e) => e.geometry),
+    ...chantiers.filter((e) => /tram|light_rail/.test(e.tags?.construction ?? '')),
+    ...lire('cable').filter((e) => e.geometry),
+  ]
+  const metros = [...lire('metro').filter((e) => e.geometry), ...chantiers.filter((e) => e.tags?.construction === 'subway')]
+  mer = reglage.cote ? merDepuisCote(lire('cote'), reglage.cote) : null
+  return {
+    type: 'FeatureCollection',
+    features: [
+      ...[...fleuves].map(([nom, coords]) => feature({ kind: 'fleuve', name: nom }, coords)),
+      // La mer et ses îles, en anneaux, pour les miniatures qui la remplissent en pair-impair.
+      ...(mer ? [feature({ kind: 'cote' }, mer.polygones.flat())] : []),
+      feature(
+        { kind: 'tram' },
+        trams.map((e) => line(e.geometry)),
+      ),
+      feature(
+        { kind: 'metro' },
+        metros.map((e) => line(e.geometry)),
+      ),
+    ],
+  }
+}
+
+let mer = null
+const fond = ville === 'lyon' ? fondLyon() : ville === 'toulouse' ? fondToulouse() : fondVille()
 writeFileSync(join(out, 'fond.json'), JSON.stringify(fond))
 
 // Décor : parcs, eau, routes, rail, communes.
@@ -197,12 +397,12 @@ function anneaux(morceaux) {
 }
 
 /** Un anneau commence et finit au même point : on le simplifie en deux moitiés. */
-const simplifierAnneau = (anneau, tolerance) => {
+function simplifierAnneau(anneau, tolerance) {
   const milieu = Math.floor(anneau.length / 2)
   return [...simplify(anneau.slice(0, milieu + 1), tolerance).slice(0, -1), ...simplify(anneau.slice(milieu), tolerance)]
 }
 
-const aire = (anneau) => {
+function aire(anneau) {
   let a = 0
   for (let i = 1; i < anneau.length; i += 1) a += anneau[i - 1][0] * anneau[i][1] - anneau[i][0] * anneau[i - 1][1]
   return Math.abs(a / 2) * 111320 * 111320 * Math.cos((LATITUDE * Math.PI) / 180)
@@ -231,44 +431,90 @@ const polygone = (properties, rings) => ({
   geometry: { type: 'MultiPolygon', coordinates: rings.map((r) => [r]) },
 })
 
-const lignesDe = (elements, tolerance) =>
-  elements
+/**
+ * Raccorde les tronçons qui se suivent (OpenStreetMap découpe une route à chaque carrefour ou changement
+ * d'attribut) : un point partagé par exactement deux tronçons devient un point de passage.
+ */
+function raccorder(lignes) {
+  const cle = (p) => `${p[0]},${p[1]}`
+  const bouts = new Map()
+  const ajouter = (k, i) => bouts.set(k, [...(bouts.get(k) ?? []), i])
+  lignes.forEach((l, i) => {
+    ajouter(cle(l[0]), i)
+    ajouter(cle(l.at(-1)), i)
+  })
+  const vivantes = lignes.map((l) => [...l])
+  const morte = new Set()
+  for (const [k, indices] of bouts) {
+    const [a, b] = indices.filter((i) => !morte.has(i))
+    if (indices.filter((i) => !morte.has(i)).length !== 2 || a === b) continue
+    let la = vivantes[a]
+    let lb = vivantes[b]
+    if (cle(la.at(-1)) !== k) la = la.reverse()
+    if (cle(lb[0]) !== k) lb = lb.reverse()
+    vivantes[a] = la.concat(lb.slice(1))
+    morte.add(b)
+    // Le bout de b qui reste appartient désormais à a.
+    const autre = cle(vivantes[a].at(-1))
+    bouts.set(autre, (bouts.get(autre) ?? []).map((i) => (i === b ? a : i)))
+  }
+  return vivantes.filter((_, i) => !morte.has(i))
+}
+
+const lignesDe = (elements, tolerance) => {
+  const lignes = elements
     .filter((e) => e.geometry)
     .map((e) => line(e.geometry, tolerance, 4))
     .filter((l) => l.length > 1)
+  return ALLEGEMENT.raccorder ? raccorder(lignes) : lignes
+}
 const routes = lire('routes')
 const communesOsm = ville === 'lyon' ? lire('communes').filter((e) => e.tags?.name) : []
 // Hors de Lyon, les contours des communes viennent de geo.api.gouv.fr (voir scripts/fetch-osm.mjs).
 const contours = ville === 'lyon' ? [] : readJson(osm('contours.json')).features
 const anneauxExterieurs = (g) =>
   g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map((p) => p[0]) : []
+// Les grands territoires (Marseille, Nice) ont des centaines de bois et de routes de campagne : on ne garde
+// que les bois assez grands, on simplifie davantage, et on écarte ce qui sort du cadre de la ville.
+const ALLEGEMENT = {
+  marseille: { parcMin: 200000, parcTol: 0.0003, eauMin: 30000, routeTol: 1.6, cadre: [43.14, 4.7, 43.8, 5.85], raccorder: true },
+  nice: { parcMin: 250000, parcTol: 0.0003, eauMin: 20000, routeTol: 1.6, cadre: [43.62, 6.76, 44.38, 7.46], raccorder: true },
+  paris: { parcMin: 40000, parcTol: 0.00018, eauMin: 10000, routeTol: 2, cadre: [48.66, 2.1, 49.04, 2.66], raccorder: true },
+}[ville] ?? { parcMin: 25000, parcTol: 0.00014, eauMin: 10000, routeTol: 1 }
+const dansLeCadre = (e) => {
+  if (!ALLEGEMENT.cadre) return true
+  const [s, o, n, est] = ALLEGEMENT.cadre
+  const points = e.geometry ?? e.members?.flatMap((m) => m.geometry ?? []) ?? []
+  return points.some((g) => g.lat >= s && g.lat <= n && g.lon >= o && g.lon <= est)
+}
 const decor = {
   type: 'FeatureCollection',
   features: [
-    polygone({ kind: 'parc' }, polygones(lire('parcs'), 25000, 0.00014)),
-    polygone({ kind: 'eau' }, polygones(lire('eau'), 10000, 0.0001)),
+    ...(mer ? [{ type: 'Feature', properties: { kind: 'mer' }, geometry: { type: 'MultiPolygon', coordinates: mer.polygones } }] : []),
+    polygone({ kind: 'parc' }, polygones(lire('parcs').filter(dansLeCadre), ALLEGEMENT.parcMin, ALLEGEMENT.parcTol)),
+    polygone({ kind: 'eau' }, polygones(lire('eau').filter(dansLeCadre), ALLEGEMENT.eauMin, 0.0001)),
     feature(
       { kind: 'route', rang: 1 },
       lignesDe(
-        routes.filter((e) => /motorway|trunk/.test(e.tags?.highway ?? '')),
-        0.00012,
+        routes.filter((e) => /motorway|trunk/.test(e.tags?.highway ?? '') && dansLeCadre(e)),
+        0.00012 * ALLEGEMENT.routeTol,
       ),
     ),
     feature(
       { kind: 'route', rang: 2 },
       lignesDe(
-        routes.filter((e) => e.tags?.highway === 'primary'),
-        0.00012,
+        routes.filter((e) => e.tags?.highway === 'primary' && dansLeCadre(e)),
+        0.00012 * ALLEGEMENT.routeTol,
       ),
     ),
     feature(
       { kind: 'route', rang: 3 },
       lignesDe(
-        routes.filter((e) => e.tags?.highway === 'secondary'),
-        0.00018,
+        routes.filter((e) => e.tags?.highway === 'secondary' && dansLeCadre(e)),
+        0.00018 * ALLEGEMENT.routeTol,
       ),
     ),
-    feature({ kind: 'rail' }, lignesDe(lire('rail'), 0.00012)),
+    feature({ kind: 'rail' }, lignesDe(lire('rail').filter(dansLeCadre), 0.00012 * ALLEGEMENT.routeTol)),
     feature({ kind: 'limite' }, [
       ...communesOsm.flatMap((e) => e.members.filter((m) => m.role === 'outer' && m.geometry).map((m) => line(m.geometry, 0.0003, 4))),
       ...contours.flatMap((f) =>
@@ -304,19 +550,22 @@ const arrondissements =
     : []
 writeFileSync(join(out, 'lieux.json'), JSON.stringify({ communes, quartiers, arrondissements }))
 
-// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse, les stations des lignes qui ouvrent
-// avant celles du joueur comptent aussi.
+// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse et à Paris, les stations des lignes
+// de métro qui ouvrent avant celles du joueur (data/<ville>/stations-futures.json) comptent aussi.
+const futures = (() => {
+  try {
+    return readJson(src(ville, 'stations-futures.json')).lignes
+  } catch {
+    return []
+  }
+})()
 const stops = [
   ...readJson(osm('stops.json')).elements.map((e) => [
     round(e.lon),
     round(e.lat),
     e.tags?.subway === 'yes' || e.tags?.station === 'subway' ? 1 : 0,
   ]),
-  ...(ville === 'toulouse'
-    ? readJson(src('toulouse', 'stations-futures.json')).lignes.flatMap((l) =>
-        l.stations.filter((s) => !s.existante).map((s) => [round(s.pos[0]), round(s.pos[1]), 1]),
-      )
-    : []),
+  ...(ville === 'lyon' ? [] : futures.flatMap((l) => l.stations.filter((s) => !s.existante).map((s) => [round(s.pos[0]), round(s.pos[1]), 1]))),
 ]
 writeFileSync(join(out, 'arrets.json'), JSON.stringify(stops))
 

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { n } from '@/lib/format'
+import { FORMULE } from '@/lib/formule'
 import { totauxCatalogue } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
@@ -22,8 +23,11 @@ const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
-/** 4 000 M€ donne « 4 », 3 120 M€ donne « 3,1 ». */
-const milliards = (v: number) => (Math.round(v / 100) / 10).toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+/** 4 000 M€ donne « 4 milliards », 3 120 M€ « 3,1 milliards », 1 580 M€ « 1,6 milliard » : le pluriel commence à 2. */
+const milliards = (v: number) => {
+  const x = Math.round(v / 100) / 10
+  return `${x.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} ${x >= 2 ? 'milliards' : 'milliard'}`
+}
 
 /** Ce que l'accueil dit de chaque ville. */
 function textes(ville: Ville) {
@@ -31,7 +35,7 @@ function textes(ville: Ville) {
   if (ville.catalogue)
     return {
       titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-      intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} milliards d’euros. Les ${NOMBRE_PROJETS} projets sur la table en coûtent plus de ${Math.floor(TOTAL.cout / 1000)}. Vous choisissez ceux qui verront le jour.`,
+      intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} d’euros. Les ${NOMBRE_PROJETS} projets sur la table en coûtent plus de ${Math.floor(TOTAL.cout / 1000)}. Vous choisissez ceux qui verront le jour.`,
       pastilles: [`${NOMBRE_PROJETS} projets réels`, `${n(TOTAL.cout)} M€ au total`],
       etapes: [
         'Vous choisissez des lignes sur la carte.',
@@ -43,14 +47,14 @@ function textes(ville: Ville) {
     }
   return {
     titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} milliards d’euros. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
+    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} d’euros. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
     pastilles: ['Tracé libre', `${n(ville.enveloppe * 2)} M€ sur deux mandats`],
     etapes: [
       'Vous tracez vos lignes sur la carte.',
       'Vous finissez chaque mandat sans déficit.',
       'Votre score est le nombre de voyageurs gagnés.',
     ],
-    sources: `Le budget est celui du jeu à Lyon, rapporté au nombre d’habitants. Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule recalée sur les lignes de ${ville.reseau} ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
+    sources: `${ville.sourceBudget} Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule calée sur plus d’une centaine de lignes de ${FORMULE.villes} villes françaises ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
   }
 }
 
@@ -76,7 +80,7 @@ function Etapes({ etapes }: { etapes: string[] }) {
 /** Le choix de la ville : il change l'accueil et l'adresse de la page, sans rien toucher à une partie. */
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
   return (
-    <div role="radiogroup" aria-label="Ville" className="flex gap-1.5">
+    <div role="radiogroup" aria-label="Ville" className="flex flex-wrap gap-1.5">
       {ID_VILLES.map((id) => (
         <button
           key={id}

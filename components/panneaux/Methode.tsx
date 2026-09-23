@@ -1,37 +1,14 @@
 'use client'
 
 import { n } from '@/lib/format'
+import { FORMULE } from '@/lib/formule'
+import { FOURCHETTE } from '@/lib/modele'
 import { useJeu, useVille } from '@/lib/store'
-import type { Ville } from '@/lib/villes'
+import type { IdVille, Ville } from '@/lib/villes'
 
 import { Panneau } from './Panneau'
 
 type Calage = { ligne: string; reel: number; ecart: number }[]
-
-/** Lyon : écarts de la formule sur chaque ligne, quand on la prédit avec les dix autres. */
-const CALAGE_LYON: Calage = [
-  { ligne: 'Métro D', reel: 307000, ecart: -38 },
-  { ligne: 'Métro A', reel: 271000, ecart: -15 },
-  { ligne: 'Métro B', reel: 173000, ecart: 20 },
-  { ligne: 'Tram T4', reel: 108000, ecart: 28 },
-  { ligne: 'Tram T1', reel: 104000, ecart: 21 },
-  { ligne: 'Tram T2', reel: 98000, ecart: 2 },
-  { ligne: 'Tram T3', reel: 52000, ecart: -15 },
-  { ligne: 'Métro C', reel: 34000, ecart: 39 },
-  { ligne: 'Tram T6', reel: 29000, ecart: -14 },
-  { ligne: 'Tram T5', reel: 8500, ecart: -1 },
-  { ligne: 'Tram T7', reel: 2800, ecart: -7 },
-]
-
-/**
- * Toulouse : validations 2024 divisées par 265, et écarts de la formule une fois recalée sur ces
- * trois lignes (résultats de la formule lyonnaise multipliés par 1,45). Voir docs/villes.md.
- */
-const CALAGE_TOULOUSE: Calage = [
-  { ligne: 'Métro A', reel: 228300, ecart: -17 },
-  { ligne: 'Métro B', reel: 218100, ecart: 6 },
-  { ligne: 'Tram T1', reel: 48700, ecart: 13 },
-]
 
 function Barres({ calage, max }: { calage: Calage; max: number }) {
   return (
@@ -68,86 +45,115 @@ function Barres({ calage, max }: { calage: Calage; max: number }) {
   )
 }
 
-function Lyon() {
+/** Un pourcentage entier, avec son signe quand il en faut un. */
+const pourcent = (x: number) => `${Math.round(x * 100)} %`
+/** 1000 m s'écrit « 1 km ». */
+const metres = (m: number) => (m >= 1000 ? `${String(m / 1000).replace('.', ',')} km` : `${m} m`)
+
+/** Comment les voyageurs suivent le bassin, selon son exposant dans la formule. */
+const rythme = (b: number) => (b > 1.15 ? 'plus vite que' : b < 0.85 ? 'moins vite que' : 'presque en proportion de')
+
+/** Ce qui fait le niveau propre de chaque ville, en plus de ses lignes actuelles. */
+const niveauDeVille = () => {
+  const v = FORMULE.variablesDeVille
+  const parts = [
+    v.includes('bassinVie') || v.includes('bassinVieProche') ? 'du nombre d’habitants de son agglomération' : '',
+    v.includes('bassinEmploi') || v.includes('emploisCentre') ? 'de ses emplois' : '',
+    v.includes('reseau') ? 'de la taille de son réseau' : '',
+  ].filter(Boolean)
+  return parts.length ? ` et ${parts.join(', ').replace(/, ([^,]*)$/, ' et $1')}` : ''
+}
+
+/** Ce que les lignes déjà décidées changent dans chaque ville, quand il y en a. */
+const LIGNES_DECIDEES: Partial<Record<IdVille, string>> = {
+  toulouse:
+    'La ligne C du métro ouvrira fin 2028, avant vos propres lignes. Nous la comptons donc comme une ligne existante, avec le prolongement de la ligne B à Labège : les habitants proches de leurs stations ne comptent pas comme nouveaux voyageurs dans votre score.',
+  paris:
+    'Les lignes 15, 16, 17 et 18 du Grand Paris Express ouvriront entre 2026 et 2031, avant vos propres lignes. Nous les comptons donc comme des lignes existantes : les habitants proches de leurs gares ne comptent pas comme nouveaux voyageurs dans votre score.',
+  nice: 'La ligne 5 du tram, de Nice à Drap par L’Ariane, a été décidée en 2026 mais n’est pas encore sur notre carte : vous pouvez la tracer vous-même.',
+}
+
+function Contenu({ ville }: { ville: Ville }) {
+  const c = FORMULE.coefficients
+  const calage = FORMULE.calage[ville.id]
+  const max = Math.max(...calage.map((l) => Math.max(l.reel, l.reel * (1 + l.ecart / 100)))) * 1.05
+  const perteConcurrence = 1 - Math.exp(c.concurrence ?? 0)
+  const gainMetro = Math.exp(FORMULE.modes.metro) - 1
+  const perteBus = 1 - Math.exp(FORMULE.modes.bus)
   return (
     <>
+      {ville.catalogue ? null : (
+        <>
+          <h3 className="text-lg font-black">Le budget</h3>
+          <p className="text-[15px] leading-relaxed">{ville.budget}</p>
+        </>
+      )}
       <h3 className="text-lg font-black">Le prix</h3>
       <p className="text-[15px] leading-relaxed">
-        Nous multiplions la longueur de votre tracé par un coût au kilomètre tiré de chantiers récents. Pour le tramway, c’est la moyenne
-        des T6 nord, T9 et T10 de Lyon, soit environ 34 M€ par kilomètre. Les prix réels varient selon les ponts, les dépôts et les rames
-        achetées.
+        Nous multiplions la longueur de votre tracé par un coût au kilomètre tiré de chantiers lyonnais récents : 34 M€ pour un tramway,
+        comme la moyenne des T6 nord, T9 et T10, 15 M€ pour un bus à haut niveau de service et 150 M€ pour un métro automatique. Les prix
+        réels varient selon les ponts, les tunnels, les dépôts et les rames achetées.
       </p>
       <h3 className="text-lg font-black">Les voyageurs</h3>
       <p className="text-[15px] leading-relaxed">
-        Nous comptons les habitants et les emplois à moins de 400 m de chaque arrêt de tram ou de bus, et à moins de 600 m d’une station de
-        métro. Les habitants viennent du carroyage INSEE à 200 m, les emplois du recensement 2022 répartis selon la base Sirene. Un emploi
-        pèse un peu moins qu’un habitant.
+        Nous comptons les habitants et les emplois à moins de {metres(FORMULE.rayonMetro)} d’une station de métro, et à moins de{' '}
+        {metres(FORMULE.rayonAutres)} d’un arrêt de tram, de bus ou de téléphérique
+        {FORMULE.poidsCouronne ? `, plus ${pourcent(FORMULE.poidsCouronne)} de ceux qui vivent ou travaillent un peu plus loin, jusqu’à 1 km` : ''}.
+        Un emploi compte pour {String(FORMULE.poidsEmplois).replace('.', ',')} habitant. Les habitants viennent du carroyage de l’INSEE à
+        200 m, les emplois du recensement 2022 répartis selon la base Sirene.
       </p>
       <p className="text-[15px] leading-relaxed">
-        Nous avons réglé la formule pour qu’elle retrouve la fréquentation des lignes de métro et de tram de Lyon en 2023. Voici ce qu’elle
-        donne quand on retire chaque ligne du calcul pour la prédire avec les autres.
+        Les voyageurs croissent {rythme(c.bassin ?? 1)} ces habitants et emplois.
+        {c.distanceCentre ? ' Ils baissent quand la ligne s’éloigne du centre de la ville.' : ''}
+        {c.concurrence
+          ? ` Ils baissent aussi quand la ligne double des lignes existantes : si tous ses arrêts sont déjà à moins de 400 m d’une station, elle perd ${pourcent(perteConcurrence)} de ses voyageurs.`
+          : ''}{' '}
+        À bassin égal, un métro attire {pourcent(gainMetro)} de voyageurs de plus qu’un tram, et un bus à haut niveau de service{' '}
+        {pourcent(perteBus)} de moins. Chaque ville a enfin son propre niveau, tiré de ses lignes actuelles{niveauDeVille()}.
       </p>
-      <Barres calage={CALAGE_LYON} max={420000} />
+      {FORMULE.ajustements[ville.id]?.metro ? (
+        <p className="text-[15px] leading-relaxed">
+          À {ville.nom}, le métro compte ses voyageurs aux entrées, sans les correspondances d’une ligne à l’autre. Nous estimons vos lignes
+          de métro de la même façon, pour qu’elles se comparent aux lignes existantes.
+        </p>
+      ) : null}
       <p className="text-[15px] leading-relaxed">
-        Sur ces onze lignes, l’écart est de 18 % en moyenne, et de 39 % au pire. C’est pourquoi nous affichons toujours une fourchette
-        plutôt qu’un chiffre exact.
+        Pour arriver à cette formule, nous en avons essayé {n(FORMULE.formules)}, avec ou sans les correspondances, les gares, la distance au
+        centre, le bassin de vie ou le bassin d’emploi de la ville, sur {FORMULE.lignes} lignes de métro, de tram et de bus de{' '}
+        {FORMULE.villes} villes françaises. Chacune a été jugée sur des lignes qu’elle n’avait pas vues. Celle que nous gardons s’écarte du
+        réel de {FORMULE.ecartVilleConnue} % en moyenne sur une ligne qu’elle ne connaît pas, et de {FORMULE.ecartVilleInconnue} % quand elle ne
+        connaît aucune ligne de la ville.
+      </p>
+      {calage.length ? (
+        <>
+          <p className="text-[15px] leading-relaxed">
+            Voici ce qu’elle donne pour {calage.length > 1 ? `les lignes de ${ville.nom}` : `la ligne de ${ville.nom}`} dont nous connaissons la
+            fréquentation, chacune prédite sans elle.
+          </p>
+          <Barres calage={calage.slice(0, 10)} max={max} />
+        </>
+      ) : null}
+      <p className="text-[15px] leading-relaxed">
+        C’est pourquoi nous affichons toujours une fourchette, de {String(FOURCHETTE.bas).replace('.', ',')} à{' '}
+        {String(FOURCHETTE.haut).replace('.', ',')} fois notre estimation : sur les lignes que nous connaissons, le réel s’y trouve huit fois
+        sur dix.
       </p>
       <h3 className="text-lg font-black">Ce que nous ne savons pas faire</h3>
       <p className="text-[15px] leading-relaxed">
-        La formule ne connaît ni la vitesse de la ligne, ni les correspondances, ni les grands équipements comme les hôpitaux ou les campus.
-        Elle surestime les lignes de rocade qui ne passent pas par le centre : pour le T6 complet, elle donne environ le double des 55 000
-        voyageurs prévus par Sytral Mobilités. Pour le bus et le téléphérique, que les lignes lyonnaises ne permettent pas de caler, nous
-        retenons 70 % et 60 % de la fréquentation d’un tram au même endroit : ce sont des hypothèses.
+        La formule ne connaît ni la vitesse ni la fréquence de la ligne, ni les grands équipements comme les hôpitaux ou les campus. Les
+        correspondances ne l’améliorent pas : une fois comptés les habitants autour des arrêts et les lignes voisines, elles n’apportent rien
+        de mesurable. Pour le téléphérique, aucune ligne dont nous connaissons la fréquentation ne permet de la caler : nous nous appuyons sur
+        Téléo à Toulouse et sur le téléphérique de Brest, ce qui reste fragile.
       </p>
+      {LIGNES_DECIDEES[ville.id] ? <p className="text-[15px] leading-relaxed">{LIGNES_DECIDEES[ville.id]}</p> : null}
       <p className="text-[15px] leading-relaxed">
         Pour le score, nous ne comptons que les voyageurs qui vivent ou travaillent loin d’un tram ou d’un métro existant. Les autres
         viendraient surtout d’une ligne voisine.
       </p>
-    </>
-  )
-}
-
-function Toulouse({ ville }: { ville: Ville }) {
-  return (
-    <>
-      <h3 className="text-lg font-black">Le budget</h3>
-      <p className="text-[15px] leading-relaxed">
-        Nous n’avons pas trouvé de programme d’investissement de Tisséo pour 2026-2038. Nous prenons donc le budget du jeu à Lyon, rapporté
-        au nombre d’habitants des 114 communes de Tisséo : {n(ville.enveloppe)} M€ par mandat, dont {n(ville.entretienBus)} M€ pour
-        l’entretien des bus.
-      </p>
-      <h3 className="text-lg font-black">Le prix</h3>
-      <p className="text-[15px] leading-relaxed">
-        Nous utilisons les mêmes prix au kilomètre qu’à Lyon, tirés de chantiers récents : 34 M€ pour un tramway, 150 M€ pour un métro
-        automatique. Les prix réels varient selon les ponts, les tunnels et les rames achetées.
-      </p>
-      <h3 className="text-lg font-black">Les voyageurs</h3>
-      <p className="text-[15px] leading-relaxed">
-        Nous comptons les habitants et les emplois à moins de 400 m de chaque arrêt de tram ou de bus, et à moins de 600 m d’une station de
-        métro, avec les mêmes données de l’INSEE qu’à Lyon. Un emploi pèse un peu moins qu’un habitant.
-      </p>
-      <p className="text-[15px] leading-relaxed">
-        Telle quelle, notre formule lyonnaise sous-estime les lignes toulousaines d’environ un tiers. Nous l’avons donc recalée sur les
-        métros A et B et le tram T1 : à Toulouse, ses résultats sont multipliés par 1,45. Voici l’écart qui reste sur chaque ligne.
-      </p>
-      <Barres calage={CALAGE_TOULOUSE} max={260000} />
-      <p className="text-[15px] leading-relaxed">
-        Quand on prédit chacune de ces trois lignes à partir des deux autres, l’écart reste sous 25 %, comme à Lyon. Nous affichons donc la
-        même fourchette.
-      </p>
-      <h3 className="text-lg font-black">Ce que nous ne savons pas faire</h3>
-      <p className="text-[15px] leading-relaxed">
-        Téléo, le téléphérique, transporte environ 5 800 voyageurs par jour. Notre formule en prévoit moins de 300 : elle ne voit ni
-        l’hôpital, ni l’université, ni la correspondance avec le métro. Pour un téléphérique, notre estimation n’est pas fiable.
-      </p>
-      <p className="text-[15px] leading-relaxed">
-        La ligne C du métro ouvrira fin 2028, avant vos propres lignes. Nous la comptons donc comme une ligne existante, avec le
-        prolongement de la ligne B à Labège : les habitants proches de leurs stations ne comptent pas comme nouveaux voyageurs dans votre
-        score.
-      </p>
       <p className="text-[13px] leading-relaxed text-gris">
-        Fréquentation 2024 de Tisséo, divisée par 265 jours comme à Lyon. Habitants : carroyage Filosofi 2021 recalé sur le recensement
-        2022. Emplois : recensement 2022 réparti selon la base Sirene.
+        Fréquentation par ligne : rapports d’activité des réseaux, données ouvertes et observatoire Omnil, de 2019 à 2026, ramenée à un jour
+        de semaine. Habitants : carroyage Filosofi 2021 recalé sur le recensement 2022. Emplois : recensement 2022 réparti selon la base
+        Sirene. Lignes et arrêts : OpenStreetMap.
       </p>
     </>
   )
@@ -162,7 +168,7 @@ export function Methode() {
       hauteurTelephone="pleine"
       onFermer={() => (brouillon ? ouvrir({ type: 'ligne' }) : fermer())}
     >
-      {ville.id === 'toulouse' ? <Toulouse ville={ville} /> : <Lyon />}
+      <Contenu ville={ville} />
     </Panneau>
   )
 }

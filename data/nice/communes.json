@@ -1,0 +1,261 @@
+{
+ "autorite": "Métropole Nice Côte d'Azur",
+ "source": "geo.api.gouv.fr, communes de la métropole (EPCI 200030195), consulté le 23 septembre 2026",
+ "communes": [
+  {
+   "code": "06006",
+   "nom": "Aspremont",
+   "epci": "200030195"
+  },
+  {
+   "code": "06009",
+   "nom": "Bairols",
+   "epci": "200030195"
+  },
+  {
+   "code": "06011",
+   "nom": "Beaulieu-sur-Mer",
+   "epci": "200030195"
+  },
+  {
+   "code": "06013",
+   "nom": "Belvédère",
+   "epci": "200030195"
+  },
+  {
+   "code": "06020",
+   "nom": "La Bollène-Vésubie",
+   "epci": "200030195"
+  },
+  {
+   "code": "06021",
+   "nom": "Bonson",
+   "epci": "200030195"
+  },
+  {
+   "code": "06025",
+   "nom": "Le Broc",
+   "epci": "200030195"
+  },
+  {
+   "code": "06027",
+   "nom": "Cagnes-sur-Mer",
+   "epci": "200030195"
+  },
+  {
+   "code": "06032",
+   "nom": "Cap-d'Ail",
+   "epci": "200030195"
+  },
+  {
+   "code": "06033",
+   "nom": "Carros",
+   "epci": "200030195"
+  },
+  {
+   "code": "06034",
+   "nom": "Castagniers",
+   "epci": "200030195"
+  },
+  {
+   "code": "06039",
+   "nom": "Châteauneuf-Villevieille",
+   "epci": "200030195"
+  },
+  {
+   "code": "06042",
+   "nom": "Clans",
+   "epci": "200030195"
+  },
+  {
+   "code": "06046",
+   "nom": "Colomars",
+   "epci": "200030195"
+  },
+  {
+   "code": "06054",
+   "nom": "Drap",
+   "epci": "200030195"
+  },
+  {
+   "code": "06055",
+   "nom": "Duranus",
+   "epci": "200030195"
+  },
+  {
+   "code": "06059",
+   "nom": "Èze",
+   "epci": "200030195"
+  },
+  {
+   "code": "06060",
+   "nom": "Falicon",
+   "epci": "200030195"
+  },
+  {
+   "code": "06064",
+   "nom": "Gattières",
+   "epci": "200030195"
+  },
+  {
+   "code": "06065",
+   "nom": "La Gaude",
+   "epci": "200030195"
+  },
+  {
+   "code": "06066",
+   "nom": "Gilette",
+   "epci": "200030195"
+  },
+  {
+   "code": "06072",
+   "nom": "Ilonse",
+   "epci": "200030195"
+  },
+  {
+   "code": "06073",
+   "nom": "Isola",
+   "epci": "200030195"
+  },
+  {
+   "code": "06074",
+   "nom": "Lantosque",
+   "epci": "200030195"
+  },
+  {
+   "code": "06075",
+   "nom": "Levens",
+   "epci": "200030195"
+  },
+  {
+   "code": "06080",
+   "nom": "Marie",
+   "epci": "200030195"
+  },
+  {
+   "code": "06088",
+   "nom": "Nice",
+   "epci": "200030195"
+  },
+  {
+   "code": "06102",
+   "nom": "Rimplas",
+   "epci": "200030195"
+  },
+  {
+   "code": "06103",
+   "nom": "Roquebillière",
+   "epci": "200030195"
+  },
+  {
+   "code": "06109",
+   "nom": "La Roquette-sur-Var",
+   "epci": "200030195"
+  },
+  {
+   "code": "06110",
+   "nom": "Roubion",
+   "epci": "200030195"
+  },
+  {
+   "code": "06111",
+   "nom": "Roure",
+   "epci": "200030195"
+  },
+  {
+   "code": "06114",
+   "nom": "Saint-André-de-la-Roche",
+   "epci": "200030195"
+  },
+  {
+   "code": "06117",
+   "nom": "Saint-Blaise",
+   "epci": "200030195"
+  },
+  {
+   "code": "06119",
+   "nom": "Saint-Dalmas-le-Selvage",
+   "epci": "200030195"
+  },
+  {
+   "code": "06120",
+   "nom": "Saint-Étienne-de-Tinée",
+   "epci": "200030195"
+  },
+  {
+   "code": "06121",
+   "nom": "Saint-Jean-Cap-Ferrat",
+   "epci": "200030195"
+  },
+  {
+   "code": "06122",
+   "nom": "Saint-Jeannet",
+   "epci": "200030195"
+  },
+  {
+   "code": "06123",
+   "nom": "Saint-Laurent-du-Var",
+   "epci": "200030195"
+  },
+  {
+   "code": "06126",
+   "nom": "Saint-Martin-du-Var",
+   "epci": "200030195"
+  },
+  {
+   "code": "06127",
+   "nom": "Saint-Martin-Vésubie",
+   "epci": "200030195"
+  },
+  {
+   "code": "06129",
+   "nom": "Saint-Sauveur-sur-Tinée",
+   "epci": "200030195"
+  },
+  {
+   "code": "06144",
+   "nom": "La Tour",
+   "epci": "200030195"
+  },
+  {
+   "code": "06146",
+   "nom": "Tournefort",
+   "epci": "200030195"
+  },
+  {
+   "code": "06147",
+   "nom": "Tourrette-Levens",
+   "epci": "200030195"
+  },
+  {
+   "code": "06149",
+   "nom": "La Trinité",
+   "epci": "200030195"
+  },
+  {
+   "code": "06151",
+   "nom": "Utelle",
+   "epci": "200030195"
+  },
+  {
+   "code": "06153",
+   "nom": "Valdeblore",
+   "epci": "200030195"
+  },
+  {
+   "code": "06156",
+   "nom": "Venanson",
+   "epci": "200030195"
+  },
+  {
+   "code": "06157",
+   "nom": "Vence",
+   "epci": "200030195"
+  },
+  {
+   "code": "06159",
+   "nom": "Villefranche-sur-Mer",
+   "epci": "200030195"
+  }
+ ]
+}

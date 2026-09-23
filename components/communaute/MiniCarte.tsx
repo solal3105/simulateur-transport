@@ -40,6 +40,7 @@ export function MiniCarte({ partie, className }: { partie: PartieCompacte; class
     >
       {fond ? (
         <>
+          <path d={fond.mer} fill="#c6dde9" fillRule="evenodd" />
           <path d={fond.fleuves} fill="none" stroke="#c6dde9" strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" />
           <path d={fond.tram} fill="none" stroke="#d9d3ca" strokeWidth={2} strokeLinecap="round" />
           <path d={fond.metro} fill="none" stroke="#958e84" strokeWidth={3.5} strokeLinecap="round" />

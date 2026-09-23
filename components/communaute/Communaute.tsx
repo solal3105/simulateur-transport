@@ -176,7 +176,7 @@ export function Communaute() {
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-5 px-5 pt-6 pb-16 lg:px-8 lg:pt-8">
         {onglet !== 'miens' ? (
-          <div role="radiogroup" aria-label="Ville" className="flex gap-1.5">
+          <div role="radiogroup" aria-label="Ville" className="flex flex-wrap gap-1.5">
             {ID_VILLES.map((id) => (
               <button
                 key={id}
