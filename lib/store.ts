@@ -57,6 +57,8 @@ interface Etat {
   message: { titre: string; texte: string } | null
   /** Coût du projet en cours d'examen, affiché en aperçu sur la jauge. */
   apercu: number
+  /** L'accueil est affiché par-dessus la partie enregistrée, qui reste intacte jusqu'à une nouvelle partie. */
+  pause: boolean
 
   /** Commence une partie dans une ville : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. */
   commencer: (ville: IdVille) => void
@@ -71,10 +73,12 @@ interface Etat {
   levier: <K extends keyof Leviers>(cle: K, valeur: Leviers[K]) => void
   finirMandat: () => void
   commencerMandat2: () => void
-  rejouer: () => void
   /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
   reprendre: (p: PartiePartagee, inspire?: Inspiration) => void
   marquerPublie: (id: string) => void
+  /** Montre l'accueil sans rien effacer : la partie, finie ou non, attend qu'on la reprenne ou qu'on en commence une autre. */
+  allerAccueil: () => void
+  quitterAccueil: () => void
   tracer: (mode?: ModeLigne) => void
   changerMode: (mode: ModeLigne) => void
   ajouterArret: (p: [number, number]) => void
@@ -100,6 +104,7 @@ const DEPART = {
   brouillon: null,
   message: null,
   apercu: 0,
+  pause: false,
 }
 
 export const useJeu = create<Etat>()(
@@ -169,8 +174,6 @@ export const useJeu = create<Etat>()(
               : null,
           }
         }),
-      // L'accueil propose ensuite la même ville.
-      rejouer: () => set((s) => ({ ...DEPART, ville: s.ville })),
       reprendre: (p, inspire) => {
         const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
         const lignes = p.lignes.map(renommer)
@@ -190,6 +193,8 @@ export const useJeu = create<Etat>()(
         })
       },
       marquerPublie: (publie) => set({ publie }),
+      allerAccueil: () => set({ pause: true, panneau: null, brouillon: null, message: null, apercu: 0 }),
+      quitterAccueil: () => set({ pause: false }),
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
       changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
       ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),

@@ -12,7 +12,7 @@ import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseReseaux, VILLES } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type Ville } from '@/lib/villes'
 
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -50,9 +50,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const fermerPublication = useCallback(() => setPublier(false), [])
   const [envoi, setEnvoi] = useState<string | null>(null)
 
-  const rejouer = () => {
-    if (!partage) return jeu.rejouer()
-    // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
+  // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
+  const quitterPartage = () => {
     if (!aUnePartie) jeu.commencer(ville.id)
     quitter?.()
   }
@@ -172,12 +171,12 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             className="absolute top-4 left-4 flex items-center gap-2.5 rounded-full bg-white/95 py-1 pr-4 pl-1 shadow-flotte lg:top-7 lg:left-7"
           >
             <Logo taille={34} />
-            <span className="text-[14.5px] font-black lg:text-[16px]">{ville.marque}</span>
+            <span className="text-[14.5px] font-black lg:text-[16px]">{MARQUE}</span>
           </Link>
         ) : (
           <div className="absolute top-4 left-4 flex items-center gap-2.5 rounded-full bg-white/95 py-1 pr-4 pl-1 shadow-flotte lg:top-7 lg:left-7">
             <Logo taille={34} />
-            <span className="text-[14.5px] font-black lg:text-[16px]">{ville.marque}</span>
+            <span className="text-[14.5px] font-black lg:text-[16px]">{MARQUE}</span>
           </div>
         )}
         <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
@@ -349,14 +348,13 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
           <p aria-live="polite" className="min-h-5 text-center text-[13px] font-semibold text-gris">
             {envoi ?? ''}
           </p>
-          <Bouton genre="contour" icone={partage ? 'fleche' : 'rejouer'} onClick={rejouer}>
-            {!partage ? 'Rejouer une partie' : aUnePartie ? 'Reprendre ma partie' : 'Commencer ma propre partie'}
-          </Bouton>
-          {!partage && communauteActive ? (
-            <Link href={adresseReseaux(ville.id)} className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3">
-              Voir les réseaux publiés
-            </Link>
-          ) : null}
+          {partage ? (
+            <Bouton genre="contour" icone="fleche" onClick={quitterPartage}>
+              {aUnePartie ? 'Reprendre ma partie' : 'Commencer ma propre partie'}
+            </Bouton>
+          ) : (
+            <Suite ville={ville} publie={jeu.publie !== null} />
+          )}
         </div>
 
         {publication ? <PiedPublication publication={publication} ville={ville.id} /> : null}
@@ -393,5 +391,43 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         ) : null}
       </AnimatePresence>
     </main>
+  )
+}
+
+/** Après la partie : rejouer ici ou dans une autre ville, revenir à l'accueil, voir les réseaux des autres. */
+function Suite({ ville, publie }: { ville: Ville; publie: boolean }) {
+  const { commencer, allerAccueil } = useJeu()
+  const autres = ID_VILLES.filter((id) => id !== ville.id).map((id) => VILLES[id])
+  return (
+    <section aria-labelledby="suite" className="mt-3 flex flex-col gap-3 border-t border-trait pt-5">
+      <h2 id="suite" className="text-[17px] font-black">
+        Rejouer
+      </h2>
+      <p className="text-[14px] leading-relaxed text-gris">
+        {publie
+          ? 'Une nouvelle partie remplace ce réseau dans ce navigateur. Il reste dans les réseaux publiés.'
+          : 'Une nouvelle partie remplace ce réseau dans ce navigateur : publiez-le ou partagez son lien avant, pour le garder.'}
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Bouton genre="encre" iconeAGauche="rejouer" onClick={() => commencer(ville.id)}>
+          Rejouer à {ville.nom}
+        </Bouton>
+        {autres.map((v) => (
+          <Bouton key={v.id} genre="contour" icone="fleche" onClick={() => commencer(v.id)}>
+            Jouer à {v.nom}
+          </Bouton>
+        ))}
+      </div>
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-[14px] font-extrabold lg:justify-start">
+        <button type="button" onClick={allerAccueil} className="min-h-10 underline underline-offset-3">
+          Retour à l’accueil
+        </button>
+        {communauteActive ? (
+          <Link href={adresseReseaux(ville.id)} className="flex min-h-10 items-center underline underline-offset-3">
+            Voir les réseaux publiés
+          </Link>
+        ) : null}
+      </div>
+    </section>
   )
 }

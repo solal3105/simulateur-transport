@@ -9,13 +9,14 @@
 
 export type IdVille = 'lyon' | 'toulouse'
 
+/** Le nom du site, le même dans toutes les villes : TCL et Tisséo sont les noms des réseaux, pas du site. */
+export const MARQUE = 'Simulateur transport'
+
 type Emprise = [[number, number], [number, number]]
 
 export interface Ville {
   id: IdVille
   nom: string
-  /** Le nom du site sur les écrans de cette ville. */
-  marque: string
   /** Le titre de la page d'accueil de la ville, dans l'onglet et les moteurs de recherche. */
   titrePage: string
   /** Le nom du réseau de transport : « le réseau TCL ». */
@@ -60,8 +61,7 @@ export const VILLES: Record<IdVille, Ville> = {
   lyon: {
     id: 'lyon',
     nom: 'Lyon',
-    marque: 'Simulateur TCL',
-    titrePage: 'Simulateur TCL : construisez le réseau lyonnais de 2038',
+    titrePage: 'Simulateur transport : construisez le réseau TCL de 2038',
     reseau: 'TCL',
     autorite: 'Métropole de Lyon, réseau TCL',
     territoire: 'de la Métropole',
@@ -112,8 +112,7 @@ export const VILLES: Record<IdVille, Ville> = {
   toulouse: {
     id: 'toulouse',
     nom: 'Toulouse',
-    marque: 'Simulateur transport',
-    titrePage: 'Simulateur transport : construisez le réseau toulousain de 2038',
+    titrePage: 'Simulateur transport : construisez le réseau Tisséo de 2038',
     reseau: 'Tisséo',
     autorite: 'Tisséo Collectivités',
     territoire: 'de l’agglomération toulousaine',

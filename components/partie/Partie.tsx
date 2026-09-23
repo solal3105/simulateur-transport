@@ -3,7 +3,9 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { LEGENDE_MODES } from '@/lib/couleurs'
 import { useJeu, useVille } from '@/lib/store'
+import { MARQUE } from '@/lib/villes'
 
 import { Carte } from '../carte/Carte'
 import { FicheProjet } from '../panneaux/FicheProjet'
@@ -16,7 +18,6 @@ import { Bouton, Icone } from '../ui'
 import { Entete } from './Entete'
 import { BarreBas, Programme } from './Programme'
 import { Tutoriel } from './Tutoriel'
-import { LEGENDE_MODES } from '@/lib/couleurs'
 
 function useGrandEcran() {
   const [grand, setGrand] = useState(false)
@@ -109,7 +110,7 @@ export function Partie() {
   return (
     <main className="fixed inset-0 overflow-hidden bg-sable" data-tuto={tuto ? etapeTuto : undefined}>
       <h1 className="sr-only">
-        {ville.marque}, partie en cours à {ville.nom}
+        {MARQUE}, partie en cours à {ville.nom}
       </h1>
       <Carte marges={marges} />
       <Entete />

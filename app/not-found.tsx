@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 
 import { BoutonLien, Logo } from '@/components/ui'
+import { MARQUE } from '@/lib/villes'
 
-export const metadata: Metadata = { title: 'Page introuvable | Simulateur TCL' }
+export const metadata: Metadata = { title: `Page introuvable | ${MARQUE}` }
 
 /** La page d'une adresse qui n'existe pas : ce qui s'est passé, et les deux endroits où aller. */
 export default function PageIntrouvable() {
@@ -11,7 +12,7 @@ export default function PageIntrouvable() {
       <div className="mx-auto flex min-h-dvh max-w-[640px] flex-col gap-5 px-6 pt-5 pb-10 lg:pt-10">
         <div className="flex items-center gap-2.5">
           <Logo taille={38} inverse />
-          <span className="text-[15px] font-extrabold lg:text-[17px]">Simulateur TCL</span>
+          <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
         </div>
         <h1 className="mt-6 text-[40px] leading-[0.95] font-black tracking-[-0.03em] lg:text-[56px]">Cette page n’existe pas.</h1>
         <p className="max-w-[500px] text-base leading-relaxed font-medium lg:text-[18px]">

@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 
 import { cadreMiniature, cheminsFond } from '@/lib/miniature'
 import { polices, ROUGE, SABLE } from '@/lib/og'
-import { VILLES } from '@/lib/villes'
+import { MARQUE, VILLES } from '@/lib/villes'
 import fond from '@/public/data/toulouse/fond.json'
 
 /** L'image qui accompagne un lien vers l'accueil de Toulouse : la carte du réseau actuel et ce qu'on y fait. */
@@ -18,7 +18,7 @@ export default async function Image() {
   return new ImageResponse(
     <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ROUGE, fontFamily: 'Figtree' }}>
       <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'space-between', marginRight: 44, color: 'white' }}>
-        <div style={{ fontSize: 26, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{`${ville.marque}, ${ville.nom}`}</div>
+        <div style={{ fontSize: 26, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{`${MARQUE}, ${ville.nom}`}</div>
         <div style={{ fontSize: 76, fontWeight: 900, lineHeight: 0.98, letterSpacing: -2.5 }}>Construisez le réseau Tisséo de 2038.</div>
         <div style={{ fontSize: 27, fontWeight: 700, lineHeight: 1.3 }}>
           Tracez vos lignes de tram, de bus ou de métro : nous calculons leur prix et leurs voyageurs.

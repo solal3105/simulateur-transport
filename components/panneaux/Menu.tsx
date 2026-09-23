@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-
 import { MANDATS } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { useJeu, useVille } from '@/lib/store'
@@ -11,13 +9,12 @@ import { Bouton, BoutonLien } from '../ui'
 import { Panneau } from './Panneau'
 
 /**
- * Le menu de la partie : ce qu'on est en train de faire, et de quoi en sortir sans rien perdre (les
- * réseaux publiés, l'explication du calcul), ou la recommencer après confirmation.
+ * Le menu de la partie : ce qu'on est en train de faire, et de quoi en sortir sans rien perdre : les
+ * réseaux publiés, l'explication du calcul, ou l'accueil, d'où l'on reprend la partie ou en commence une autre.
  */
 export function Menu() {
-  const { mandat, fermer, ouvrir, rejouer } = useJeu()
+  const { mandat, fermer, ouvrir, allerAccueil } = useJeu()
   const ville = useVille()
-  const [effacer, setEffacer] = useState(false)
   const { debut, fin } = MANDATS[mandat]
 
   return (
@@ -40,25 +37,13 @@ export function Menu() {
         </Bouton>
       </div>
       <div className="border-t border-trait pt-4">
-        {effacer ? (
-          <div role="group" aria-labelledby="effacer-partie" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
-            <p id="effacer-partie" className="text-[14.5px] leading-relaxed">
-              Votre partie sera effacée. Vous reviendrez à l’accueil, où vous pourrez choisir la ville et recommencer.
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Bouton genre="rouge" onClick={rejouer}>
-                Effacer ma partie
-              </Bouton>
-              <Bouton genre="contour" onClick={() => setEffacer(false)}>
-                Garder ma partie
-              </Bouton>
-            </div>
-          </div>
-        ) : (
-          <Bouton genre="sable" iconeAGauche="rejouer" className="w-full justify-start" onClick={() => setEffacer(true)}>
-            Recommencer une partie
-          </Bouton>
-        )}
+        <Bouton genre="sable" iconeAGauche="retour" className="w-full justify-start" onClick={allerAccueil}>
+          Retour à l’accueil
+        </Bouton>
+        <p className="pt-2 text-[13px] leading-relaxed text-gris">
+          Votre partie reste enregistrée : vous la retrouverez depuis l’accueil, où vous pourrez aussi en commencer une autre, ici ou dans
+          une autre ville.
+        </p>
       </div>
     </Panneau>
   )

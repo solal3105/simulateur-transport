@@ -19,11 +19,14 @@ const abonnerAdresse = (changer: () => void) => {
 /**
  * Aiguillage entre les écrans. La partie enregistrée est relue une fois la page affichée.
  * `ville` est la ville de l'adresse (/toulouse) : l'accueil la propose, et si la partie enregistrée se
- * joue ailleurs, l'accueil le signale au lieu de l'ouvrir directement.
+ * joue ailleurs, l'accueil le signale au lieu de l'ouvrir directement. L'accueil s'affiche aussi à la
+ * demande du joueur (menu de la partie, bilan), sans effacer la partie.
  */
 export function Jeu({ ville }: { ville?: IdVille }) {
   const ecran = useJeu((s) => s.ecran)
   const villePartie = useJeu((s) => s.ville)
+  const pause = useJeu((s) => s.pause)
+  const publie = useJeu((s) => s.publie)
   const [pret, setPret] = useState(false)
   const [partage, setPartage] = useState<PartiePartagee | null>(null)
   const [reprise, setReprise] = useState(false)
@@ -53,7 +56,7 @@ export function Jeu({ ville }: { ville?: IdVille }) {
       document.title = VILLES[partage.ville].titrePage
       return
     }
-    if (ecran === 'accueil' || autreVille) return
+    if (ecran === 'accueil' || autreVille || pause) return
     const titre = VILLES[villePartie].titrePage
     const adresse = adresseAccueil(villePartie)
     if (window.location.pathname === adresse) {
@@ -64,7 +67,7 @@ export function Jeu({ ville }: { ville?: IdVille }) {
     window.history.replaceState(null, '', adresse)
     const t = window.setTimeout(() => (document.title = titre), 50)
     return () => window.clearTimeout(t)
-  }, [pret, partage, ecran, villePartie, autreVille])
+  }, [pret, partage, ecran, villePartie, autreVille, pause])
 
   // Quitter le réseau reçu efface le lien de l'adresse et affiche la partie du visiteur, telle qu'elle est enregistrée.
   const quitter = () => {
@@ -84,12 +87,18 @@ export function Jeu({ ville }: { ville?: IdVille }) {
   }
   // Sans ville dans l'adresse, l'accueil propose celle de la dernière partie, Lyon pour une première visite.
   if (!pret || ecran === 'accueil') return <Accueil villeInitiale={ville ?? (pret ? villePartie : 'lyon')} />
-  if (autreVille) {
+  if (autreVille || pause) {
     const reprendre = () => {
-      window.history.replaceState(null, '', adresseAccueil(villePartie))
+      if (window.location.pathname !== adresseAccueil(villePartie)) window.history.replaceState(null, '', adresseAccueil(villePartie))
       setReprise(true)
+      useJeu.getState().quitterAccueil()
     }
-    return <Accueil villeInitiale={ville} partieEnCours={{ ville: villePartie, reprendre }} />
+    return (
+      <Accueil
+        villeInitiale={pause ? villePartie : ville}
+        partieEnCours={{ ville: villePartie, terminee: ecran === 'bilan', publiee: publie !== null, reprendre }}
+      />
+    )
   }
   if (ecran === 'fin-mandat') return <FinMandat />
   if (ecran === 'bilan') return <Bilan />

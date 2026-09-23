@@ -4,7 +4,7 @@ import { n } from '@/lib/format'
 import { cadreMiniature, cheminsFond, cheminsReseau } from '@/lib/miniature'
 import { polices, ROUGE, SABLE } from '@/lib/og'
 import { villeDePartie } from '@/lib/partie'
-import { VILLES, type IdVille } from '@/lib/villes'
+import { MARQUE, VILLES, type IdVille } from '@/lib/villes'
 import fondLyon from '@/public/data/fond.json'
 import projetsLyon from '@/public/data/projets.json'
 import fondToulouse from '@/public/data/toulouse/fond.json'
@@ -50,7 +50,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           fontFamily: 'Figtree',
         }}
       >
-        <div style={{ fontSize: 30, fontWeight: 700 }}>Simulateur TCL</div>
+        <div style={{ fontSize: 30, fontWeight: 700 }}>{MARQUE}</div>
         <div style={{ fontSize: 88, fontWeight: 900, lineHeight: 0.95, letterSpacing: -3, marginTop: 24 }}>
           Construisez le réseau TCL de 2038.
         </div>
@@ -64,7 +64,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const chemins = cheminsFond(fond, ville)
   const traces = cheminsReseau(projets, reseau.partie, ville)
   const long = reseau.titre.length > 32
-  const surtitre = `${ville.marque}, ${ville.nom} en 2038`
+  const surtitre = `${MARQUE}, ${ville.nom} en 2038`
   return new ImageResponse(
     <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ROUGE, fontFamily: 'Figtree' }}>
       <div style={{ display: 'flex', width: 640, height: 550, borderRadius: 32, overflow: 'hidden', background: SABLE }}>
