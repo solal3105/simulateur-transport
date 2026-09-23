@@ -11,9 +11,6 @@ npm-debug.log*
 next-env.d.ts
 tsconfig.tsbuildinfo
 .netlify
-.impeccable/review
-.impeccable/refs
-.impeccable/config.local.json
 data/osm/
 public/maplibre/
 public/_mock/

@@ -1,6 +1,7 @@
 'use client'
 
 import { clsx } from 'clsx'
+import Link from 'next/link'
 import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 
 const TRACES = {
@@ -88,38 +89,62 @@ const GENRES: Record<Genre, string> = {
   contourBlanc: 'bg-transparent text-white shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] hover:bg-white/10',
 }
 
-export function Bouton({
-  genre = 'rouge',
-  icone,
-  iconeAGauche,
-  taille = 'normal',
-  className,
-  children,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  genre?: Genre
-  icone?: NomIcone
-  iconeAGauche?: NomIcone
-  taille?: 'normal' | 'petit' | 'grand'
-}) {
+type Aspect = { genre?: Genre; icone?: NomIcone; iconeAGauche?: NomIcone; taille?: 'normal' | 'petit' | 'grand' }
+
+const classesBouton = ({ genre = 'rouge', icone, taille = 'normal' }: Aspect) =>
+  clsx(
+    'inline-flex items-center gap-2.5 rounded-full font-extrabold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40',
+    icone ? 'justify-between' : 'justify-center',
+    taille === 'petit' && 'min-h-11 px-4 text-sm',
+    taille === 'normal' && 'min-h-13 px-5 text-[15px]',
+    taille === 'grand' && 'min-h-14 px-6 text-base',
+    GENRES[genre],
+  )
+
+function Contenu({ icone, iconeAGauche, children }: Aspect & { children: ReactNode }) {
   return (
-    <button
-      type="button"
-      {...props}
-      className={clsx(
-        'inline-flex items-center gap-2.5 rounded-full font-extrabold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40',
-        icone ? 'justify-between' : 'justify-center',
-        taille === 'petit' && 'min-h-11 px-4 text-sm',
-        taille === 'normal' && 'min-h-13 px-5 text-[15px]',
-        taille === 'grand' && 'min-h-14 px-6 text-base',
-        GENRES[genre],
-        className,
-      )}
-    >
+    <>
       {iconeAGauche ? <Icone nom={iconeAGauche} taille={18} /> : null}
       <span className="text-left">{children}</span>
       {icone ? <Icone nom={icone} taille={19} epaisseur={2.3} /> : null}
+    </>
+  )
+}
+
+export function Bouton({
+  genre,
+  icone,
+  iconeAGauche,
+  taille,
+  className,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & Aspect) {
+  return (
+    <button type="button" {...props} className={clsx(classesBouton({ genre, icone, taille }), className)}>
+      <Contenu icone={icone} iconeAGauche={iconeAGauche}>
+        {children}
+      </Contenu>
     </button>
+  )
+}
+
+/** Un lien vers une autre page, avec l'apparence d'un bouton : même taille, mêmes couleurs, mêmes icônes. */
+export function BoutonLien({
+  href,
+  genre,
+  icone,
+  iconeAGauche,
+  taille,
+  className,
+  children,
+}: Aspect & { href: string; className?: string; children: ReactNode }) {
+  return (
+    <Link href={href} className={clsx(classesBouton({ genre, icone, taille }), className)}>
+      <Contenu icone={icone} iconeAGauche={iconeAGauche}>
+        {children}
+      </Contenu>
+    </Link>
   )
 }
 

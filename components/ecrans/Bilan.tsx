@@ -12,7 +12,7 @@ import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu } from '@/lib/store'
-import { VILLES } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, VILLES } from '@/lib/villes'
 
 import { useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -164,10 +164,22 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     <main className="min-h-dvh bg-white lg:fixed lg:inset-0">
       <div className="relative h-[300px] lg:absolute lg:inset-y-0 lg:right-[620px] lg:left-0 lg:h-auto">
         <Carte marges={MARGES_GRAND} decor anneeMax={annee} partie={partage} ville={ville.id} />
-        <div className="absolute top-4 left-4 flex items-center gap-2.5 lg:top-7 lg:left-7">
-          <Logo taille={40} />
-          <span className="hidden text-[17px] font-black lg:inline">{ville.marque}</span>
-        </div>
+        {/* Le nom du site, lisible aussi sur téléphone : on arrive souvent ici depuis un lien. Sur la page d'un
+            réseau publié, il mène à l'accueil de la ville. */}
+        {publication ? (
+          <Link
+            href={adresseAccueil(ville.id)}
+            className="absolute top-4 left-4 flex items-center gap-2.5 rounded-full bg-white/95 py-1 pr-4 pl-1 shadow-flotte lg:top-7 lg:left-7"
+          >
+            <Logo taille={34} />
+            <span className="text-[14.5px] font-black lg:text-[16px]">{ville.marque}</span>
+          </Link>
+        ) : (
+          <div className="absolute top-4 left-4 flex items-center gap-2.5 rounded-full bg-white/95 py-1 pr-4 pl-1 shadow-flotte lg:top-7 lg:left-7">
+            <Logo taille={34} />
+            <span className="text-[14.5px] font-black lg:text-[16px]">{ville.marque}</span>
+          </div>
+        )}
         <div className="absolute right-4 bottom-10 flex flex-col items-end gap-2 lg:right-auto lg:bottom-8 lg:left-8 lg:items-start">
           <div className="rounded-2xl bg-white/90 px-4 py-2.5 shadow-flotte backdrop-blur">
             <div className="text-xs font-extrabold tracking-[0.08em] text-muet uppercase">
@@ -191,7 +203,18 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       </div>
 
       <div className="relative -mt-6 flex flex-col gap-5 rounded-t-[26px] bg-white px-5 pt-6 pb-8 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:w-[620px] lg:gap-6 lg:overflow-y-auto lg:rounded-l-[32px] lg:rounded-tr-none lg:px-12 lg:py-10 lg:shadow-[-8px_0_30px_rgb(0_0_0/0.08)]">
-        {publication ? <EnTetePublication publication={publication} /> : null}
+        {publication ? (
+          <>
+            <Link
+              href={adresseReseaux(ville.id)}
+              className="-mt-1 flex min-h-10 items-center gap-2 self-start text-[14px] font-extrabold text-gris hover:text-encre"
+            >
+              <Icone nom="retour" taille={17} epaisseur={2.4} />
+              Réseaux publiés à {ville.nom}
+            </Link>
+            <EnTetePublication publication={publication} />
+          </>
+        ) : null}
 
         <span
           className={`flex items-center gap-2 self-start rounded-full px-3.5 py-1.5 text-[13.5px] font-extrabold ${resultat.equilibre ? 'bg-rouge text-white' : 'bg-encre text-white'}`}
@@ -311,7 +334,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               </Link>
             ) : (
               <Bouton genre="rouge" icone="partager" taille="grand" onClick={() => setPublier(true)}>
-                Publier mon réseau dans la communauté
+                Publier mon réseau
               </Bouton>
             )
           ) : null}
@@ -327,19 +350,16 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             {envoi ?? ''}
           </p>
           <Bouton genre="contour" icone={partage ? 'fleche' : 'rejouer'} onClick={rejouer}>
-            {!partage ? 'Rejouer une partie' : aUnePartie ? 'Retrouver ma partie' : 'Commencer ma propre partie'}
+            {!partage ? 'Rejouer une partie' : aUnePartie ? 'Reprendre ma partie' : 'Commencer ma propre partie'}
           </Bouton>
           {!partage && communauteActive ? (
-            <Link
-              href={ville.id === 'lyon' ? '/communaute' : `/communaute?ville=${ville.id}`}
-              className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3"
-            >
-              Voir les réseaux des autres joueurs
+            <Link href={adresseReseaux(ville.id)} className="self-center py-2 text-[14px] font-extrabold underline underline-offset-3">
+              Voir les réseaux publiés
             </Link>
           ) : null}
         </div>
 
-        {publication ? <PiedPublication publication={publication} /> : null}
+        {publication ? <PiedPublication publication={publication} ville={ville.id} /> : null}
       </div>
 
       <AnimatePresence>

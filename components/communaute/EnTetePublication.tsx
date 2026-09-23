@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { profilLocal, retirer, signaler, soutenir, soutiensLocaux, type Motif } from '@/lib/communaute'
 import { de, n } from '@/lib/format'
 import { useJeu } from '@/lib/store'
+import { adresseReseaux, type IdVille } from '@/lib/villes'
 
 import { Bouton, Icone } from '../ui'
 
@@ -98,7 +99,7 @@ export function EnTetePublication({ publication }: { publication: Publication })
 }
 
 /** En bas de la page : signaler un réseau, ou le retirer quand on en est l'auteur. */
-export function PiedPublication({ publication }: { publication: Publication }) {
+export function PiedPublication({ publication, ville }: { publication: Publication; ville: IdVille }) {
   const router = useRouter()
   const [ouvert, setOuvert] = useState<'signaler' | 'retirer' | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -124,7 +125,7 @@ export function PiedPublication({ publication }: { publication: Publication }) {
       await retirer(publication.id)
       // La partie qui avait publié ce réseau peut le publier à nouveau.
       if (useJeu.getState().publie === publication.id) useJeu.setState({ publie: null })
-      router.push('/communaute')
+      router.push(adresseReseaux(ville))
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Le retrait n’a pas abouti.')
       setEnvoi(false)
@@ -156,7 +157,7 @@ export function PiedPublication({ publication }: { publication: Publication }) {
       ) : ouvert === 'retirer' ? (
         <div className="flex flex-col gap-2.5">
           <p className="text-[14px] leading-relaxed">
-            Ce réseau disparaîtra de la communauté, et son lien ne mènera plus nulle part. Vous ne pourrez pas le récupérer.
+            Ce réseau disparaîtra des réseaux publiés, et son lien ne mènera plus nulle part. Vous ne pourrez pas le récupérer.
           </p>
           <div className="flex flex-wrap gap-2">
             <Bouton genre="rouge" taille="petit" disabled={envoi} onClick={() => void retirerReseau()}>
@@ -169,8 +170,8 @@ export function PiedPublication({ publication }: { publication: Publication }) {
         </div>
       ) : (
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13.5px] font-bold text-gris">
-          <Link href="/communaute" className="underline underline-offset-3">
-            Voir les autres réseaux
+          <Link href={adresseReseaux(ville)} className="underline underline-offset-3">
+            Voir les réseaux publiés
           </Link>
           {estAuteur ? (
             <button type="button" onClick={() => setOuvert('retirer')} className="underline underline-offset-3">

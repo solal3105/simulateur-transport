@@ -170,3 +170,9 @@ export const estVille = (id: unknown): id is IdVille => typeof id === 'string' &
 
 /** La ville d'un identifiant venu de l'extérieur, Lyon par défaut. */
 export const villeDe = (id: unknown): Ville => (estVille(id) ? VILLES[id] : VILLES.lyon)
+
+/** L'adresse de l'accueil d'une ville : la racine du site pour Lyon. */
+export const adresseAccueil = (ville: IdVille) => (ville === 'lyon' ? '/' : `/${ville}`)
+
+/** L'adresse des réseaux publiés d'une ville. */
+export const adresseReseaux = (ville: IdVille) => (ville === 'lyon' ? '/communaute' : `/communaute?ville=${ville}`)

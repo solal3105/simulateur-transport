@@ -9,6 +9,7 @@ import { Carte } from '../carte/Carte'
 import { FicheProjet } from '../panneaux/FicheProjet'
 import { Leviers } from '../panneaux/Leviers'
 import { Liste } from '../panneaux/Liste'
+import { Menu } from '../panneaux/Menu'
 import { Methode } from '../panneaux/Methode'
 import { MaLigne, Traceur } from '../panneaux/Traceur'
 import { Bouton, Icone } from '../ui'
@@ -62,23 +63,26 @@ function Message() {
   )
 }
 
-/** Les couleurs des projets par mode, et le réseau actuel en gris. */
+/** Les couleurs des projets par mode, et le réseau actuel en gris. Sans catalogue, ni bateau ni projet à décider. */
 function Legende() {
+  const { catalogue } = useVille()
   return (
     <div
       aria-label="Légende de la carte"
       className="absolute top-[166px] left-3 z-10 flex max-w-[calc(100%-24px)] flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl bg-white/95 px-3 py-2 text-[11.5px] font-bold shadow-flotte lg:top-auto lg:bottom-6 lg:left-[358px] lg:gap-x-4 lg:px-4 lg:py-3 lg:text-[12.5px]"
     >
-      {LEGENDE_MODES.map((m) => (
+      {LEGENDE_MODES.filter((m) => catalogue || m.nom !== 'Bateau').map((m) => (
         <span key={m.nom} className="flex items-center gap-1.5">
           <span className="h-1.5 w-4 rounded-full" style={{ background: m.couleur }} />
           {m.nom}
         </span>
       ))}
-      <span className="hidden items-center gap-1.5 text-gris lg:flex">
-        <span className="w-4 border-t-2 border-dashed border-gris" />
-        En pointillés : pas encore décidé
-      </span>
+      {catalogue ? (
+        <span className="hidden items-center gap-1.5 text-gris lg:flex">
+          <span className="w-4 border-t-2 border-dashed border-gris" />
+          En pointillés : pas encore décidé
+        </span>
+      ) : null}
       <span className="hidden items-center gap-1.5 text-gris lg:flex">
         <span className="h-1 w-4 rounded-full bg-[#958e84]" />
         Réseau actuel
@@ -144,6 +148,7 @@ export function Partie() {
         {panneau?.type === 'trace' ? <Traceur key="trace" /> : null}
         {panneau?.type === 'ligne' ? <MaLigne key="ligne" /> : null}
         {panneau?.type === 'methode' ? <Methode key="methode" /> : null}
+        {panneau?.type === 'menu' ? <Menu key="menu" /> : null}
       </AnimatePresence>
 
       {tuto ? <Tutoriel /> : null}

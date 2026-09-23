@@ -17,6 +17,31 @@ function libelleReste(reste: number, apercu: number) {
   return { valeur: n(reste), texte: 'M€ encore disponibles', manque: false }
 }
 
+/**
+ * Le bouton du menu de la partie, caché pendant le tutoriel et pendant le tracé d'une ligne. Sur
+ * téléphone, l'icône seule laisse la place au nom de la ville et au mandat.
+ */
+function BoutonMenu({ compact, className }: { compact?: boolean; className?: string }) {
+  const { ouvrir, ecran, brouillon, panneau } = useJeu()
+  if (ecran === 'tuto' || brouillon) return null
+  return (
+    <button
+      type="button"
+      aria-label="Menu de la partie"
+      aria-expanded={panneau?.type === 'menu'}
+      onClick={() => ouvrir({ type: 'menu' })}
+      className={clsx(
+        'flex shrink-0 items-center justify-center gap-2 rounded-full bg-white/18 font-extrabold transition-colors hover:bg-white/28',
+        compact ? 'size-10' : 'min-h-10 px-3.5 text-[13.5px]',
+        className,
+      )}
+    >
+      <Icone nom="points" taille={18} epaisseur={3.2} />
+      {compact ? null : 'Menu'}
+    </button>
+  )
+}
+
 /** Le budget du mandat et le score, toujours visibles pendant la partie. */
 export function Entete({ attenue }: { attenue?: boolean }) {
   const { mandat, apercu } = useJeu()
@@ -44,6 +69,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
               {debut}-{fin}
             </span>
           </div>
+          <BoutonMenu compact className="-my-2 -mr-1.5" />
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="flex flex-col gap-0.5">
@@ -136,6 +162,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           </motion.div>
           <span className="text-[12.5px] font-semibold opacity-90">voyageurs gagnés par jour</span>
         </div>
+        <BoutonMenu />
       </div>
     </header>
   )

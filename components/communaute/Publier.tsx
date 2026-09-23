@@ -125,7 +125,7 @@ export function Publier({
           <div className="flex flex-col gap-3">
             <p className="text-[15px] leading-relaxed text-gris">
               {visibilite === 'publique'
-                ? `Il apparaît dans les réseaux de ${VILLES[partie.ville].nom}, sous le nom ${resultat.pseudo}. D’autres joueurs peuvent le soutenir, le comparer au leur ou partir de lui pour leur partie.`
+                ? `Il apparaît dans les réseaux publiés à ${VILLES[partie.ville].nom}, sous le nom ${resultat.pseudo}. D’autres joueurs peuvent le soutenir, le comparer au leur ou partir de lui pour leur partie.`
                 : `Seules les personnes qui ont son lien peuvent le voir. Il n’apparaît dans aucune liste.`}
             </p>
             <Link
@@ -205,8 +205,8 @@ export function Publier({
                 [
                   [
                     'publique',
-                    'Toute la communauté',
-                    `Il apparaît dans les réseaux de ${VILLES[partie.ville].nom}, et d’autres peuvent partir de lui pour leur partie.`,
+                    'Tout le monde',
+                    `Il apparaît dans les réseaux publiés à ${VILLES[partie.ville].nom}, et d’autres peuvent partir de lui pour leur partie.`,
                   ],
                   [
                     'lien',
