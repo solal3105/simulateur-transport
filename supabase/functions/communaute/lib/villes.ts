@@ -16,6 +16,8 @@ export interface Ville {
   nom: string
   /** Le nom du site sur les écrans de cette ville. */
   marque: string
+  /** Le titre de la page d'accueil de la ville, dans l'onglet et les moteurs de recherche. */
+  titrePage: string
   /** Le nom du réseau de transport : « le réseau TCL ». */
   reseau: string
   /** Qui organise les transports, tel qu'on le présente à l'accueil. */
@@ -59,6 +61,7 @@ export const VILLES: Record<IdVille, Ville> = {
     id: 'lyon',
     nom: 'Lyon',
     marque: 'Simulateur TCL',
+    titrePage: 'Simulateur TCL : construisez le réseau lyonnais de 2038',
     reseau: 'TCL',
     autorite: 'Métropole de Lyon, réseau TCL',
     territoire: 'de la Métropole',
@@ -110,6 +113,7 @@ export const VILLES: Record<IdVille, Ville> = {
     id: 'toulouse',
     nom: 'Toulouse',
     marque: 'Simulateur transport',
+    titrePage: 'Simulateur transport : construisez le réseau toulousain de 2038',
     reseau: 'Tisséo',
     autorite: 'Tisséo Collectivités',
     territoire: 'de l’agglomération toulousaine',
@@ -167,3 +171,9 @@ export const estVille = (id: unknown): id is IdVille => typeof id === 'string' &
 
 /** La ville d'un identifiant venu de l'extérieur, Lyon par défaut. */
 export const villeDe = (id: unknown): Ville => (estVille(id) ? VILLES[id] : VILLES.lyon)
+
+/** L'adresse de l'accueil d'une ville : la racine du site pour Lyon. */
+export const adresseAccueil = (ville: IdVille) => (ville === 'lyon' ? '/' : `/${ville}`)
+
+/** L'adresse des réseaux publiés d'une ville. */
+export const adresseReseaux = (ville: IdVille) => (ville === 'lyon' ? '/communaute' : `/communaute?ville=${ville}`)
