@@ -1,6 +1,6 @@
 # La communauté et les autres villes
 
-Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté » et « Communauté : la réflexion ». Rien de tout cela n'est encore construit dans le site.
+Ce document décrit ce qui est prévu pour permettre aux joueurs de publier leurs réseaux, de les comparer et de jouer dans d'autres villes que Lyon. Les maquettes correspondantes sont sur la planche de design, pages « Communauté, téléphone », « Communauté, ordinateur » et « Communauté, la réflexion ». Seul le partage d'un réseau par lien est déjà construit dans le site ; le reste est à faire.
 
 ## Le principe : le jeu reste le jeu
 
@@ -44,15 +44,19 @@ Il n'y a pas de mot de passe. La connexion anonyme de Supabase suffit pour publi
 
 Deux niveaux, pour ouvrir vite sans rien inventer.
 
-Le tracé libre fonctionne dans n'importe quelle ville française avec des données publiques : fond de carte et réseau actuel tirés d'OpenStreetMap, habitants par carreau de 200 m de l'INSEE, prix au kilomètre des chantiers récents. Le joueur y dessine ses propres lignes dans un budget.
+Le tracé libre fonctionne dans n'importe quelle ville française avec des données publiques : fond de carte et réseau actuel tirés d'OpenStreetMap, habitants par carreau de 200 m de l'INSEE, emplois du recensement répartis selon la base Sirene, prix au kilomètre des chantiers récents. Le joueur y dessine ses propres lignes dans un budget. Les chantiers déjà décidés apparaissent sur la carte et ne comptent pas dans ce budget.
 
 Le catalogue ajoute les projets réels d'une ville, avec leurs coûts et leurs fréquentations sourcés, comme pour Lyon. Il demande un travail de recherche ville par ville.
 
-Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. Le budget de chaque ville doit venir de son plan d'investissement publié ; à défaut, il sera calculé à partir de celui de Lyon rapporté au nombre d'habitants, et l'écran le dira.
+Pour démarrer : Lyon avec son catalogue, et Paris, Marseille, Toulouse et Nice en tracé libre. `docs/villes.md` rassemble les réseaux, les projets et les budgets sourcés de ces quatre villes, et le détail des vérifications ci-dessous.
 
-La formule de fréquentation est calée sur les lignes lyonnaises. Dans une autre ville, elle donne un ordre de grandeur ; il faudra la recaler sur les lignes locales dès que leur fréquentation est connue, et l'annoncer dans l'écran « Notre calcul ».
+La formule de fréquentation doit être recalée dans chaque ville. Telle quelle, elle tombe juste pour le tram L1 de Nice, mais elle sous-estime les lignes de Toulouse d'un tiers et surestime le métro de Marseille de 60 à 85 %. Recalée sur les métros A et B et le tram T1, elle prédit chaque ligne toulousaine à moins de 25 % près à partir des deux autres, comme à Lyon. Elle ne sait pas estimer un téléphérique, ni à Toulouse ni à Lyon.
+
+Le budget d'une ville vient de son objectif d'investissement publié quand il existe (300 M€ par an à Marseille), sinon de celui de Lyon rapporté au nombre d'habitants (1 560 M€ par mandat à Toulouse, 790 à Nice). L'écran dit toujours d'où vient le chiffre.
 
 Paris est un cas à part : l'autorité est régionale (Île-de-France Mobilités), le Grand Paris Express relève d'un autre maître d'ouvrage, et les montants sont d'un autre ordre. Le budget et le périmètre de jeu devront être choisis avec soin.
+
+Toulouse est la ville à ouvrir en premier : Tisséo publie la fréquentation de chaque ligne, la formule s'y recale bien, et la ligne C, qui ouvre fin 2028, donne un vrai sujet de partie. Les maquettes « Toulouse en tracé libre » et « Notre calcul à Toulouse » en montrent le résultat, avec des chiffres calculés sur les données toulousaines.
 
 ## Côté technique
 
@@ -64,9 +68,9 @@ Côté données, `scripts/build-data.mjs` doit être rendu paramétrable par vil
 
 ## Ordre de réalisation proposé
 
-1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. Aucune base de données nécessaire, et c'est déjà utile.
+1. Le partage par lien sans compte : un réseau encodé dans l'adresse, qu'on peut ouvrir, comparer et reprendre. L'ouverture est faite : le bilan donne une adresse qui affiche le réseau, recalculé, chez n'importe qui. Il reste la comparaison et la reprise.
 2. Supabase : publication, fil « Populaires » et « Récents », soutiens, reprises, page d'un réseau.
-3. Le tracé libre dans une deuxième ville, pour valider que la chaîne de données tient.
+3. Le tracé libre à Toulouse, pour valider la chaîne de données et le recalage de la formule.
 4. La carte des envies et les réactions aux lignes.
 5. Les défis.
 6. Les trois autres villes.

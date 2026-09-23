@@ -18,7 +18,10 @@ import type { Estimation, ModeLigne } from './types'
  * En validation croisée, l'écart moyen est de 18 % et le pire de 39 %. La formule surestime
  * les lignes de rocade : elle donne environ 109 000 voyageurs pour le T6 complet, là où Sytral
  * Mobilités en prévoit 55 000. Les facteurs du bus et du téléphérique sont des hypothèses,
- * faute de ligne de ce type dans le calage.
+ * faute de ligne de ce type dans le calage. Pour le téléphérique Téléo de Toulouse, qui transporte
+ * 5 800 voyageurs par jour, la formule en prévoit moins de 300 : ses voyageurs viennent des
+ * correspondances et des équipements desservis. Ailleurs qu'à Lyon, la constante A doit être
+ * recalée sur les lignes locales (voir docs/villes.md).
  */
 const A = -8.03
 const B = 1.678
@@ -36,6 +39,7 @@ const DEJA_DESSERVI = 400
 /** Fourchette affichée, d'après les écarts constatés sur les lignes existantes. */
 export const FOURCHETTE = { bas: 0.7, haut: 1.4 }
 
+/** Latitude de Lyon. Dans une autre ville, elle doit devenir un paramètre, sinon les distances est-ouest sont faussées. */
 const LAT0 = 45.755
 const MX = 111320 * Math.cos((LAT0 * Math.PI) / 180)
 const MY = 111320
