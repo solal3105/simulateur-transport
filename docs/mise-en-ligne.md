@@ -6,7 +6,7 @@ La base est le projet Supabase « simulateur-transport » (organisation TCL2040)
 
 1. Appliquer les deux migrations, dans l'ordre de leur nom. Elles ne font qu'ajouter : le site actuel continue de fonctionner après elles.
    - `20260924080000_marseille_nice_idf.sql` ouvre les trois réseaux à la publication.
-   - `20260924090000_jeu_libre.sql` ajoute la colonne `libre` et refait les deux index des listes.
+   - `20260924090000_jeu_libre.sql` ajoute la colonne `libre` et deux index des listes qui en tiennent compte, sans toucher aux anciens.
 2. Déployer la fonction `communaute` telle qu'elle est dans `supabase/functions/communaute/` (ses modules sont déjà recopiés par `node scripts/fonction-communaute.mjs`). Elle contient l'empreinte des nouvelles données franciliennes.
 3. Déposer les données du modèle des trois réseaux, une fois chacun :
 
