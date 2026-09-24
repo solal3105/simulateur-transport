@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 import { MANDATS } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { useJeu, useVille } from '@/lib/store'
@@ -42,6 +44,12 @@ export function Menu() {
           Comment nous calculons votre budget
         </Bouton>
       </div>
+      <Link
+        href="/mentions-legales"
+        className="self-start text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
+      >
+        Mentions légales et confidentialité
+      </Link>
     </Panneau>
   )
 }

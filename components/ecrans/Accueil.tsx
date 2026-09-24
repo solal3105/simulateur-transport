@@ -470,6 +470,12 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
                 Les réseaux publiés
               </Link>
             ) : null}
+            <Link
+              href="/mentions-legales"
+              className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
+            >
+              Mentions légales
+            </Link>
           </motion.nav>
         )}
       </motion.div>

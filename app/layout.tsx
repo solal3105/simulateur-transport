@@ -6,6 +6,8 @@ import { CATALOGUE } from '@/lib/catalogue'
 import { enLettres } from '@/lib/format'
 import { VILLES } from '@/lib/villes'
 
+import { Mesure } from '@/components/Mesure'
+
 import './globals.css'
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-figtree', weight: ['400', '500', '600', '700', '800', '900'] })
@@ -16,7 +18,7 @@ const MONTANT = `${enLettres(enveloppe(LYON, 1) + enveloppe(LYON, 2))} d’euros
 const PROJETS = `${CATALOGUE.filter((p) => p.trace).length} projets réels`
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://simulateur-transport-tcl.netlify.app'),
+  metadataBase: new URL('https://tcl-2040.com'),
   title: VILLES.lyon.titrePage,
   description: `Deux mandats, ${MONTANT} et ${PROJETS} de métro, tram et bus. Choisissez ceux qui verront le jour, ou tracez votre propre ligne.`,
   openGraph: {
@@ -36,7 +38,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={figtree.variable}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Mesure />
+      </body>
     </html>
   )
 }

@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { PROJETS } from './catalogue'
 import { approx } from './format'
+import { mesurer } from './mesure'
 import { estimer, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { LEVIERS_NEUTRES } from './regles'
@@ -123,26 +124,30 @@ export const useJeu = create<Etat>()(
   persist(
     (set, get) => ({
       ...DEPART,
-      commencer: (ville, libre = false) =>
+      commencer: (ville, libre = false) => {
+        mesurer('partie commencée', { reseau: ville, libre })
         set(
           VILLES[ville].catalogue
             ? { ...DEPART, ville, libre, ecran: libre ? 'jeu' : 'tuto', tuto: 0 }
             : { ...DEPART, ville, libre, ecran: 'jeu', brouillon: { mode: 'tram', arrets: [] }, panneau: { type: 'trace' } },
-        ),
+        )
+      },
       etapeTuto: (tuto) => set({ tuto }),
       finirTuto: () => set({ ecran: 'jeu', panneau: null }),
       // Le tutoriel avance avec les gestes du joueur : ouvrir un projet, puis le lancer.
       ouvrir: (panneau) =>
         set((s) => ({ panneau, apercu: 0, tuto: s.ecran === 'tuto' && s.tuto === 0 && panneau.type === 'projet' ? 1 : s.tuto })),
       fermer: () => set((s) => ({ panneau: null, apercu: 0, tuto: s.ecran === 'tuto' && s.tuto === 1 ? 0 : s.tuto })),
-      construire: (c, message = null) =>
+      construire: (c, message = null) => {
+        mesurer('projet décidé', { projet: c.id })
         set((s) => ({
           chantiers: [...s.chantiers.filter((x) => x.id !== c.id), { ...c, mandat: s.mandat }],
           panneau: null,
           apercu: 0,
           message: s.ecran === 'tuto' ? null : message,
           tuto: s.ecran === 'tuto' ? 2 : s.tuto,
-        })),
+        }))
+      },
       retirer: (id) =>
         set((s) => ({
           chantiers: s.chantiers.filter((c) => !(c.id === id && c.mandat === s.mandat)),
@@ -155,8 +160,10 @@ export const useJeu = create<Etat>()(
         })),
       levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
       // Le jeu libre n'a qu'une étape : il passe directement au bilan.
-      finirMandat: () =>
-        set({ ecran: get().mandat === 1 && !get().libre ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null }),
+      finirMandat: () => {
+        mesurer(get().mandat === 1 && !get().libre ? 'premier mandat fini' : 'partie finie', { reseau: get().ville })
+        set({ ecran: get().mandat === 1 && !get().libre ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null })
+      },
       commencerMandat2: () =>
         set((s) => {
           const suite = {
@@ -209,7 +216,10 @@ export const useJeu = create<Etat>()(
           },
         })
       },
-      marquerPublie: (publie) => set({ publie }),
+      marquerPublie: (publie) => {
+        mesurer('réseau publié', { reseau: get().ville })
+        set({ publie })
+      },
       allerAccueil: () => set({ pause: true, panneau: null, brouillon: null, message: null, apercu: 0 }),
       quitterAccueil: () => set({ pause: false }),
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
@@ -220,6 +230,7 @@ export const useJeu = create<Etat>()(
       construireLigne: (nom, estimation, etale) =>
         set((s) => {
           if (!s.brouillon) return {}
+          mesurer('ligne construite', { reseau: s.ville, mode: s.brouillon.mode, arrets: s.brouillon.arrets.length })
           const ligne: LigneJoueur = {
             id: `ligne-${Date.now().toString(36)}`,
             nom,
