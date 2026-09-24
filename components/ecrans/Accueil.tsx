@@ -155,6 +155,9 @@ function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number })
  * Le choix du réseau : il change l'accueil, ses couleurs et l'adresse de la page, sans rien toucher à une
  * partie. Sur téléphone, les réseaux défilent sur une seule rangée.
  */
+/** Le nom de la ville sur le sélecteur : court et parlant, le nom du réseau est dans le titre juste dessous. */
+const NOM_COURT: Record<IdVille, string> = { lyon: 'Lyon', toulouse: 'Toulouse', marseille: 'Marseille', nice: 'Nice', idf: 'Paris' }
+
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
   const rangee = useChoixVisible<HTMLDivElement>(ville)
   return (
@@ -170,22 +173,20 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
           type="button"
           role="radio"
           aria-checked={ville === id}
+          aria-label={`${NOM_COURT[id]}, réseau ${VILLES[id].nom}`}
           onClick={() => choisir(id)}
           className={clsx(
-            'flex shrink-0 snap-start flex-col items-start rounded-2xl px-3.5 py-2 text-left transition-colors',
+            'flex min-h-11 shrink-0 snap-start items-center rounded-full px-4 text-left transition-colors',
             ville === id ? 'bg-white text-rouge' : 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] hover:bg-white/10',
           )}
         >
-          <span className="flex items-center gap-1.5 text-[14px] leading-tight font-extrabold whitespace-nowrap">
+          <span className="flex items-center gap-2 text-[15px] leading-tight font-extrabold whitespace-nowrap">
             <span
               aria-hidden="true"
               className="size-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_#fff]"
               style={{ background: VILLES[id].couleurs.principale }}
             />
-            {VILLES[id].nom}
-          </span>
-          <span className={clsx('text-[11.5px] leading-tight font-semibold whitespace-nowrap', ville === id ? 'text-gris' : 'opacity-85')}>
-            {VILLES[id].lieu}
+            {NOM_COURT[id]}
           </span>
         </button>
       ))}
