@@ -29,23 +29,27 @@ export interface PrixMode {
   stationSouterraine: number
 }
 
-/** Les prix d'une ville moyenne française, en M€ 2025 (docs/couts.md). */
+/**
+ * Les prix d'une ville moyenne française, en M€ 2025, calés par scripts/caler-couts.ts : la voie et les
+ * stations sur 27 chantiers en terrain plat, les ouvrages sur les chantiers lyonnais sous une colline
+ * (docs/couts.md).
+ */
 export const PRIX: Record<ModeLigne, PrixMode> = {
-  // Tours, Angers, Montpellier, Grenoble, Dijon : 30 à 36 M€ par km tout compris ; une station de tram coûte
-  // de 0,5 à 1,1 M€. Le tunnel de TEOL et celui de la ligne 2 de Nice donnent 70 à 150 M€ de plus par km.
-  // Une station de tram souterraine coûte de 30 à 60 M€ selon une note déposée au BAPE du Québec ; TEOL en a deux.
-  tram: { km: 33, station: 1, ouvrageKm: 100, pont: 20, metreProfondeur: 0, stationSouterraine: 30 },
-  // Nantes, Nîmes, Metz : 13 à 17 M€ par km. Aucun document ne chiffre une station ni un tunnel de bus :
-  // ces deux montants sont nos estimations.
-  bus: { km: 14, station: 0.4, ouvrageKm: 80, pont: 15, metreProfondeur: 0, stationSouterraine: 25 },
-  // Métro automatique entièrement souterrain : environ 90 M€ par km de tunnel équipé et 50 M€ par station
-  // en province (Toulouse C, Rennes b, Lyon B à Saint-Genis-Laval). Sous une colline, le tunnel passe à plus
-  // de 30 m (150 M€ de plus par km : roche, puits d'accès et de secours plus hauts) et les stations se
-  // creusent plus bas (5 M€ par mètre au-delà de 25 m) ; passer sous un grand fleuve coûte 30 M€. Ces trois
-  // montants sont nos estimations, calées sur la seule référence française d'un métro sous une colline, la
-  // ligne E de Lyon, estimée de 270 à 360 M€ 2025 par km ; au métro B, descendre une station de 5 m coûtait
-  // 10 M€ de plus, mais en tranchée couverte, bien moins cher qu'en profondeur.
-  metro: { km: 90, station: 50, ouvrageKm: 150, pont: 30, metreProfondeur: 5, stationSouterraine: 0 },
+  // Tram : 32 M€ par km et 1,5 M€ par station (Tours, Angers, Montpellier, Grenoble, Dijon, Lyon, Nice, Paris :
+  // écart moyen de 15 %). Sous une colline, 160 M€ de plus par km de tunnel, rampes d'accès comprises, et 40 M€
+  // par station souterraine : TEOL, tunnel de 2,9 km sous Fourvière, est retrouvé à 3 % près. Une note déposée
+  // au BAPE du Québec donne 30 à 60 M€ par station de tram souterraine.
+  tram: { km: 32, station: 1.5, ouvrageKm: 160, pont: 20, metreProfondeur: 0, stationSouterraine: 40 },
+  // Bus : 15 M€ par km et 0,6 M€ par station (Nantes, Nîmes, Lyon : écart moyen de 11 %). Aucun document ne
+  // chiffre un tunnel ni une station souterraine de bus : ces montants sont nos estimations.
+  bus: { km: 15, station: 0.6, ouvrageKm: 100, pont: 15, metreProfondeur: 0, stationSouterraine: 30 },
+  // Métro automatique entièrement souterrain : 100 M€ par km et 40 M€ par station (Toulouse C, Rennes b et
+  // les métros d'Île-de-France : écart moyen de 14 %). Sous une colline, le tunnel passe à plus de 30 m
+  // (250 M€ de plus par km : roche, puits d'accès et de secours plus hauts) et les stations se creusent plus
+  // bas (7 M€ par mètre au-delà de 25 m) ; passer sous un grand fleuve coûte 30 M€. Ces montants sont calés
+  // sur la ligne E de Lyon, estimée à 316 M€ 2025 par km, retrouvée à 11 % près, et sur le métro B à
+  // Saint-Genis-Laval, retrouvé à 3 % près.
+  metro: { km: 100, station: 40, ouvrageKm: 250, pont: 30, metreProfondeur: 7, stationSouterraine: 0 },
   // Téléphériques urbains : Brest, Ajaccio, La Réunion, Grenoble, Téléo et le Câble C1.
   cable: { km: 10, station: 9, ouvrageKm: 0, pont: 0, metreProfondeur: 0, stationSouterraine: 0 },
 }

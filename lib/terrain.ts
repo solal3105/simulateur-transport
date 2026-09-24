@@ -76,6 +76,11 @@ export const ECART_OUVRAGE = 6
 const COUVERTURE = 12
 /** Au-delà de cette profondeur, un tunnel de métro demande des puits d'accès et de secours plus hauts, en roche. */
 export const TUNNEL_PROFOND = 30
+/**
+ * Réglages du calage (scripts/caler-couts.ts) : la longueur de la rampe d'accès, en mètres, ajoutée à chaque
+ * entrée d'un tunnel de tram ou de bus pour descendre sous le sol.
+ */
+export const REGLAGES = { rampe: 250 }
 
 /** Un point du profil en long : distance depuis le départ, terrain et voie, en mètres. */
 export interface PointProfil {
@@ -146,24 +151,32 @@ export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], 
     const d = points[i + 1]!.s - points[i]!.s
     dessous[i] = Math.min(dessous[i]!, dessous[i + 1]! + g * d)
   }
-  let kmOuvrage = 0
+  const enOuvrage: boolean[] = []
   const profondeurs: number[] = []
   const voies: number[] = []
   const stations: PointProfil[] = []
   for (let i = 0; i < points.length; i += 1) {
     const p = points[i]!
-    const ds = i > 0 ? (p.s - points[i - 1]!.s) / 1000 : 0
     // Le tram et le bus suivent le terrain tant que leur pente le permet, et passent dessous, en tranchée ou en
     // tunnel, quand il monte trop vite : la voie la plus haute qui reste sous le sol. Le tunnel du métro passe
     // au plus près de la surface que sa pente permet ; le câble passe au-dessus.
     const voie = mode === 'metro' ? dessous[i]! - COUVERTURE : mode === 'cable' ? p.z : dessous[i]!
     voies.push(voie)
     if (p.station) profondeurs.push(p.z - voie)
-    if (mode === 'metro') {
-      if (p.z - voie > TUNNEL_PROFOND) kmOuvrage += ds
-    } else if (mode !== 'cable' && Math.abs(p.z - voie) > ECART_OUVRAGE) kmOuvrage += ds
+    enOuvrage.push(mode === 'metro' ? p.z - voie > TUNNEL_PROFOND : mode !== 'cable' && p.z - voie > ECART_OUVRAGE)
     if (p.station) stations.push({ s: p.s, z: p.z, voie })
   }
+  // Un tunnel de tram ou de bus commence et finit par une rampe, là où la voie descend sous le sol.
+  if (mode === 'tram' || mode === 'bus') {
+    const coeur = enOuvrage.slice()
+    for (let i = 0; i < points.length; i += 1) {
+      if (!coeur[i]) continue
+      for (let k = i - 1; k >= 0 && points[i]!.s - points[k]!.s <= REGLAGES.rampe; k -= 1) enOuvrage[k] = true
+      for (let k = i + 1; k < points.length && points[k]!.s - points[i]!.s <= REGLAGES.rampe; k += 1) enOuvrage[k] = true
+    }
+  }
+  let kmOuvrage = 0
+  for (let i = 1; i < points.length; i += 1) if (enOuvrage[i]) kmOuvrage += (points[i]!.s - points[i - 1]!.s) / 1000
   // Un point tous les 50 m environ suffit pour dessiner le profil, en gardant les stations.
   const pas = Math.max(1, Math.round(points.length / 200))
   const profil = points
