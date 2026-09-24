@@ -176,3 +176,18 @@ export async function soutenir(reseau: string, oui: boolean) {
 export const compterReprise = (reseau: string) => appeler<{ ok: true }>('reprendre', { reseau })
 export const signaler = (reseau: string, motif: Motif) => appeler<{ ok: true }>('signaler', { reseau, motif })
 export const retirer = (reseau: string) => appeler<{ ok: true }>('retirer', { reseau })
+
+/**
+ * Les chiffres d'en-tête des réseaux publiés d'une ville : combien il y en a, et celui qui gagne le plus de
+ * voyageurs, pour montrer le record à battre.
+ */
+export async function chiffresCommunaute(ville: IdVille, libre: boolean) {
+  const filtre = `ville=eq.${ville}&libre=eq.${libre}&visibilite=eq.publique`
+  const r = await fetch(`${URL_BASE}/rest/v1/reseaux?select=id&${filtre}&limit=1`, {
+    headers: { apikey: CLE_PUBLIQUE, Prefer: 'count=exact' },
+  })
+  if (!r.ok) throw new Error('Nous n’arrivons pas à charger les réseaux publiés pour l’instant.')
+  const total = Number(r.headers.get('content-range')?.split('/')[1]) || 0
+  const [record] = await lire<ReseauPublie[]>(`reseaux?select=${COLONNES}&${filtre}&order=voyageurs.desc&limit=1`)
+  return { total, record: record ?? null }
+}
