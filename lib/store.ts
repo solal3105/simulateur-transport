@@ -19,6 +19,8 @@ export type Panneau =
   | { type: 'leviers' }
   | { type: 'trace' }
   | { type: 'ligne' }
+  /** Une ligne déjà construite par le joueur, ouverte depuis la carte ou le programme. */
+  | { type: 'ligne-joueur'; id: string }
   | { type: 'methode' }
   | { type: 'budget' }
   | { type: 'menu' }
