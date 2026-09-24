@@ -140,7 +140,7 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
             meilleur={mieux(ra.voyageurs, rb.voyageurs)}
           />
           <Ligne
-            label="Investi sur les deux mandats"
+            label="Investi de 2026 à 2038"
             a={`${n(ra.investi)} M€`}
             b={`${n(rb.investi)} M€`}
             meilleur={mieux(ra.investi, rb.investi, false)}
@@ -152,7 +152,7 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
             meilleur={mieux(rendement(ra), rendement(rb))}
           />
           <Ligne
-            label="Budget des deux mandats"
+            label="Budget réel"
             a={a.libre ? 'Jeu libre' : ra.equilibre ? 'Tenu' : `Déficit de ${n(-ra.deficit)} M€`}
             b={b.libre ? 'Jeu libre' : rb.equilibre ? 'Tenu' : `Déficit de ${n(-rb.deficit)} M€`}
           />

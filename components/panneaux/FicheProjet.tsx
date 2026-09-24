@@ -192,7 +192,7 @@ export function FicheProjet({ id }: { id: string }) {
       {existant ? (
         <div className="flex items-center gap-2.5 rounded-2xl bg-rouge-pale px-4 py-3 text-sm font-bold text-rouge-fonce">
           <Icone nom="valider" taille={18} epaisseur={2.8} />
-          Dans votre programme depuis le mandat {existant.mandat}.
+          {libre ? 'Dans votre programme.' : `Dans votre programme depuis le mandat ${existant.mandat}.`}
         </div>
       ) : null}
 

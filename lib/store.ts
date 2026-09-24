@@ -29,6 +29,8 @@ export type Panneau =
 export interface Brouillon {
   mode: ModeLigne
   arrets: [number, number][]
+  /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
+  edition?: string
 }
 
 /** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
@@ -93,6 +95,14 @@ interface Etat {
   changerMode: (mode: ModeLigne) => void
   ajouterArret: (p: [number, number]) => void
   retirerArret: () => void
+  /** Retire un arrêt précis du tracé, où qu'il soit. */
+  enleverArret: (i: number) => void
+  /** Déplace un arrêt du tracé, quand on le fait glisser sur la carte. */
+  deplacerArret: (i: number, p: [number, number]) => void
+  /** Insère un arrêt à la position i, quand on touche la ligne entre deux arrêts. */
+  insererArret: (i: number, p: [number, number]) => void
+  /** Rouvre le traceur sur une ligne déjà construite, pour changer son tracé ou son mode. */
+  modifierLigne: (id: string) => void
   abandonnerTrace: () => void
   construireLigne: (nom: string, estimation: Estimation, etale: boolean) => void
   /** Recalcule le coût et les voyageurs des lignes tracées avec le modèle actuel, quand il a changé. */
@@ -226,10 +236,52 @@ export const useJeu = create<Etat>()(
       changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
       ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
       retirerArret: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.slice(0, -1) } } : {})),
-      abandonnerTrace: () => set({ brouillon: null, panneau: null, apercu: 0 }),
+      enleverArret: (i) =>
+        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.filter((_, k) => k !== i) } } : {})),
+      deplacerArret: (i, p) =>
+        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.map((a, k) => (k === i ? p : a)) } } : {})),
+      insererArret: (i, p) =>
+        set((s) =>
+          s.brouillon
+            ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets.slice(0, i), p, ...s.brouillon.arrets.slice(i)] } }
+            : {},
+        ),
+      modifierLigne: (id) =>
+        set((s) => {
+          const l = s.lignes.find((x) => x.id === id && x.mandat === s.mandat)
+          return l ? { brouillon: { mode: l.mode, arrets: [...l.arrets], edition: l.id }, panneau: { type: 'trace' }, apercu: 0 } : {}
+        }),
+      // Abandonner la modification d'une ligne ramène à sa fiche, sans rien changer.
+      abandonnerTrace: () =>
+        set((s) => ({
+          brouillon: null,
+          panneau: s.brouillon?.edition ? { type: 'ligne-joueur', id: s.brouillon.edition } : null,
+          apercu: 0,
+        })),
       construireLigne: (nom, estimation, etale) =>
         set((s) => {
           if (!s.brouillon) return {}
+          const ancienne = s.brouillon.edition ? s.lignes.find((l) => l.id === s.brouillon!.edition) : undefined
+          if (ancienne) {
+            // Une ligne modifiée garde sa place dans le programme, son mandat et son paiement.
+            mesurer('ligne modifiée', { reseau: s.ville, mode: s.brouillon.mode, arrets: s.brouillon.arrets.length })
+            const modifiee: LigneJoueur = {
+              ...ancienne,
+              nom,
+              mode: s.brouillon.mode,
+              arrets: s.brouillon.arrets,
+              estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
+            }
+            return {
+              lignes: s.lignes.map((l) => (l.id === ancienne.id ? modifiee : l)),
+              brouillon: null,
+              panneau: { type: 'ligne-joueur', id: ancienne.id },
+              message: {
+                titre: `${nom} modifiée.`,
+                texte: `Environ ${approx(estimation.nouveaux)} nouveaux voyageurs par jour pour le réseau.`,
+              },
+            }
+          }
           mesurer('ligne construite', { reseau: s.ville, mode: s.brouillon.mode, arrets: s.brouillon.arrets.length })
           const ligne: LigneJoueur = {
             id: `ligne-${Date.now().toString(36)}`,

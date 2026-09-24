@@ -290,7 +290,7 @@ function AjoutParNom() {
 
 /** Le panneau affiché pendant qu'on pose les arrêts. */
 export function Traceur() {
-  const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir, libre } = useJeu()
+  const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
@@ -301,11 +301,13 @@ export function Traceur() {
   if (!brouillon) return null
   const arrets = brouillon.arrets.length
   const pret = arrets >= 2 && e
+  // En modification, fermer ramène à la fiche de la ligne sans rien changer.
+  const modifiee = brouillon.edition ? lignes.find((l) => l.id === brouillon.edition) : undefined
   const fermer = () => (arrets >= 2 && !confirmer ? setConfirmer(true) : abandonnerTrace())
 
   return (
     <Panneau
-      titre={`Tracer un ${NOM_MODE[brouillon.mode]}`}
+      titre={modifiee ? `Modifier ${modifiee.nom}` : `Tracer un ${NOM_MODE[brouillon.mode]}`}
       onFermer={fermer}
       pied={
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
@@ -326,7 +328,7 @@ export function Traceur() {
             disabled={!pret}
             onClick={() => ouvrir({ type: 'ligne' })}
           >
-            Terminer la ligne
+            {modifiee ? 'Voir le résultat' : 'Terminer la ligne'}
           </Bouton>
         </div>
       }
@@ -334,11 +336,13 @@ export function Traceur() {
       {confirmer ? (
         <div role="group" aria-labelledby="abandon-trace" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
           <p id="abandon-trace" className="text-[14.5px] leading-relaxed">
-            Abandonner ce tracé ? Les {arrets} arrêts posés seront effacés.
+            {modifiee
+              ? `Abandonner les modifications ? ${modifiee.nom} garde son tracé de départ.`
+              : `Abandonner ce tracé ? Les ${arrets} arrêts posés seront effacés.`}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
             <Bouton genre="rouge" taille="petit" onClick={abandonnerTrace}>
-              Abandonner
+              {modifiee ? 'Abandonner les modifications' : 'Abandonner'}
             </Bouton>
             <Bouton genre="contour" taille="petit" onClick={() => setConfirmer(false)}>
               Continuer le tracé
@@ -402,6 +406,36 @@ export function Traceur() {
 
       <AjoutParNom />
 
+      {arrets > 0 ? (
+        <div className="flex flex-col gap-2">
+          <Surtitre>Vos arrêts</Surtitre>
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
+            {brouillon.arrets.map((_, i) => (
+              <li key={i} className="flex items-center gap-1">
+                <span className="flex items-center gap-0.5 rounded-full bg-sable py-0.5 pr-0.5 pl-2.5">
+                  {noms[i] ?? `Arrêt ${i + 1}`}
+                  <button
+                    type="button"
+                    onClick={() => enleverArret(i)}
+                    aria-label={`Retirer l’arrêt ${noms[i] ?? i + 1}`}
+                    title="Retirer cet arrêt"
+                    className="grid size-7 place-items-center rounded-full text-gris transition-colors hover:bg-white hover:text-rouge-fonce"
+                  >
+                    <Icone nom="fermer" taille={13} epaisseur={2.6} />
+                  </button>
+                </span>
+                {i < arrets - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+              </li>
+            ))}
+          </ol>
+          {arrets >= 2 ? (
+            <p className="text-[12.5px] leading-snug text-gris">
+              Faites glisser un arrêt sur la carte pour le déplacer, ou touchez la ligne entre deux arrêts pour en ajouter un.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       {!pret ? (
         <p className="flex items-start gap-2.5 rounded-2xl bg-encre px-4 py-3 text-sm leading-snug font-semibold text-white">
           <Icone nom="main" taille={20} className="mt-0.5" />
@@ -456,26 +490,32 @@ function useNomsArrets() {
 
 /** Le résultat d'une ligne terminée, avant de la construire. */
 export function MaLigne() {
-  const { brouillon, mandat, construireLigne, ouvrir, libre } = useJeu()
+  const { brouillon, mandat, construireLigne, ouvrir, libre, lignes } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const e = useEstimation()
   const noms = useNomsArrets()
+  // Une ligne modifiée garde son nom, son mandat et son paiement ; on la compare à ce qu'elle était.
+  const ancienne = brouillon?.edition ? lignes.find((l) => l.id === brouillon.edition) : undefined
   // Une ligne porte le nom de ses deux terminus, comme sur le réseau.
   // Tant que le joueur ne l'a pas renommée, la ligne porte le nom de ses terminus.
-  const [nomSaisi, setNom] = useState<string | null>(null)
+  const [nomSaisi, setNom] = useState<string | null>(ancienne?.nom ?? null)
   const nom =
     nomSaisi ?? (noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
+  // La part payée sur ce mandat ; en modification, l'ancienne version libère la sienne.
+  const partDuMandat = (cout: number) => (ancienne?.etale && mandat === 1 ? cout / 2 : cout)
   // En jeu libre, il n'y a pas de budget à tenir, ni de paiement en deux fois.
-  const reste = libre ? Infinity : bilan.reste
-  const etaler = mandat === 1 && !libre
+  const reste = libre ? Infinity : bilan.reste + (ancienne ? partDuMandat(ancienne.estimation.cout) : 0)
+  const etaler = mandat === 1 && !libre && !ancienne
   const moitie = Math.round(e.cout / 2)
 
   return (
     <Panneau
-      surtitre={<Pastille icone="trace">Votre ligne de {NOM_MODE[brouillon.mode]}</Pastille>}
+      surtitre={
+        <Pastille icone="trace">{ancienne ? 'Modification de votre ligne' : `Votre ligne de ${NOM_MODE[brouillon.mode]}`}</Pastille>
+      }
       titre={
         <label className="flex items-center gap-2">
           <span className="sr-only">Nom de la ligne</span>
@@ -492,7 +532,13 @@ export function MaLigne() {
       pied={
         <>
           <Bouton genre="rouge" icone="valider" taille="grand" onClick={() => construireLigne(nom.trim() || 'Ma ligne', e, false)}>
-            {e.cout <= reste ? `Construire pour ${n(e.cout)} M€` : `Construire pour ${n(e.cout)} M€, avec un déficit`}
+            {ancienne
+              ? partDuMandat(e.cout) <= reste
+                ? `Enregistrer pour ${n(e.cout)} M€`
+                : `Enregistrer pour ${n(e.cout)} M€, avec un déficit`
+              : e.cout <= reste
+                ? `Construire pour ${n(e.cout)} M€`
+                : `Construire pour ${n(e.cout)} M€, avec un déficit`}
           </Bouton>
           <div className="grid grid-cols-2 gap-2">
             {etaler ? (
@@ -517,6 +563,12 @@ export function MaLigne() {
         />
         <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
       </div>
+      {ancienne ? (
+        <p className="text-[13.5px] leading-relaxed text-gris">
+          Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
+          jour.
+        </p>
+      ) : null}
       <div className="flex flex-col gap-0.5">
         <Surtitre>Ce que coûte la ligne</Surtitre>
         <DetailCout e={e} arrets={brouillon.arrets.length} mode={brouillon.mode} />
@@ -563,7 +615,7 @@ export function MaLigne() {
  * le détail de son coût, ses arrêts, et de quoi la supprimer.
  */
 export function FicheLigne({ id }: { id: string }) {
-  const { lignes, mandat, retirer, fermer, changerPaiement, libre } = useJeu()
+  const { lignes, mandat, retirer, fermer, changerPaiement, libre, modifierLigne } = useJeu()
   const ville = useVille()
   const donnees = useDonnees(ville.id)
   const l = lignes.find((x) => x.id === id)
@@ -602,16 +654,21 @@ export function FicheLigne({ id }: { id: string }) {
     )
   } else {
     pied = (
-      <div className={clsx('grid gap-2', mandat === 1 && !libre ? 'grid-cols-2' : 'grid-cols-1')}>
-        {mandat === 1 && !libre ? (
-          <Bouton genre="contour" taille="petit" onClick={() => changerPaiement(l.id, !l.etale)}>
-            {l.etale ? 'Payer en une fois' : 'Payer en deux fois'}
-          </Bouton>
-        ) : null}
-        <Bouton genre="contour" taille="petit" iconeAGauche="poubelle" onClick={() => setConfirmer(true)}>
-          Supprimer la ligne
+      <>
+        <Bouton genre="rouge" iconeAGauche="crayon" onClick={() => modifierLigne(l.id)}>
+          Modifier le tracé
         </Bouton>
-      </div>
+        <div className={clsx('grid gap-2', mandat === 1 && !libre ? 'grid-cols-2' : 'grid-cols-1')}>
+          {mandat === 1 && !libre ? (
+            <Bouton genre="contour" taille="petit" onClick={() => changerPaiement(l.id, !l.etale)}>
+              {l.etale ? 'Payer en une fois' : 'Payer en deux fois'}
+            </Bouton>
+          ) : null}
+          <Bouton genre="contour" taille="petit" iconeAGauche="poubelle" onClick={() => setConfirmer(true)}>
+            Supprimer la ligne
+          </Bouton>
+        </div>
+      </>
     )
   }
 
