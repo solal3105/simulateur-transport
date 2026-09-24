@@ -10,3 +10,5 @@
 [build.environment]
   NEXT_PUBLIC_SUPABASE_URL = "https://tyqrzfhrgrnyriwqkvju.supabase.co"
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_m1nWijMehbeNeysp_FXvIg_oeGk9y_v"
+  # Clé du projet PostHog (hébergement européen) pour la mesure d'audience : publique elle aussi, elle part avec la page.
+  NEXT_PUBLIC_POSTHOG_KEY = "phc_xi8mDe2PjTBZto7uufxLaG8ePJfBy9JQnjEuhXM4emtd"

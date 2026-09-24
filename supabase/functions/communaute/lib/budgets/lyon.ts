@@ -152,7 +152,7 @@ export const lyon: BudgetVille = {
   limites: [
     'Le débat d’orientation budgétaire 2026 a été voté par l’ancienne majorité. La nouvelle présidence de Sytral prépare un plan de mandat 2026-2031, pas encore voté ; elle a annoncé l’abandon du TEOL au profit du métro E, ce que seule la presse rapporte.',
     'Le jeu ne réserve rien à l’entretien du réseau existant, alors que Sytral y consacre 70 à 80 M€ par an.',
-    'Les coûts du catalogue datent d’avant décembre 2025 : Sytral a depuis réévalué plusieurs projets, par exemple la modernisation de la ligne D, passée de 339 à 522 M€.',
+    'Les coûts du catalogue datent d’avant décembre 2025, sauf celui de la modernisation de la ligne D, que Sytral a porté de 339 à 522 M€ : d’autres projets ont pu être réévalués depuis.',
     'Le projet d’électrification des bus du catalogue recoupe en partie la réserve des bus, qui comprend déjà les bus électriques.',
     'Les montants des leviers sont ceux de la première version du jeu, un peu plus forts que ce que donnent les comptes de 2025 : l’explication des leviers détaille chaque écart.',
     'Sytral n’a jamais étudié la gratuité des 11-18 ans enfants d’abonnés : son coût vient d’une proposition de campagne rapportée par la presse.',

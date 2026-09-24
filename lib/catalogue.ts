@@ -139,9 +139,11 @@ export const CATALOGUE: Projet[] = [
     nom: 'Modernisation de la ligne D',
     genre: 'Rénovation d’une ligne de métro',
     description:
-      'Nouvelles rames et nouveaux équipements, pour fiabiliser la ligne et augmenter sa capacité. C’est le meilleur rapport entre l’argent engagé et les voyageurs gagnés de tout le catalogue.',
+      'Nouvelles rames et nouveaux équipements, pour fiabiliser la ligne et augmenter sa capacité. Sytral a porté son enveloppe de 339 à 522 millions d’euros en décembre 2025.',
     mode: 'renovation',
-    cout: 338,
+    // Délibération 25-079 de Sytral Mobilités, autorisations de programme 2026 : programme « Avenir métro D »,
+    // 339,1 M€ avant actualisation, 522,4 M€ après.
+    cout: 522,
     voyageurs: 220500,
     duree: 4,
     trace: 'modern-d',
@@ -381,7 +383,7 @@ const MOTS: Record<Action, { verbe: string; participe: string }> = {
   electrifier: { verbe: 'Électrifier', participe: 'Électrifié' },
 }
 
-/** Le vocabulaire d'un projet : « Moderniser pour 338 M€ », « Modernisée » sur la carte. */
+/** Le vocabulaire d'un projet : « Moderniser pour 522 M€ », « Modernisée » sur la carte. */
 export function mots(id: string) {
   const action = ACTIONS[id] ?? 'construire'
   const { verbe, participe } = MOTS[action]
