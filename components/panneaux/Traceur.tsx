@@ -24,7 +24,7 @@ const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; reper
     nom: 'Tramway',
     court: 'Tram',
     icone: 'tram',
-    repere: 'Il ne monte pas au-delà de 8 % : plus raide, il lui faut un tunnel, et un pont pour chaque grand fleuve.',
+    repere: 'Il ne monte pas au-delà de 6 % : plus raide, il lui faut un tunnel, et un pont pour chaque grand fleuve.',
   },
   {
     id: 'bus',

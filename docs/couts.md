@@ -16,14 +16,14 @@ En millions d'euros 2025, pour une ville moyenne :
 
 | Mode | Voie par km | Station | Tunnel en plus, par km | Fleuve | Station sous la colline |
 | --- | --- | --- | --- | --- | --- |
-| Tram | 33 | 1 | 100 (pente au-delà de 8 %) | 20 (pont) | 30 par station souterraine |
+| Tram | 33 | 1 | 100 (pente au-delà de 6 %) | 20 (pont) | 30 par station souterraine |
 | Bus à haut niveau de service | 14 | 0,4 | 80 (pente au-delà de 10 %) | 15 (pont) | 25 par station souterraine |
 | Métro automatique | 90 | 50 | 150 (tunnel à plus de 30 m) | 30 (passage dessous) | 5 par mètre au-delà de 25 m |
 | Téléphérique | 10 | 9 | | | |
 
 Les coefficients des réseaux : Lyon 1,2, Tisséo 1, Aix-Marseille-Provence 1,4, Lignes d'Azur 1,45, Île-de-France 1,85. Ils viennent du coût au kilomètre des trams récents (Lyon 39 à 46 M€, Nice 51, Marseille 56, Île-de-France 54 à 78, contre 35 dans les villes moyennes) et des métros (196 à 295 M€ par km en Île-de-France, 113 à 125 à Rennes et à Toulouse).
 
-Les pentes maximales sans ouvrage : 8 % pour le tram (référentiel du Cerema, 2018), 10 % pour un métro sur pneus (le Sytral étudiait 10 à 12 % pour la ligne E), 10 % pour le bus (notre estimation, aucune source ne la fixe). Le tram et le bus suivent le terrain tant que leur pente le permet et passent dessous sinon ; le tunnel du métro reste au plus près de la surface que sa pente permet, avec 12 m de couverture.
+Les pentes maximales sans ouvrage : 6 % pour le tram (le référentiel du Cerema admet 8 % par exception, mais les directives des tramways de Genève n'admettent 5 à 6 % que sur de courtes rampes), 10 % pour un métro sur pneus (le Sytral étudiait 10 à 12 % pour la ligne E), 10 % pour le bus (notre estimation, aucune source ne la fixe). Le tram et le bus suivent le terrain tant que leur pente le permet et passent dessous sinon ; le tunnel du métro reste au plus près de la surface que sa pente permet, avec 12 m de couverture.
 
 Les surcoûts du métro sous une colline sont nos estimations, calées sur la seule référence française, la ligne E de Lyon, estimée de 270 à 360 M€ 2025 par km : un tracé proche, d'Alaï à Bellecour sous Fourvière, revient à 254 M€ par km dans le jeu. Le téléphérique ne craint pas la pente. Les grands cours d'eau sont le Rhône, la Saône, la Garonne, la Seine, la Marne, l'Oise, le Var et la Durance ; les petites rivières se franchissent sans ouvrage notable.
 
