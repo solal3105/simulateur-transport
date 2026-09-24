@@ -7,7 +7,6 @@ import {
   setWorkerUrl,
   type FilterSpecification,
   type GeoJSONSource,
-  type MapLayerMouseEvent,
   type MapMouseEvent,
   type StyleSpecification,
 } from 'maplibre-gl'
@@ -284,6 +283,15 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5) },
       },
       { id: 'projets-cible', type: 'line', source: 'projets', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 } },
+      // La ligne dont la fiche est ouverte, soulignée d'un halo de sa couleur.
+      {
+        id: 'joueur-halo',
+        type: 'line',
+        source: 'joueur',
+        filter: ['get', 'choisi'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': ['get', 'couleur'], 'line-opacity': 0.3, 'line-width': largeur(20) },
+      },
       {
         id: 'joueur-liseré',
         type: 'line',
@@ -306,6 +314,8 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         filter: ['get', 'chantier'],
         paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
       },
+      // Une bande invisible et large autour des lignes du joueur, pour les toucher facilement au doigt.
+      { id: 'joueur-cible', type: 'line', source: 'joueur', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 } },
       {
         id: 'zones',
         type: 'fill',
@@ -516,21 +526,25 @@ export function Carte({
       etiquettes.set(f.properties.id, el)
     }
 
-    m.on('click', 'projets-cible', (e: MapLayerMouseEvent) => {
-      if (decor || useJeu.getState().brouillon) return
-      const id = e.features?.[0]?.properties?.id as string | undefined
-      const projet = CATALOGUE.find((p) => p.trace === id)
-      if (projet) useJeu.getState().ouvrir({ type: 'projet', id: projet.id })
-    })
-    m.on('mouseenter', 'projets-cible', () => {
-      if (!decor && !useJeu.getState().brouillon) m.getCanvas().style.cursor = 'pointer'
-    })
-    m.on('mouseleave', 'projets-cible', () => {
-      m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
-    })
+    // Un clic pose un arrêt pendant le tracé ; sinon il ouvre la ligne du joueur touchée, ou à défaut le projet.
     m.on('click', (e: MapMouseEvent) => {
-      if (useJeu.getState().brouillon) useJeu.getState().ajouterArret([e.lngLat.lng, e.lngLat.lat])
+      const jeu = useJeu.getState()
+      if (jeu.brouillon) return jeu.ajouterArret([e.lngLat.lng, e.lngLat.lat])
+      if (decor) return
+      const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
+      if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
+      const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
+      const projet = CATALOGUE.find((p) => p.trace === trace)
+      if (projet) jeu.ouvrir({ type: 'projet', id: projet.id })
     })
+    for (const couche of ['projets-cible', 'joueur-cible']) {
+      m.on('mouseenter', couche, () => {
+        if (!decor && !useJeu.getState().brouillon) m.getCanvas().style.cursor = 'pointer'
+      })
+      m.on('mouseleave', couche, () => {
+        m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+      })
+    }
     m.on('moveend', () => eviterChevauchements(etiquettes))
     m.on('load', () => {
       pret.current = true
@@ -619,8 +633,10 @@ export function Carte({
           .map((l) => ({
             type: 'Feature',
             properties: {
+              id: l.id,
               chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin,
               couleur: couleurLigne(l.mode),
+              choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
             geometry: { type: 'LineString', coordinates: l.arrets },
           })),
@@ -658,7 +674,7 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville])
+  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
 
   // Pendant la première étape du tutoriel, la carte montre le T8.
   useEffect(() => {

@@ -68,13 +68,13 @@ export function Liste() {
               <span style={{ color: couleurLigne(l.mode) }}>
                 <Icone nom="trace" taille={20} />
               </span>
-              <span className="flex flex-1 flex-col">
-                <span className="font-extrabold">{l.nom}</span>
+              <button type="button" onClick={() => ouvrir({ type: 'ligne-joueur', id: l.id })} className="flex flex-1 flex-col text-left">
+                <span className="font-extrabold underline-offset-3 hover:underline">{l.nom}</span>
                 <span className="chiffres text-[12.5px] font-semibold text-gris">
                   {n(l.estimation.cout)} M€ · +{n(l.estimation.nouveaux)} nouveaux voyageurs par jour · ouvre en{' '}
                   {ouverture(l.mandat, l.estimation.duree)}
                 </span>
-              </span>
+              </button>
               {l.mandat === mandat ? (
                 <span className="flex flex-wrap justify-end gap-1.5">
                   {mandat === 1 ? (

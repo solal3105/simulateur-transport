@@ -15,7 +15,7 @@ import { Leviers } from '../panneaux/Leviers'
 import { Liste } from '../panneaux/Liste'
 import { Menu } from '../panneaux/Menu'
 import { Methode } from '../panneaux/Methode'
-import { MaLigne, Traceur } from '../panneaux/Traceur'
+import { FicheLigne, MaLigne, Traceur } from '../panneaux/Traceur'
 import { Bouton, Icone } from '../ui'
 import { Entete } from './Entete'
 import { BarreBas, Programme } from './Programme'
@@ -151,6 +151,7 @@ export function Partie() {
         {panneau?.type === 'liste' ? <Liste key="liste" /> : null}
         {panneau?.type === 'trace' ? <Traceur key="trace" /> : null}
         {panneau?.type === 'ligne' ? <MaLigne key="ligne" /> : null}
+        {panneau?.type === 'ligne-joueur' ? <FicheLigne key={panneau.id} id={panneau.id} /> : null}
         {panneau?.type === 'methode' ? <Methode key="methode" /> : null}
         {panneau?.type === 'budget' ? <Budget key="budget" /> : null}
         {panneau?.type === 'menu' ? <Menu key="menu" /> : null}

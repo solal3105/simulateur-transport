@@ -115,7 +115,7 @@ export function Programme() {
                 <li key={l.id} className="flex items-center gap-1 border-b border-trait">
                   <button
                     type="button"
-                    onClick={() => ouvrir(l.joueur ? { type: 'liste' } : { type: 'projet', id: l.id })}
+                    onClick={() => ouvrir(l.joueur ? { type: 'ligne-joueur', id: l.id } : { type: 'projet', id: l.id })}
                     className="flex min-w-0 flex-1 items-center gap-3 py-3 text-left"
                   >
                     <span className="grid size-8.5 shrink-0 place-items-center rounded-[10px] text-white" style={{ background: l.couleur }}>

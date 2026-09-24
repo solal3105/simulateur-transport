@@ -557,3 +557,114 @@ export function MaLigne() {
     </Panneau>
   )
 }
+
+/**
+ * La fiche d'une ligne déjà construite, ouverte d'un clic sur son tracé : ses chiffres, son profil en long,
+ * le détail de son coût, ses arrêts, et de quoi la supprimer.
+ */
+export function FicheLigne({ id }: { id: string }) {
+  const { lignes, mandat, retirer, fermer, changerPaiement, libre } = useJeu()
+  const ville = useVille()
+  const donnees = useDonnees(ville.id)
+  const l = lignes.find((x) => x.id === id)
+  const noms = useMemo(() => (donnees && l ? nommerArrets(l.arrets, donnees.lieux) : []), [donnees, l])
+  const [confirmer, setConfirmer] = useState(false)
+  if (!l) return null
+  const e = l.estimation
+  const annee = ouverture(l.mandat, e.duree)
+  // Comme un projet du catalogue, une ligne décidée au premier mandat est lancée : on ne la supprime plus au second.
+  const modifiable = l.mandat === mandat
+  const moitie = Math.round(e.cout / 2)
+  const supprimer = () => {
+    retirer(l.id)
+    fermer()
+  }
+
+  let pied: React.ReactNode
+  if (!modifiable) {
+    pied = <p className="text-sm leading-relaxed text-gris">Décidée pendant le premier mandat, cette ligne ne peut plus être supprimée.</p>
+  } else if (confirmer) {
+    pied = (
+      <div role="group" aria-labelledby="supprimer-ligne" className="flex flex-col gap-3">
+        <p id="supprimer-ligne" className="text-[14.5px] leading-relaxed">
+          Supprimer {l.nom} ? Son tracé sera effacé
+          {libre ? '.' : ` et ses ${n(l.etale && mandat === 1 ? moitie : e.cout)} M€ reviendront dans votre budget.`}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <Bouton genre="rouge" taille="petit" iconeAGauche="poubelle" onClick={supprimer}>
+            Supprimer la ligne
+          </Bouton>
+          <Bouton genre="contour" taille="petit" onClick={() => setConfirmer(false)}>
+            Garder la ligne
+          </Bouton>
+        </div>
+      </div>
+    )
+  } else {
+    pied = (
+      <div className={clsx('grid gap-2', mandat === 1 && !libre ? 'grid-cols-2' : 'grid-cols-1')}>
+        {mandat === 1 && !libre ? (
+          <Bouton genre="contour" taille="petit" onClick={() => changerPaiement(l.id, !l.etale)}>
+            {l.etale ? 'Payer en une fois' : 'Payer en deux fois'}
+          </Bouton>
+        ) : null}
+        <Bouton genre="contour" taille="petit" iconeAGauche="poubelle" onClick={() => setConfirmer(true)}>
+          Supprimer la ligne
+        </Bouton>
+      </div>
+    )
+  }
+
+  return (
+    <Panneau surtitre={<Pastille icone="trace">Votre ligne de {NOM_MODE[l.mode]}</Pastille>} titre={l.nom} pied={pied}>
+      <div className="grid grid-cols-3 gap-1.5">
+        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${l.arrets.length} stations`} />
+        <CarteChiffre
+          icone="voyageurs"
+          valeur={`~${approx(e.voyageurs)}`}
+          legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`}
+          accent
+        />
+        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
+      </div>
+      {l.etale && !libre ? (
+        <p className="text-[13.5px] leading-relaxed text-gris">
+          Payée en deux fois : {n(moitie)} M€ sur le premier mandat, {n(e.cout - moitie)} M€ sur le second.
+        </p>
+      ) : null}
+      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
+        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs sont nouveaux sur le réseau : c’est ce chiffre qui compte
+        dans votre score.
+      </p>
+      <div className="flex flex-col gap-1">
+        <Surtitre>Le relief sous la ligne</Surtitre>
+        <Profil mode={l.mode} arrets={l.arrets} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <Surtitre>Ce que coûte la ligne</Surtitre>
+        <DetailCout e={e} arrets={l.arrets.length} mode={l.mode} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <Surtitre>
+          Autour de ses {l.arrets.length} arrêts, à moins de {distanceBassin(l.mode)}
+        </Surtitre>
+        <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
+        <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
+        <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
+      </div>
+      {noms.length ? (
+        <div className="flex flex-col gap-2">
+          <Surtitre>Ses arrêts</Surtitre>
+          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
+            {noms.map((nomArret, i) => (
+              <li key={i} className="flex items-center gap-1">
+                <span className="rounded-full bg-sable px-2.5 py-1">{nomArret}</span>
+                {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+    </Panneau>
+  )
+}
