@@ -19,27 +19,29 @@ function libelleReste(reste: number, apercu: number) {
 }
 
 /**
- * Le bouton du menu de la partie, caché pendant le tutoriel et pendant le tracé d'une ligne. Sur
- * téléphone, l'icône seule laisse la place au nom de la ville et au mandat.
+ * Les deux boutons de la partie, cachés pendant le tutoriel et pendant le tracé d'une ligne : la maison
+ * ramène à l'accueil, où la partie enregistrée attend, et le menu regroupe tout le reste.
  */
-function BoutonMenu({ compact, className }: { compact?: boolean; className?: string }) {
-  const { ouvrir, ecran, brouillon, panneau } = useJeu()
+function BoutonsPartie({ className }: { className?: string }) {
+  const { ouvrir, allerAccueil, ecran, brouillon, panneau } = useJeu()
   if (ecran === 'tuto' || brouillon) return null
+  const rond = 'grid size-10 shrink-0 place-items-center rounded-full bg-white/18 transition-colors hover:bg-white/28'
   return (
-    <button
-      type="button"
-      aria-label="Menu de la partie"
-      aria-expanded={panneau?.type === 'menu'}
-      onClick={() => ouvrir({ type: 'menu' })}
-      className={clsx(
-        'flex shrink-0 items-center justify-center gap-2 rounded-full bg-white/18 font-extrabold transition-colors hover:bg-white/28',
-        compact ? 'size-10' : 'min-h-10 px-3.5 text-[13.5px]',
-        className,
-      )}
-    >
-      <Icone nom="points" taille={18} epaisseur={3.2} />
-      {compact ? null : 'Menu'}
-    </button>
+    <div className={clsx('flex shrink-0 items-center gap-2', className)}>
+      <button type="button" aria-label="Retour à l’accueil" title="Retour à l’accueil" onClick={allerAccueil} className={rond}>
+        <Icone nom="maison" taille={20} epaisseur={2.4} />
+      </button>
+      <button
+        type="button"
+        aria-label="Menu de la partie"
+        title="Menu"
+        aria-expanded={panneau?.type === 'menu'}
+        onClick={() => ouvrir({ type: 'menu' })}
+        className={rond}
+      >
+        <Icone nom="burger" taille={20} epaisseur={2.4} />
+      </button>
+    </div>
   )
 }
 
@@ -75,7 +77,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
             <span className="truncate text-[13px] font-extrabold">{etape}</span>
             <span className="chiffres shrink-0 text-xs font-semibold opacity-80">{annees}</span>
           </div>
-          <BoutonMenu compact className="-my-2 -mr-1.5" />
+          <BoutonsPartie className="-my-2 -mr-1.5" />
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="flex flex-col gap-0.5">
@@ -187,7 +189,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           </motion.div>
           <span className="text-[12.5px] font-semibold opacity-90">voyageurs gagnés par jour</span>
         </div>
-        <BoutonMenu />
+        <BoutonsPartie />
       </div>
     </header>
   )
