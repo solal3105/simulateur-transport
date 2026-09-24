@@ -21,7 +21,7 @@ Quelques règles valent partout :
 - Chaque chiffre d'une explication vient d'une source citée, ou se présente comme notre estimation.
 - On préfère, dans l'ordre, les budgets votés et les comptes, les programmes pluriannuels, les prospectus obligataires et les analyses de notation, les rapports d'orientation budgétaire, puis les rapports des chambres régionales des comptes. La presse ne sert qu'en dernier recours, et la liste des limites le signale.
 
-Lyon garde pour l'instant la règle d'origine du jeu, 2 000 M€ par mandat dont 400 M€ pour l'entretien des bus, et ses leviers d'origine, sans source : les écrans l'affichent comme la règle du jeu, et le contrôle le signale.
+Lyon garde les montants du jeu depuis sa première version, 2 000 M€ par mandat dont 400 M€ pour les bus, désormais sourcés : c'est à peu près ce que Sytral Mobilités a investi de 2021 à 2025, et ce qu'il peut investir sans s'endetter davantage. Sytral a programmé davantage pour 2026-2031, en empruntant ; le fichier de Lyon le dit, avec ce que le jeu ne compte pas, comme l'entretien du réseau existant.
 
 ## Les leviers de financement
 

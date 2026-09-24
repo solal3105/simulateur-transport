@@ -78,5 +78,5 @@ export function nomReserve(b: BudgetVille) {
         phrase: 'aux bus et aux lignes existantes',
         payes: 'une fois payés les bus et les lignes existantes',
       }
-    : { court: 'Entretien des bus', phrase: 'à l’entretien des bus', payes: 'une fois payé l’entretien des bus' }
+    : { court: 'Renouvellement des bus', phrase: 'au renouvellement des bus', payes: 'une fois payé le renouvellement des bus' }
 }

@@ -23,7 +23,7 @@ Le site s'ouvre sur http://localhost:3000. `npm run build` prépare la version d
 
 ## Les règles du jeu
 
-À Lyon, chaque mandat dispose de 2 000 M€, dont 400 M€ réservés d'office à l'entretien des bus ; ailleurs, le budget de chaque mandat vient de `lib/budgets/<réseau>.ts`. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit, sauf en jeu libre, qui n'a qu'une étape de 2026 à 2038 et pas de budget à tenir.
+Le budget de chaque mandat vient de `lib/budgets/<réseau>.ts`, avec ses sources : à Lyon, 2 000 M€ par mandat, ce que Sytral Mobilités peut investir sans s'endetter davantage, dont 400 M€ réservés d'office au renouvellement des bus. Un projet décidé au premier mandat peut être payé en une fois ou en deux, la seconde moitié étant alors prise sur le second mandat ; ce choix reste modifiable tant que le premier mandat n'est pas terminé. L'argent non dépensé au premier mandat passe au second. Les leviers de financement (tarifs, gratuité, TVA, versement mobilité) changent l'enveloppe de chaque mandat. Un mandat ne peut pas se terminer en déficit, sauf en jeu libre, qui n'a qu'une étape de 2026 à 2038 et pas de budget à tenir.
 
 À la fin de la partie, le bilan donne un lien qui contient tout le réseau, sans compte ni serveur. Qui ouvre ce lien voit le réseau se construire, peut partir de ce réseau pour sa propre partie, ou le comparer à la sienne.
 

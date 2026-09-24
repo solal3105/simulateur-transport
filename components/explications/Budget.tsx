@@ -125,15 +125,14 @@ export function ExplicationBudget({ ville }: { ville: Ville }) {
     <div className="flex flex-col gap-4">
       {source ? (
         <p className="text-[16px] leading-relaxed lg:text-[17px]">
-          De 2026 à 2038, les transports {ville.territoire} recevront environ {enLettres(total)} d’euros d’investissement. Il en reste{' '}
-          <b className="text-rouge-fonce">{enLettres(pourLignes)}</b> pour de nouvelles lignes : c’est votre budget. Le reste est déjà pris
-          par {pris.join(', ').replace(/, ([^,]*)$/, ' et $1')}.
+          De 2026 à 2038, nous comptons environ {enLettres(total)} d’euros d’investissement dans les transports {ville.territoire}. Il en
+          reste <b className="text-rouge-fonce">{enLettres(pourLignes)}</b> pour de nouvelles lignes : c’est votre budget. Le reste est déjà
+          pris par {pris.join(', ').replace(/, ([^,]*)$/, ' et $1')}.
         </p>
       ) : (
         <p className="text-[16px] leading-relaxed lg:text-[17px]">
           Le jeu vous donne {enLettres(b.total.montants[1])} d’euros à chaque mandat, dont {enLettres(b.bus.montants[1])} réservés d’office
-          à l’entretien des bus. Ces montants viennent de la première version du jeu : nous ne les avons pas encore rapprochés des comptes{' '}
-          de {b.payeur}.
+          au renouvellement des bus. Nous n’avons pas encore rapproché ces montants des comptes {de(b.payeur)}.
         </p>
       )}
       <div className="grid gap-3 lg:grid-cols-2">

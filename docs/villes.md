@@ -28,6 +28,8 @@ Le budget de chaque ville suit la méthode commune de `docs/budgets.md` : l'inve
 
 | Ville         | Mandat    | Investissement prévu | Projets décidés dessinés | Bus   | Lignes existantes | Pour le joueur |
 | ------------- | --------- | -------------------- | ------------------------ | ----- | ----------------- | -------------- |
+| Lyon          | 2026-2032 | 2 000                | 0                        | 400   | 0                 | 1 600          |
+| Lyon          | 2032-2038 | 2 000                | 0                        | 400   | 0                 | 1 600          |
 | Toulouse      | 2026-2032 | 2 600                | 1 800                    | 150   | 450               | 200            |
 | Toulouse      | 2032-2038 | 1 300                | 0                        | 200   | 450               | 650            |
 | Marseille     | 2026-2032 | 1 800                | 50                       | 400   | 650               | 700            |
