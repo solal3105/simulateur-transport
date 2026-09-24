@@ -1,7 +1,7 @@
 'use client'
 
 import { clsx } from 'clsx'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
 import { useCouleursReseau } from '../couleurs'
 import { ouvrirMessagerie } from '../explications/Ecrire'
-import { Bouton, Icone, Logo, useChoixVisible, type NomIcone } from '../ui'
+import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
 import { Devoilement } from './Devoilement'
 
 const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
@@ -25,44 +25,129 @@ const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
-type Etape = { icone: NomIcone; titre: string; texte: string }
+/** Un arrêt de la ligne du temps de l'accueil : une date du jeu, et ce qu'on y fait. */
+type Arret = { quand: string; annee: string; titre: string; texte: string }
 
-/** Ce que l'accueil dit de chaque réseau : le but, et comment on joue, en trois étapes. */
+/**
+ * Ce que l'accueil dit de chaque réseau : le but, puis la partie racontée comme une ligne de transport, du
+ * départ en 2026 au terminus en 2038, avec les deux mandats du jeu.
+ */
 function textes(ville: Ville) {
   const pourLignes = libre(ville.budget, 1) + libre(ville.budget, 2)
-  const etapes: Etape[] = [
+  const arrets: Arret[] = [
     ville.catalogue
-      ? { icone: 'liste', titre: 'Choisissez vos projets', texte: `${NOMBRE_PROJETS} projets réels, ou vos propres lignes.` }
-      : { icone: 'trace', titre: 'Tracez vos lignes', texte: 'Tram, bus rapide ou métro, là où vous voulez.' },
-    { icone: 'pieces', titre: 'Tenez le budget', texte: `${majuscule(enLettres(pourLignes))} d’euros sur deux mandats, sans déficit.` },
-    { icone: 'voyageurs', titre: 'Gagnez des voyageurs', texte: 'Votre score : les voyageurs gagnés chaque jour en 2038.' },
+      ? {
+          quand: 'Départ',
+          annee: '2026',
+          titre: 'Choisissez vos projets',
+          texte: `${NOMBRE_PROJETS} projets réels, ou vos propres lignes.`,
+        }
+      : {
+          quand: 'Départ',
+          annee: '2026',
+          titre: 'Tracez vos lignes',
+          texte: 'Tram, bus, métro ou téléphérique, où vous voulez.',
+        },
+    {
+      quand: 'Second mandat',
+      annee: '2032',
+      titre: 'Tenez le budget',
+      texte: `${majuscule(enLettres(pourLignes))} d’euros pour vos lignes, sur deux mandats.`,
+    },
+    {
+      quand: 'Terminus',
+      annee: '2038',
+      titre: 'Comptez vos voyageurs',
+      texte: 'Les voyageurs gagnés chaque jour : c’est votre score.',
+    },
   ]
   return {
-    titre: `Construisez le réseau ${ville.reseau} de 2038.`,
+    debutTitre: `Construisez le réseau ${ville.reseau}`,
     sousTitre: `Vous dirigez les transports ${ville.territoire} de 2026 à 2038.`,
-    etapes,
+    arrets,
     pourLignes,
   }
 }
 
 const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Comment on joue, en trois étapes illustrées. */
-function Etapes({ etapes }: { etapes: Etape[] }) {
+/**
+ * Comment on joue, dessiné comme le plan d'une ligne : un trait qui se trace de haut en bas, une station par
+ * étape, et le terminus plus gros, comme sur les plans de ligne.
+ */
+function Parcours({ arrets }: { arrets: Arret[] }) {
+  const reduit = useReducedMotion()
   return (
-    <motion.ol variants={cascade.parent} aria-label="Comment on joue" className="flex flex-col gap-3">
-      {etapes.map((e) => (
-        <motion.li variants={cascade.enfant} key={e.titre} className="flex items-center gap-3.5">
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white text-rouge">
-            <Icone nom={e.icone} taille={22} epaisseur={2.2} />
-          </span>
-          <span className="flex flex-col">
-            <span className="text-[16px] leading-tight font-black lg:text-[17px]">{e.titre}</span>
-            <span className="text-[14px] leading-snug font-medium opacity-90 lg:text-[15px]">{e.texte}</span>
-          </span>
-        </motion.li>
-      ))}
+    <motion.ol variants={cascade.parent} aria-label="Comment on joue" className="relative flex flex-col gap-4 pl-11">
+      <motion.span
+        aria-hidden="true"
+        initial={{ scaleY: reduit ? 1 : 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: reduit ? 0 : 0.9, ease: [0.3, 0.7, 0.2, 1], delay: 0.25 }}
+        className="absolute top-3 bottom-6 left-[13px] w-[5px] origin-top rounded-full bg-white/40"
+      />
+      {arrets.map((a, i) => {
+        const terminus = i === arrets.length - 1
+        return (
+          <motion.li variants={cascade.enfant} key={a.annee} className="relative flex flex-col gap-0.5">
+            <span
+              aria-hidden="true"
+              className={clsx(
+                'absolute top-1 rounded-full bg-white',
+                terminus
+                  ? '-left-[42px] size-[26px] shadow-[0_0_0_6px_rgba(255,255,255,0.25)]'
+                  : '-left-[38px] size-[18px] border-[4px] border-rouge shadow-[0_0_0_3px_#fff]',
+              )}
+            />
+            <span className="flex items-center gap-2 text-[12px] font-black tracking-[0.08em] uppercase opacity-85">
+              <span>{a.quand}</span>
+              <span className="chiffres rounded-full bg-white/20 px-2 py-0.5 tracking-normal">{a.annee}</span>
+            </span>
+            <span className="text-[18px] leading-tight font-black lg:text-[19px]">{a.titre}</span>
+            <span className="text-[14px] leading-snug font-medium opacity-90 lg:text-[15px]">{a.texte}</span>
+          </motion.li>
+        )
+      })}
     </motion.ol>
+  )
+}
+
+/**
+ * La fiche posée sur la carte, sur ordinateur : ce que la carte montre, et l'argent disponible pour vos
+ * lignes, avec d'où il vient.
+ */
+function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 26, delay: 0.5 }}
+      className="absolute bottom-8 left-8 hidden w-[330px] flex-col gap-4 rounded-[26px] bg-white p-6 text-encre shadow-[0_18px_50px_rgb(0_0_0/0.18)] lg:flex"
+    >
+      <div className="flex flex-col gap-2">
+        <span className="text-[12px] font-black tracking-[0.08em] text-gris uppercase">Le réseau aujourd’hui</span>
+        <span className="flex items-center gap-2.5 text-[14px] font-bold">
+          <span className="h-[5px] w-7 rounded-full bg-[#8d877e]" />
+          Métro et tram en service
+        </span>
+        {ville.catalogue ? (
+          <span className="flex items-center gap-2.5 text-[14px] font-bold">
+            <span className="h-[5px] w-7 rounded-full bg-[repeating-linear-gradient(90deg,var(--color-rouge)_0_6px,transparent_6px_10px)]" />
+            {NOMBRE_PROJETS} projets sur la table
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-1 border-t border-trait pt-4">
+        <span className="chiffres text-[34px] leading-none font-black tracking-tight text-rouge">
+          {majuscule(enLettres(pourLignes))
+            .replace(/ milliards?/, ' Md€')
+            .replace(' millions', ' M€')}
+        </span>
+        <span className="text-[14px] leading-snug font-semibold text-gris">
+          pour vos nouvelles lignes sur deux mandats, d’après les budgets publiés par {ville.budget.payeur}.
+        </span>
+      </div>
+    </motion.div>
   )
 }
 
@@ -70,6 +155,9 @@ function Etapes({ etapes }: { etapes: Etape[] }) {
  * Le choix du réseau : il change l'accueil, ses couleurs et l'adresse de la page, sans rien toucher à une
  * partie. Sur téléphone, les réseaux défilent sur une seule rangée.
  */
+/** Le nom de la ville sur le sélecteur : court et parlant, le nom du réseau est dans le titre juste dessous. */
+const NOM_COURT: Record<IdVille, string> = { lyon: 'Lyon', toulouse: 'Toulouse', marseille: 'Marseille', nice: 'Nice', idf: 'Paris' }
+
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
   const rangee = useChoixVisible<HTMLDivElement>(ville)
   return (
@@ -85,15 +173,20 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
           type="button"
           role="radio"
           aria-checked={ville === id}
+          aria-label={`${NOM_COURT[id]}, réseau ${VILLES[id].nom}`}
           onClick={() => choisir(id)}
           className={clsx(
-            'flex shrink-0 snap-start flex-col items-start rounded-2xl px-3.5 py-2 text-left transition-colors',
+            'flex min-h-11 shrink-0 snap-start items-center rounded-full px-4 text-left transition-colors',
             ville === id ? 'bg-white text-rouge' : 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] hover:bg-white/10',
           )}
         >
-          <span className="text-[14px] leading-tight font-extrabold whitespace-nowrap">{VILLES[id].nom}</span>
-          <span className={clsx('text-[11.5px] leading-tight font-semibold whitespace-nowrap', ville === id ? 'text-gris' : 'opacity-85')}>
-            {VILLES[id].lieu}
+          <span className="flex items-center gap-2 text-[15px] leading-tight font-extrabold whitespace-nowrap">
+            <span
+              aria-hidden="true"
+              className="size-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_#fff]"
+              style={{ background: VILLES[id].couleurs.principale }}
+            />
+            {NOM_COURT[id]}
           </span>
         </button>
       ))}
@@ -200,18 +293,15 @@ function BoutonDevoilement({ ouvrir }: { ouvrir: () => void }) {
       variants={cascade.enfant}
       type="button"
       onClick={ouvrir}
-      className="flex items-center gap-3.5 rounded-2xl bg-white/12 p-3.5 text-left transition-colors hover:bg-white/20"
+      className="group flex items-center gap-3 rounded-full py-1 pr-2 text-left"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/20">
-        <Icone nom="drapeau" taille={21} epaisseur={2.2} />
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition-colors group-hover:bg-white/30">
+        <Icone nom="drapeau" taille={19} epaisseur={2.2} />
       </span>
-      <span className="flex flex-1 flex-col">
-        <span className="text-[16px] leading-tight font-black">Voir tout ce que le jeu permet</span>
-        <span className="text-[13.5px] leading-snug font-semibold opacity-90">
-          Vous tracerez vos lignes, trouverez l’argent et verrez 2038 arriver.
-        </span>
+      <span className="flex-1 text-[15.5px] leading-tight font-black underline decoration-white/40 underline-offset-4 group-hover:decoration-white">
+        Voir tout ce que le jeu permet
       </span>
-      <Icone nom="fleche" taille={20} epaisseur={2.3} />
+      <Icone nom="fleche" taille={20} epaisseur={2.3} className="transition-transform group-hover:translate-x-1" />
     </motion.button>
   )
 }
@@ -330,14 +420,26 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-4">
           <ChoixVille ville={choix} choisir={setChoix} />
-          {/* Un titre long, comme celui d'Aix-Marseille-Provence, s'écrit plus petit pour tenir en quelques lignes. */}
+          {/* Un titre long, comme celui d'Aix-Marseille-Provence, s'écrit plus petit pour tenir en quelques lignes.
+              L'année s'affiche comme la girouette d'un tram : blanche, à la couleur du réseau. */}
           <h1
             className={clsx(
-              'leading-[0.95] font-black tracking-[-0.035em] text-balance lg:leading-[0.93]',
-              t.titre.length > 50 ? 'text-[36px] lg:text-[48px]' : 'text-[44px] lg:text-[58px]',
+              'leading-[1.02] font-black tracking-[-0.035em] text-balance lg:leading-[1]',
+              t.debutTitre.length > 40 ? 'text-[36px] lg:text-[46px]' : 'text-[44px] lg:text-[54px]',
             )}
           >
-            {t.titre}
+            {t.debutTitre}{' '}
+            <span className="whitespace-nowrap">
+              de{' '}
+              <motion.span
+                initial={{ rotate: -6, scale: 0.6, opacity: 0 }}
+                animate={{ rotate: -2.5, scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 14, delay: 0.35 }}
+                className="chiffres inline-block rounded-[0.16em] bg-white px-[0.14em] pb-[0.02em] text-rouge shadow-[0_0.08em_0_rgb(0_0_0/0.18)]"
+              >
+                2038
+              </motion.span>
+            </span>
           </h1>
           <p className="text-[16px] leading-snug font-semibold opacity-95 lg:text-[17px]">{t.sousTitre}</p>
         </motion.div>
@@ -349,12 +451,13 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
           className="relative min-h-[190px] flex-1 overflow-hidden rounded-[20px] bg-sable lg:fixed lg:inset-y-0 lg:right-0 lg:left-[640px] lg:h-auto lg:rounded-none"
         >
           <Carte key={choix} marges={MARGES} decor ville={choix} partie={RESEAU_ACTUEL} />
-          <span className="absolute top-2.5 left-2.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-extrabold text-encre shadow-flotte lg:top-6 lg:left-6 lg:px-3 lg:py-1.5 lg:text-[13px]">
+          <span className="absolute top-2.5 left-2.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-extrabold text-encre shadow-flotte lg:hidden">
             Le réseau aujourd’hui
           </span>
+          <FicheCarte key={`fiche-${choix}`} ville={ville} pourLignes={t.pourLignes} />
         </div>
 
-        <Etapes key={choix} etapes={t.etapes} />
+        <Parcours key={choix} arrets={t.arrets} />
 
         <BoutonDevoilement ouvrir={() => setDevoilement(true)} />
 
