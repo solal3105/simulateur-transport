@@ -36,3 +36,16 @@ export function metadonneesMethode(id: IdVille): Metadata {
     twitter: { card: 'summary_large_image', title: titre, description },
   }
 }
+
+/** Le titre et la description des réseaux publiés d'un réseau. */
+export function metadonneesCommunaute(id: IdVille): Metadata {
+  const ville = VILLES[id]
+  const titre = `Les réseaux imaginés pour ${ville.nom} | Simulateur transport`
+  const description = `Les réseaux de transport construits par les joueurs ${ville.ou}, avec le vrai budget ou en jeu libre : soutenez-les, comparez-les au vôtre, reprenez-les pour votre partie.`
+  return {
+    title: titre,
+    description,
+    openGraph: { title: titre, description, locale: 'fr_FR' },
+    twitter: { card: 'summary_large_image', title: titre, description },
+  }
+}

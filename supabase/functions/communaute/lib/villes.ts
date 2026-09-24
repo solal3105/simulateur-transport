@@ -376,5 +376,5 @@ export const adresseMethode = (ville: IdVille) => (VILLES[ville].chemin ? `/${VI
 export const cssCouleurs = (c: Couleurs) =>
   `:root{--color-rouge:${c.principale};--color-rouge-fonce:${c.fonce};--color-rouge-pale:${c.pale};--color-rouge-moyen:${c.moyen}}`
 
-/** L'adresse des réseaux publiés d'une ville. */
-export const adresseReseaux = (ville: IdVille) => (ville === 'lyon' ? '/communaute' : `/communaute?ville=${ville}`)
+/** L'adresse des réseaux publiés d'un réseau, rangée comme sa page de méthode : /toulouse/communaute. */
+export const adresseReseaux = (ville: IdVille) => (VILLES[ville].chemin ? `/${VILLES[ville].chemin}/communaute` : '/communaute')

@@ -10,6 +10,7 @@ import { libre } from '@/lib/budget'
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { enLettres } from '@/lib/format'
+import { NOM_COURT } from '@/lib/noms'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
@@ -155,9 +156,6 @@ function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number })
  * Le choix du réseau : il change l'accueil, ses couleurs et l'adresse de la page, sans rien toucher à une
  * partie. Sur téléphone, les réseaux défilent sur une seule rangée.
  */
-/** Le nom de la ville sur le sélecteur : court et parlant, le nom du réseau est dans le titre juste dessous. */
-const NOM_COURT: Record<IdVille, string> = { lyon: 'Lyon', toulouse: 'Toulouse', marseille: 'Marseille', nice: 'Nice', idf: 'Paris' }
-
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
   const rangee = useChoixVisible<HTMLDivElement>(ville)
   return (
@@ -413,9 +411,20 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         animate="show"
         className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col gap-6 px-6 pt-5 pb-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[640px] lg:gap-6 lg:overflow-y-auto lg:rounded-r-[36px] lg:bg-rouge lg:px-14 lg:pt-8 lg:pb-7"
       >
-        <motion.div variants={cascade.enfant} className="flex items-center gap-2.5">
-          <Logo taille={36} inverse />
-          <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
+        <motion.div variants={cascade.enfant} className="flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2.5">
+            <Logo taille={36} inverse />
+            <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
+          </span>
+          {communauteActive ? (
+            <Link
+              href={adresseReseaux(choix)}
+              className="flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-white/18 px-3.5 text-[13.5px] font-extrabold transition-colors hover:bg-white/28"
+            >
+              <Icone nom="voyageurs" taille={16} epaisseur={2.4} />
+              Réseaux publiés
+            </Link>
+          ) : null}
         </motion.div>
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-4">
