@@ -4,8 +4,9 @@ Le coût d'une ligne additionne quatre parts, calculées dans `lib/couts.ts` à 
 
 - la voie, au kilomètre de tracé, matériel roulant et dépôt compris ;
 - chaque station ;
-- un tunnel ou une tranchée couverte là où le terrain monte plus vite que le mode ne sait gravir ;
-- un pont pour chaque grand cours d'eau franchi en tram ou en bus, et, pour le métro, le surcoût des stations creusées au-delà de 25 m sous une colline.
+- un tunnel ou une tranchée couverte là où le terrain monte plus vite que le mode ne sait gravir, avec des stations souterraines quand le tram ou le bus passe sous la colline ;
+- un pont pour chaque grand cours d'eau franchi en tram ou en bus, un passage dessous pour le métro ;
+- pour le métro, le tunnel creusé à plus de 30 m sous une colline et les stations creusées au-delà de 25 m.
 
 Le tout est multiplié par un coefficient propre au réseau, parce qu'on ne construit pas au même prix partout.
 
@@ -13,16 +14,18 @@ Le tout est multiplié par un coefficient propre au réseau, parce qu'on ne cons
 
 En millions d'euros 2025, pour une ville moyenne :
 
-| Mode | Voie par km | Station | Tunnel en plus, par km | Pont sur un grand fleuve | Station profonde, par mètre au-delà de 25 m |
+| Mode | Voie par km | Station | Tunnel en plus, par km | Fleuve | Station sous la colline |
 | --- | --- | --- | --- | --- | --- |
-| Tram | 33 | 1 | 100 | 20 | |
-| Bus à haut niveau de service | 14 | 0,4 | 80 | 15 | |
-| Métro automatique | 90 | 50 | | | 2 |
+| Tram | 33 | 1 | 100 (pente au-delà de 8 %) | 20 (pont) | 30 par station souterraine |
+| Bus à haut niveau de service | 14 | 0,4 | 80 (pente au-delà de 10 %) | 15 (pont) | 25 par station souterraine |
+| Métro automatique | 90 | 50 | 150 (tunnel à plus de 30 m) | 30 (passage dessous) | 5 par mètre au-delà de 25 m |
 | Téléphérique | 10 | 9 | | | |
 
 Les coefficients des réseaux : Lyon 1,2, Tisséo 1, Aix-Marseille-Provence 1,4, Lignes d'Azur 1,45, Île-de-France 1,85. Ils viennent du coût au kilomètre des trams récents (Lyon 39 à 46 M€, Nice 51, Marseille 56, Île-de-France 54 à 78, contre 35 dans les villes moyennes) et des métros (196 à 295 M€ par km en Île-de-France, 113 à 125 à Rennes et à Toulouse).
 
-Les pentes maximales sans ouvrage : 8 % pour le tram (référentiel du Cerema, 2018), 8 % pour un métro automatique sur pneus (VAL), 10 % pour le bus (notre estimation, aucune source ne la fixe). Le téléphérique ne craint pas la pente. Les grands cours d'eau sont le Rhône, la Saône, la Garonne, la Seine, la Marne, l'Oise, le Var et la Durance ; les petites rivières se franchissent sans ouvrage notable.
+Les pentes maximales sans ouvrage : 8 % pour le tram (référentiel du Cerema, 2018), 10 % pour un métro sur pneus (le Sytral étudiait 10 à 12 % pour la ligne E), 10 % pour le bus (notre estimation, aucune source ne la fixe). Le tram et le bus suivent le terrain tant que leur pente le permet et passent dessous sinon ; le tunnel du métro reste au plus près de la surface que sa pente permet, avec 12 m de couverture.
+
+Les surcoûts du métro sous une colline sont nos estimations, calées sur la seule référence française, la ligne E de Lyon, estimée de 270 à 360 M€ 2025 par km : un tracé proche, d'Alaï à Bellecour sous Fourvière, revient à 254 M€ par km dans le jeu. Le téléphérique ne craint pas la pente. Les grands cours d'eau sont le Rhône, la Saône, la Garonne, la Seine, la Marne, l'Oise, le Var et la Durance ; les petites rivières se franchissent sans ouvrage notable.
 
 ## D'où viennent ces prix
 
@@ -44,4 +47,5 @@ Quelques repères :
 - Aucune source officielle ne donne le coût d'une station de bus, d'une gare de téléphérique ou d'une gare aérienne de métro, ni la façon dont le coût d'une station varie avec la profondeur, en dehors du repère d'Oullins.
 - Les coûts des ponts de tram ne viennent que de la presse.
 - Le métro B à Saint-Genis-Laval n'a pas de source primaire.
-- Le tunnel d'un bus et sa pente maximale sont nos estimations.
+- Le tunnel d'un bus et sa pente maximale sont nos estimations, comme le coût d'une station de tram ou de bus souterraine, tiré d'une seule note de consultant (30 à 60 M€).
+- Les surcoûts du métro sous une colline reposent sur une seule estimation, celle de la ligne E.

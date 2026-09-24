@@ -25,6 +25,8 @@ import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
+import { imageRelief } from './relief'
+
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
 if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
 
@@ -91,9 +93,12 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       .filter((a) => a[2] === 1)
       .map((a) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
   }
+  // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
+  const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
   return {
     version: 8,
     sources: {
+      ...(relief ? { relief: { type: 'image' as const, url: relief.url, coordinates: relief.coordinates } } : {}),
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
@@ -156,6 +161,17 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         filter: genre('rail'),
         paint: { 'line-color': COULEURS.rail, 'line-width': largeur(1), 'line-dasharray': [4, 2] },
       },
+      ...(relief
+        ? [
+            {
+              id: 'relief',
+              type: 'raster' as const,
+              source: 'relief',
+              layout: { visibility: 'none' as const },
+              paint: { 'raster-opacity': 0.9, 'raster-resampling': 'linear' as const },
+            },
+          ]
+        : []),
       {
         id: 'densite',
         type: 'fill',
@@ -593,6 +609,7 @@ export function Carte({
       for (const el of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
       requestAnimationFrame(() => eviterChevauchements(etiquettes))
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
+      if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace ? 'visible' : 'none')
       m.getCanvas().style.cursor = trace ? 'crosshair' : ''
 
       const joueur: FeatureCollection<LineString> = {

@@ -61,32 +61,49 @@ export function altitude(t: Terrain, lon: number, lat: number): number {
 }
 
 /** La pente maximale que chaque mode peut suivre sans ouvrage, en mètres par mètre. */
-// Tram : 8 % au plus selon le référentiel du Cerema (2018). Métro automatique sur pneus : 8 % pour le VAL.
-// Bus : aucune limite publiée, 10 % est notre estimation. Le téléphérique ne craint pas la pente.
-export const PENTE_MAX: Record<ModeLigne, number> = { tram: 0.08, bus: 0.1, metro: 0.08, cable: Infinity }
+// Tram : 8 % au plus selon le référentiel du Cerema (2018). Métro sur pneus : 10 %, comme le Sytral l'étudiait
+// pour la ligne E (10 à 12 %). Bus : aucune limite publiée, 10 % est notre estimation. Le téléphérique ne
+// craint pas la pente.
+export const PENTE_MAX: Record<ModeLigne, number> = { tram: 0.08, bus: 0.1, metro: 0.1, cable: Infinity }
 
 /** Pas d'échantillonnage du profil en long, en mètres. */
 const PAS_PROFIL = 25
 /** Écart au terrain au-delà duquel la voie ne suit plus le sol : tranchée couverte, tunnel ou viaduc. */
-const ECART_OUVRAGE = 6
+export const ECART_OUVRAGE = 6
 /** Couverture minimale au-dessus d'un tunnel de métro, en mètres. */
 const COUVERTURE = 12
+/** Au-delà de cette profondeur, un tunnel de métro demande des puits d'accès et de secours plus hauts, en roche. */
+export const TUNNEL_PROFOND = 30
+
+/** Un point du profil en long : distance depuis le départ, terrain et voie, en mètres. */
+export interface PointProfil {
+  s: number
+  z: number
+  voie: number
+}
 
 export interface Relief {
-  /** Longueur, en km, où un tram ou un bus ne peut pas suivre le terrain. */
+  /**
+   * Longueur, en km, où un tram ou un bus ne peut pas suivre le terrain, ou où le tunnel d'un métro passe
+   * à plus de 30 m sous le sol.
+   */
   kmOuvrage: number
-  /** Profondeur de chaque station de métro sous le sol, en mètres. */
+  /** Profondeur de chaque station sous le sol, en mètres : un tram ou un bus en tunnel a des stations souterraines. */
   profondeurs: number[]
   /** Plus forte montée ou descente du terrain sur 200 m, en pourcentage. */
   penteTerrain: number
   /** Dénivelé entre le point le plus bas et le plus haut de la ligne, en mètres. */
   denivele: number
+  /** Le profil en long, allégé pour être dessiné. */
+  profil: PointProfil[]
+  /** Le terrain et la voie à chaque station. */
+  stations: PointProfil[]
 }
 
 /**
- * Le profil en long d'une ligne et ce qu'il demande. On cherche la voie la plus proche du terrain qui
- * respecte la pente maximale du mode : pour le tram et le bus, les endroits où elle s'en écarte de plus de
- * quelques mètres demandent un ouvrage ; pour le métro, la voie passe sous le terrain, et une station sous
+ * Le profil en long d'une ligne et ce qu'il demande. On cherche la voie la plus haute qui reste sous le
+ * terrain en respectant la pente maximale du mode : pour le tram et le bus, les endroits où elle passe à plus
+ * de quelques mètres sous le sol demandent une tranchée ou un tunnel ; pour le métro, la voie passe sous le terrain, et une station sous
  * une colline se retrouve plus profonde.
  */
 export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], mx: number): Relief {
@@ -117,32 +134,41 @@ export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], 
     if (d >= 150) penteTerrain = Math.max(penteTerrain, Math.abs(points[j]!.z - points[i]!.z) / d)
   }
   const g = PENTE_MAX[mode]
-  // Les deux enveloppes de pente g autour du terrain : la plus haute sous lui, la plus basse au-dessus.
+  // La voie de pente g la plus haute qui reste sous le terrain.
   const dessous = zs.slice()
-  const dessus = zs.slice()
   for (let i = 1; i < points.length; i += 1) {
     const d = points[i]!.s - points[i - 1]!.s
     dessous[i] = Math.min(dessous[i]!, dessous[i - 1]! + g * d)
-    dessus[i] = Math.max(dessus[i]!, dessus[i - 1]! - g * d)
   }
   for (let i = points.length - 2; i >= 0; i -= 1) {
     const d = points[i + 1]!.s - points[i]!.s
     dessous[i] = Math.min(dessous[i]!, dessous[i + 1]! + g * d)
-    dessus[i] = Math.max(dessus[i]!, dessus[i + 1]! - g * d)
   }
   let kmOuvrage = 0
   const profondeurs: number[] = []
+  const voies: number[] = []
+  const stations: PointProfil[] = []
   for (let i = 0; i < points.length; i += 1) {
     const p = points[i]!
+    const ds = i > 0 ? (p.s - points[i - 1]!.s) / 1000 : 0
+    // Le tram et le bus suivent le terrain tant que leur pente le permet, et passent dessous, en tranchée ou en
+    // tunnel, quand il monte trop vite : la voie la plus haute qui reste sous le sol. Le tunnel du métro passe
+    // au plus près de la surface que sa pente permet ; le câble passe au-dessus.
+    const voie = mode === 'metro' ? dessous[i]! - COUVERTURE : mode === 'cable' ? p.z : dessous[i]!
+    voies.push(voie)
+    if (p.station) profondeurs.push(p.z - voie)
     if (mode === 'metro') {
-      // Le tunnel passe au plus près de la surface que sa pente permet.
-      if (p.station) profondeurs.push(p.z - (dessous[i]! - COUVERTURE))
-    } else if (mode !== 'cable' && i > 0) {
-      const voie = (dessous[i]! + dessus[i]!) / 2
-      if (Math.abs(p.z - voie) > ECART_OUVRAGE) kmOuvrage += (p.s - points[i - 1]!.s) / 1000
-    }
+      if (p.z - voie > TUNNEL_PROFOND) kmOuvrage += ds
+    } else if (mode !== 'cable' && Math.abs(p.z - voie) > ECART_OUVRAGE) kmOuvrage += ds
+    if (p.station) stations.push({ s: p.s, z: p.z, voie })
   }
-  return { kmOuvrage, profondeurs, penteTerrain: Math.round(penteTerrain * 1000) / 10, denivele: Math.round(denivele) }
+  // Un point tous les 50 m environ suffit pour dessiner le profil, en gardant les stations.
+  const pas = Math.max(1, Math.round(points.length / 200))
+  const profil = points
+    .map((p, i) => ({ s: p.s, z: p.z, voie: voies[i]!, garder: p.station || i % pas === 0 }))
+    .filter((p) => p.garder)
+    .map(({ s, z, voie }) => ({ s, z, voie }))
+  return { kmOuvrage, profondeurs, penteTerrain: Math.round(penteTerrain * 1000) / 10, denivele: Math.round(denivele), profil, stations }
 }
 
 function secantes(a: [number, number], b: [number, number], c: [number, number], d: [number, number]) {
