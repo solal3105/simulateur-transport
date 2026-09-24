@@ -10,3 +10,13 @@ export const signe = (v: number) => (v > 0 ? `+${n(v)}` : v < 0 ? `-${n(-v)}` : 
 
 /** « de Camille », mais « d’Inès » : la préposition devant un nom, avec l'élision du français. */
 export const de = (nom: string) => (/^[aeiouyàâäéèêëîïôöûüœ]/i.test(nom) ? `d’${nom}` : `de ${nom}`)
+
+/**
+ * Un montant en millions d'euros, en toutes lettres : 850 donne « 850 millions », 4 000 « 4 milliards »,
+ * 1 450 « 1,5 milliard ». Le pluriel de milliard commence à 2.
+ */
+export function enLettres(v: number) {
+  if (v < 1000) return `${n(v)} millions`
+  const x = Math.round(v / 100) / 10
+  return `${x.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} ${x >= 2 ? 'milliards' : 'milliard'}`
+}

@@ -4,9 +4,11 @@
 @theme {
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 
-  --color-rouge: #e3051b;
-  --color-rouge-fonce: #b5000f;
-  --color-rouge-pale: #fdebed;
+  /* La couleur du réseau joué : le rouge TCL par défaut, remplacé par celle de chaque réseau (lib/villes.ts). */
+  --color-rouge: #e30613;
+  --color-rouge-fonce: #b40014;
+  --color-rouge-pale: #fce9ea;
+  --color-rouge-moyen: #f18289;
   --color-encre: #1b1b1f;
   --color-gris: #55555d;
   --color-muet: #85858e;

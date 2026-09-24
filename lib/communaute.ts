@@ -31,6 +31,8 @@ export interface ReseauPublie {
   intention: string | null
   visibilite: 'publique' | 'lien'
   partie: PartieCompacte
+  /** Fait en jeu libre, sans budget à tenir : listé à part et marqué comme tel. */
+  libre: boolean
   voyageurs: number
   investi: number
   retenus: number
@@ -44,7 +46,7 @@ export interface ReseauPublie {
 }
 
 const COLONNES =
-  'id,titre,intention,visibilite,partie,voyageurs,investi,retenus,lignes,modes,soutiens,reprises,cree_le,inspire_de,auteur:profils(id,pseudo)'
+  'id,titre,intention,visibilite,partie,libre,voyageurs,investi,retenus,lignes,modes,soutiens,reprises,cree_le,inspire_de,auteur:profils(id,pseudo)'
 
 // Stockage local : il peut être indisponible (navigation privée, cookies bloqués), et le jeu doit tenir sans lui.
 function lireLocal<T>(nom: string, defaut: T): T {
@@ -97,9 +99,12 @@ async function appeler<T>(action: string, donnees: Record<string, unknown> = {})
   return corps as T
 }
 
-export function listerReseaux(tri: Tri, ville: IdVille = 'lyon', limite = 30) {
+/** Les réseaux publiés d'une ville : ceux qui tiennent le budget, ou ceux du jeu libre, jamais mêlés. */
+export function listerReseaux(tri: Tri, ville: IdVille = 'lyon', libre = false, limite = 30) {
   const ordre = tri === 'populaires' ? 'soutiens.desc,cree_le.desc' : 'cree_le.desc'
-  return lire<ReseauPublie[]>(`reseaux?select=${COLONNES}&ville=eq.${ville}&visibilite=eq.publique&order=${ordre}&limit=${limite}`)
+  return lire<ReseauPublie[]>(
+    `reseaux?select=${COLONNES}&ville=eq.${ville}&libre=eq.${libre}&visibilite=eq.publique&order=${ordre}&limit=${limite}`,
+  )
 }
 
 export function reseauxDe(profil: string) {

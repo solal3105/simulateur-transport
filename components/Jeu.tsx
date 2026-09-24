@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
+import { aAcces } from '@/lib/acces'
 import { decoderPartie, type PartiePartagee } from '@/lib/lien'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, VILLES, type IdVille } from '@/lib/villes'
@@ -41,7 +42,12 @@ export function Jeu({ ville }: { ville?: IdVille }) {
     // Un lien de partage (#r=…) affiche le réseau reçu, sans toucher à la partie en cours.
     const code = new URLSearchParams(window.location.hash.slice(1)).get('r')
     const lecture = code ? decoderPartie(code).then(setPartage) : Promise.resolve()
-    Promise.all([Promise.resolve(useJeu.persist.rehydrate()), lecture]).then(() => setPret(true))
+    Promise.all([Promise.resolve(useJeu.persist.rehydrate()), lecture]).then(() => {
+      // Sans l'accès anticipé, une partie enregistrée ne s'ouvre pas : l'accueil passe devant, et demande
+      // le mot de passe avant de la reprendre.
+      if (!aAcces() && useJeu.getState().ecran !== 'accueil') useJeu.getState().allerAccueil()
+      setPret(true)
+    })
   }, [])
 
   useEffect(() => {

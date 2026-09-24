@@ -16,7 +16,7 @@ Des habitantes et habitants de la Métropole de Lyon, sans expertise en transpor
 
 ## Product Purpose
 
-Le simulateur transforme l'arbitrage budgétaire des transports lyonnais en un jeu jouable en quelques minutes. On dispose de deux mandats, 2026-2032 et 2032-2038, d'environ 2 000 M€ de capacité d'investissement par mandat, d'un catalogue de projets réels avec leur coût et leur gain de fréquentation, et de leviers de financement qui font bouger cette enveloppe. Le joueur réussit quand il comprend, en le vivant, qu'on ne peut pas tout financer, et que chaque choix de tarif ou de gratuité se paie en kilomètres de ligne non construits.
+Le simulateur transforme l'arbitrage budgétaire des transports lyonnais en un jeu jouable en quelques minutes. On dispose de deux mandats, 2026-2032 et 2032-2038, de 1 940 M€ d'investissement disponible par mandat, d'un catalogue de projets réels avec leur coût et leur gain de fréquentation, et de leviers de financement qui font bouger cette enveloppe. Le joueur réussit quand il comprend, en le vivant, qu'on ne peut pas tout financer, et que chaque choix de tarif ou de gratuité se paie en kilomètres de ligne non construits.
 
 ## Positioning
 

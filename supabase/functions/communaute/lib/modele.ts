@@ -1,4 +1,5 @@
 // Copie de lib/modele.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
+import { FORMULE } from './formule.ts'
 import type { Estimation, ModeLigne } from './types.ts'
 import type { IdVille, Ville } from './villes.ts'
 
@@ -11,36 +12,31 @@ import type { IdVille, Ville } from './villes.ts'
  * Saint-Genis-Laval (157 à 163) et ligne C de Toulouse (117 à 127) ; téléphérique, Téléo à
  * Toulouse et Câble C1 à Créteil (27 à 31).
  *
- * La fréquentation suit une formule calée sur les onze lignes de métro et de tram de Lyon
- * (fréquentation 2023, ramenée à un jour de semaine en divisant par 265) :
- *
- *   voyageurs par jour = exp(A) × (habitants + 0,3 × emplois) ^ B
- *
- * où habitants et emplois sont comptés à moins de 400 m d'un arrêt (600 m pour le métro),
- * A vaut -8,03 et B 1,678. En validation croisée, l'écart moyen est de 18 % et le pire de 39 %. La formule surestime
- * les lignes de rocade : elle donne environ 109 000 voyageurs pour le T6 complet, là où Sytral
- * Mobilités en prévoit 55 000. Les facteurs du bus et du téléphérique sont des hypothèses,
- * faute de ligne de ce type dans le calage. Pour le téléphérique Téléo de Toulouse, qui transporte
- * 5 800 voyageurs par jour, la formule en prévoit moins de 300 : ses voyageurs viennent des
- * correspondances et des équipements desservis.
- *
- * Ailleurs qu'à Lyon, la constante A est recalée sur les lignes locales (lib/villes.ts et
- * docs/villes.md). Elle voyage avec les carreaux préparés, comme la latitude qui sert aux distances.
+ * La fréquentation suit la formule retenue par le moteur de fréquentation (scripts/modele/moteur.py,
+ * docs/modele.md), écrite dans lib/formule.ts : elle a été choisie parmi des milliers d'autres, calées
+ * sur plus d'une centaine de lignes de métro, de tram et de bus d'une vingtaine de villes françaises,
+ * et jugées sur des lignes et des villes absentes de leur calage. Ce module ne fait que la calculer :
+ * les coefficients, les distances et la constante de chaque ville viennent tous de lib/formule.ts.
  */
-const B = 1.678
-const POIDS_EMPLOI = 0.3
-
 export const PRIX_KM: Record<ModeLigne, number> = { tram: 34, bus: 15, metro: 150, cable: 30 }
 export const DUREE_CHANTIER: Record<ModeLigne, number> = { tram: 5, bus: 3, metro: 8, cable: 4 }
-const RAYON: Record<ModeLigne, number> = { tram: 400, bus: 400, metro: 600, cable: 400 }
 /** Les rues ne sont pas droites : un tracé réel est plus long que la somme des segments. */
 const DETOUR: Record<ModeLigne, number> = { tram: 1.12, bus: 1.12, metro: 1.05, cable: 1 }
-const FACTEUR: Record<ModeLigne, number> = { tram: 1, metro: 1, bus: 0.7, cable: 0.6 }
-/** Distance en deçà de laquelle un habitant est considéré comme déjà desservi. */
+/** Distance en deçà de laquelle un habitant est considéré comme déjà desservi, et où se mesure la concurrence. */
 const DEJA_DESSERVI = 400
+/** Poids d'un emploi dans la mesure de la concurrence, comme dans le moteur. */
+const POIDS_EMPLOI_CONCURRENCE = 0.3
+/** Jusqu'où compte la couronne du bassin, et le bassin large. */
+const COURONNE = 1000
+const LARGE = 2000
+/** Rayon du centre-ville, pour la part des arrêts au centre. */
+const CENTRE = 1500
 
-/** Fourchette affichée, d'après les écarts constatés sur les lignes existantes. */
-export const FOURCHETTE = { bas: 0.7, haut: 1.4 }
+/** Fourchette affichée : le réel se situe dans cet intervalle pour huit lignes sur dix du calage. */
+export const FOURCHETTE = FORMULE.fourchette
+
+/** La distance autour d'un arrêt où la formule compte les habitants et les emplois. */
+export const rayonBassin = (mode: ModeLigne) => (mode === 'metro' ? FORMULE.rayonMetro : FORMULE.rayonAutres)
 
 const MY = 111320
 /** Mètres par degré de longitude à une latitude donnée. */
@@ -54,14 +50,16 @@ export interface Carreaux {
   index: Map<string, number[]>
   /** Mètres par degré de longitude à la latitude de la ville. */
   mx: number
-  /** Constante A de la formule, recalée pour la ville. */
+  /** Constante de la formule pour la ville (lib/formule.ts). */
   constante: number
+  /** Le centre de la ville, [lon, lat], d'où se mesure la distance au centre. */
+  centre: [number, number]
   ville: IdVille
 }
 
 const TUILE = 500
 
-export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pick<Ville, 'id' | 'latitude' | 'constante'>): Carreaux {
+export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pick<Ville, 'id' | 'latitude' | 'centre'>): Carreaux {
   const mx = metresParDegre(ville.latitude)
   const metres = distance(mx)
   const cle = (lon: number, lat: number) => `${Math.floor((lon * mx) / TUILE)}:${Math.floor((lat * MY) / TUILE)}`
@@ -95,7 +93,7 @@ export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pi
     l.push(i)
     index.set(k, l)
   })
-  return { cellules, index, mx, constante: ville.constante, ville: ville.id }
+  return { cellules, index, mx, constante: FORMULE.constantes[ville.id], centre: ville.centre, ville: ville.id }
 }
 
 export function longueurKm(arrets: [number, number][], mode: ModeLigne, mx: number) {
@@ -110,35 +108,71 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
   const metres = distance(mx)
   const km = longueurKm(arrets, mode, mx)
   const cout = Math.round(km * PRIX_KM[mode])
-  const r = RAYON[mode]
-  const pas = Math.ceil(r / TUILE)
-  const vus = new Set<number>()
-  let habitants = 0
-  let emplois = 0
-  let habitantsNonDesservis = 0
-  let poidsNouveau = 0
+  const c = FORMULE.coefficients
+  const r = rayonBassin(mode)
+  const w = FORMULE.poidsEmplois
+  // Pour chaque carreau à portée de la ligne, la distance à l'arrêt le plus proche.
+  const portee = Math.max(r, FORMULE.poidsCouronne ? COURONNE : 0, DEJA_DESSERVI, c.bassinLarge ? LARGE : 0)
+  const pas = Math.ceil(portee / TUILE)
+  const proches = new Map<number, number>()
   for (const a of arrets) {
     const tx = Math.floor((a[0] * mx) / TUILE)
     const ty = Math.floor((a[1] * MY) / TUILE)
     for (let dx = -pas; dx <= pas; dx += 1) {
       for (let dy = -pas; dy <= pas; dy += 1) {
         for (const i of carreaux.index.get(`${tx + dx}:${ty + dy}`) ?? []) {
-          if (vus.has(i)) continue
-          const c = carreaux.cellules[i]!
-          if (metres([c[0]!, c[1]!], a) > r) continue
-          vus.add(i)
-          habitants += c[2]!
-          emplois += c[3]!
-          if (!c[4]) {
-            habitantsNonDesservis += c[2]!
-            poidsNouveau += c[2]! + POIDS_EMPLOI * c[3]!
-          }
+          const cel = carreaux.cellules[i]!
+          const d = metres([cel[0]!, cel[1]!], a)
+          if (d > portee) continue
+          const avant = proches.get(i)
+          if (avant === undefined || d < avant) proches.set(i, d)
         }
       }
     }
   }
-  const poids = habitants + POIDS_EMPLOI * emplois
-  const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(carreaux.constante) * poids ** B * FACTEUR[mode] : 0
+  let habitants = 0
+  let emplois = 0
+  let habitantsNonDesservis = 0
+  let poidsNouveau = 0
+  let loin = 0
+  let large = 0
+  let autour = 0
+  let dejaServi = 0
+  for (const [i, d] of proches) {
+    const cel = carreaux.cellules[i]!
+    const hab = cel[2]!
+    const emp = cel[3]!
+    const deja = cel[4]!
+    if (d <= r) {
+      habitants += hab
+      emplois += emp
+      if (!deja) {
+        habitantsNonDesservis += hab
+        poidsNouveau += hab + w * emp
+      }
+    }
+    if (d <= COURONNE) loin += hab + w * emp
+    if (d <= LARGE) large += hab + w * emp
+    if (d <= DEJA_DESSERVI) {
+      autour += hab + POIDS_EMPLOI_CONCURRENCE * emp
+      if (deja) dejaServi += hab + POIDS_EMPLOI_CONCURRENCE * emp
+    }
+  }
+  const poids = habitants + w * emplois
+  const auCentre = arrets.map((a) => metres(a, carreaux.centre))
+  const variables = {
+    bassin: Math.log1p(poids + FORMULE.poidsCouronne * Math.max(0, loin - poids)),
+    stations: Math.log(Math.max(1, arrets.length)),
+    longueur: Math.log(Math.max(0.5, km / DETOUR[mode])),
+    distanceCentre: Math.log1p(Math.min(...auCentre) / 1000),
+    partCentre: auCentre.filter((d) => d < CENTRE).length / Math.max(1, arrets.length),
+    concurrence: autour > 0 ? dejaServi / autour : 0,
+    bassinLarge: Math.log1p(large),
+  }
+  // À Paris, le métro compte ses voyageurs aux entrées, sans les correspondances : on estime pareil.
+  let exposant = carreaux.constante + FORMULE.modes[mode] + (FORMULE.ajustements[carreaux.ville]?.[mode] ?? 0)
+  for (const [nom, coefficient] of Object.entries(c) as [keyof typeof variables, number][]) exposant += coefficient * variables[nom]
+  const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(exposant) : 0
   const nouveaux = poids > 0 ? voyageurs * (poidsNouveau / poids) : 0
   return {
     km,

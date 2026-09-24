@@ -1,0 +1,6341 @@
+{
+ "autorite": "Île-de-France Mobilités",
+ "source": "geo.api.gouv.fr, communes des huit départements d’Île-de-France, consulté le 24 septembre 2026",
+ "communes": [
+  {
+   "code": "75056",
+   "nom": "Paris",
+   "departement": "75"
+  },
+  {
+   "code": "77001",
+   "nom": "Achères-la-Forêt",
+   "departement": "77"
+  },
+  {
+   "code": "77002",
+   "nom": "Amillis",
+   "departement": "77"
+  },
+  {
+   "code": "77003",
+   "nom": "Amponville",
+   "departement": "77"
+  },
+  {
+   "code": "77004",
+   "nom": "Andrezel",
+   "departement": "77"
+  },
+  {
+   "code": "77005",
+   "nom": "Annet-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77006",
+   "nom": "Arbonne-la-Forêt",
+   "departement": "77"
+  },
+  {
+   "code": "77007",
+   "nom": "Argentières",
+   "departement": "77"
+  },
+  {
+   "code": "77008",
+   "nom": "Armentières-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77009",
+   "nom": "Arville",
+   "departement": "77"
+  },
+  {
+   "code": "77010",
+   "nom": "Aubepierre-Ozouer-le-Repos",
+   "departement": "77"
+  },
+  {
+   "code": "77011",
+   "nom": "Aufferville",
+   "departement": "77"
+  },
+  {
+   "code": "77012",
+   "nom": "Augers-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77013",
+   "nom": "Aulnoy",
+   "departement": "77"
+  },
+  {
+   "code": "77014",
+   "nom": "Avon",
+   "departement": "77"
+  },
+  {
+   "code": "77015",
+   "nom": "Baby",
+   "departement": "77"
+  },
+  {
+   "code": "77016",
+   "nom": "Bagneaux-sur-Loing",
+   "departement": "77"
+  },
+  {
+   "code": "77018",
+   "nom": "Bailly-Romainvilliers",
+   "departement": "77"
+  },
+  {
+   "code": "77019",
+   "nom": "Balloy",
+   "departement": "77"
+  },
+  {
+   "code": "77020",
+   "nom": "Bannost-Villegagnon",
+   "departement": "77"
+  },
+  {
+   "code": "77021",
+   "nom": "Barbey",
+   "departement": "77"
+  },
+  {
+   "code": "77022",
+   "nom": "Barbizon",
+   "departement": "77"
+  },
+  {
+   "code": "77023",
+   "nom": "Barcy",
+   "departement": "77"
+  },
+  {
+   "code": "77024",
+   "nom": "Bassevelle",
+   "departement": "77"
+  },
+  {
+   "code": "77025",
+   "nom": "Bazoches-lès-Bray",
+   "departement": "77"
+  },
+  {
+   "code": "77026",
+   "nom": "Beauchery-Saint-Martin",
+   "departement": "77"
+  },
+  {
+   "code": "77027",
+   "nom": "Beaumont-du-Gâtinais",
+   "departement": "77"
+  },
+  {
+   "code": "77029",
+   "nom": "Beauvoir",
+   "departement": "77"
+  },
+  {
+   "code": "77030",
+   "nom": "Bellot",
+   "departement": "77"
+  },
+  {
+   "code": "77031",
+   "nom": "Bernay-Vilbert",
+   "departement": "77"
+  },
+  {
+   "code": "77032",
+   "nom": "Beton-Bazoches",
+   "departement": "77"
+  },
+  {
+   "code": "77033",
+   "nom": "Bezalles",
+   "departement": "77"
+  },
+  {
+   "code": "77034",
+   "nom": "Blandy",
+   "departement": "77"
+  },
+  {
+   "code": "77035",
+   "nom": "Blennes",
+   "departement": "77"
+  },
+  {
+   "code": "77036",
+   "nom": "Boisdon",
+   "departement": "77"
+  },
+  {
+   "code": "77037",
+   "nom": "Bois-le-Roi",
+   "departement": "77"
+  },
+  {
+   "code": "77038",
+   "nom": "Boissettes",
+   "departement": "77"
+  },
+  {
+   "code": "77039",
+   "nom": "Boissise-la-Bertrand",
+   "departement": "77"
+  },
+  {
+   "code": "77040",
+   "nom": "Boissise-le-Roi",
+   "departement": "77"
+  },
+  {
+   "code": "77041",
+   "nom": "Boissy-aux-Cailles",
+   "departement": "77"
+  },
+  {
+   "code": "77042",
+   "nom": "Boissy-le-Châtel",
+   "departement": "77"
+  },
+  {
+   "code": "77043",
+   "nom": "Boitron",
+   "departement": "77"
+  },
+  {
+   "code": "77044",
+   "nom": "Bombon",
+   "departement": "77"
+  },
+  {
+   "code": "77045",
+   "nom": "Bougligny",
+   "departement": "77"
+  },
+  {
+   "code": "77046",
+   "nom": "Boulancourt",
+   "departement": "77"
+  },
+  {
+   "code": "77047",
+   "nom": "Bouleurs",
+   "departement": "77"
+  },
+  {
+   "code": "77048",
+   "nom": "Bourron-Marlotte",
+   "departement": "77"
+  },
+  {
+   "code": "77049",
+   "nom": "Boutigny",
+   "departement": "77"
+  },
+  {
+   "code": "77050",
+   "nom": "Bransles",
+   "departement": "77"
+  },
+  {
+   "code": "77051",
+   "nom": "Bray-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77052",
+   "nom": "Bréau",
+   "departement": "77"
+  },
+  {
+   "code": "77053",
+   "nom": "Brie-Comte-Robert",
+   "departement": "77"
+  },
+  {
+   "code": "77054",
+   "nom": "La Brosse-Montceaux",
+   "departement": "77"
+  },
+  {
+   "code": "77055",
+   "nom": "Brou-sur-Chantereine",
+   "departement": "77"
+  },
+  {
+   "code": "77056",
+   "nom": "Burcy",
+   "departement": "77"
+  },
+  {
+   "code": "77057",
+   "nom": "Bussières",
+   "departement": "77"
+  },
+  {
+   "code": "77058",
+   "nom": "Bussy-Saint-Georges",
+   "departement": "77"
+  },
+  {
+   "code": "77059",
+   "nom": "Bussy-Saint-Martin",
+   "departement": "77"
+  },
+  {
+   "code": "77060",
+   "nom": "Buthiers",
+   "departement": "77"
+  },
+  {
+   "code": "77061",
+   "nom": "Cannes-Écluse",
+   "departement": "77"
+  },
+  {
+   "code": "77062",
+   "nom": "Carnetin",
+   "departement": "77"
+  },
+  {
+   "code": "77063",
+   "nom": "La Celle-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77065",
+   "nom": "Cély",
+   "departement": "77"
+  },
+  {
+   "code": "77066",
+   "nom": "Cerneux",
+   "departement": "77"
+  },
+  {
+   "code": "77067",
+   "nom": "Cesson",
+   "departement": "77"
+  },
+  {
+   "code": "77068",
+   "nom": "Cessoy-en-Montois",
+   "departement": "77"
+  },
+  {
+   "code": "77069",
+   "nom": "Chailly-en-Bière",
+   "departement": "77"
+  },
+  {
+   "code": "77070",
+   "nom": "Chailly-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77071",
+   "nom": "Chaintreaux",
+   "departement": "77"
+  },
+  {
+   "code": "77072",
+   "nom": "Chalautre-la-Grande",
+   "departement": "77"
+  },
+  {
+   "code": "77073",
+   "nom": "Chalautre-la-Petite",
+   "departement": "77"
+  },
+  {
+   "code": "77075",
+   "nom": "Chalifert",
+   "departement": "77"
+  },
+  {
+   "code": "77076",
+   "nom": "Chalmaison",
+   "departement": "77"
+  },
+  {
+   "code": "77077",
+   "nom": "Chambry",
+   "departement": "77"
+  },
+  {
+   "code": "77078",
+   "nom": "Chamigny",
+   "departement": "77"
+  },
+  {
+   "code": "77079",
+   "nom": "Champagne-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77080",
+   "nom": "Champcenest",
+   "departement": "77"
+  },
+  {
+   "code": "77081",
+   "nom": "Champdeuil",
+   "departement": "77"
+  },
+  {
+   "code": "77082",
+   "nom": "Champeaux",
+   "departement": "77"
+  },
+  {
+   "code": "77083",
+   "nom": "Champs-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77084",
+   "nom": "Changis-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77085",
+   "nom": "Chanteloup-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77086",
+   "nom": "La Chapelle-Gauthier",
+   "departement": "77"
+  },
+  {
+   "code": "77087",
+   "nom": "La Chapelle-Iger",
+   "departement": "77"
+  },
+  {
+   "code": "77088",
+   "nom": "La Chapelle-la-Reine",
+   "departement": "77"
+  },
+  {
+   "code": "77089",
+   "nom": "La Chapelle-Rablais",
+   "departement": "77"
+  },
+  {
+   "code": "77090",
+   "nom": "La Chapelle-Saint-Sulpice",
+   "departement": "77"
+  },
+  {
+   "code": "77091",
+   "nom": "Les Chapelles-Bourbon",
+   "departement": "77"
+  },
+  {
+   "code": "77093",
+   "nom": "La Chapelle-Moutils",
+   "departement": "77"
+  },
+  {
+   "code": "77094",
+   "nom": "Charmentray",
+   "departement": "77"
+  },
+  {
+   "code": "77095",
+   "nom": "Charny",
+   "departement": "77"
+  },
+  {
+   "code": "77096",
+   "nom": "Chartrettes",
+   "departement": "77"
+  },
+  {
+   "code": "77097",
+   "nom": "Chartronges",
+   "departement": "77"
+  },
+  {
+   "code": "77098",
+   "nom": "Châteaubleau",
+   "departement": "77"
+  },
+  {
+   "code": "77099",
+   "nom": "Château-Landon",
+   "departement": "77"
+  },
+  {
+   "code": "77100",
+   "nom": "Le Châtelet-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77101",
+   "nom": "Châtenay-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77102",
+   "nom": "Châtenoy",
+   "departement": "77"
+  },
+  {
+   "code": "77103",
+   "nom": "Châtillon-la-Borde",
+   "departement": "77"
+  },
+  {
+   "code": "77104",
+   "nom": "Châtres",
+   "departement": "77"
+  },
+  {
+   "code": "77106",
+   "nom": "Chauffry",
+   "departement": "77"
+  },
+  {
+   "code": "77107",
+   "nom": "Chaumes-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77108",
+   "nom": "Chelles",
+   "departement": "77"
+  },
+  {
+   "code": "77109",
+   "nom": "Chenoise-Cucharmoy",
+   "departement": "77"
+  },
+  {
+   "code": "77110",
+   "nom": "Chenou",
+   "departement": "77"
+  },
+  {
+   "code": "77111",
+   "nom": "Chessy",
+   "departement": "77"
+  },
+  {
+   "code": "77112",
+   "nom": "Chevrainvilliers",
+   "departement": "77"
+  },
+  {
+   "code": "77113",
+   "nom": "Chevru",
+   "departement": "77"
+  },
+  {
+   "code": "77114",
+   "nom": "Chevry-Cossigny",
+   "departement": "77"
+  },
+  {
+   "code": "77115",
+   "nom": "Chevry-en-Sereine",
+   "departement": "77"
+  },
+  {
+   "code": "77116",
+   "nom": "Choisy-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77117",
+   "nom": "Citry",
+   "departement": "77"
+  },
+  {
+   "code": "77118",
+   "nom": "Claye-Souilly",
+   "departement": "77"
+  },
+  {
+   "code": "77119",
+   "nom": "Clos-Fontaine",
+   "departement": "77"
+  },
+  {
+   "code": "77120",
+   "nom": "Cocherel",
+   "departement": "77"
+  },
+  {
+   "code": "77121",
+   "nom": "Collégien",
+   "departement": "77"
+  },
+  {
+   "code": "77122",
+   "nom": "Combs-la-Ville",
+   "departement": "77"
+  },
+  {
+   "code": "77123",
+   "nom": "Compans",
+   "departement": "77"
+  },
+  {
+   "code": "77124",
+   "nom": "Conches-sur-Gondoire",
+   "departement": "77"
+  },
+  {
+   "code": "77125",
+   "nom": "Condé-Sainte-Libiaire",
+   "departement": "77"
+  },
+  {
+   "code": "77126",
+   "nom": "Congis-sur-Thérouanne",
+   "departement": "77"
+  },
+  {
+   "code": "77127",
+   "nom": "Coubert",
+   "departement": "77"
+  },
+  {
+   "code": "77128",
+   "nom": "Couilly-Pont-aux-Dames",
+   "departement": "77"
+  },
+  {
+   "code": "77129",
+   "nom": "Coulombs-en-Valois",
+   "departement": "77"
+  },
+  {
+   "code": "77130",
+   "nom": "Coulommes",
+   "departement": "77"
+  },
+  {
+   "code": "77131",
+   "nom": "Coulommiers",
+   "departement": "77"
+  },
+  {
+   "code": "77132",
+   "nom": "Coupvray",
+   "departement": "77"
+  },
+  {
+   "code": "77133",
+   "nom": "Courcelles-en-Bassée",
+   "departement": "77"
+  },
+  {
+   "code": "77134",
+   "nom": "Courchamp",
+   "departement": "77"
+  },
+  {
+   "code": "77135",
+   "nom": "Courpalay",
+   "departement": "77"
+  },
+  {
+   "code": "77136",
+   "nom": "Courquetaine",
+   "departement": "77"
+  },
+  {
+   "code": "77137",
+   "nom": "Courtacon",
+   "departement": "77"
+  },
+  {
+   "code": "77138",
+   "nom": "Courtomer",
+   "departement": "77"
+  },
+  {
+   "code": "77139",
+   "nom": "Courtry",
+   "departement": "77"
+  },
+  {
+   "code": "77140",
+   "nom": "Coutençon",
+   "departement": "77"
+  },
+  {
+   "code": "77141",
+   "nom": "Coutevroult",
+   "departement": "77"
+  },
+  {
+   "code": "77142",
+   "nom": "Crécy-la-Chapelle",
+   "departement": "77"
+  },
+  {
+   "code": "77143",
+   "nom": "Crégy-lès-Meaux",
+   "departement": "77"
+  },
+  {
+   "code": "77144",
+   "nom": "Crèvecœur-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77145",
+   "nom": "Crisenoy",
+   "departement": "77"
+  },
+  {
+   "code": "77146",
+   "nom": "Croissy-Beaubourg",
+   "departement": "77"
+  },
+  {
+   "code": "77147",
+   "nom": "La Croix-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77148",
+   "nom": "Crouy-sur-Ourcq",
+   "departement": "77"
+  },
+  {
+   "code": "77150",
+   "nom": "Cuisy",
+   "departement": "77"
+  },
+  {
+   "code": "77151",
+   "nom": "Dagny",
+   "departement": "77"
+  },
+  {
+   "code": "77152",
+   "nom": "Dammarie-les-Lys",
+   "departement": "77"
+  },
+  {
+   "code": "77153",
+   "nom": "Dammartin-en-Goële",
+   "departement": "77"
+  },
+  {
+   "code": "77154",
+   "nom": "Dammartin-sur-Tigeaux",
+   "departement": "77"
+  },
+  {
+   "code": "77155",
+   "nom": "Dampmart",
+   "departement": "77"
+  },
+  {
+   "code": "77156",
+   "nom": "Darvault",
+   "departement": "77"
+  },
+  {
+   "code": "77157",
+   "nom": "Dhuisy",
+   "departement": "77"
+  },
+  {
+   "code": "77158",
+   "nom": "Diant",
+   "departement": "77"
+  },
+  {
+   "code": "77159",
+   "nom": "Donnemarie-Dontilly",
+   "departement": "77"
+  },
+  {
+   "code": "77161",
+   "nom": "Dormelles",
+   "departement": "77"
+  },
+  {
+   "code": "77162",
+   "nom": "Doue",
+   "departement": "77"
+  },
+  {
+   "code": "77163",
+   "nom": "Douy-la-Ramée",
+   "departement": "77"
+  },
+  {
+   "code": "77164",
+   "nom": "Échouboulains",
+   "departement": "77"
+  },
+  {
+   "code": "77165",
+   "nom": "Les Écrennes",
+   "departement": "77"
+  },
+  {
+   "code": "77167",
+   "nom": "Égligny",
+   "departement": "77"
+  },
+  {
+   "code": "77168",
+   "nom": "Égreville",
+   "departement": "77"
+  },
+  {
+   "code": "77169",
+   "nom": "Émerainville",
+   "departement": "77"
+  },
+  {
+   "code": "77171",
+   "nom": "Esbly",
+   "departement": "77"
+  },
+  {
+   "code": "77172",
+   "nom": "Esmans",
+   "departement": "77"
+  },
+  {
+   "code": "77173",
+   "nom": "Étrépilly",
+   "departement": "77"
+  },
+  {
+   "code": "77174",
+   "nom": "Everly",
+   "departement": "77"
+  },
+  {
+   "code": "77175",
+   "nom": "Évry-Grégy-sur-Yerre",
+   "departement": "77"
+  },
+  {
+   "code": "77176",
+   "nom": "Faremoutiers",
+   "departement": "77"
+  },
+  {
+   "code": "77177",
+   "nom": "Favières",
+   "departement": "77"
+  },
+  {
+   "code": "77178",
+   "nom": "Faÿ-lès-Nemours",
+   "departement": "77"
+  },
+  {
+   "code": "77179",
+   "nom": "Féricy",
+   "departement": "77"
+  },
+  {
+   "code": "77180",
+   "nom": "Férolles-Attilly",
+   "departement": "77"
+  },
+  {
+   "code": "77181",
+   "nom": "Ferrières-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77182",
+   "nom": "La Ferté-Gaucher",
+   "departement": "77"
+  },
+  {
+   "code": "77183",
+   "nom": "La Ferté-sous-Jouarre",
+   "departement": "77"
+  },
+  {
+   "code": "77184",
+   "nom": "Flagy",
+   "departement": "77"
+  },
+  {
+   "code": "77185",
+   "nom": "Fleury-en-Bière",
+   "departement": "77"
+  },
+  {
+   "code": "77186",
+   "nom": "Fontainebleau",
+   "departement": "77"
+  },
+  {
+   "code": "77187",
+   "nom": "Fontaine-Fourches",
+   "departement": "77"
+  },
+  {
+   "code": "77188",
+   "nom": "Fontaine-le-Port",
+   "departement": "77"
+  },
+  {
+   "code": "77190",
+   "nom": "Fontains",
+   "departement": "77"
+  },
+  {
+   "code": "77191",
+   "nom": "Fontenailles",
+   "departement": "77"
+  },
+  {
+   "code": "77192",
+   "nom": "Fontenay-Trésigny",
+   "departement": "77"
+  },
+  {
+   "code": "77193",
+   "nom": "Forfry",
+   "departement": "77"
+  },
+  {
+   "code": "77194",
+   "nom": "Forges",
+   "departement": "77"
+  },
+  {
+   "code": "77195",
+   "nom": "Fouju",
+   "departement": "77"
+  },
+  {
+   "code": "77196",
+   "nom": "Fresnes-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77197",
+   "nom": "Frétoy",
+   "departement": "77"
+  },
+  {
+   "code": "77198",
+   "nom": "Fromont",
+   "departement": "77"
+  },
+  {
+   "code": "77199",
+   "nom": "Fublaines",
+   "departement": "77"
+  },
+  {
+   "code": "77200",
+   "nom": "Garentreville",
+   "departement": "77"
+  },
+  {
+   "code": "77201",
+   "nom": "Gastins",
+   "departement": "77"
+  },
+  {
+   "code": "77202",
+   "nom": "La Genevraye",
+   "departement": "77"
+  },
+  {
+   "code": "77203",
+   "nom": "Germigny-l'Évêque",
+   "departement": "77"
+  },
+  {
+   "code": "77204",
+   "nom": "Germigny-sous-Coulombs",
+   "departement": "77"
+  },
+  {
+   "code": "77205",
+   "nom": "Gesvres-le-Chapitre",
+   "departement": "77"
+  },
+  {
+   "code": "77206",
+   "nom": "Giremoutiers",
+   "departement": "77"
+  },
+  {
+   "code": "77207",
+   "nom": "Gironville",
+   "departement": "77"
+  },
+  {
+   "code": "77208",
+   "nom": "Gouaix",
+   "departement": "77"
+  },
+  {
+   "code": "77209",
+   "nom": "Gouvernes",
+   "departement": "77"
+  },
+  {
+   "code": "77210",
+   "nom": "La Grande-Paroisse",
+   "departement": "77"
+  },
+  {
+   "code": "77211",
+   "nom": "Grandpuits-Bailly-Carrois",
+   "departement": "77"
+  },
+  {
+   "code": "77212",
+   "nom": "Gravon",
+   "departement": "77"
+  },
+  {
+   "code": "77214",
+   "nom": "Gressy",
+   "departement": "77"
+  },
+  {
+   "code": "77215",
+   "nom": "Gretz-Armainvilliers",
+   "departement": "77"
+  },
+  {
+   "code": "77216",
+   "nom": "Grez-sur-Loing",
+   "departement": "77"
+  },
+  {
+   "code": "77217",
+   "nom": "Grisy-Suisnes",
+   "departement": "77"
+  },
+  {
+   "code": "77218",
+   "nom": "Grisy-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77219",
+   "nom": "Guérard",
+   "departement": "77"
+  },
+  {
+   "code": "77220",
+   "nom": "Guercheville",
+   "departement": "77"
+  },
+  {
+   "code": "77221",
+   "nom": "Guermantes",
+   "departement": "77"
+  },
+  {
+   "code": "77222",
+   "nom": "Guignes",
+   "departement": "77"
+  },
+  {
+   "code": "77223",
+   "nom": "Gurcy-le-Châtel",
+   "departement": "77"
+  },
+  {
+   "code": "77224",
+   "nom": "Hautefeuille",
+   "departement": "77"
+  },
+  {
+   "code": "77225",
+   "nom": "La Haute-Maison",
+   "departement": "77"
+  },
+  {
+   "code": "77226",
+   "nom": "Héricy",
+   "departement": "77"
+  },
+  {
+   "code": "77227",
+   "nom": "Hermé",
+   "departement": "77"
+  },
+  {
+   "code": "77228",
+   "nom": "Hondevilliers",
+   "departement": "77"
+  },
+  {
+   "code": "77229",
+   "nom": "La Houssaye-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77230",
+   "nom": "Ichy",
+   "departement": "77"
+  },
+  {
+   "code": "77231",
+   "nom": "Isles-les-Meldeuses",
+   "departement": "77"
+  },
+  {
+   "code": "77232",
+   "nom": "Isles-lès-Villenoy",
+   "departement": "77"
+  },
+  {
+   "code": "77233",
+   "nom": "Iverny",
+   "departement": "77"
+  },
+  {
+   "code": "77234",
+   "nom": "Jablines",
+   "departement": "77"
+  },
+  {
+   "code": "77235",
+   "nom": "Jaignes",
+   "departement": "77"
+  },
+  {
+   "code": "77236",
+   "nom": "Jaulnes",
+   "departement": "77"
+  },
+  {
+   "code": "77237",
+   "nom": "Jossigny",
+   "departement": "77"
+  },
+  {
+   "code": "77238",
+   "nom": "Jouarre",
+   "departement": "77"
+  },
+  {
+   "code": "77239",
+   "nom": "Jouy-le-Châtel",
+   "departement": "77"
+  },
+  {
+   "code": "77240",
+   "nom": "Jouy-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77241",
+   "nom": "Juilly",
+   "departement": "77"
+  },
+  {
+   "code": "77242",
+   "nom": "Jutigny",
+   "departement": "77"
+  },
+  {
+   "code": "77243",
+   "nom": "Lagny-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77244",
+   "nom": "Larchant",
+   "departement": "77"
+  },
+  {
+   "code": "77245",
+   "nom": "Laval-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77246",
+   "nom": "Léchelle",
+   "departement": "77"
+  },
+  {
+   "code": "77247",
+   "nom": "Lescherolles",
+   "departement": "77"
+  },
+  {
+   "code": "77248",
+   "nom": "Lesches",
+   "departement": "77"
+  },
+  {
+   "code": "77249",
+   "nom": "Lésigny",
+   "departement": "77"
+  },
+  {
+   "code": "77250",
+   "nom": "Leudon-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77251",
+   "nom": "Lieusaint",
+   "departement": "77"
+  },
+  {
+   "code": "77252",
+   "nom": "Limoges-Fourches",
+   "departement": "77"
+  },
+  {
+   "code": "77253",
+   "nom": "Lissy",
+   "departement": "77"
+  },
+  {
+   "code": "77254",
+   "nom": "Liverdy-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77255",
+   "nom": "Livry-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77256",
+   "nom": "Lizines",
+   "departement": "77"
+  },
+  {
+   "code": "77257",
+   "nom": "Lizy-sur-Ourcq",
+   "departement": "77"
+  },
+  {
+   "code": "77258",
+   "nom": "Lognes",
+   "departement": "77"
+  },
+  {
+   "code": "77259",
+   "nom": "Longperrier",
+   "departement": "77"
+  },
+  {
+   "code": "77260",
+   "nom": "Longueville",
+   "departement": "77"
+  },
+  {
+   "code": "77261",
+   "nom": "Lorrez-le-Bocage-Préaux",
+   "departement": "77"
+  },
+  {
+   "code": "77262",
+   "nom": "Louan-Villegruis-Fontaine",
+   "departement": "77"
+  },
+  {
+   "code": "77263",
+   "nom": "Luisetaines",
+   "departement": "77"
+  },
+  {
+   "code": "77264",
+   "nom": "Lumigny-Nesles-Ormeaux",
+   "departement": "77"
+  },
+  {
+   "code": "77265",
+   "nom": "Luzancy",
+   "departement": "77"
+  },
+  {
+   "code": "77266",
+   "nom": "Machault",
+   "departement": "77"
+  },
+  {
+   "code": "77267",
+   "nom": "La Madeleine-sur-Loing",
+   "departement": "77"
+  },
+  {
+   "code": "77268",
+   "nom": "Magny-le-Hongre",
+   "departement": "77"
+  },
+  {
+   "code": "77269",
+   "nom": "Maincy",
+   "departement": "77"
+  },
+  {
+   "code": "77270",
+   "nom": "Maisoncelles-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77271",
+   "nom": "Maisoncelles-en-Gâtinais",
+   "departement": "77"
+  },
+  {
+   "code": "77272",
+   "nom": "Maison-Rouge",
+   "departement": "77"
+  },
+  {
+   "code": "77273",
+   "nom": "Marchémoret",
+   "departement": "77"
+  },
+  {
+   "code": "77274",
+   "nom": "Marcilly",
+   "departement": "77"
+  },
+  {
+   "code": "77275",
+   "nom": "Les Marêts",
+   "departement": "77"
+  },
+  {
+   "code": "77276",
+   "nom": "Mareuil-lès-Meaux",
+   "departement": "77"
+  },
+  {
+   "code": "77277",
+   "nom": "Marles-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77278",
+   "nom": "Marolles-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77279",
+   "nom": "Marolles-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77280",
+   "nom": "Mary-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77281",
+   "nom": "Mauperthuis",
+   "departement": "77"
+  },
+  {
+   "code": "77282",
+   "nom": "Mauregard",
+   "departement": "77"
+  },
+  {
+   "code": "77283",
+   "nom": "May-en-Multien",
+   "departement": "77"
+  },
+  {
+   "code": "77284",
+   "nom": "Meaux",
+   "departement": "77"
+  },
+  {
+   "code": "77285",
+   "nom": "Le Mée-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77286",
+   "nom": "Meigneux",
+   "departement": "77"
+  },
+  {
+   "code": "77287",
+   "nom": "Meilleray",
+   "departement": "77"
+  },
+  {
+   "code": "77288",
+   "nom": "Melun",
+   "departement": "77"
+  },
+  {
+   "code": "77289",
+   "nom": "Melz-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77290",
+   "nom": "Méry-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77291",
+   "nom": "Le Mesnil-Amelot",
+   "departement": "77"
+  },
+  {
+   "code": "77292",
+   "nom": "Messy",
+   "departement": "77"
+  },
+  {
+   "code": "77293",
+   "nom": "Misy-sur-Yonne",
+   "departement": "77"
+  },
+  {
+   "code": "77294",
+   "nom": "Mitry-Mory",
+   "departement": "77"
+  },
+  {
+   "code": "77295",
+   "nom": "Moisenay",
+   "departement": "77"
+  },
+  {
+   "code": "77296",
+   "nom": "Moissy-Cramayel",
+   "departement": "77"
+  },
+  {
+   "code": "77297",
+   "nom": "Mondreville",
+   "departement": "77"
+  },
+  {
+   "code": "77298",
+   "nom": "Mons-en-Montois",
+   "departement": "77"
+  },
+  {
+   "code": "77300",
+   "nom": "Montceaux-lès-Meaux",
+   "departement": "77"
+  },
+  {
+   "code": "77301",
+   "nom": "Montceaux-lès-Provins",
+   "departement": "77"
+  },
+  {
+   "code": "77302",
+   "nom": "Moncourt-Fromonville",
+   "departement": "77"
+  },
+  {
+   "code": "77303",
+   "nom": "Montdauphin",
+   "departement": "77"
+  },
+  {
+   "code": "77304",
+   "nom": "Montenils",
+   "departement": "77"
+  },
+  {
+   "code": "77305",
+   "nom": "Montereau-Fault-Yonne",
+   "departement": "77"
+  },
+  {
+   "code": "77306",
+   "nom": "Montereau-sur-le-Jard",
+   "departement": "77"
+  },
+  {
+   "code": "77307",
+   "nom": "Montévrain",
+   "departement": "77"
+  },
+  {
+   "code": "77308",
+   "nom": "Montgé-en-Goële",
+   "departement": "77"
+  },
+  {
+   "code": "77309",
+   "nom": "Monthyon",
+   "departement": "77"
+  },
+  {
+   "code": "77310",
+   "nom": "Montigny-le-Guesdier",
+   "departement": "77"
+  },
+  {
+   "code": "77311",
+   "nom": "Montigny-Lencoup",
+   "departement": "77"
+  },
+  {
+   "code": "77312",
+   "nom": "Montigny-sur-Loing",
+   "departement": "77"
+  },
+  {
+   "code": "77313",
+   "nom": "Montmachoux",
+   "departement": "77"
+  },
+  {
+   "code": "77314",
+   "nom": "Montolivet",
+   "departement": "77"
+  },
+  {
+   "code": "77315",
+   "nom": "Montry",
+   "departement": "77"
+  },
+  {
+   "code": "77316",
+   "nom": "Moret-Loing-et-Orvanne",
+   "departement": "77"
+  },
+  {
+   "code": "77317",
+   "nom": "Mormant",
+   "departement": "77"
+  },
+  {
+   "code": "77318",
+   "nom": "Mortcerf",
+   "departement": "77"
+  },
+  {
+   "code": "77319",
+   "nom": "Mortery",
+   "departement": "77"
+  },
+  {
+   "code": "77320",
+   "nom": "Mouroux",
+   "departement": "77"
+  },
+  {
+   "code": "77321",
+   "nom": "Mousseaux-lès-Bray",
+   "departement": "77"
+  },
+  {
+   "code": "77322",
+   "nom": "Moussy-le-Neuf",
+   "departement": "77"
+  },
+  {
+   "code": "77323",
+   "nom": "Moussy-le-Vieux",
+   "departement": "77"
+  },
+  {
+   "code": "77325",
+   "nom": "Mouy-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77326",
+   "nom": "Nandy",
+   "departement": "77"
+  },
+  {
+   "code": "77327",
+   "nom": "Nangis",
+   "departement": "77"
+  },
+  {
+   "code": "77328",
+   "nom": "Nanteau-sur-Essonne",
+   "departement": "77"
+  },
+  {
+   "code": "77329",
+   "nom": "Nanteau-sur-Lunain",
+   "departement": "77"
+  },
+  {
+   "code": "77330",
+   "nom": "Nanteuil-lès-Meaux",
+   "departement": "77"
+  },
+  {
+   "code": "77331",
+   "nom": "Nanteuil-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77332",
+   "nom": "Nantouillet",
+   "departement": "77"
+  },
+  {
+   "code": "77333",
+   "nom": "Nemours",
+   "departement": "77"
+  },
+  {
+   "code": "77335",
+   "nom": "Chauconin-Neufmontiers",
+   "departement": "77"
+  },
+  {
+   "code": "77336",
+   "nom": "Neufmoutiers-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77337",
+   "nom": "Noisiel",
+   "departement": "77"
+  },
+  {
+   "code": "77338",
+   "nom": "Noisy-Rudignon",
+   "departement": "77"
+  },
+  {
+   "code": "77339",
+   "nom": "Noisy-sur-École",
+   "departement": "77"
+  },
+  {
+   "code": "77340",
+   "nom": "Nonville",
+   "departement": "77"
+  },
+  {
+   "code": "77341",
+   "nom": "Noyen-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77342",
+   "nom": "Obsonville",
+   "departement": "77"
+  },
+  {
+   "code": "77343",
+   "nom": "Ocquerre",
+   "departement": "77"
+  },
+  {
+   "code": "77344",
+   "nom": "Oissery",
+   "departement": "77"
+  },
+  {
+   "code": "77345",
+   "nom": "Orly-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77347",
+   "nom": "Les Ormes-sur-Voulzie",
+   "departement": "77"
+  },
+  {
+   "code": "77348",
+   "nom": "Ormesson",
+   "departement": "77"
+  },
+  {
+   "code": "77349",
+   "nom": "Othis",
+   "departement": "77"
+  },
+  {
+   "code": "77350",
+   "nom": "Ozoir-la-Ferrière",
+   "departement": "77"
+  },
+  {
+   "code": "77352",
+   "nom": "Ozouer-le-Voulgis",
+   "departement": "77"
+  },
+  {
+   "code": "77353",
+   "nom": "Paley",
+   "departement": "77"
+  },
+  {
+   "code": "77354",
+   "nom": "Pamfou",
+   "departement": "77"
+  },
+  {
+   "code": "77355",
+   "nom": "Paroy",
+   "departement": "77"
+  },
+  {
+   "code": "77356",
+   "nom": "Passy-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77357",
+   "nom": "Pécy",
+   "departement": "77"
+  },
+  {
+   "code": "77358",
+   "nom": "Penchard",
+   "departement": "77"
+  },
+  {
+   "code": "77359",
+   "nom": "Perthes",
+   "departement": "77"
+  },
+  {
+   "code": "77360",
+   "nom": "Pézarches",
+   "departement": "77"
+  },
+  {
+   "code": "77361",
+   "nom": "Pierre-Levée",
+   "departement": "77"
+  },
+  {
+   "code": "77363",
+   "nom": "Le Pin",
+   "departement": "77"
+  },
+  {
+   "code": "77364",
+   "nom": "Le Plessis-aux-Bois",
+   "departement": "77"
+  },
+  {
+   "code": "77365",
+   "nom": "Le Plessis-Feu-Aussoux",
+   "departement": "77"
+  },
+  {
+   "code": "77366",
+   "nom": "Le Plessis-l'Évêque",
+   "departement": "77"
+  },
+  {
+   "code": "77367",
+   "nom": "Le Plessis-Placy",
+   "departement": "77"
+  },
+  {
+   "code": "77368",
+   "nom": "Poigny",
+   "departement": "77"
+  },
+  {
+   "code": "77369",
+   "nom": "Poincy",
+   "departement": "77"
+  },
+  {
+   "code": "77370",
+   "nom": "Poligny",
+   "departement": "77"
+  },
+  {
+   "code": "77371",
+   "nom": "Pommeuse",
+   "departement": "77"
+  },
+  {
+   "code": "77372",
+   "nom": "Pomponne",
+   "departement": "77"
+  },
+  {
+   "code": "77373",
+   "nom": "Pontault-Combault",
+   "departement": "77"
+  },
+  {
+   "code": "77374",
+   "nom": "Pontcarré",
+   "departement": "77"
+  },
+  {
+   "code": "77376",
+   "nom": "Précy-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77377",
+   "nom": "Presles-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77378",
+   "nom": "Pringy",
+   "departement": "77"
+  },
+  {
+   "code": "77379",
+   "nom": "Provins",
+   "departement": "77"
+  },
+  {
+   "code": "77380",
+   "nom": "Puisieux",
+   "departement": "77"
+  },
+  {
+   "code": "77381",
+   "nom": "Quiers",
+   "departement": "77"
+  },
+  {
+   "code": "77382",
+   "nom": "Quincy-Voisins",
+   "departement": "77"
+  },
+  {
+   "code": "77383",
+   "nom": "Rampillon",
+   "departement": "77"
+  },
+  {
+   "code": "77384",
+   "nom": "Réau",
+   "departement": "77"
+  },
+  {
+   "code": "77385",
+   "nom": "Rebais",
+   "departement": "77"
+  },
+  {
+   "code": "77386",
+   "nom": "Recloses",
+   "departement": "77"
+  },
+  {
+   "code": "77387",
+   "nom": "Remauville",
+   "departement": "77"
+  },
+  {
+   "code": "77388",
+   "nom": "Reuil-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77389",
+   "nom": "La Rochette",
+   "departement": "77"
+  },
+  {
+   "code": "77390",
+   "nom": "Roissy-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77391",
+   "nom": "Rouilly",
+   "departement": "77"
+  },
+  {
+   "code": "77392",
+   "nom": "Rouvres",
+   "departement": "77"
+  },
+  {
+   "code": "77393",
+   "nom": "Rozay-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77394",
+   "nom": "Rubelles",
+   "departement": "77"
+  },
+  {
+   "code": "77395",
+   "nom": "Rumont",
+   "departement": "77"
+  },
+  {
+   "code": "77396",
+   "nom": "Rupéreux",
+   "departement": "77"
+  },
+  {
+   "code": "77397",
+   "nom": "Saâcy-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77398",
+   "nom": "Sablonnières",
+   "departement": "77"
+  },
+  {
+   "code": "77400",
+   "nom": "Saint-Augustin",
+   "departement": "77"
+  },
+  {
+   "code": "77401",
+   "nom": "Sainte-Aulde",
+   "departement": "77"
+  },
+  {
+   "code": "77402",
+   "nom": "Saint-Barthélemy",
+   "departement": "77"
+  },
+  {
+   "code": "77403",
+   "nom": "Saint-Brice",
+   "departement": "77"
+  },
+  {
+   "code": "77404",
+   "nom": "Sainte-Colombe",
+   "departement": "77"
+  },
+  {
+   "code": "77405",
+   "nom": "Saint-Cyr-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77406",
+   "nom": "Saint-Denis-lès-Rebais",
+   "departement": "77"
+  },
+  {
+   "code": "77407",
+   "nom": "Saint-Fargeau-Ponthierry",
+   "departement": "77"
+  },
+  {
+   "code": "77408",
+   "nom": "Saint-Fiacre",
+   "departement": "77"
+  },
+  {
+   "code": "77409",
+   "nom": "Saint-Germain-Laval",
+   "departement": "77"
+  },
+  {
+   "code": "77410",
+   "nom": "Saint-Germain-Laxis",
+   "departement": "77"
+  },
+  {
+   "code": "77411",
+   "nom": "Saint-Germain-sous-Doue",
+   "departement": "77"
+  },
+  {
+   "code": "77412",
+   "nom": "Saint-Germain-sur-École",
+   "departement": "77"
+  },
+  {
+   "code": "77413",
+   "nom": "Saint-Germain-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77414",
+   "nom": "Saint-Hilliers",
+   "departement": "77"
+  },
+  {
+   "code": "77415",
+   "nom": "Saint-Jean-les-Deux-Jumeaux",
+   "departement": "77"
+  },
+  {
+   "code": "77416",
+   "nom": "Saint-Just-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77417",
+   "nom": "Saint-Léger",
+   "departement": "77"
+  },
+  {
+   "code": "77418",
+   "nom": "Saint-Loup-de-Naud",
+   "departement": "77"
+  },
+  {
+   "code": "77419",
+   "nom": "Saint-Mammès",
+   "departement": "77"
+  },
+  {
+   "code": "77420",
+   "nom": "Saint-Mard",
+   "departement": "77"
+  },
+  {
+   "code": "77421",
+   "nom": "Saint-Mars-Vieux-Maisons",
+   "departement": "77"
+  },
+  {
+   "code": "77423",
+   "nom": "Saint-Martin-des-Champs",
+   "departement": "77"
+  },
+  {
+   "code": "77424",
+   "nom": "Saint-Martin-du-Boschet",
+   "departement": "77"
+  },
+  {
+   "code": "77425",
+   "nom": "Saint-Martin-en-Bière",
+   "departement": "77"
+  },
+  {
+   "code": "77426",
+   "nom": "Saint-Méry",
+   "departement": "77"
+  },
+  {
+   "code": "77427",
+   "nom": "Saint-Mesmes",
+   "departement": "77"
+  },
+  {
+   "code": "77428",
+   "nom": "Saint-Ouen-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77429",
+   "nom": "Saint-Ouen-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77430",
+   "nom": "Saint-Pathus",
+   "departement": "77"
+  },
+  {
+   "code": "77431",
+   "nom": "Saint-Pierre-lès-Nemours",
+   "departement": "77"
+  },
+  {
+   "code": "77432",
+   "nom": "Saint-Rémy-de-la-Vanne",
+   "departement": "77"
+  },
+  {
+   "code": "77433",
+   "nom": "Beautheil-Saints",
+   "departement": "77"
+  },
+  {
+   "code": "77434",
+   "nom": "Saint-Sauveur-lès-Bray",
+   "departement": "77"
+  },
+  {
+   "code": "77435",
+   "nom": "Saint-Sauveur-sur-École",
+   "departement": "77"
+  },
+  {
+   "code": "77436",
+   "nom": "Saint-Siméon",
+   "departement": "77"
+  },
+  {
+   "code": "77437",
+   "nom": "Saint-Soupplets",
+   "departement": "77"
+  },
+  {
+   "code": "77438",
+   "nom": "Saint-Thibault-des-Vignes",
+   "departement": "77"
+  },
+  {
+   "code": "77439",
+   "nom": "Salins",
+   "departement": "77"
+  },
+  {
+   "code": "77440",
+   "nom": "Sammeron",
+   "departement": "77"
+  },
+  {
+   "code": "77441",
+   "nom": "Samois-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77442",
+   "nom": "Samoreau",
+   "departement": "77"
+  },
+  {
+   "code": "77443",
+   "nom": "Sancy",
+   "departement": "77"
+  },
+  {
+   "code": "77444",
+   "nom": "Sancy-lès-Provins",
+   "departement": "77"
+  },
+  {
+   "code": "77445",
+   "nom": "Savigny-le-Temple",
+   "departement": "77"
+  },
+  {
+   "code": "77446",
+   "nom": "Savins",
+   "departement": "77"
+  },
+  {
+   "code": "77447",
+   "nom": "Seine-Port",
+   "departement": "77"
+  },
+  {
+   "code": "77448",
+   "nom": "Sept-Sorts",
+   "departement": "77"
+  },
+  {
+   "code": "77449",
+   "nom": "Serris",
+   "departement": "77"
+  },
+  {
+   "code": "77450",
+   "nom": "Servon",
+   "departement": "77"
+  },
+  {
+   "code": "77451",
+   "nom": "Signy-Signets",
+   "departement": "77"
+  },
+  {
+   "code": "77452",
+   "nom": "Sigy",
+   "departement": "77"
+  },
+  {
+   "code": "77453",
+   "nom": "Sivry-Courtry",
+   "departement": "77"
+  },
+  {
+   "code": "77454",
+   "nom": "Sognolles-en-Montois",
+   "departement": "77"
+  },
+  {
+   "code": "77455",
+   "nom": "Soignolles-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77456",
+   "nom": "Soisy-Bouy",
+   "departement": "77"
+  },
+  {
+   "code": "77457",
+   "nom": "Solers",
+   "departement": "77"
+  },
+  {
+   "code": "77458",
+   "nom": "Souppes-sur-Loing",
+   "departement": "77"
+  },
+  {
+   "code": "77459",
+   "nom": "Sourdun",
+   "departement": "77"
+  },
+  {
+   "code": "77460",
+   "nom": "Tancrou",
+   "departement": "77"
+  },
+  {
+   "code": "77461",
+   "nom": "Thénisy",
+   "departement": "77"
+  },
+  {
+   "code": "77462",
+   "nom": "Thieux",
+   "departement": "77"
+  },
+  {
+   "code": "77463",
+   "nom": "Thomery",
+   "departement": "77"
+  },
+  {
+   "code": "77464",
+   "nom": "Thorigny-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77465",
+   "nom": "Thoury-Férottes",
+   "departement": "77"
+  },
+  {
+   "code": "77466",
+   "nom": "Tigeaux",
+   "departement": "77"
+  },
+  {
+   "code": "77467",
+   "nom": "La Tombe",
+   "departement": "77"
+  },
+  {
+   "code": "77468",
+   "nom": "Torcy",
+   "departement": "77"
+  },
+  {
+   "code": "77469",
+   "nom": "Touquin",
+   "departement": "77"
+  },
+  {
+   "code": "77470",
+   "nom": "Tournan-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77471",
+   "nom": "Tousson",
+   "departement": "77"
+  },
+  {
+   "code": "77472",
+   "nom": "La Trétoire",
+   "departement": "77"
+  },
+  {
+   "code": "77473",
+   "nom": "Treuzy-Levelay",
+   "departement": "77"
+  },
+  {
+   "code": "77474",
+   "nom": "Trilbardou",
+   "departement": "77"
+  },
+  {
+   "code": "77475",
+   "nom": "Trilport",
+   "departement": "77"
+  },
+  {
+   "code": "77476",
+   "nom": "Trocy-en-Multien",
+   "departement": "77"
+  },
+  {
+   "code": "77477",
+   "nom": "Ury",
+   "departement": "77"
+  },
+  {
+   "code": "77478",
+   "nom": "Ussy-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77479",
+   "nom": "Vaires-sur-Marne",
+   "departement": "77"
+  },
+  {
+   "code": "77480",
+   "nom": "Valence-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77481",
+   "nom": "Vanvillé",
+   "departement": "77"
+  },
+  {
+   "code": "77482",
+   "nom": "Varennes-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77483",
+   "nom": "Varreddes",
+   "departement": "77"
+  },
+  {
+   "code": "77484",
+   "nom": "Vaucourtois",
+   "departement": "77"
+  },
+  {
+   "code": "77485",
+   "nom": "Le Vaudoué",
+   "departement": "77"
+  },
+  {
+   "code": "77486",
+   "nom": "Vaudoy-en-Brie",
+   "departement": "77"
+  },
+  {
+   "code": "77487",
+   "nom": "Vaux-le-Pénil",
+   "departement": "77"
+  },
+  {
+   "code": "77489",
+   "nom": "Vaux-sur-Lunain",
+   "departement": "77"
+  },
+  {
+   "code": "77490",
+   "nom": "Vendrest",
+   "departement": "77"
+  },
+  {
+   "code": "77492",
+   "nom": "Verdelot",
+   "departement": "77"
+  },
+  {
+   "code": "77493",
+   "nom": "Verneuil-l'Étang",
+   "departement": "77"
+  },
+  {
+   "code": "77494",
+   "nom": "Vernou-la-Celle-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77495",
+   "nom": "Vert-Saint-Denis",
+   "departement": "77"
+  },
+  {
+   "code": "77496",
+   "nom": "Vieux-Champagne",
+   "departement": "77"
+  },
+  {
+   "code": "77498",
+   "nom": "Vignely",
+   "departement": "77"
+  },
+  {
+   "code": "77500",
+   "nom": "Villebéon",
+   "departement": "77"
+  },
+  {
+   "code": "77501",
+   "nom": "Villecerf",
+   "departement": "77"
+  },
+  {
+   "code": "77504",
+   "nom": "Villemaréchal",
+   "departement": "77"
+  },
+  {
+   "code": "77505",
+   "nom": "Villemareuil",
+   "departement": "77"
+  },
+  {
+   "code": "77506",
+   "nom": "Villemer",
+   "departement": "77"
+  },
+  {
+   "code": "77507",
+   "nom": "Villenauxe-la-Petite",
+   "departement": "77"
+  },
+  {
+   "code": "77508",
+   "nom": "Villeneuve-le-Comte",
+   "departement": "77"
+  },
+  {
+   "code": "77509",
+   "nom": "Villeneuve-les-Bordes",
+   "departement": "77"
+  },
+  {
+   "code": "77510",
+   "nom": "Villeneuve-Saint-Denis",
+   "departement": "77"
+  },
+  {
+   "code": "77511",
+   "nom": "Villeneuve-sous-Dammartin",
+   "departement": "77"
+  },
+  {
+   "code": "77512",
+   "nom": "Villeneuve-sur-Bellot",
+   "departement": "77"
+  },
+  {
+   "code": "77513",
+   "nom": "Villenoy",
+   "departement": "77"
+  },
+  {
+   "code": "77514",
+   "nom": "Villeparisis",
+   "departement": "77"
+  },
+  {
+   "code": "77515",
+   "nom": "Villeroy",
+   "departement": "77"
+  },
+  {
+   "code": "77516",
+   "nom": "Ville-Saint-Jacques",
+   "departement": "77"
+  },
+  {
+   "code": "77517",
+   "nom": "Villevaudé",
+   "departement": "77"
+  },
+  {
+   "code": "77518",
+   "nom": "Villiers-en-Bière",
+   "departement": "77"
+  },
+  {
+   "code": "77519",
+   "nom": "Villiers-Saint-Georges",
+   "departement": "77"
+  },
+  {
+   "code": "77520",
+   "nom": "Villiers-sous-Grez",
+   "departement": "77"
+  },
+  {
+   "code": "77521",
+   "nom": "Villiers-sur-Morin",
+   "departement": "77"
+  },
+  {
+   "code": "77522",
+   "nom": "Villiers-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77523",
+   "nom": "Villuis",
+   "departement": "77"
+  },
+  {
+   "code": "77524",
+   "nom": "Vimpelles",
+   "departement": "77"
+  },
+  {
+   "code": "77525",
+   "nom": "Vinantes",
+   "departement": "77"
+  },
+  {
+   "code": "77526",
+   "nom": "Vincy-Manœuvre",
+   "departement": "77"
+  },
+  {
+   "code": "77527",
+   "nom": "Voinsles",
+   "departement": "77"
+  },
+  {
+   "code": "77528",
+   "nom": "Voisenon",
+   "departement": "77"
+  },
+  {
+   "code": "77529",
+   "nom": "Voulangis",
+   "departement": "77"
+  },
+  {
+   "code": "77530",
+   "nom": "Voulton",
+   "departement": "77"
+  },
+  {
+   "code": "77531",
+   "nom": "Voulx",
+   "departement": "77"
+  },
+  {
+   "code": "77532",
+   "nom": "Vulaines-lès-Provins",
+   "departement": "77"
+  },
+  {
+   "code": "77533",
+   "nom": "Vulaines-sur-Seine",
+   "departement": "77"
+  },
+  {
+   "code": "77534",
+   "nom": "Yèbles",
+   "departement": "77"
+  },
+  {
+   "code": "78003",
+   "nom": "Ablis",
+   "departement": "78"
+  },
+  {
+   "code": "78005",
+   "nom": "Achères",
+   "departement": "78"
+  },
+  {
+   "code": "78006",
+   "nom": "Adainville",
+   "departement": "78"
+  },
+  {
+   "code": "78007",
+   "nom": "Aigremont",
+   "departement": "78"
+  },
+  {
+   "code": "78009",
+   "nom": "Allainville",
+   "departement": "78"
+  },
+  {
+   "code": "78010",
+   "nom": "Les Alluets-le-Roi",
+   "departement": "78"
+  },
+  {
+   "code": "78013",
+   "nom": "Andelu",
+   "departement": "78"
+  },
+  {
+   "code": "78015",
+   "nom": "Andrésy",
+   "departement": "78"
+  },
+  {
+   "code": "78020",
+   "nom": "Arnouville-lès-Mantes",
+   "departement": "78"
+  },
+  {
+   "code": "78029",
+   "nom": "Aubergenville",
+   "departement": "78"
+  },
+  {
+   "code": "78030",
+   "nom": "Auffargis",
+   "departement": "78"
+  },
+  {
+   "code": "78031",
+   "nom": "Auffreville-Brasseuil",
+   "departement": "78"
+  },
+  {
+   "code": "78033",
+   "nom": "Aulnay-sur-Mauldre",
+   "departement": "78"
+  },
+  {
+   "code": "78034",
+   "nom": "Auteuil",
+   "departement": "78"
+  },
+  {
+   "code": "78036",
+   "nom": "Autouillet",
+   "departement": "78"
+  },
+  {
+   "code": "78043",
+   "nom": "Bailly",
+   "departement": "78"
+  },
+  {
+   "code": "78048",
+   "nom": "Bazainville",
+   "departement": "78"
+  },
+  {
+   "code": "78049",
+   "nom": "Bazemont",
+   "departement": "78"
+  },
+  {
+   "code": "78050",
+   "nom": "Bazoches-sur-Guyonne",
+   "departement": "78"
+  },
+  {
+   "code": "78053",
+   "nom": "Béhoust",
+   "departement": "78"
+  },
+  {
+   "code": "78057",
+   "nom": "Bennecourt",
+   "departement": "78"
+  },
+  {
+   "code": "78062",
+   "nom": "Beynes",
+   "departement": "78"
+  },
+  {
+   "code": "78068",
+   "nom": "Blaru",
+   "departement": "78"
+  },
+  {
+   "code": "78070",
+   "nom": "Boinville-en-Mantois",
+   "departement": "78"
+  },
+  {
+   "code": "78071",
+   "nom": "Boinville-le-Gaillard",
+   "departement": "78"
+  },
+  {
+   "code": "78072",
+   "nom": "Boinvilliers",
+   "departement": "78"
+  },
+  {
+   "code": "78073",
+   "nom": "Bois-d'Arcy",
+   "departement": "78"
+  },
+  {
+   "code": "78076",
+   "nom": "Boissets",
+   "departement": "78"
+  },
+  {
+   "code": "78077",
+   "nom": "La Boissière-École",
+   "departement": "78"
+  },
+  {
+   "code": "78082",
+   "nom": "Boissy-Mauvoisin",
+   "departement": "78"
+  },
+  {
+   "code": "78084",
+   "nom": "Boissy-sans-Avoir",
+   "departement": "78"
+  },
+  {
+   "code": "78087",
+   "nom": "Bonnelles",
+   "departement": "78"
+  },
+  {
+   "code": "78089",
+   "nom": "Bonnières-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78090",
+   "nom": "Bouafle",
+   "departement": "78"
+  },
+  {
+   "code": "78092",
+   "nom": "Bougival",
+   "departement": "78"
+  },
+  {
+   "code": "78096",
+   "nom": "Bourdonné",
+   "departement": "78"
+  },
+  {
+   "code": "78104",
+   "nom": "Breuil-Bois-Robert",
+   "departement": "78"
+  },
+  {
+   "code": "78107",
+   "nom": "Bréval",
+   "departement": "78"
+  },
+  {
+   "code": "78108",
+   "nom": "Les Bréviaires",
+   "departement": "78"
+  },
+  {
+   "code": "78113",
+   "nom": "Brueil-en-Vexin",
+   "departement": "78"
+  },
+  {
+   "code": "78117",
+   "nom": "Buc",
+   "departement": "78"
+  },
+  {
+   "code": "78118",
+   "nom": "Buchelay",
+   "departement": "78"
+  },
+  {
+   "code": "78120",
+   "nom": "Bullion",
+   "departement": "78"
+  },
+  {
+   "code": "78123",
+   "nom": "Carrières-sous-Poissy",
+   "departement": "78"
+  },
+  {
+   "code": "78124",
+   "nom": "Carrières-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78125",
+   "nom": "La Celle-les-Bordes",
+   "departement": "78"
+  },
+  {
+   "code": "78126",
+   "nom": "La Celle-Saint-Cloud",
+   "departement": "78"
+  },
+  {
+   "code": "78128",
+   "nom": "Cernay-la-Ville",
+   "departement": "78"
+  },
+  {
+   "code": "78133",
+   "nom": "Chambourcy",
+   "departement": "78"
+  },
+  {
+   "code": "78138",
+   "nom": "Chanteloup-les-Vignes",
+   "departement": "78"
+  },
+  {
+   "code": "78140",
+   "nom": "Chapet",
+   "departement": "78"
+  },
+  {
+   "code": "78143",
+   "nom": "Châteaufort",
+   "departement": "78"
+  },
+  {
+   "code": "78146",
+   "nom": "Chatou",
+   "departement": "78"
+  },
+  {
+   "code": "78147",
+   "nom": "Chaufour-lès-Bonnières",
+   "departement": "78"
+  },
+  {
+   "code": "78152",
+   "nom": "Chavenay",
+   "departement": "78"
+  },
+  {
+   "code": "78158",
+   "nom": "Le Chesnay-Rocquencourt",
+   "departement": "78"
+  },
+  {
+   "code": "78160",
+   "nom": "Chevreuse",
+   "departement": "78"
+  },
+  {
+   "code": "78162",
+   "nom": "Choisel",
+   "departement": "78"
+  },
+  {
+   "code": "78163",
+   "nom": "Civry-la-Forêt",
+   "departement": "78"
+  },
+  {
+   "code": "78164",
+   "nom": "Clairefontaine-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78165",
+   "nom": "Les Clayes-sous-Bois",
+   "departement": "78"
+  },
+  {
+   "code": "78168",
+   "nom": "Coignières",
+   "departement": "78"
+  },
+  {
+   "code": "78171",
+   "nom": "Condé-sur-Vesgre",
+   "departement": "78"
+  },
+  {
+   "code": "78172",
+   "nom": "Conflans-Sainte-Honorine",
+   "departement": "78"
+  },
+  {
+   "code": "78185",
+   "nom": "Courgent",
+   "departement": "78"
+  },
+  {
+   "code": "78188",
+   "nom": "Cravent",
+   "departement": "78"
+  },
+  {
+   "code": "78189",
+   "nom": "Crespières",
+   "departement": "78"
+  },
+  {
+   "code": "78190",
+   "nom": "Croissy-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78192",
+   "nom": "Dammartin-en-Serve",
+   "departement": "78"
+  },
+  {
+   "code": "78193",
+   "nom": "Dampierre-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78194",
+   "nom": "Dannemarie",
+   "departement": "78"
+  },
+  {
+   "code": "78196",
+   "nom": "Davron",
+   "departement": "78"
+  },
+  {
+   "code": "78202",
+   "nom": "Drocourt",
+   "departement": "78"
+  },
+  {
+   "code": "78206",
+   "nom": "Ecquevilly",
+   "departement": "78"
+  },
+  {
+   "code": "78208",
+   "nom": "Élancourt",
+   "departement": "78"
+  },
+  {
+   "code": "78209",
+   "nom": "Émancé",
+   "departement": "78"
+  },
+  {
+   "code": "78217",
+   "nom": "Épône",
+   "departement": "78"
+  },
+  {
+   "code": "78220",
+   "nom": "Les Essarts-le-Roi",
+   "departement": "78"
+  },
+  {
+   "code": "78224",
+   "nom": "L'Étang-la-Ville",
+   "departement": "78"
+  },
+  {
+   "code": "78227",
+   "nom": "Évecquemont",
+   "departement": "78"
+  },
+  {
+   "code": "78230",
+   "nom": "La Falaise",
+   "departement": "78"
+  },
+  {
+   "code": "78231",
+   "nom": "Favrieux",
+   "departement": "78"
+  },
+  {
+   "code": "78233",
+   "nom": "Feucherolles",
+   "departement": "78"
+  },
+  {
+   "code": "78234",
+   "nom": "Flacourt",
+   "departement": "78"
+  },
+  {
+   "code": "78236",
+   "nom": "Flexanville",
+   "departement": "78"
+  },
+  {
+   "code": "78237",
+   "nom": "Flins-Neuve-Église",
+   "departement": "78"
+  },
+  {
+   "code": "78238",
+   "nom": "Flins-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78239",
+   "nom": "Follainville-Dennemont",
+   "departement": "78"
+  },
+  {
+   "code": "78242",
+   "nom": "Fontenay-le-Fleury",
+   "departement": "78"
+  },
+  {
+   "code": "78245",
+   "nom": "Fontenay-Mauvoisin",
+   "departement": "78"
+  },
+  {
+   "code": "78246",
+   "nom": "Fontenay-Saint-Père",
+   "departement": "78"
+  },
+  {
+   "code": "78255",
+   "nom": "Freneuse",
+   "departement": "78"
+  },
+  {
+   "code": "78261",
+   "nom": "Gaillon-sur-Montcient",
+   "departement": "78"
+  },
+  {
+   "code": "78262",
+   "nom": "Galluis",
+   "departement": "78"
+  },
+  {
+   "code": "78263",
+   "nom": "Gambais",
+   "departement": "78"
+  },
+  {
+   "code": "78264",
+   "nom": "Gambaiseuil",
+   "departement": "78"
+  },
+  {
+   "code": "78265",
+   "nom": "Garancières",
+   "departement": "78"
+  },
+  {
+   "code": "78267",
+   "nom": "Gargenville",
+   "departement": "78"
+  },
+  {
+   "code": "78269",
+   "nom": "Gazeran",
+   "departement": "78"
+  },
+  {
+   "code": "78276",
+   "nom": "Gommecourt",
+   "departement": "78"
+  },
+  {
+   "code": "78278",
+   "nom": "Goupillières",
+   "departement": "78"
+  },
+  {
+   "code": "78281",
+   "nom": "Goussonville",
+   "departement": "78"
+  },
+  {
+   "code": "78283",
+   "nom": "Grandchamp",
+   "departement": "78"
+  },
+  {
+   "code": "78285",
+   "nom": "Gressey",
+   "departement": "78"
+  },
+  {
+   "code": "78289",
+   "nom": "Grosrouvre",
+   "departement": "78"
+  },
+  {
+   "code": "78290",
+   "nom": "Guernes",
+   "departement": "78"
+  },
+  {
+   "code": "78291",
+   "nom": "Guerville",
+   "departement": "78"
+  },
+  {
+   "code": "78296",
+   "nom": "Guitrancourt",
+   "departement": "78"
+  },
+  {
+   "code": "78297",
+   "nom": "Guyancourt",
+   "departement": "78"
+  },
+  {
+   "code": "78299",
+   "nom": "Hardricourt",
+   "departement": "78"
+  },
+  {
+   "code": "78300",
+   "nom": "Hargeville",
+   "departement": "78"
+  },
+  {
+   "code": "78302",
+   "nom": "La Hauteville",
+   "departement": "78"
+  },
+  {
+   "code": "78305",
+   "nom": "Herbeville",
+   "departement": "78"
+  },
+  {
+   "code": "78307",
+   "nom": "Hermeray",
+   "departement": "78"
+  },
+  {
+   "code": "78310",
+   "nom": "Houdan",
+   "departement": "78"
+  },
+  {
+   "code": "78311",
+   "nom": "Houilles",
+   "departement": "78"
+  },
+  {
+   "code": "78314",
+   "nom": "Issou",
+   "departement": "78"
+  },
+  {
+   "code": "78317",
+   "nom": "Jambville",
+   "departement": "78"
+  },
+  {
+   "code": "78320",
+   "nom": "Notre-Dame-de-la-Mer",
+   "departement": "78"
+  },
+  {
+   "code": "78321",
+   "nom": "Jouars-Pontchartrain",
+   "departement": "78"
+  },
+  {
+   "code": "78322",
+   "nom": "Jouy-en-Josas",
+   "departement": "78"
+  },
+  {
+   "code": "78324",
+   "nom": "Jouy-Mauvoisin",
+   "departement": "78"
+  },
+  {
+   "code": "78325",
+   "nom": "Jumeauville",
+   "departement": "78"
+  },
+  {
+   "code": "78327",
+   "nom": "Juziers",
+   "departement": "78"
+  },
+  {
+   "code": "78329",
+   "nom": "Lainville-en-Vexin",
+   "departement": "78"
+  },
+  {
+   "code": "78334",
+   "nom": "Lévis-Saint-Nom",
+   "departement": "78"
+  },
+  {
+   "code": "78335",
+   "nom": "Limay",
+   "departement": "78"
+  },
+  {
+   "code": "78337",
+   "nom": "Limetz-Villez",
+   "departement": "78"
+  },
+  {
+   "code": "78343",
+   "nom": "Les Loges-en-Josas",
+   "departement": "78"
+  },
+  {
+   "code": "78344",
+   "nom": "Lommoye",
+   "departement": "78"
+  },
+  {
+   "code": "78346",
+   "nom": "Longnes",
+   "departement": "78"
+  },
+  {
+   "code": "78349",
+   "nom": "Longvilliers",
+   "departement": "78"
+  },
+  {
+   "code": "78350",
+   "nom": "Louveciennes",
+   "departement": "78"
+  },
+  {
+   "code": "78354",
+   "nom": "Magnanville",
+   "departement": "78"
+  },
+  {
+   "code": "78356",
+   "nom": "Magny-les-Hameaux",
+   "departement": "78"
+  },
+  {
+   "code": "78358",
+   "nom": "Maisons-Laffitte",
+   "departement": "78"
+  },
+  {
+   "code": "78361",
+   "nom": "Mantes-la-Jolie",
+   "departement": "78"
+  },
+  {
+   "code": "78362",
+   "nom": "Mantes-la-Ville",
+   "departement": "78"
+  },
+  {
+   "code": "78364",
+   "nom": "Marcq",
+   "departement": "78"
+  },
+  {
+   "code": "78366",
+   "nom": "Mareil-le-Guyon",
+   "departement": "78"
+  },
+  {
+   "code": "78367",
+   "nom": "Mareil-Marly",
+   "departement": "78"
+  },
+  {
+   "code": "78368",
+   "nom": "Mareil-sur-Mauldre",
+   "departement": "78"
+  },
+  {
+   "code": "78372",
+   "nom": "Marly-le-Roi",
+   "departement": "78"
+  },
+  {
+   "code": "78380",
+   "nom": "Maule",
+   "departement": "78"
+  },
+  {
+   "code": "78381",
+   "nom": "Maulette",
+   "departement": "78"
+  },
+  {
+   "code": "78382",
+   "nom": "Maurecourt",
+   "departement": "78"
+  },
+  {
+   "code": "78383",
+   "nom": "Maurepas",
+   "departement": "78"
+  },
+  {
+   "code": "78384",
+   "nom": "Médan",
+   "departement": "78"
+  },
+  {
+   "code": "78385",
+   "nom": "Ménerville",
+   "departement": "78"
+  },
+  {
+   "code": "78389",
+   "nom": "Méré",
+   "departement": "78"
+  },
+  {
+   "code": "78391",
+   "nom": "Méricourt",
+   "departement": "78"
+  },
+  {
+   "code": "78396",
+   "nom": "Le Mesnil-le-Roi",
+   "departement": "78"
+  },
+  {
+   "code": "78397",
+   "nom": "Le Mesnil-Saint-Denis",
+   "departement": "78"
+  },
+  {
+   "code": "78398",
+   "nom": "Les Mesnuls",
+   "departement": "78"
+  },
+  {
+   "code": "78401",
+   "nom": "Meulan-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78402",
+   "nom": "Mézières-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78403",
+   "nom": "Mézy-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78404",
+   "nom": "Millemont",
+   "departement": "78"
+  },
+  {
+   "code": "78406",
+   "nom": "Milon-la-Chapelle",
+   "departement": "78"
+  },
+  {
+   "code": "78407",
+   "nom": "Mittainville",
+   "departement": "78"
+  },
+  {
+   "code": "78410",
+   "nom": "Moisson",
+   "departement": "78"
+  },
+  {
+   "code": "78413",
+   "nom": "Mondreville",
+   "departement": "78"
+  },
+  {
+   "code": "78415",
+   "nom": "Montainville",
+   "departement": "78"
+  },
+  {
+   "code": "78416",
+   "nom": "Montalet-le-Bois",
+   "departement": "78"
+  },
+  {
+   "code": "78417",
+   "nom": "Montchauvet",
+   "departement": "78"
+  },
+  {
+   "code": "78418",
+   "nom": "Montesson",
+   "departement": "78"
+  },
+  {
+   "code": "78420",
+   "nom": "Montfort-l'Amaury",
+   "departement": "78"
+  },
+  {
+   "code": "78423",
+   "nom": "Montigny-le-Bretonneux",
+   "departement": "78"
+  },
+  {
+   "code": "78431",
+   "nom": "Morainvilliers",
+   "departement": "78"
+  },
+  {
+   "code": "78437",
+   "nom": "Mousseaux-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78439",
+   "nom": "Mulcent",
+   "departement": "78"
+  },
+  {
+   "code": "78440",
+   "nom": "Les Mureaux",
+   "departement": "78"
+  },
+  {
+   "code": "78442",
+   "nom": "Neauphle-le-Château",
+   "departement": "78"
+  },
+  {
+   "code": "78443",
+   "nom": "Neauphle-le-Vieux",
+   "departement": "78"
+  },
+  {
+   "code": "78444",
+   "nom": "Neauphlette",
+   "departement": "78"
+  },
+  {
+   "code": "78451",
+   "nom": "Nézel",
+   "departement": "78"
+  },
+  {
+   "code": "78455",
+   "nom": "Noisy-le-Roi",
+   "departement": "78"
+  },
+  {
+   "code": "78460",
+   "nom": "Oinville-sur-Montcient",
+   "departement": "78"
+  },
+  {
+   "code": "78464",
+   "nom": "Orcemont",
+   "departement": "78"
+  },
+  {
+   "code": "78465",
+   "nom": "Orgerus",
+   "departement": "78"
+  },
+  {
+   "code": "78466",
+   "nom": "Orgeval",
+   "departement": "78"
+  },
+  {
+   "code": "78470",
+   "nom": "Orphin",
+   "departement": "78"
+  },
+  {
+   "code": "78472",
+   "nom": "Orsonville",
+   "departement": "78"
+  },
+  {
+   "code": "78474",
+   "nom": "Orvilliers",
+   "departement": "78"
+  },
+  {
+   "code": "78475",
+   "nom": "Osmoy",
+   "departement": "78"
+  },
+  {
+   "code": "78478",
+   "nom": "Paray-Douaville",
+   "departement": "78"
+  },
+  {
+   "code": "78481",
+   "nom": "Le Pecq",
+   "departement": "78"
+  },
+  {
+   "code": "78484",
+   "nom": "Perdreauville",
+   "departement": "78"
+  },
+  {
+   "code": "78486",
+   "nom": "Le Perray-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78490",
+   "nom": "Plaisir",
+   "departement": "78"
+  },
+  {
+   "code": "78497",
+   "nom": "Poigny-la-Forêt",
+   "departement": "78"
+  },
+  {
+   "code": "78498",
+   "nom": "Poissy",
+   "departement": "78"
+  },
+  {
+   "code": "78499",
+   "nom": "Ponthévrard",
+   "departement": "78"
+  },
+  {
+   "code": "78501",
+   "nom": "Porcheville",
+   "departement": "78"
+  },
+  {
+   "code": "78502",
+   "nom": "Le Port-Marly",
+   "departement": "78"
+  },
+  {
+   "code": "78505",
+   "nom": "Prunay-le-Temple",
+   "departement": "78"
+  },
+  {
+   "code": "78506",
+   "nom": "Prunay-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78513",
+   "nom": "La Queue-les-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78516",
+   "nom": "Raizeux",
+   "departement": "78"
+  },
+  {
+   "code": "78517",
+   "nom": "Rambouillet",
+   "departement": "78"
+  },
+  {
+   "code": "78518",
+   "nom": "Rennemoulin",
+   "departement": "78"
+  },
+  {
+   "code": "78520",
+   "nom": "Richebourg",
+   "departement": "78"
+  },
+  {
+   "code": "78522",
+   "nom": "Rochefort-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78528",
+   "nom": "Rolleboise",
+   "departement": "78"
+  },
+  {
+   "code": "78530",
+   "nom": "Rosay",
+   "departement": "78"
+  },
+  {
+   "code": "78531",
+   "nom": "Rosny-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78536",
+   "nom": "Sailly",
+   "departement": "78"
+  },
+  {
+   "code": "78537",
+   "nom": "Saint-Arnoult-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78545",
+   "nom": "Saint-Cyr-l'École",
+   "departement": "78"
+  },
+  {
+   "code": "78548",
+   "nom": "Saint-Forget",
+   "departement": "78"
+  },
+  {
+   "code": "78550",
+   "nom": "Saint-Germain-de-la-Grange",
+   "departement": "78"
+  },
+  {
+   "code": "78551",
+   "nom": "Saint-Germain-en-Laye",
+   "departement": "78"
+  },
+  {
+   "code": "78557",
+   "nom": "Saint-Hilarion",
+   "departement": "78"
+  },
+  {
+   "code": "78558",
+   "nom": "Saint-Illiers-la-Ville",
+   "departement": "78"
+  },
+  {
+   "code": "78559",
+   "nom": "Saint-Illiers-le-Bois",
+   "departement": "78"
+  },
+  {
+   "code": "78561",
+   "nom": "Saint-Lambert",
+   "departement": "78"
+  },
+  {
+   "code": "78562",
+   "nom": "Saint-Léger-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78564",
+   "nom": "Saint-Martin-de-Bréthencourt",
+   "departement": "78"
+  },
+  {
+   "code": "78565",
+   "nom": "Saint-Martin-des-Champs",
+   "departement": "78"
+  },
+  {
+   "code": "78567",
+   "nom": "Saint-Martin-la-Garenne",
+   "departement": "78"
+  },
+  {
+   "code": "78569",
+   "nom": "Sainte-Mesme",
+   "departement": "78"
+  },
+  {
+   "code": "78571",
+   "nom": "Saint-Nom-la-Bretèche",
+   "departement": "78"
+  },
+  {
+   "code": "78575",
+   "nom": "Saint-Rémy-lès-Chevreuse",
+   "departement": "78"
+  },
+  {
+   "code": "78576",
+   "nom": "Saint-Rémy-l'Honoré",
+   "departement": "78"
+  },
+  {
+   "code": "78586",
+   "nom": "Sartrouville",
+   "departement": "78"
+  },
+  {
+   "code": "78588",
+   "nom": "Saulx-Marchais",
+   "departement": "78"
+  },
+  {
+   "code": "78590",
+   "nom": "Senlisse",
+   "departement": "78"
+  },
+  {
+   "code": "78591",
+   "nom": "Septeuil",
+   "departement": "78"
+  },
+  {
+   "code": "78597",
+   "nom": "Soindres",
+   "departement": "78"
+  },
+  {
+   "code": "78601",
+   "nom": "Sonchamp",
+   "departement": "78"
+  },
+  {
+   "code": "78605",
+   "nom": "Tacoignières",
+   "departement": "78"
+  },
+  {
+   "code": "78606",
+   "nom": "Le Tartre-Gaudran",
+   "departement": "78"
+  },
+  {
+   "code": "78608",
+   "nom": "Le Tertre-Saint-Denis",
+   "departement": "78"
+  },
+  {
+   "code": "78609",
+   "nom": "Tessancourt-sur-Aubette",
+   "departement": "78"
+  },
+  {
+   "code": "78615",
+   "nom": "Thiverval-Grignon",
+   "departement": "78"
+  },
+  {
+   "code": "78616",
+   "nom": "Thoiry",
+   "departement": "78"
+  },
+  {
+   "code": "78618",
+   "nom": "Tilly",
+   "departement": "78"
+  },
+  {
+   "code": "78620",
+   "nom": "Toussus-le-Noble",
+   "departement": "78"
+  },
+  {
+   "code": "78621",
+   "nom": "Trappes",
+   "departement": "78"
+  },
+  {
+   "code": "78623",
+   "nom": "Le Tremblay-sur-Mauldre",
+   "departement": "78"
+  },
+  {
+   "code": "78624",
+   "nom": "Triel-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78638",
+   "nom": "Vaux-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78640",
+   "nom": "Vélizy-Villacoublay",
+   "departement": "78"
+  },
+  {
+   "code": "78642",
+   "nom": "Verneuil-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78643",
+   "nom": "Vernouillet",
+   "departement": "78"
+  },
+  {
+   "code": "78644",
+   "nom": "La Verrière",
+   "departement": "78"
+  },
+  {
+   "code": "78646",
+   "nom": "Versailles",
+   "departement": "78"
+  },
+  {
+   "code": "78647",
+   "nom": "Vert",
+   "departement": "78"
+  },
+  {
+   "code": "78650",
+   "nom": "Le Vésinet",
+   "departement": "78"
+  },
+  {
+   "code": "78653",
+   "nom": "Vicq",
+   "departement": "78"
+  },
+  {
+   "code": "78655",
+   "nom": "Vieille-Église-en-Yvelines",
+   "departement": "78"
+  },
+  {
+   "code": "78668",
+   "nom": "La Villeneuve-en-Chevrie",
+   "departement": "78"
+  },
+  {
+   "code": "78672",
+   "nom": "Villennes-sur-Seine",
+   "departement": "78"
+  },
+  {
+   "code": "78674",
+   "nom": "Villepreux",
+   "departement": "78"
+  },
+  {
+   "code": "78677",
+   "nom": "Villette",
+   "departement": "78"
+  },
+  {
+   "code": "78681",
+   "nom": "Villiers-le-Mahieu",
+   "departement": "78"
+  },
+  {
+   "code": "78683",
+   "nom": "Villiers-Saint-Frédéric",
+   "departement": "78"
+  },
+  {
+   "code": "78686",
+   "nom": "Viroflay",
+   "departement": "78"
+  },
+  {
+   "code": "78688",
+   "nom": "Voisins-le-Bretonneux",
+   "departement": "78"
+  },
+  {
+   "code": "91001",
+   "nom": "Abbéville-la-Rivière",
+   "departement": "91"
+  },
+  {
+   "code": "91016",
+   "nom": "Angerville",
+   "departement": "91"
+  },
+  {
+   "code": "91017",
+   "nom": "Angervilliers",
+   "departement": "91"
+  },
+  {
+   "code": "91021",
+   "nom": "Arpajon",
+   "departement": "91"
+  },
+  {
+   "code": "91022",
+   "nom": "Arrancourt",
+   "departement": "91"
+  },
+  {
+   "code": "91027",
+   "nom": "Athis-Mons",
+   "departement": "91"
+  },
+  {
+   "code": "91035",
+   "nom": "Authon-la-Plaine",
+   "departement": "91"
+  },
+  {
+   "code": "91037",
+   "nom": "Auvernaux",
+   "departement": "91"
+  },
+  {
+   "code": "91038",
+   "nom": "Auvers-Saint-Georges",
+   "departement": "91"
+  },
+  {
+   "code": "91041",
+   "nom": "Avrainville",
+   "departement": "91"
+  },
+  {
+   "code": "91044",
+   "nom": "Ballainvilliers",
+   "departement": "91"
+  },
+  {
+   "code": "91045",
+   "nom": "Ballancourt-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91047",
+   "nom": "Baulne",
+   "departement": "91"
+  },
+  {
+   "code": "91064",
+   "nom": "Bièvres",
+   "departement": "91"
+  },
+  {
+   "code": "91067",
+   "nom": "Blandy",
+   "departement": "91"
+  },
+  {
+   "code": "91069",
+   "nom": "Boigneville",
+   "departement": "91"
+  },
+  {
+   "code": "91075",
+   "nom": "Bois-Herpin",
+   "departement": "91"
+  },
+  {
+   "code": "91079",
+   "nom": "Boissy-la-Rivière",
+   "departement": "91"
+  },
+  {
+   "code": "91080",
+   "nom": "Boissy-le-Cutté",
+   "departement": "91"
+  },
+  {
+   "code": "91081",
+   "nom": "Boissy-le-Sec",
+   "departement": "91"
+  },
+  {
+   "code": "91085",
+   "nom": "Boissy-sous-Saint-Yon",
+   "departement": "91"
+  },
+  {
+   "code": "91086",
+   "nom": "Bondoufle",
+   "departement": "91"
+  },
+  {
+   "code": "91093",
+   "nom": "Boullay-les-Troux",
+   "departement": "91"
+  },
+  {
+   "code": "91095",
+   "nom": "Bouray-sur-Juine",
+   "departement": "91"
+  },
+  {
+   "code": "91097",
+   "nom": "Boussy-Saint-Antoine",
+   "departement": "91"
+  },
+  {
+   "code": "91098",
+   "nom": "Boutervilliers",
+   "departement": "91"
+  },
+  {
+   "code": "91099",
+   "nom": "Boutigny-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91100",
+   "nom": "Bouville",
+   "departement": "91"
+  },
+  {
+   "code": "91103",
+   "nom": "Brétigny-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91105",
+   "nom": "Breuillet",
+   "departement": "91"
+  },
+  {
+   "code": "91106",
+   "nom": "Breux-Jouy",
+   "departement": "91"
+  },
+  {
+   "code": "91109",
+   "nom": "Brières-les-Scellés",
+   "departement": "91"
+  },
+  {
+   "code": "91111",
+   "nom": "Briis-sous-Forges",
+   "departement": "91"
+  },
+  {
+   "code": "91112",
+   "nom": "Brouy",
+   "departement": "91"
+  },
+  {
+   "code": "91114",
+   "nom": "Brunoy",
+   "departement": "91"
+  },
+  {
+   "code": "91115",
+   "nom": "Bruyères-le-Châtel",
+   "departement": "91"
+  },
+  {
+   "code": "91121",
+   "nom": "Buno-Bonnevaux",
+   "departement": "91"
+  },
+  {
+   "code": "91122",
+   "nom": "Bures-sur-Yvette",
+   "departement": "91"
+  },
+  {
+   "code": "91129",
+   "nom": "Cerny",
+   "departement": "91"
+  },
+  {
+   "code": "91130",
+   "nom": "Chalo-Saint-Mars",
+   "departement": "91"
+  },
+  {
+   "code": "91131",
+   "nom": "Chalou-Moulineux",
+   "departement": "91"
+  },
+  {
+   "code": "91132",
+   "nom": "Chamarande",
+   "departement": "91"
+  },
+  {
+   "code": "91135",
+   "nom": "Champcueil",
+   "departement": "91"
+  },
+  {
+   "code": "91136",
+   "nom": "Champlan",
+   "departement": "91"
+  },
+  {
+   "code": "91137",
+   "nom": "Champmotteux",
+   "departement": "91"
+  },
+  {
+   "code": "91145",
+   "nom": "Chatignonville",
+   "departement": "91"
+  },
+  {
+   "code": "91148",
+   "nom": "Chauffour-lès-Étréchy",
+   "departement": "91"
+  },
+  {
+   "code": "91156",
+   "nom": "Cheptainville",
+   "departement": "91"
+  },
+  {
+   "code": "91159",
+   "nom": "Chevannes",
+   "departement": "91"
+  },
+  {
+   "code": "91161",
+   "nom": "Chilly-Mazarin",
+   "departement": "91"
+  },
+  {
+   "code": "91174",
+   "nom": "Corbeil-Essonnes",
+   "departement": "91"
+  },
+  {
+   "code": "91175",
+   "nom": "Corbreuse",
+   "departement": "91"
+  },
+  {
+   "code": "91179",
+   "nom": "Le Coudray-Montceaux",
+   "departement": "91"
+  },
+  {
+   "code": "91180",
+   "nom": "Courances",
+   "departement": "91"
+  },
+  {
+   "code": "91184",
+   "nom": "Courdimanche-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91186",
+   "nom": "Courson-Monteloup",
+   "departement": "91"
+  },
+  {
+   "code": "91191",
+   "nom": "Crosne",
+   "departement": "91"
+  },
+  {
+   "code": "91195",
+   "nom": "Dannemois",
+   "departement": "91"
+  },
+  {
+   "code": "91198",
+   "nom": "D'Huison-Longueville",
+   "departement": "91"
+  },
+  {
+   "code": "91200",
+   "nom": "Dourdan",
+   "departement": "91"
+  },
+  {
+   "code": "91201",
+   "nom": "Draveil",
+   "departement": "91"
+  },
+  {
+   "code": "91204",
+   "nom": "Écharcon",
+   "departement": "91"
+  },
+  {
+   "code": "91207",
+   "nom": "Égly",
+   "departement": "91"
+  },
+  {
+   "code": "91215",
+   "nom": "Épinay-sous-Sénart",
+   "departement": "91"
+  },
+  {
+   "code": "91216",
+   "nom": "Épinay-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91223",
+   "nom": "Étampes",
+   "departement": "91"
+  },
+  {
+   "code": "91225",
+   "nom": "Étiolles",
+   "departement": "91"
+  },
+  {
+   "code": "91226",
+   "nom": "Étréchy",
+   "departement": "91"
+  },
+  {
+   "code": "91228",
+   "nom": "Évry-Courcouronnes",
+   "departement": "91"
+  },
+  {
+   "code": "91232",
+   "nom": "La Ferté-Alais",
+   "departement": "91"
+  },
+  {
+   "code": "91235",
+   "nom": "Fleury-Mérogis",
+   "departement": "91"
+  },
+  {
+   "code": "91240",
+   "nom": "Fontaine-la-Rivière",
+   "departement": "91"
+  },
+  {
+   "code": "91243",
+   "nom": "Fontenay-lès-Briis",
+   "departement": "91"
+  },
+  {
+   "code": "91244",
+   "nom": "Fontenay-le-Vicomte",
+   "departement": "91"
+  },
+  {
+   "code": "91247",
+   "nom": "La Forêt-le-Roi",
+   "departement": "91"
+  },
+  {
+   "code": "91248",
+   "nom": "La Forêt-Sainte-Croix",
+   "departement": "91"
+  },
+  {
+   "code": "91249",
+   "nom": "Forges-les-Bains",
+   "departement": "91"
+  },
+  {
+   "code": "91272",
+   "nom": "Gif-sur-Yvette",
+   "departement": "91"
+  },
+  {
+   "code": "91273",
+   "nom": "Gironville-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91274",
+   "nom": "Gometz-la-Ville",
+   "departement": "91"
+  },
+  {
+   "code": "91275",
+   "nom": "Gometz-le-Châtel",
+   "departement": "91"
+  },
+  {
+   "code": "91284",
+   "nom": "Les Granges-le-Roi",
+   "departement": "91"
+  },
+  {
+   "code": "91286",
+   "nom": "Grigny",
+   "departement": "91"
+  },
+  {
+   "code": "91292",
+   "nom": "Guibeville",
+   "departement": "91"
+  },
+  {
+   "code": "91293",
+   "nom": "Guigneville-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91294",
+   "nom": "Guillerval",
+   "departement": "91"
+  },
+  {
+   "code": "91312",
+   "nom": "Igny",
+   "departement": "91"
+  },
+  {
+   "code": "91315",
+   "nom": "Itteville",
+   "departement": "91"
+  },
+  {
+   "code": "91318",
+   "nom": "Janville-sur-Juine",
+   "departement": "91"
+  },
+  {
+   "code": "91319",
+   "nom": "Janvry",
+   "departement": "91"
+  },
+  {
+   "code": "91326",
+   "nom": "Juvisy-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91330",
+   "nom": "Lardy",
+   "departement": "91"
+  },
+  {
+   "code": "91332",
+   "nom": "Leudeville",
+   "departement": "91"
+  },
+  {
+   "code": "91333",
+   "nom": "Leuville-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91338",
+   "nom": "Limours",
+   "departement": "91"
+  },
+  {
+   "code": "91339",
+   "nom": "Linas",
+   "departement": "91"
+  },
+  {
+   "code": "91340",
+   "nom": "Lisses",
+   "departement": "91"
+  },
+  {
+   "code": "91345",
+   "nom": "Longjumeau",
+   "departement": "91"
+  },
+  {
+   "code": "91347",
+   "nom": "Longpont-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91359",
+   "nom": "Maisse",
+   "departement": "91"
+  },
+  {
+   "code": "91363",
+   "nom": "Marcoussis",
+   "departement": "91"
+  },
+  {
+   "code": "91374",
+   "nom": "Marolles-en-Beauce",
+   "departement": "91"
+  },
+  {
+   "code": "91376",
+   "nom": "Marolles-en-Hurepoix",
+   "departement": "91"
+  },
+  {
+   "code": "91377",
+   "nom": "Massy",
+   "departement": "91"
+  },
+  {
+   "code": "91378",
+   "nom": "Mauchamps",
+   "departement": "91"
+  },
+  {
+   "code": "91386",
+   "nom": "Mennecy",
+   "departement": "91"
+  },
+  {
+   "code": "91390",
+   "nom": "Le Mérévillois",
+   "departement": "91"
+  },
+  {
+   "code": "91393",
+   "nom": "Mérobert",
+   "departement": "91"
+  },
+  {
+   "code": "91399",
+   "nom": "Mespuits",
+   "departement": "91"
+  },
+  {
+   "code": "91405",
+   "nom": "Milly-la-Forêt",
+   "departement": "91"
+  },
+  {
+   "code": "91408",
+   "nom": "Moigny-sur-École",
+   "departement": "91"
+  },
+  {
+   "code": "91411",
+   "nom": "Les Molières",
+   "departement": "91"
+  },
+  {
+   "code": "91412",
+   "nom": "Mondeville",
+   "departement": "91"
+  },
+  {
+   "code": "91414",
+   "nom": "Monnerville",
+   "departement": "91"
+  },
+  {
+   "code": "91421",
+   "nom": "Montgeron",
+   "departement": "91"
+  },
+  {
+   "code": "91425",
+   "nom": "Montlhéry",
+   "departement": "91"
+  },
+  {
+   "code": "91432",
+   "nom": "Morangis",
+   "departement": "91"
+  },
+  {
+   "code": "91433",
+   "nom": "Morigny-Champigny",
+   "departement": "91"
+  },
+  {
+   "code": "91434",
+   "nom": "Morsang-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91435",
+   "nom": "Morsang-sur-Seine",
+   "departement": "91"
+  },
+  {
+   "code": "91441",
+   "nom": "Nainville-les-Roches",
+   "departement": "91"
+  },
+  {
+   "code": "91457",
+   "nom": "La Norville",
+   "departement": "91"
+  },
+  {
+   "code": "91458",
+   "nom": "Nozay",
+   "departement": "91"
+  },
+  {
+   "code": "91461",
+   "nom": "Ollainville",
+   "departement": "91"
+  },
+  {
+   "code": "91463",
+   "nom": "Oncy-sur-École",
+   "departement": "91"
+  },
+  {
+   "code": "91468",
+   "nom": "Ormoy",
+   "departement": "91"
+  },
+  {
+   "code": "91469",
+   "nom": "Ormoy-la-Rivière",
+   "departement": "91"
+  },
+  {
+   "code": "91471",
+   "nom": "Orsay",
+   "departement": "91"
+  },
+  {
+   "code": "91473",
+   "nom": "Orveau",
+   "departement": "91"
+  },
+  {
+   "code": "91477",
+   "nom": "Palaiseau",
+   "departement": "91"
+  },
+  {
+   "code": "91479",
+   "nom": "Paray-Vieille-Poste",
+   "departement": "91"
+  },
+  {
+   "code": "91482",
+   "nom": "Pecqueuse",
+   "departement": "91"
+  },
+  {
+   "code": "91494",
+   "nom": "Le Plessis-Pâté",
+   "departement": "91"
+  },
+  {
+   "code": "91495",
+   "nom": "Plessis-Saint-Benoist",
+   "departement": "91"
+  },
+  {
+   "code": "91507",
+   "nom": "Prunay-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91508",
+   "nom": "Puiselet-le-Marais",
+   "departement": "91"
+  },
+  {
+   "code": "91511",
+   "nom": "Pussay",
+   "departement": "91"
+  },
+  {
+   "code": "91514",
+   "nom": "Quincy-sous-Sénart",
+   "departement": "91"
+  },
+  {
+   "code": "91519",
+   "nom": "Richarville",
+   "departement": "91"
+  },
+  {
+   "code": "91521",
+   "nom": "Ris-Orangis",
+   "departement": "91"
+  },
+  {
+   "code": "91525",
+   "nom": "Roinville",
+   "departement": "91"
+  },
+  {
+   "code": "91526",
+   "nom": "Roinvilliers",
+   "departement": "91"
+  },
+  {
+   "code": "91533",
+   "nom": "Saclas",
+   "departement": "91"
+  },
+  {
+   "code": "91534",
+   "nom": "Saclay",
+   "departement": "91"
+  },
+  {
+   "code": "91538",
+   "nom": "Saint-Aubin",
+   "departement": "91"
+  },
+  {
+   "code": "91540",
+   "nom": "Saint-Chéron",
+   "departement": "91"
+  },
+  {
+   "code": "91544",
+   "nom": "Saint-Cyr-la-Rivière",
+   "departement": "91"
+  },
+  {
+   "code": "91546",
+   "nom": "Saint-Cyr-sous-Dourdan",
+   "departement": "91"
+  },
+  {
+   "code": "91547",
+   "nom": "Saint-Escobille",
+   "departement": "91"
+  },
+  {
+   "code": "91549",
+   "nom": "Sainte-Geneviève-des-Bois",
+   "departement": "91"
+  },
+  {
+   "code": "91552",
+   "nom": "Saint-Germain-lès-Arpajon",
+   "departement": "91"
+  },
+  {
+   "code": "91553",
+   "nom": "Saint-Germain-lès-Corbeil",
+   "departement": "91"
+  },
+  {
+   "code": "91556",
+   "nom": "Saint-Hilaire",
+   "departement": "91"
+  },
+  {
+   "code": "91560",
+   "nom": "Saint-Jean-de-Beauregard",
+   "departement": "91"
+  },
+  {
+   "code": "91568",
+   "nom": "Saint-Maurice-Montcouronne",
+   "departement": "91"
+  },
+  {
+   "code": "91570",
+   "nom": "Saint-Michel-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91573",
+   "nom": "Saint-Pierre-du-Perray",
+   "departement": "91"
+  },
+  {
+   "code": "91577",
+   "nom": "Saintry-sur-Seine",
+   "departement": "91"
+  },
+  {
+   "code": "91578",
+   "nom": "Saint-Sulpice-de-Favières",
+   "departement": "91"
+  },
+  {
+   "code": "91579",
+   "nom": "Saint-Vrain",
+   "departement": "91"
+  },
+  {
+   "code": "91581",
+   "nom": "Saint-Yon",
+   "departement": "91"
+  },
+  {
+   "code": "91587",
+   "nom": "Saulx-les-Chartreux",
+   "departement": "91"
+  },
+  {
+   "code": "91589",
+   "nom": "Savigny-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91593",
+   "nom": "Sermaise",
+   "departement": "91"
+  },
+  {
+   "code": "91599",
+   "nom": "Soisy-sur-École",
+   "departement": "91"
+  },
+  {
+   "code": "91600",
+   "nom": "Soisy-sur-Seine",
+   "departement": "91"
+  },
+  {
+   "code": "91602",
+   "nom": "Souzy-la-Briche",
+   "departement": "91"
+  },
+  {
+   "code": "91613",
+   "nom": "Congerville-Thionville",
+   "departement": "91"
+  },
+  {
+   "code": "91617",
+   "nom": "Tigery",
+   "departement": "91"
+  },
+  {
+   "code": "91619",
+   "nom": "Torfou",
+   "departement": "91"
+  },
+  {
+   "code": "91629",
+   "nom": "Valpuiseaux",
+   "departement": "91"
+  },
+  {
+   "code": "91630",
+   "nom": "Le Val-Saint-Germain",
+   "departement": "91"
+  },
+  {
+   "code": "91631",
+   "nom": "Varennes-Jarcy",
+   "departement": "91"
+  },
+  {
+   "code": "91634",
+   "nom": "Vaugrigneuse",
+   "departement": "91"
+  },
+  {
+   "code": "91635",
+   "nom": "Vauhallan",
+   "departement": "91"
+  },
+  {
+   "code": "91639",
+   "nom": "Vayres-sur-Essonne",
+   "departement": "91"
+  },
+  {
+   "code": "91645",
+   "nom": "Verrières-le-Buisson",
+   "departement": "91"
+  },
+  {
+   "code": "91648",
+   "nom": "Vert-le-Grand",
+   "departement": "91"
+  },
+  {
+   "code": "91649",
+   "nom": "Vert-le-Petit",
+   "departement": "91"
+  },
+  {
+   "code": "91654",
+   "nom": "Videlles",
+   "departement": "91"
+  },
+  {
+   "code": "91657",
+   "nom": "Vigneux-sur-Seine",
+   "departement": "91"
+  },
+  {
+   "code": "91659",
+   "nom": "Villabé",
+   "departement": "91"
+  },
+  {
+   "code": "91661",
+   "nom": "Villebon-sur-Yvette",
+   "departement": "91"
+  },
+  {
+   "code": "91662",
+   "nom": "Villeconin",
+   "departement": "91"
+  },
+  {
+   "code": "91665",
+   "nom": "La Ville-du-Bois",
+   "departement": "91"
+  },
+  {
+   "code": "91666",
+   "nom": "Villejust",
+   "departement": "91"
+  },
+  {
+   "code": "91667",
+   "nom": "Villemoisson-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91671",
+   "nom": "Villeneuve-sur-Auvers",
+   "departement": "91"
+  },
+  {
+   "code": "91679",
+   "nom": "Villiers-le-Bâcle",
+   "departement": "91"
+  },
+  {
+   "code": "91685",
+   "nom": "Villiers-sur-Orge",
+   "departement": "91"
+  },
+  {
+   "code": "91687",
+   "nom": "Viry-Châtillon",
+   "departement": "91"
+  },
+  {
+   "code": "91689",
+   "nom": "Wissous",
+   "departement": "91"
+  },
+  {
+   "code": "91691",
+   "nom": "Yerres",
+   "departement": "91"
+  },
+  {
+   "code": "91692",
+   "nom": "Les Ulis",
+   "departement": "91"
+  },
+  {
+   "code": "92002",
+   "nom": "Antony",
+   "departement": "92"
+  },
+  {
+   "code": "92004",
+   "nom": "Asnières-sur-Seine",
+   "departement": "92"
+  },
+  {
+   "code": "92007",
+   "nom": "Bagneux",
+   "departement": "92"
+  },
+  {
+   "code": "92009",
+   "nom": "Bois-Colombes",
+   "departement": "92"
+  },
+  {
+   "code": "92012",
+   "nom": "Boulogne-Billancourt",
+   "departement": "92"
+  },
+  {
+   "code": "92014",
+   "nom": "Bourg-la-Reine",
+   "departement": "92"
+  },
+  {
+   "code": "92019",
+   "nom": "Châtenay-Malabry",
+   "departement": "92"
+  },
+  {
+   "code": "92020",
+   "nom": "Châtillon",
+   "departement": "92"
+  },
+  {
+   "code": "92022",
+   "nom": "Chaville",
+   "departement": "92"
+  },
+  {
+   "code": "92023",
+   "nom": "Clamart",
+   "departement": "92"
+  },
+  {
+   "code": "92024",
+   "nom": "Clichy",
+   "departement": "92"
+  },
+  {
+   "code": "92025",
+   "nom": "Colombes",
+   "departement": "92"
+  },
+  {
+   "code": "92026",
+   "nom": "Courbevoie",
+   "departement": "92"
+  },
+  {
+   "code": "92032",
+   "nom": "Fontenay-aux-Roses",
+   "departement": "92"
+  },
+  {
+   "code": "92033",
+   "nom": "Garches",
+   "departement": "92"
+  },
+  {
+   "code": "92035",
+   "nom": "La Garenne-Colombes",
+   "departement": "92"
+  },
+  {
+   "code": "92036",
+   "nom": "Gennevilliers",
+   "departement": "92"
+  },
+  {
+   "code": "92040",
+   "nom": "Issy-les-Moulineaux",
+   "departement": "92"
+  },
+  {
+   "code": "92044",
+   "nom": "Levallois-Perret",
+   "departement": "92"
+  },
+  {
+   "code": "92046",
+   "nom": "Malakoff",
+   "departement": "92"
+  },
+  {
+   "code": "92047",
+   "nom": "Marnes-la-Coquette",
+   "departement": "92"
+  },
+  {
+   "code": "92048",
+   "nom": "Meudon",
+   "departement": "92"
+  },
+  {
+   "code": "92049",
+   "nom": "Montrouge",
+   "departement": "92"
+  },
+  {
+   "code": "92050",
+   "nom": "Nanterre",
+   "departement": "92"
+  },
+  {
+   "code": "92051",
+   "nom": "Neuilly-sur-Seine",
+   "departement": "92"
+  },
+  {
+   "code": "92060",
+   "nom": "Le Plessis-Robinson",
+   "departement": "92"
+  },
+  {
+   "code": "92062",
+   "nom": "Puteaux",
+   "departement": "92"
+  },
+  {
+   "code": "92063",
+   "nom": "Rueil-Malmaison",
+   "departement": "92"
+  },
+  {
+   "code": "92064",
+   "nom": "Saint-Cloud",
+   "departement": "92"
+  },
+  {
+   "code": "92071",
+   "nom": "Sceaux",
+   "departement": "92"
+  },
+  {
+   "code": "92072",
+   "nom": "Sèvres",
+   "departement": "92"
+  },
+  {
+   "code": "92073",
+   "nom": "Suresnes",
+   "departement": "92"
+  },
+  {
+   "code": "92075",
+   "nom": "Vanves",
+   "departement": "92"
+  },
+  {
+   "code": "92076",
+   "nom": "Vaucresson",
+   "departement": "92"
+  },
+  {
+   "code": "92077",
+   "nom": "Ville-d'Avray",
+   "departement": "92"
+  },
+  {
+   "code": "92078",
+   "nom": "Villeneuve-la-Garenne",
+   "departement": "92"
+  },
+  {
+   "code": "93001",
+   "nom": "Aubervilliers",
+   "departement": "93"
+  },
+  {
+   "code": "93005",
+   "nom": "Aulnay-sous-Bois",
+   "departement": "93"
+  },
+  {
+   "code": "93006",
+   "nom": "Bagnolet",
+   "departement": "93"
+  },
+  {
+   "code": "93007",
+   "nom": "Le Blanc-Mesnil",
+   "departement": "93"
+  },
+  {
+   "code": "93008",
+   "nom": "Bobigny",
+   "departement": "93"
+  },
+  {
+   "code": "93010",
+   "nom": "Bondy",
+   "departement": "93"
+  },
+  {
+   "code": "93013",
+   "nom": "Le Bourget",
+   "departement": "93"
+  },
+  {
+   "code": "93014",
+   "nom": "Clichy-sous-Bois",
+   "departement": "93"
+  },
+  {
+   "code": "93015",
+   "nom": "Coubron",
+   "departement": "93"
+  },
+  {
+   "code": "93027",
+   "nom": "La Courneuve",
+   "departement": "93"
+  },
+  {
+   "code": "93029",
+   "nom": "Drancy",
+   "departement": "93"
+  },
+  {
+   "code": "93030",
+   "nom": "Dugny",
+   "departement": "93"
+  },
+  {
+   "code": "93031",
+   "nom": "Épinay-sur-Seine",
+   "departement": "93"
+  },
+  {
+   "code": "93032",
+   "nom": "Gagny",
+   "departement": "93"
+  },
+  {
+   "code": "93033",
+   "nom": "Gournay-sur-Marne",
+   "departement": "93"
+  },
+  {
+   "code": "93039",
+   "nom": "L'Île-Saint-Denis",
+   "departement": "93"
+  },
+  {
+   "code": "93045",
+   "nom": "Les Lilas",
+   "departement": "93"
+  },
+  {
+   "code": "93046",
+   "nom": "Livry-Gargan",
+   "departement": "93"
+  },
+  {
+   "code": "93047",
+   "nom": "Montfermeil",
+   "departement": "93"
+  },
+  {
+   "code": "93048",
+   "nom": "Montreuil",
+   "departement": "93"
+  },
+  {
+   "code": "93049",
+   "nom": "Neuilly-Plaisance",
+   "departement": "93"
+  },
+  {
+   "code": "93050",
+   "nom": "Neuilly-sur-Marne",
+   "departement": "93"
+  },
+  {
+   "code": "93051",
+   "nom": "Noisy-le-Grand",
+   "departement": "93"
+  },
+  {
+   "code": "93053",
+   "nom": "Noisy-le-Sec",
+   "departement": "93"
+  },
+  {
+   "code": "93055",
+   "nom": "Pantin",
+   "departement": "93"
+  },
+  {
+   "code": "93057",
+   "nom": "Les Pavillons-sous-Bois",
+   "departement": "93"
+  },
+  {
+   "code": "93059",
+   "nom": "Pierrefitte-sur-Seine (réunie à Saint-Denis en 2025, encore à part dans les fichiers de 2022)",
+   "departement": "93"
+  },
+  {
+   "code": "93061",
+   "nom": "Le Pré-Saint-Gervais",
+   "departement": "93"
+  },
+  {
+   "code": "93062",
+   "nom": "Le Raincy",
+   "departement": "93"
+  },
+  {
+   "code": "93063",
+   "nom": "Romainville",
+   "departement": "93"
+  },
+  {
+   "code": "93064",
+   "nom": "Rosny-sous-Bois",
+   "departement": "93"
+  },
+  {
+   "code": "93066",
+   "nom": "Saint-Denis",
+   "departement": "93"
+  },
+  {
+   "code": "93070",
+   "nom": "Saint-Ouen-sur-Seine",
+   "departement": "93"
+  },
+  {
+   "code": "93071",
+   "nom": "Sevran",
+   "departement": "93"
+  },
+  {
+   "code": "93072",
+   "nom": "Stains",
+   "departement": "93"
+  },
+  {
+   "code": "93073",
+   "nom": "Tremblay-en-France",
+   "departement": "93"
+  },
+  {
+   "code": "93074",
+   "nom": "Vaujours",
+   "departement": "93"
+  },
+  {
+   "code": "93077",
+   "nom": "Villemomble",
+   "departement": "93"
+  },
+  {
+   "code": "93078",
+   "nom": "Villepinte",
+   "departement": "93"
+  },
+  {
+   "code": "93079",
+   "nom": "Villetaneuse",
+   "departement": "93"
+  },
+  {
+   "code": "94001",
+   "nom": "Ablon-sur-Seine",
+   "departement": "94"
+  },
+  {
+   "code": "94002",
+   "nom": "Alfortville",
+   "departement": "94"
+  },
+  {
+   "code": "94003",
+   "nom": "Arcueil",
+   "departement": "94"
+  },
+  {
+   "code": "94004",
+   "nom": "Boissy-Saint-Léger",
+   "departement": "94"
+  },
+  {
+   "code": "94011",
+   "nom": "Bonneuil-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94015",
+   "nom": "Bry-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94016",
+   "nom": "Cachan",
+   "departement": "94"
+  },
+  {
+   "code": "94017",
+   "nom": "Champigny-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94018",
+   "nom": "Charenton-le-Pont",
+   "departement": "94"
+  },
+  {
+   "code": "94019",
+   "nom": "Chennevières-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94021",
+   "nom": "Chevilly-Larue",
+   "departement": "94"
+  },
+  {
+   "code": "94022",
+   "nom": "Choisy-le-Roi",
+   "departement": "94"
+  },
+  {
+   "code": "94028",
+   "nom": "Créteil",
+   "departement": "94"
+  },
+  {
+   "code": "94033",
+   "nom": "Fontenay-sous-Bois",
+   "departement": "94"
+  },
+  {
+   "code": "94034",
+   "nom": "Fresnes",
+   "departement": "94"
+  },
+  {
+   "code": "94037",
+   "nom": "Gentilly",
+   "departement": "94"
+  },
+  {
+   "code": "94038",
+   "nom": "L'Haÿ-les-Roses",
+   "departement": "94"
+  },
+  {
+   "code": "94041",
+   "nom": "Ivry-sur-Seine",
+   "departement": "94"
+  },
+  {
+   "code": "94042",
+   "nom": "Joinville-le-Pont",
+   "departement": "94"
+  },
+  {
+   "code": "94043",
+   "nom": "Le Kremlin-Bicêtre",
+   "departement": "94"
+  },
+  {
+   "code": "94044",
+   "nom": "Limeil-Brévannes",
+   "departement": "94"
+  },
+  {
+   "code": "94046",
+   "nom": "Maisons-Alfort",
+   "departement": "94"
+  },
+  {
+   "code": "94047",
+   "nom": "Mandres-les-Roses",
+   "departement": "94"
+  },
+  {
+   "code": "94048",
+   "nom": "Marolles-en-Brie",
+   "departement": "94"
+  },
+  {
+   "code": "94052",
+   "nom": "Nogent-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94053",
+   "nom": "Noiseau",
+   "departement": "94"
+  },
+  {
+   "code": "94054",
+   "nom": "Orly",
+   "departement": "94"
+  },
+  {
+   "code": "94055",
+   "nom": "Ormesson-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94056",
+   "nom": "Périgny",
+   "departement": "94"
+  },
+  {
+   "code": "94058",
+   "nom": "Le Perreux-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94059",
+   "nom": "Le Plessis-Trévise",
+   "departement": "94"
+  },
+  {
+   "code": "94060",
+   "nom": "La Queue-en-Brie",
+   "departement": "94"
+  },
+  {
+   "code": "94065",
+   "nom": "Rungis",
+   "departement": "94"
+  },
+  {
+   "code": "94067",
+   "nom": "Saint-Mandé",
+   "departement": "94"
+  },
+  {
+   "code": "94068",
+   "nom": "Saint-Maur-des-Fossés",
+   "departement": "94"
+  },
+  {
+   "code": "94069",
+   "nom": "Saint-Maurice",
+   "departement": "94"
+  },
+  {
+   "code": "94070",
+   "nom": "Santeny",
+   "departement": "94"
+  },
+  {
+   "code": "94071",
+   "nom": "Sucy-en-Brie",
+   "departement": "94"
+  },
+  {
+   "code": "94073",
+   "nom": "Thiais",
+   "departement": "94"
+  },
+  {
+   "code": "94074",
+   "nom": "Valenton",
+   "departement": "94"
+  },
+  {
+   "code": "94075",
+   "nom": "Villecresnes",
+   "departement": "94"
+  },
+  {
+   "code": "94076",
+   "nom": "Villejuif",
+   "departement": "94"
+  },
+  {
+   "code": "94077",
+   "nom": "Villeneuve-le-Roi",
+   "departement": "94"
+  },
+  {
+   "code": "94078",
+   "nom": "Villeneuve-Saint-Georges",
+   "departement": "94"
+  },
+  {
+   "code": "94079",
+   "nom": "Villiers-sur-Marne",
+   "departement": "94"
+  },
+  {
+   "code": "94080",
+   "nom": "Vincennes",
+   "departement": "94"
+  },
+  {
+   "code": "94081",
+   "nom": "Vitry-sur-Seine",
+   "departement": "94"
+  },
+  {
+   "code": "95002",
+   "nom": "Ableiges",
+   "departement": "95"
+  },
+  {
+   "code": "95008",
+   "nom": "Aincourt",
+   "departement": "95"
+  },
+  {
+   "code": "95011",
+   "nom": "Ambleville",
+   "departement": "95"
+  },
+  {
+   "code": "95012",
+   "nom": "Amenucourt",
+   "departement": "95"
+  },
+  {
+   "code": "95014",
+   "nom": "Andilly",
+   "departement": "95"
+  },
+  {
+   "code": "95018",
+   "nom": "Argenteuil",
+   "departement": "95"
+  },
+  {
+   "code": "95019",
+   "nom": "Arnouville",
+   "departement": "95"
+  },
+  {
+   "code": "95023",
+   "nom": "Arronville",
+   "departement": "95"
+  },
+  {
+   "code": "95024",
+   "nom": "Arthies",
+   "departement": "95"
+  },
+  {
+   "code": "95026",
+   "nom": "Asnières-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95028",
+   "nom": "Attainville",
+   "departement": "95"
+  },
+  {
+   "code": "95039",
+   "nom": "Auvers-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95040",
+   "nom": "Avernes",
+   "departement": "95"
+  },
+  {
+   "code": "95042",
+   "nom": "Baillet-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95046",
+   "nom": "Banthelu",
+   "departement": "95"
+  },
+  {
+   "code": "95051",
+   "nom": "Beauchamp",
+   "departement": "95"
+  },
+  {
+   "code": "95052",
+   "nom": "Beaumont-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95054",
+   "nom": "Le Bellay-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95055",
+   "nom": "Bellefontaine",
+   "departement": "95"
+  },
+  {
+   "code": "95056",
+   "nom": "Belloy-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95058",
+   "nom": "Bernes-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95059",
+   "nom": "Berville",
+   "departement": "95"
+  },
+  {
+   "code": "95060",
+   "nom": "Bessancourt",
+   "departement": "95"
+  },
+  {
+   "code": "95061",
+   "nom": "Béthemont-la-Forêt",
+   "departement": "95"
+  },
+  {
+   "code": "95063",
+   "nom": "Bezons",
+   "departement": "95"
+  },
+  {
+   "code": "95074",
+   "nom": "Boisemont",
+   "departement": "95"
+  },
+  {
+   "code": "95078",
+   "nom": "Boissy-l'Aillerie",
+   "departement": "95"
+  },
+  {
+   "code": "95088",
+   "nom": "Bonneuil-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95091",
+   "nom": "Bouffémont",
+   "departement": "95"
+  },
+  {
+   "code": "95094",
+   "nom": "Bouqueval",
+   "departement": "95"
+  },
+  {
+   "code": "95101",
+   "nom": "Bray-et-Lû",
+   "departement": "95"
+  },
+  {
+   "code": "95102",
+   "nom": "Bréançon",
+   "departement": "95"
+  },
+  {
+   "code": "95110",
+   "nom": "Brignancourt",
+   "departement": "95"
+  },
+  {
+   "code": "95116",
+   "nom": "Bruyères-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95119",
+   "nom": "Buhy",
+   "departement": "95"
+  },
+  {
+   "code": "95120",
+   "nom": "Butry-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95127",
+   "nom": "Cergy",
+   "departement": "95"
+  },
+  {
+   "code": "95134",
+   "nom": "Champagne-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95139",
+   "nom": "La Chapelle-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95141",
+   "nom": "Charmont",
+   "departement": "95"
+  },
+  {
+   "code": "95142",
+   "nom": "Chars",
+   "departement": "95"
+  },
+  {
+   "code": "95144",
+   "nom": "Châtenay-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95149",
+   "nom": "Chaumontel",
+   "departement": "95"
+  },
+  {
+   "code": "95150",
+   "nom": "Chaussy",
+   "departement": "95"
+  },
+  {
+   "code": "95151",
+   "nom": "Chauvry",
+   "departement": "95"
+  },
+  {
+   "code": "95154",
+   "nom": "Chennevières-lès-Louvres",
+   "departement": "95"
+  },
+  {
+   "code": "95157",
+   "nom": "Chérence",
+   "departement": "95"
+  },
+  {
+   "code": "95166",
+   "nom": "Cléry-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95169",
+   "nom": "Commeny",
+   "departement": "95"
+  },
+  {
+   "code": "95170",
+   "nom": "Condécourt",
+   "departement": "95"
+  },
+  {
+   "code": "95176",
+   "nom": "Cormeilles-en-Parisis",
+   "departement": "95"
+  },
+  {
+   "code": "95177",
+   "nom": "Cormeilles-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95181",
+   "nom": "Courcelles-sur-Viosne",
+   "departement": "95"
+  },
+  {
+   "code": "95183",
+   "nom": "Courdimanche",
+   "departement": "95"
+  },
+  {
+   "code": "95197",
+   "nom": "Deuil-la-Barre",
+   "departement": "95"
+  },
+  {
+   "code": "95199",
+   "nom": "Domont",
+   "departement": "95"
+  },
+  {
+   "code": "95203",
+   "nom": "Eaubonne",
+   "departement": "95"
+  },
+  {
+   "code": "95205",
+   "nom": "Écouen",
+   "departement": "95"
+  },
+  {
+   "code": "95210",
+   "nom": "Enghien-les-Bains",
+   "departement": "95"
+  },
+  {
+   "code": "95211",
+   "nom": "Ennery",
+   "departement": "95"
+  },
+  {
+   "code": "95212",
+   "nom": "Épiais-lès-Louvres",
+   "departement": "95"
+  },
+  {
+   "code": "95213",
+   "nom": "Épiais-Rhus",
+   "departement": "95"
+  },
+  {
+   "code": "95214",
+   "nom": "Épinay-Champlâtreux",
+   "departement": "95"
+  },
+  {
+   "code": "95218",
+   "nom": "Éragny-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95219",
+   "nom": "Ermont",
+   "departement": "95"
+  },
+  {
+   "code": "95229",
+   "nom": "Ézanville",
+   "departement": "95"
+  },
+  {
+   "code": "95241",
+   "nom": "Fontenay-en-Parisis",
+   "departement": "95"
+  },
+  {
+   "code": "95250",
+   "nom": "Fosses",
+   "departement": "95"
+  },
+  {
+   "code": "95252",
+   "nom": "Franconville",
+   "departement": "95"
+  },
+  {
+   "code": "95253",
+   "nom": "Frémainville",
+   "departement": "95"
+  },
+  {
+   "code": "95254",
+   "nom": "Frémécourt",
+   "departement": "95"
+  },
+  {
+   "code": "95256",
+   "nom": "Frépillon",
+   "departement": "95"
+  },
+  {
+   "code": "95257",
+   "nom": "La Frette-sur-Seine",
+   "departement": "95"
+  },
+  {
+   "code": "95258",
+   "nom": "Frouville",
+   "departement": "95"
+  },
+  {
+   "code": "95268",
+   "nom": "Garges-lès-Gonesse",
+   "departement": "95"
+  },
+  {
+   "code": "95270",
+   "nom": "Genainville",
+   "departement": "95"
+  },
+  {
+   "code": "95271",
+   "nom": "Génicourt",
+   "departement": "95"
+  },
+  {
+   "code": "95277",
+   "nom": "Gonesse",
+   "departement": "95"
+  },
+  {
+   "code": "95280",
+   "nom": "Goussainville",
+   "departement": "95"
+  },
+  {
+   "code": "95287",
+   "nom": "Grisy-les-Plâtres",
+   "departement": "95"
+  },
+  {
+   "code": "95288",
+   "nom": "Groslay",
+   "departement": "95"
+  },
+  {
+   "code": "95295",
+   "nom": "Guiry-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95298",
+   "nom": "Haravilliers",
+   "departement": "95"
+  },
+  {
+   "code": "95301",
+   "nom": "Haute-Isle",
+   "departement": "95"
+  },
+  {
+   "code": "95303",
+   "nom": "Le Heaulme",
+   "departement": "95"
+  },
+  {
+   "code": "95304",
+   "nom": "Hédouville",
+   "departement": "95"
+  },
+  {
+   "code": "95306",
+   "nom": "Herblay-sur-Seine",
+   "departement": "95"
+  },
+  {
+   "code": "95308",
+   "nom": "Hérouville-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95309",
+   "nom": "Hodent",
+   "departement": "95"
+  },
+  {
+   "code": "95313",
+   "nom": "L'Isle-Adam",
+   "departement": "95"
+  },
+  {
+   "code": "95316",
+   "nom": "Jagny-sous-Bois",
+   "departement": "95"
+  },
+  {
+   "code": "95323",
+   "nom": "Jouy-le-Moutier",
+   "departement": "95"
+  },
+  {
+   "code": "95328",
+   "nom": "Labbeville",
+   "departement": "95"
+  },
+  {
+   "code": "95331",
+   "nom": "Lassy",
+   "departement": "95"
+  },
+  {
+   "code": "95341",
+   "nom": "Livilliers",
+   "departement": "95"
+  },
+  {
+   "code": "95348",
+   "nom": "Longuesse",
+   "departement": "95"
+  },
+  {
+   "code": "95351",
+   "nom": "Louvres",
+   "departement": "95"
+  },
+  {
+   "code": "95352",
+   "nom": "Luzarches",
+   "departement": "95"
+  },
+  {
+   "code": "95353",
+   "nom": "Maffliers",
+   "departement": "95"
+  },
+  {
+   "code": "95355",
+   "nom": "Magny-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95365",
+   "nom": "Mareil-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95369",
+   "nom": "Margency",
+   "departement": "95"
+  },
+  {
+   "code": "95370",
+   "nom": "Marines",
+   "departement": "95"
+  },
+  {
+   "code": "95371",
+   "nom": "Marly-la-Ville",
+   "departement": "95"
+  },
+  {
+   "code": "95379",
+   "nom": "Maudétour-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95387",
+   "nom": "Menouville",
+   "departement": "95"
+  },
+  {
+   "code": "95388",
+   "nom": "Menucourt",
+   "departement": "95"
+  },
+  {
+   "code": "95392",
+   "nom": "Mériel",
+   "departement": "95"
+  },
+  {
+   "code": "95394",
+   "nom": "Méry-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95395",
+   "nom": "Le Mesnil-Aubry",
+   "departement": "95"
+  },
+  {
+   "code": "95409",
+   "nom": "Moisselles",
+   "departement": "95"
+  },
+  {
+   "code": "95422",
+   "nom": "Montgeroult",
+   "departement": "95"
+  },
+  {
+   "code": "95424",
+   "nom": "Montigny-lès-Cormeilles",
+   "departement": "95"
+  },
+  {
+   "code": "95426",
+   "nom": "Montlignon",
+   "departement": "95"
+  },
+  {
+   "code": "95427",
+   "nom": "Montmagny",
+   "departement": "95"
+  },
+  {
+   "code": "95428",
+   "nom": "Montmorency",
+   "departement": "95"
+  },
+  {
+   "code": "95429",
+   "nom": "Montreuil-sur-Epte",
+   "departement": "95"
+  },
+  {
+   "code": "95430",
+   "nom": "Montsoult",
+   "departement": "95"
+  },
+  {
+   "code": "95436",
+   "nom": "Mours",
+   "departement": "95"
+  },
+  {
+   "code": "95438",
+   "nom": "Moussy",
+   "departement": "95"
+  },
+  {
+   "code": "95445",
+   "nom": "Nerville-la-Forêt",
+   "departement": "95"
+  },
+  {
+   "code": "95446",
+   "nom": "Nesles-la-Vallée",
+   "departement": "95"
+  },
+  {
+   "code": "95447",
+   "nom": "Neuilly-en-Vexin",
+   "departement": "95"
+  },
+  {
+   "code": "95450",
+   "nom": "Neuville-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95452",
+   "nom": "Nointel",
+   "departement": "95"
+  },
+  {
+   "code": "95456",
+   "nom": "Noisy-sur-Oise",
+   "departement": "95"
+  },
+  {
+   "code": "95459",
+   "nom": "Nucourt",
+   "departement": "95"
+  },
+  {
+   "code": "95462",
+   "nom": "Omerville",
+   "departement": "95"
+  },
+  {
+   "code": "95476",
+   "nom": "Osny",
+   "departement": "95"
+  },
+  {
+   "code": "95480",
+   "nom": "Parmain",
+   "departement": "95"
+  },
+  {
+   "code": "95483",
+   "nom": "Le Perchay",
+   "departement": "95"
+  },
+  {
+   "code": "95487",
+   "nom": "Persan",
+   "departement": "95"
+  },
+  {
+   "code": "95488",
+   "nom": "Pierrelaye",
+   "departement": "95"
+  },
+  {
+   "code": "95489",
+   "nom": "Piscop",
+   "departement": "95"
+  },
+  {
+   "code": "95491",
+   "nom": "Le Plessis-Bouchard",
+   "departement": "95"
+  },
+  {
+   "code": "95492",
+   "nom": "Le Plessis-Gassot",
+   "departement": "95"
+  },
+  {
+   "code": "95493",
+   "nom": "Le Plessis-Luzarches",
+   "departement": "95"
+  },
+  {
+   "code": "95500",
+   "nom": "Pontoise",
+   "departement": "95"
+  },
+  {
+   "code": "95504",
+   "nom": "Presles",
+   "departement": "95"
+  },
+  {
+   "code": "95509",
+   "nom": "Puiseux-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95510",
+   "nom": "Puiseux-Pontoise",
+   "departement": "95"
+  },
+  {
+   "code": "95523",
+   "nom": "La Roche-Guyon",
+   "departement": "95"
+  },
+  {
+   "code": "95527",
+   "nom": "Roissy-en-France",
+   "departement": "95"
+  },
+  {
+   "code": "95529",
+   "nom": "Ronquerolles",
+   "departement": "95"
+  },
+  {
+   "code": "95535",
+   "nom": "Sagy",
+   "departement": "95"
+  },
+  {
+   "code": "95539",
+   "nom": "Saint-Brice-sous-Forêt",
+   "departement": "95"
+  },
+  {
+   "code": "95541",
+   "nom": "Saint-Clair-sur-Epte",
+   "departement": "95"
+  },
+  {
+   "code": "95543",
+   "nom": "Saint-Cyr-en-Arthies",
+   "departement": "95"
+  },
+  {
+   "code": "95554",
+   "nom": "Saint-Gervais",
+   "departement": "95"
+  },
+  {
+   "code": "95555",
+   "nom": "Saint-Gratien",
+   "departement": "95"
+  },
+  {
+   "code": "95563",
+   "nom": "Saint-Leu-la-Forêt",
+   "departement": "95"
+  },
+  {
+   "code": "95566",
+   "nom": "Saint-Martin-du-Tertre",
+   "departement": "95"
+  },
+  {
+   "code": "95572",
+   "nom": "Saint-Ouen-l'Aumône",
+   "departement": "95"
+  },
+  {
+   "code": "95574",
+   "nom": "Saint-Prix",
+   "departement": "95"
+  },
+  {
+   "code": "95580",
+   "nom": "Saint-Witz",
+   "departement": "95"
+  },
+  {
+   "code": "95582",
+   "nom": "Sannois",
+   "departement": "95"
+  },
+  {
+   "code": "95584",
+   "nom": "Santeuil",
+   "departement": "95"
+  },
+  {
+   "code": "95585",
+   "nom": "Sarcelles",
+   "departement": "95"
+  },
+  {
+   "code": "95592",
+   "nom": "Seraincourt",
+   "departement": "95"
+  },
+  {
+   "code": "95594",
+   "nom": "Seugy",
+   "departement": "95"
+  },
+  {
+   "code": "95598",
+   "nom": "Soisy-sous-Montmorency",
+   "departement": "95"
+  },
+  {
+   "code": "95604",
+   "nom": "Survilliers",
+   "departement": "95"
+  },
+  {
+   "code": "95607",
+   "nom": "Taverny",
+   "departement": "95"
+  },
+  {
+   "code": "95610",
+   "nom": "Théméricourt",
+   "departement": "95"
+  },
+  {
+   "code": "95611",
+   "nom": "Theuville",
+   "departement": "95"
+  },
+  {
+   "code": "95612",
+   "nom": "Le Thillay",
+   "departement": "95"
+  },
+  {
+   "code": "95625",
+   "nom": "Us",
+   "departement": "95"
+  },
+  {
+   "code": "95627",
+   "nom": "Vallangoujard",
+   "departement": "95"
+  },
+  {
+   "code": "95628",
+   "nom": "Valmondois",
+   "departement": "95"
+  },
+  {
+   "code": "95633",
+   "nom": "Vaudherland",
+   "departement": "95"
+  },
+  {
+   "code": "95637",
+   "nom": "Vauréal",
+   "departement": "95"
+  },
+  {
+   "code": "95641",
+   "nom": "Vémars",
+   "departement": "95"
+  },
+  {
+   "code": "95651",
+   "nom": "Vétheuil",
+   "departement": "95"
+  },
+  {
+   "code": "95652",
+   "nom": "Viarmes",
+   "departement": "95"
+  },
+  {
+   "code": "95656",
+   "nom": "Vienne-en-Arthies",
+   "departement": "95"
+  },
+  {
+   "code": "95658",
+   "nom": "Vigny",
+   "departement": "95"
+  },
+  {
+   "code": "95660",
+   "nom": "Villaines-sous-Bois",
+   "departement": "95"
+  },
+  {
+   "code": "95675",
+   "nom": "Villeron",
+   "departement": "95"
+  },
+  {
+   "code": "95676",
+   "nom": "Villers-en-Arthies",
+   "departement": "95"
+  },
+  {
+   "code": "95678",
+   "nom": "Villiers-Adam",
+   "departement": "95"
+  },
+  {
+   "code": "95680",
+   "nom": "Villiers-le-Bel",
+   "departement": "95"
+  },
+  {
+   "code": "95682",
+   "nom": "Villiers-le-Sec",
+   "departement": "95"
+  },
+  {
+   "code": "95690",
+   "nom": "Wy-dit-Joli-Village",
+   "departement": "95"
+  }
+ ]
+}

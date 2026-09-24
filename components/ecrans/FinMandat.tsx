@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react'
 
+import { nomReserve } from '@/lib/budget'
 import { MANDATS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { bilanMandat, ouvertures } from '@/lib/regles'
@@ -9,6 +10,7 @@ import { useJeu, useVille } from '@/lib/store'
 
 import { cascade, useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
+import { useCouleursReseau } from '../couleurs'
 import { segmentsBudget, useBilan } from '../partie/budget'
 import { Bouton, EtapesMandat, Icone, Jauge, Surtitre } from '../ui'
 
@@ -17,6 +19,7 @@ const MARGES_CARTE = { top: 20, left: 20, right: 20, bottom: 20 }
 export function FinMandat() {
   const { chantiers, lignes, leviers, commencerMandat2, aVenir } = useJeu()
   const ville = useVille()
+  useCouleursReseau(ville.id)
   const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
   const bilan1 = useBilan(1)
   const liste = ouvertures(chantiers, lignes)
@@ -116,12 +119,12 @@ export function FinMandat() {
             />
             <p className="text-[13.5px] leading-relaxed font-medium lg:text-[15px]">
               Sur {n(bilan2.enveloppe + bilan2.leviers + bilan2.reliquat)} M€
-              {bilan2.reliquat > 0 ? `, dont ${n(bilan2.reliquat)} M€ économisés au premier mandat` : ''}, une fois retirés l’entretien des
-              bus
+              {bilan2.reliquat > 0 ? `, dont ${n(bilan2.reliquat)} M€ économisés au premier mandat` : ''}, une fois retirés les{' '}
+              {n(bilan2.reserve)} M€ réservés {nomReserve(ville.budget).phrase}
               {bilan2.reports > 0
                 ? ` et les ${n(bilan2.reports)} M€ ${reportes.length > 1 ? `des ${reportes.length} projets payés` : 'du projet payé'} en deux fois`
                 : ''}
-              .{ville.leviers ? ' Vos choix de tarifs restent en place, et vous pourrez les revoir.' : ''}
+              .{ville.budget.leviers ? ' Vos choix de tarifs restent en place, et vous pourrez les revoir.' : ''}
               {nombreAVenir > 0
                 ? ` En commençant, ${nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du second mandat du réseau que vous avez repris ${nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme.`
                 : ''}

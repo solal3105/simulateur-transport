@@ -1,0 +1,466 @@
+{
+ "autorite": "Métropole d'Aix-Marseille-Provence",
+ "source": "geo.api.gouv.fr, communes de la métropole (EPCI 200054807), consulté le 23 septembre 2026",
+ "communes": [
+  {
+   "code": "13001",
+   "nom": "Aix-en-Provence",
+   "epci": "200054807"
+  },
+  {
+   "code": "13002",
+   "nom": "Allauch",
+   "epci": "200054807"
+  },
+  {
+   "code": "13003",
+   "nom": "Alleins",
+   "epci": "200054807"
+  },
+  {
+   "code": "13005",
+   "nom": "Aubagne",
+   "epci": "200054807"
+  },
+  {
+   "code": "13007",
+   "nom": "Auriol",
+   "epci": "200054807"
+  },
+  {
+   "code": "13008",
+   "nom": "Aurons",
+   "epci": "200054807"
+  },
+  {
+   "code": "13009",
+   "nom": "La Barben",
+   "epci": "200054807"
+  },
+  {
+   "code": "13012",
+   "nom": "Beaurecueil",
+   "epci": "200054807"
+  },
+  {
+   "code": "13013",
+   "nom": "Belcodène",
+   "epci": "200054807"
+  },
+  {
+   "code": "13014",
+   "nom": "Berre-l'Étang",
+   "epci": "200054807"
+  },
+  {
+   "code": "13015",
+   "nom": "Bouc-Bel-Air",
+   "epci": "200054807"
+  },
+  {
+   "code": "13016",
+   "nom": "La Bouilladisse",
+   "epci": "200054807"
+  },
+  {
+   "code": "13019",
+   "nom": "Cabriès",
+   "epci": "200054807"
+  },
+  {
+   "code": "13020",
+   "nom": "Cadolive",
+   "epci": "200054807"
+  },
+  {
+   "code": "13021",
+   "nom": "Carry-le-Rouet",
+   "epci": "200054807"
+  },
+  {
+   "code": "13022",
+   "nom": "Cassis",
+   "epci": "200054807"
+  },
+  {
+   "code": "13023",
+   "nom": "Ceyreste",
+   "epci": "200054807"
+  },
+  {
+   "code": "13024",
+   "nom": "Charleval",
+   "epci": "200054807"
+  },
+  {
+   "code": "13025",
+   "nom": "Châteauneuf-le-Rouge",
+   "epci": "200054807"
+  },
+  {
+   "code": "13026",
+   "nom": "Châteauneuf-les-Martigues",
+   "epci": "200054807"
+  },
+  {
+   "code": "13028",
+   "nom": "La Ciotat",
+   "epci": "200054807"
+  },
+  {
+   "code": "13029",
+   "nom": "Cornillon-Confoux",
+   "epci": "200054807"
+  },
+  {
+   "code": "13030",
+   "nom": "Cuges-les-Pins",
+   "epci": "200054807"
+  },
+  {
+   "code": "13031",
+   "nom": "La Destrousse",
+   "epci": "200054807"
+  },
+  {
+   "code": "13032",
+   "nom": "Éguilles",
+   "epci": "200054807"
+  },
+  {
+   "code": "13033",
+   "nom": "Ensuès-la-Redonne",
+   "epci": "200054807"
+  },
+  {
+   "code": "13035",
+   "nom": "Eyguières",
+   "epci": "200054807"
+  },
+  {
+   "code": "13037",
+   "nom": "La Fare-les-Oliviers",
+   "epci": "200054807"
+  },
+  {
+   "code": "13039",
+   "nom": "Fos-sur-Mer",
+   "epci": "200054807"
+  },
+  {
+   "code": "13040",
+   "nom": "Fuveau",
+   "epci": "200054807"
+  },
+  {
+   "code": "13041",
+   "nom": "Gardanne",
+   "epci": "200054807"
+  },
+  {
+   "code": "13042",
+   "nom": "Gémenos",
+   "epci": "200054807"
+  },
+  {
+   "code": "13043",
+   "nom": "Gignac-la-Nerthe",
+   "epci": "200054807"
+  },
+  {
+   "code": "13044",
+   "nom": "Grans",
+   "epci": "200054807"
+  },
+  {
+   "code": "13046",
+   "nom": "Gréasque",
+   "epci": "200054807"
+  },
+  {
+   "code": "13047",
+   "nom": "Istres",
+   "epci": "200054807"
+  },
+  {
+   "code": "13048",
+   "nom": "Jouques",
+   "epci": "200054807"
+  },
+  {
+   "code": "13049",
+   "nom": "Lamanon",
+   "epci": "200054807"
+  },
+  {
+   "code": "13050",
+   "nom": "Lambesc",
+   "epci": "200054807"
+  },
+  {
+   "code": "13051",
+   "nom": "Lançon-Provence",
+   "epci": "200054807"
+  },
+  {
+   "code": "13053",
+   "nom": "Mallemort",
+   "epci": "200054807"
+  },
+  {
+   "code": "13054",
+   "nom": "Marignane",
+   "epci": "200054807"
+  },
+  {
+   "code": "13055",
+   "nom": "Marseille",
+   "epci": "200054807"
+  },
+  {
+   "code": "13056",
+   "nom": "Martigues",
+   "epci": "200054807"
+  },
+  {
+   "code": "13059",
+   "nom": "Meyrargues",
+   "epci": "200054807"
+  },
+  {
+   "code": "13060",
+   "nom": "Meyreuil",
+   "epci": "200054807"
+  },
+  {
+   "code": "13062",
+   "nom": "Mimet",
+   "epci": "200054807"
+  },
+  {
+   "code": "13063",
+   "nom": "Miramas",
+   "epci": "200054807"
+  },
+  {
+   "code": "13069",
+   "nom": "Pélissanne",
+   "epci": "200054807"
+  },
+  {
+   "code": "13070",
+   "nom": "La Penne-sur-Huveaune",
+   "epci": "200054807"
+  },
+  {
+   "code": "13071",
+   "nom": "Les Pennes-Mirabeau",
+   "epci": "200054807"
+  },
+  {
+   "code": "13072",
+   "nom": "Peynier",
+   "epci": "200054807"
+  },
+  {
+   "code": "13073",
+   "nom": "Peypin",
+   "epci": "200054807"
+  },
+  {
+   "code": "13074",
+   "nom": "Peyrolles-en-Provence",
+   "epci": "200054807"
+  },
+  {
+   "code": "13075",
+   "nom": "Plan-de-Cuques",
+   "epci": "200054807"
+  },
+  {
+   "code": "13077",
+   "nom": "Port-de-Bouc",
+   "epci": "200054807"
+  },
+  {
+   "code": "13078",
+   "nom": "Port-Saint-Louis-du-Rhône",
+   "epci": "200054807"
+  },
+  {
+   "code": "13079",
+   "nom": "Puyloubier",
+   "epci": "200054807"
+  },
+  {
+   "code": "13080",
+   "nom": "Le Puy-Sainte-Réparade",
+   "epci": "200054807"
+  },
+  {
+   "code": "13081",
+   "nom": "Rognac",
+   "epci": "200054807"
+  },
+  {
+   "code": "13082",
+   "nom": "Rognes",
+   "epci": "200054807"
+  },
+  {
+   "code": "13084",
+   "nom": "La Roque-d'Anthéron",
+   "epci": "200054807"
+  },
+  {
+   "code": "13085",
+   "nom": "Roquefort-la-Bédoule",
+   "epci": "200054807"
+  },
+  {
+   "code": "13086",
+   "nom": "Roquevaire",
+   "epci": "200054807"
+  },
+  {
+   "code": "13087",
+   "nom": "Rousset",
+   "epci": "200054807"
+  },
+  {
+   "code": "13088",
+   "nom": "Le Rove",
+   "epci": "200054807"
+  },
+  {
+   "code": "13090",
+   "nom": "Saint-Antonin-sur-Bayon",
+   "epci": "200054807"
+  },
+  {
+   "code": "13091",
+   "nom": "Saint-Cannat",
+   "epci": "200054807"
+  },
+  {
+   "code": "13092",
+   "nom": "Saint-Chamas",
+   "epci": "200054807"
+  },
+  {
+   "code": "13093",
+   "nom": "Saint-Estève-Janson",
+   "epci": "200054807"
+  },
+  {
+   "code": "13095",
+   "nom": "Saint-Marc-Jaumegarde",
+   "epci": "200054807"
+  },
+  {
+   "code": "13098",
+   "nom": "Saint-Mitre-les-Remparts",
+   "epci": "200054807"
+  },
+  {
+   "code": "13099",
+   "nom": "Saint-Paul-lès-Durance",
+   "epci": "200054807"
+  },
+  {
+   "code": "13101",
+   "nom": "Saint-Savournin",
+   "epci": "200054807"
+  },
+  {
+   "code": "13102",
+   "nom": "Saint-Victoret",
+   "epci": "200054807"
+  },
+  {
+   "code": "13103",
+   "nom": "Salon-de-Provence",
+   "epci": "200054807"
+  },
+  {
+   "code": "13104",
+   "nom": "Sausset-les-Pins",
+   "epci": "200054807"
+  },
+  {
+   "code": "13105",
+   "nom": "Sénas",
+   "epci": "200054807"
+  },
+  {
+   "code": "13106",
+   "nom": "Septèmes-les-Vallons",
+   "epci": "200054807"
+  },
+  {
+   "code": "13107",
+   "nom": "Simiane-Collongue",
+   "epci": "200054807"
+  },
+  {
+   "code": "13109",
+   "nom": "Le Tholonet",
+   "epci": "200054807"
+  },
+  {
+   "code": "13110",
+   "nom": "Trets",
+   "epci": "200054807"
+  },
+  {
+   "code": "13111",
+   "nom": "Vauvenargues",
+   "epci": "200054807"
+  },
+  {
+   "code": "13112",
+   "nom": "Velaux",
+   "epci": "200054807"
+  },
+  {
+   "code": "13113",
+   "nom": "Venelles",
+   "epci": "200054807"
+  },
+  {
+   "code": "13114",
+   "nom": "Ventabren",
+   "epci": "200054807"
+  },
+  {
+   "code": "13115",
+   "nom": "Vernègues",
+   "epci": "200054807"
+  },
+  {
+   "code": "13117",
+   "nom": "Vitrolles",
+   "epci": "200054807"
+  },
+  {
+   "code": "13118",
+   "nom": "Coudoux",
+   "epci": "200054807"
+  },
+  {
+   "code": "13119",
+   "nom": "Carnoux-en-Provence",
+   "epci": "200054807"
+  },
+  {
+   "code": "83120",
+   "nom": "Saint-Zacharie",
+   "epci": "200054807"
+  },
+  {
+   "code": "84089",
+   "nom": "Pertuis",
+   "epci": "200054807"
+  }
+ ]
+}

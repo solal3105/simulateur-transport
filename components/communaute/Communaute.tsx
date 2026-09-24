@@ -10,17 +10,18 @@ import { villeDePartie } from '@/lib/partie'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, adresseReseaux, estVille, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
 
-import { Bouton, BoutonLien, Icone, Logo } from '../ui'
+import { useCouleursReseau } from '../couleurs'
+import { Bouton, BoutonLien, Icone, Logo, useChoixVisible } from '../ui'
 import { MiniCarte } from './MiniCarte'
 
 type Onglet = 'populaires' | 'recents' | 'miens'
 
-const titre = (onglet: Onglet, ville: IdVille) =>
-  onglet === 'populaires'
-    ? `Les réseaux les plus soutenus à ${VILLES[ville].nom}`
-    : onglet === 'recents'
-      ? `Les derniers réseaux publiés à ${VILLES[ville].nom}`
-      : 'Vos réseaux publiés'
+const titre = (onglet: Onglet, ville: IdVille, libre: boolean) =>
+  onglet === 'miens'
+    ? 'Vos réseaux publiés'
+    : `${onglet === 'populaires' ? `Les réseaux les plus soutenus pour ${VILLES[ville].nom}` : `Les derniers réseaux publiés pour ${VILLES[ville].nom}`}${
+        libre ? ', en jeu libre' : ''
+      }`
 
 /** La ville demandée dans l'adresse (?ville=toulouse), lue sans décalage entre le serveur et le navigateur. */
 function useVilleAdresse() {
@@ -88,8 +89,11 @@ export function CarteReseau({ reseau, avecVille }: { reseau: ReseauPublie; avecV
         <MiniCarte partie={reseau.partie} />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className="text-[13px] font-bold text-gris">
+        <span className="flex items-center justify-between gap-2 text-[13px] font-bold text-gris">
           {avecVille ? VILLES[villeDePartie(reseau.partie) ?? 'lyon'].nom : (reseau.auteur?.pseudo ?? 'Anonyme')}
+          {reseau.libre ? (
+            <span className="shrink-0 rounded-full bg-encre px-2 py-0.5 text-[11.5px] font-extrabold text-white">Jeu libre</span>
+          ) : null}
         </span>
         <span className="text-[17px] leading-tight font-black">{reseau.titre}</span>
         {reseau.intention ? <p className="line-clamp-3 text-[13.5px] leading-relaxed text-gris">{reseau.intention}</p> : null}
@@ -118,17 +122,21 @@ export function Communaute() {
   const villeAdresse = useVilleAdresse()
   const [choix, setChoix] = useState<IdVille | null>(null)
   const ville = choix ?? villeAdresse
+  useCouleursReseau(ville)
+  const rangee = useChoixVisible<HTMLDivElement>(ville)
+  // Les réseaux du jeu libre, sans budget à tenir, ne sont jamais classés avec les autres.
+  const [libre, setLibre] = useState(false)
   const profil = useProfilLocal()
   const versLaPartie = useVersLaPartie(ville)
   // Chaque réponse porte la clé de sa demande : un changement d'onglet affiche le chargement sans effacer d'état.
   const [essai, setEssai] = useState(0)
-  const demande = `${onglet}:${ville}:${profil?.id ?? ''}:${essai}`
+  const demande = `${onglet}:${ville}:${libre}:${profil?.id ?? ''}:${essai}`
   const [reponse, setReponse] = useState<{ demande: string; reseaux?: ReseauPublie[]; erreur?: string } | null>(null)
 
   useEffect(() => {
     if (!communauteActive) return
     let actif = true
-    const requete = onglet === 'miens' ? (profil ? reseauxDe(profil.id) : Promise.resolve([])) : listerReseaux(onglet, ville)
+    const requete = onglet === 'miens' ? (profil ? reseauxDe(profil.id) : Promise.resolve([])) : listerReseaux(onglet, ville, libre)
     requete.then(
       (reseaux) => actif && setReponse({ demande, reseaux }),
       (e: unknown) =>
@@ -141,7 +149,7 @@ export function Communaute() {
     return () => {
       actif = false
     }
-  }, [onglet, ville, profil, demande])
+  }, [onglet, ville, libre, profil, demande])
 
   const actuelle = reponse?.demande === demande ? reponse : null
   const reseaux = actuelle?.reseaux ?? null
@@ -176,25 +184,64 @@ export function Communaute() {
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-5 px-5 pt-6 pb-16 lg:px-8 lg:pt-8">
         {onglet !== 'miens' ? (
-          <div role="radiogroup" aria-label="Ville" className="flex gap-1.5">
-            {ID_VILLES.map((id) => (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={ville === id}
-                onClick={() => choisir(id)}
-                className={clsx(
-                  'min-h-10 rounded-full px-4 text-[14px] font-extrabold transition-colors',
-                  ville === id ? 'bg-encre text-white' : 'bg-white shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:bg-sable',
-                )}
-              >
-                {VILLES[id].nom}
-              </button>
-            ))}
+          <div className="flex flex-col gap-3">
+            <div
+              ref={rangee}
+              role="radiogroup"
+              aria-label="Réseau"
+              className="-mx-5 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0"
+            >
+              {ID_VILLES.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={ville === id}
+                  onClick={() => choisir(id)}
+                  className={clsx(
+                    'flex shrink-0 flex-col items-start rounded-2xl px-3.5 py-2 text-left transition-colors',
+                    ville === id ? 'bg-encre text-white' : 'bg-white shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:bg-sable',
+                  )}
+                >
+                  <span className="text-[14px] leading-tight font-extrabold whitespace-nowrap">{VILLES[id].nom}</span>
+                  <span
+                    className={clsx(
+                      'text-[11.5px] leading-tight font-semibold whitespace-nowrap',
+                      ville === id ? 'opacity-80' : 'text-gris',
+                    )}
+                  >
+                    {VILLES[id].lieu}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div
+              role="radiogroup"
+              aria-label="Façon de jouer"
+              className="flex self-start rounded-full bg-white p-1 shadow-[inset_0_0_0_1.5px_var(--color-trait)]"
+            >
+              {[
+                { valeur: false, texte: 'Avec le vrai budget' },
+                { valeur: true, texte: 'Jeu libre' },
+              ].map((o) => (
+                <button
+                  key={o.texte}
+                  type="button"
+                  role="radio"
+                  aria-checked={libre === o.valeur}
+                  onClick={() => setLibre(o.valeur)}
+                  className={clsx(
+                    'min-h-9 rounded-full px-3.5 text-[13.5px] font-extrabold transition-colors',
+                    libre === o.valeur ? 'bg-rouge text-white' : 'text-gris hover:text-encre',
+                  )}
+                >
+                  {o.texte}
+                </button>
+              ))}
+            </div>
           </div>
         ) : null}
-        <h1 className="text-[24px] leading-tight font-black tracking-tight lg:text-[28px]">{titre(onglet, ville)}</h1>
+        <h1 className="text-[24px] leading-tight font-black tracking-tight lg:text-[28px]">{titre(onglet, ville, libre)}</h1>
 
         {!communauteActive ? (
           <p className="max-w-[640px] text-[15px] leading-relaxed text-gris">
@@ -216,7 +263,9 @@ export function Communaute() {
             <p className="text-[15px] leading-relaxed text-gris">
               {onglet === 'miens'
                 ? 'Vous n’avez encore rien publié depuis ce navigateur.'
-                : 'Aucun réseau n’a encore été publié. Terminez une partie, puis publiez votre réseau depuis le bilan : il apparaîtra ici.'}
+                : libre
+                  ? 'Aucun réseau en jeu libre n’a encore été publié ici. Choisissez « Jouer sans limite de budget » en commençant une partie, puis publiez votre réseau depuis le bilan.'
+                  : 'Aucun réseau n’a encore été publié. Terminez une partie, puis publiez votre réseau depuis le bilan : il apparaîtra ici.'}
             </p>
             <BoutonLien href={versLaPartie.href} icone="fleche">
               {versLaPartie.enCours ? 'Reprendre ma partie' : 'Commencer une partie'}

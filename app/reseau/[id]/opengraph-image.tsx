@@ -7,6 +7,9 @@ import { villeDePartie } from '@/lib/partie'
 import { MARQUE, VILLES, type IdVille } from '@/lib/villes'
 import fondLyon from '@/public/data/fond.json'
 import projetsLyon from '@/public/data/projets.json'
+import fondMarseille from '@/public/data/marseille/fond.json'
+import fondNice from '@/public/data/nice/fond.json'
+import fondIdf from '@/public/data/idf/fond.json'
 import fondToulouse from '@/public/data/toulouse/fond.json'
 
 import { lireApercu } from './apercu'
@@ -22,9 +25,13 @@ export const contentType = 'image/png'
 
 type Fond = Parameters<typeof cheminsFond>[0]
 type Projets = Parameters<typeof cheminsReseau>[0]
+const SANS_PROJETS: Projets = { type: 'FeatureCollection', features: [] }
 const DONNEES: Record<IdVille, { fond: Fond; projets: Projets }> = {
   lyon: { fond: fondLyon as unknown as Fond, projets: projetsLyon as unknown as Projets },
-  toulouse: { fond: fondToulouse as unknown as Fond, projets: { type: 'FeatureCollection', features: [] } },
+  toulouse: { fond: fondToulouse as unknown as Fond, projets: SANS_PROJETS },
+  marseille: { fond: fondMarseille as unknown as Fond, projets: SANS_PROJETS },
+  nice: { fond: fondNice as unknown as Fond, projets: SANS_PROJETS },
+  idf: { fond: fondIdf as unknown as Fond, projets: SANS_PROJETS },
 }
 
 /** La police n'a pas l'espace fine insécable que le français met entre les milliers. */
@@ -64,11 +71,15 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const chemins = cheminsFond(fond, ville)
   const traces = cheminsReseau(projets, reseau.partie, ville)
   const long = reseau.titre.length > 32
-  const surtitre = `${MARQUE}, ${ville.nom} en 2038`
+  const libre = (reseau.partie as { x?: number } | null)?.x === 1
+  const surtitre = `${MARQUE}, ${ville.nom} en 2038${libre ? ', jeu libre' : ''}`
   return new ImageResponse(
-    <div style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ROUGE, fontFamily: 'Figtree' }}>
+    <div
+      style={{ width: '100%', height: '100%', display: 'flex', padding: 40, background: ville.couleurs.principale, fontFamily: 'Figtree' }}
+    >
       <div style={{ display: 'flex', width: 640, height: 550, borderRadius: 32, overflow: 'hidden', background: SABLE }}>
         <svg width={640} height={550} viewBox={cadreMiniature(ville).viewBox} preserveAspectRatio="xMidYMid meet">
+          <path d={chemins.mer} fill="#c6dde9" fillRule="evenodd" />
           <path d={chemins.fleuves} fill="none" stroke="#c6dde9" strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" />
           <path d={chemins.tram} fill="none" stroke="#d9d3ca" strokeWidth={2} strokeLinecap="round" />
           <path d={chemins.metro} fill="none" stroke="#958e84" strokeWidth={3.5} strokeLinecap="round" />

@@ -5,78 +5,80 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { essayerMotDePasse, useAcces } from '@/lib/acces'
+import { libre } from '@/lib/budget'
 import { CATALOGUE } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
-import { n } from '@/lib/format'
-import { totauxCatalogue } from '@/lib/regles'
+import { enLettres } from '@/lib/format'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
-import { Bouton, Icone, Logo } from '../ui'
+import { useCouleursReseau } from '../couleurs'
+import { ouvrirMessagerie } from '../explications/Ecrire'
+import { Bouton, Icone, Logo, useChoixVisible, type NomIcone } from '../ui'
+import { Devoilement } from './Devoilement'
 
-const TOTAL = totauxCatalogue(CATALOGUE.filter((p) => p.trace))
 const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
 
-/** 4 000 M€ donne « 4 », 3 120 M€ donne « 3,1 ». */
-const milliards = (v: number) => (Math.round(v / 100) / 10).toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+type Etape = { icone: NomIcone; titre: string; texte: string }
 
-/** Ce que l'accueil dit de chaque ville. */
+/** Ce que l'accueil dit de chaque réseau : le but, et comment on joue, en trois étapes. */
 function textes(ville: Ville) {
-  const budget = milliards(ville.enveloppe * 2)
-  if (ville.catalogue)
-    return {
-      titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-      intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} milliards d’euros. Les ${NOMBRE_PROJETS} projets sur la table en coûtent plus de ${Math.floor(TOTAL.cout / 1000)}. Vous choisissez ceux qui verront le jour.`,
-      pastilles: [`${NOMBRE_PROJETS} projets réels`, `${n(TOTAL.cout)} M€ au total`],
-      etapes: [
-        'Vous choisissez des lignes sur la carte.',
-        'Vous finissez chaque mandat sans déficit.',
-        'Votre score est le nombre de voyageurs gagnés.',
-      ],
-      sources:
-        'Les coûts, les voyageurs et les durées de chantier viennent d’études et de délibérations publiques ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap, et le traceur de ligne les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.',
-    }
+  const pourLignes = libre(ville.budget, 1) + libre(ville.budget, 2)
+  const etapes: Etape[] = [
+    ville.catalogue
+      ? { icone: 'liste', titre: 'Choisissez vos projets', texte: `${NOMBRE_PROJETS} projets réels, ou vos propres lignes.` }
+      : { icone: 'trace', titre: 'Tracez vos lignes', texte: 'Tram, bus rapide ou métro, là où vous voulez.' },
+    { icone: 'pieces', titre: 'Tenez le budget', texte: `${majuscule(enLettres(pourLignes))} d’euros sur deux mandats, sans déficit.` },
+    { icone: 'voyageurs', titre: 'Gagnez des voyageurs', texte: 'Votre score : les voyageurs gagnés chaque jour en 2038.' },
+  ]
   return {
     titre: `Construisez le réseau ${ville.reseau} de 2038.`,
-    intro: `Vous dirigez les transports ${ville.territoire} pendant deux mandats, avec ${budget} milliards d’euros. Il n’y a pas encore de catalogue de projets à ${ville.nom} : vous tracez vos propres lignes de tram, de bus ou de métro, et nous calculons leur prix et leurs voyageurs.`,
-    pastilles: ['Tracé libre', `${n(ville.enveloppe * 2)} M€ sur deux mandats`],
-    etapes: [
-      'Vous tracez vos lignes sur la carte.',
-      'Vous finissez chaque mandat sans déficit.',
-      'Votre score est le nombre de voyageurs gagnés.',
-    ],
-    sources: `Le budget est celui du jeu à Lyon, rapporté au nombre d’habitants. Les prix au kilomètre viennent de chantiers lyonnais récents, et les voyageurs d’une formule recalée sur les lignes de ${ville.reseau} ; ce sont des estimations, pas des devis signés. La carte utilise OpenStreetMap et Wikidata, et le traceur les données de population et d’emploi de l’INSEE. Projet citoyen, sous licence CC BY-NC 4.0.`,
+    sousTitre: `Vous dirigez les transports ${ville.territoire} de 2026 à 2038.`,
+    etapes,
+    pourLignes,
   }
 }
 
-function Etapes({ etapes }: { etapes: string[] }) {
+const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+/** Comment on joue, en trois étapes illustrées. */
+function Etapes({ etapes }: { etapes: Etape[] }) {
   return (
-    <motion.ol variants={cascade.parent} className="flex flex-col gap-2.5 lg:gap-3">
-      {etapes.map((e, i) => (
-        <motion.li
-          variants={cascade.enfant}
-          key={e}
-          className="flex items-center gap-3 text-[15px] leading-snug font-semibold lg:text-[17px]"
-        >
-          <span className="grid size-6.5 shrink-0 place-items-center rounded-full bg-white text-[13px] font-black text-rouge lg:size-7.5">
-            {i + 1}
+    <motion.ol variants={cascade.parent} aria-label="Comment on joue" className="flex flex-col gap-3">
+      {etapes.map((e) => (
+        <motion.li variants={cascade.enfant} key={e.titre} className="flex items-center gap-3.5">
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white text-rouge">
+            <Icone nom={e.icone} taille={22} epaisseur={2.2} />
           </span>
-          {e}
+          <span className="flex flex-col">
+            <span className="text-[16px] leading-tight font-black lg:text-[17px]">{e.titre}</span>
+            <span className="text-[14px] leading-snug font-medium opacity-90 lg:text-[15px]">{e.texte}</span>
+          </span>
         </motion.li>
       ))}
     </motion.ol>
   )
 }
 
-/** Le choix de la ville : il change l'accueil et l'adresse de la page, sans rien toucher à une partie. */
+/**
+ * Le choix du réseau : il change l'accueil, ses couleurs et l'adresse de la page, sans rien toucher à une
+ * partie. Sur téléphone, les réseaux défilent sur une seule rangée.
+ */
 function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) => void }) {
+  const rangee = useChoixVisible<HTMLDivElement>(ville)
   return (
-    <div role="radiogroup" aria-label="Ville" className="flex gap-1.5">
+    <div
+      ref={rangee}
+      role="radiogroup"
+      aria-label="Réseau"
+      className="-mx-6 flex snap-x gap-1.5 overflow-x-auto px-6 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
+    >
       {ID_VILLES.map((id) => (
         <button
           key={id}
@@ -85,13 +87,161 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
           aria-checked={ville === id}
           onClick={() => choisir(id)}
           className={clsx(
-            'min-h-10 rounded-full px-4 text-[14px] font-extrabold transition-colors',
+            'flex shrink-0 snap-start flex-col items-start rounded-2xl px-3.5 py-2 text-left transition-colors',
             ville === id ? 'bg-white text-rouge' : 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] hover:bg-white/10',
           )}
         >
-          {VILLES[id].nom}
+          <span className="text-[14px] leading-tight font-extrabold whitespace-nowrap">{VILLES[id].nom}</span>
+          <span className={clsx('text-[11.5px] leading-tight font-semibold whitespace-nowrap', ville === id ? 'text-gris' : 'opacity-85')}>
+            {VILLES[id].lieu}
+          </span>
         </button>
       ))}
+    </div>
+  )
+}
+
+/**
+ * Le mot de passe de l'accès anticipé, demandé au premier clic pour jouer. Celui qui ne l'a pas peut nous
+ * écrire pour le demander, ou revenir à l'accueil.
+ */
+function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () => void }) {
+  const [mot, setMot] = useState('')
+  const [etat, setEtat] = useState<'saisie' | 'envoi' | 'faux' | 'erreur'>('saisie')
+  const [adresse, setAdresse] = useState<string | null>(null)
+  const envoyer = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!mot.trim() || etat === 'envoi') return
+    setEtat('envoi')
+    const resultat = await essayerMotDePasse(mot)
+    if (resultat === 'ok') ouvrir()
+    else setEtat(resultat)
+  }
+  return (
+    <form onSubmit={envoyer} aria-labelledby="acces-titre" className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <p id="acces-titre" className="text-[16px] font-black">
+          Le jeu est en accès anticipé
+        </p>
+        <p className="text-[14px] leading-snug font-semibold opacity-90">
+          Entrez le mot de passe pour jouer. Ce navigateur s’en souviendra ensuite.
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="password"
+          value={mot}
+          onChange={(e) => {
+            setMot(e.target.value)
+            if (etat === 'faux' || etat === 'erreur') setEtat('saisie')
+          }}
+          aria-label="Mot de passe de l’accès anticipé"
+          aria-invalid={etat === 'faux'}
+          aria-describedby="acces-erreur"
+          autoComplete="off"
+          autoFocus
+          placeholder="Mot de passe"
+          className="min-h-14 flex-1 rounded-full bg-white px-5 text-[16px] font-bold text-encre outline-none placeholder:font-semibold placeholder:text-muet focus-visible:ring-4 focus-visible:ring-white/40"
+        />
+        <Bouton genre="blanc" icone="fleche" taille="grand" type="submit" disabled={etat === 'envoi'} className="sm:w-auto">
+          {etat === 'envoi' ? 'Vérification' : 'Entrer dans le jeu'}
+        </Bouton>
+      </div>
+      <p id="acces-erreur" aria-live="polite" className="text-[14px] leading-snug font-extrabold empty:hidden">
+        {etat === 'faux'
+          ? 'Ce n’est pas le bon mot de passe.'
+          : etat === 'erreur'
+            ? 'Nous n’avons pas pu vérifier le mot de passe. Réessayez dans un instant.'
+            : ''}
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[14px] font-extrabold lg:justify-start">
+        <button
+          type="button"
+          onClick={() => setAdresse(ouvrirMessagerie('accès anticipé'))}
+          className="min-h-10 underline decoration-white/50 underline-offset-3 hover:decoration-white"
+        >
+          Demander le mot de passe
+        </button>
+        <button
+          type="button"
+          onClick={annuler}
+          className="min-h-10 underline decoration-white/50 underline-offset-3 hover:decoration-white"
+        >
+          Revenir
+        </button>
+      </div>
+      {adresse ? (
+        <p className="text-center text-[13px] leading-snug opacity-90 lg:text-left" aria-live="polite">
+          Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span>.
+        </p>
+      ) : null}
+    </form>
+  )
+}
+
+/** Le bouton qui ouvre le dévoilement de tout ce que le jeu permet. */
+function BoutonDevoilement({ ouvrir }: { ouvrir: () => void }) {
+  return (
+    <motion.button
+      variants={cascade.enfant}
+      type="button"
+      onClick={ouvrir}
+      className="flex items-center gap-3.5 rounded-2xl bg-white/12 p-3.5 text-left transition-colors hover:bg-white/20"
+    >
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/20">
+        <Icone nom="drapeau" taille={21} epaisseur={2.2} />
+      </span>
+      <span className="flex flex-1 flex-col">
+        <span className="text-[16px] leading-tight font-black">Voir tout ce que le jeu permet</span>
+        <span className="text-[13.5px] leading-snug font-semibold opacity-90">
+          Vous tracerez vos lignes, trouverez l’argent et verrez 2038 arriver.
+        </span>
+      </span>
+      <Icone nom="fleche" taille={20} epaisseur={2.3} />
+    </motion.button>
+  )
+}
+
+/** Les deux façons de jouer, proposées quand on commence une partie. */
+function ChoixMode({ pourLignes, choisir, annuler }: { pourLignes: number; choisir: (libre: boolean) => void; annuler: () => void }) {
+  const carte =
+    'flex w-full flex-col items-start gap-1.5 rounded-2xl p-4 text-left transition-transform active:scale-[0.99] lg:min-h-[150px]'
+  return (
+    <div role="group" aria-labelledby="choix-mode" className="flex flex-col gap-3">
+      <p id="choix-mode" className="text-[15px] font-extrabold">
+        Comment voulez-vous jouer ?
+      </p>
+      <div className="grid gap-2.5 lg:grid-cols-2">
+        <button type="button" onClick={() => choisir(false)} className={clsx(carte, 'bg-white text-encre hover:bg-white/95')}>
+          <span className="flex w-full items-center justify-between gap-2 text-[17px] font-black text-rouge">
+            Jouer avec le vrai budget
+            <Icone nom="fleche" taille={19} epaisseur={2.4} />
+          </span>
+          <span className="text-[14px] leading-snug text-gris">
+            {majuscule(enLettres(pourLignes))} d’euros pour vos lignes, en deux mandats sans déficit.
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => choisir(true)}
+          className={clsx(carte, 'shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.75)] hover:bg-white/10')}
+        >
+          <span className="flex w-full items-center justify-between gap-2 text-[17px] font-black">
+            Jouer sans limite de budget
+            <Icone nom="fleche" taille={19} epaisseur={2.4} />
+          </span>
+          <span className="text-[14px] leading-snug opacity-90">
+            Tracez le réseau dont vous rêvez, et voyez ce qu’il coûterait face au budget réel.
+          </span>
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={annuler}
+        className="min-h-10 self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start"
+      >
+        Revenir
+      </button>
     </div>
   )
 }
@@ -121,12 +271,21 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
   }
   const ville = VILLES[choix]
   const t = textes(ville)
-  // Une nouvelle partie remplace celle qui est enregistrée : on le dit avant, pour la ville affichée.
-  const [confirmerPour, setConfirmerPour] = useState<IdVille | null>(null)
-  const confirmer = confirmerPour === choix
+  useCouleursReseau(choix)
+  // Commencer propose d'abord les deux modes ; une nouvelle partie remplace celle qui est enregistrée :
+  // on le dit ensuite, avant d'effacer quoi que ce soit.
+  const [etape, setEtape] = useState<{ ville: IdVille; libre?: boolean } | null>(null)
+  const choixMode = etape?.ville === choix && etape.libre === undefined
+  const confirmer = etape?.ville === choix && etape.libre !== undefined
   const enregistree = partieEnCours ?? null
   const ici = enregistree?.ville === choix
-  const villeEnregistree = enregistree ? VILLES[enregistree.ville].nom : ''
+  const reseauEnregistre = enregistree ? VILLES[enregistree.ville] : null
+  const choisirMode = (libre: boolean) => (enregistree ? setEtape({ ville: choix, libre }) : commencer(choix, libre))
+  // Tant que le jeu est en accès anticipé, toute action qui mène à une partie passe d'abord par le mot de passe.
+  const acces = useAcces()
+  const [enAttente, setEnAttente] = useState<(() => void) | null>(null)
+  const avecAcces = (action: () => void) => (acces ? action() : setEnAttente(() => action))
+  const [devoilement, setDevoilement] = useState(false)
 
   // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
   // d'origine après un changement d'adresse : le titre est corrigé juste après.
@@ -148,133 +307,152 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         variants={cascade.parent}
         initial="hidden"
         animate="show"
-        className="flex min-h-dvh flex-col gap-5 px-6 pt-5 pb-7 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[640px] lg:gap-7 lg:overflow-y-auto lg:rounded-r-[36px] lg:bg-rouge lg:px-14 lg:pt-10 lg:pb-12"
+        className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col gap-6 px-6 pt-5 pb-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[640px] lg:gap-6 lg:overflow-y-auto lg:rounded-r-[36px] lg:bg-rouge lg:px-14 lg:pt-8 lg:pb-7"
       >
-        <motion.div variants={cascade.enfant} className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Logo taille={38} inverse />
-            <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-          </div>
-          {/* Sur ordinateur, les sources restent affichées en bas à droite : le lien ne sert que sur téléphone. */}
-          <a href="#sources" className="text-[13px] font-bold underline underline-offset-3 lg:hidden">
-            D’où viennent les chiffres
-          </a>
+        <motion.div variants={cascade.enfant} className="flex items-center gap-2.5">
+          <Logo taille={36} inverse />
+          <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
         </motion.div>
 
-        <motion.div variants={cascade.enfant} className="flex flex-col gap-3 lg:mt-2 lg:gap-5">
+        <motion.div variants={cascade.enfant} className="flex flex-col gap-4">
           <ChoixVille ville={choix} choisir={setChoix} />
-          <h1 className="text-[44px] leading-[0.95] font-black tracking-[-0.035em] text-balance lg:text-[72px] lg:leading-[0.93]">
+          {/* Un titre long, comme celui d'Aix-Marseille-Provence, s'écrit plus petit pour tenir en quelques lignes. */}
+          <h1
+            className={clsx(
+              'leading-[0.95] font-black tracking-[-0.035em] text-balance lg:leading-[0.93]',
+              t.titre.length > 50 ? 'text-[36px] lg:text-[48px]' : 'text-[44px] lg:text-[58px]',
+            )}
+          >
             {t.titre}
           </h1>
-          <p className="max-w-[500px] text-base leading-relaxed font-medium lg:text-[19px]">{t.intro}</p>
+          <p className="text-[16px] leading-snug font-semibold opacity-95 lg:text-[17px]">{t.sousTitre}</p>
         </motion.div>
 
-        {/* Une seule carte : une vignette sur téléphone, le fond de l'écran sur ordinateur. */}
+        {/* Une seule carte : une vignette sur téléphone, qui grandit sur un grand écran étroit, et le fond de
+            l'écran sur ordinateur. */}
         <div
           aria-hidden="true"
-          className="relative h-[230px] shrink-0 overflow-hidden rounded-[20px] bg-sable lg:fixed lg:inset-y-0 lg:right-0 lg:left-[640px] lg:h-auto lg:rounded-none"
+          className="relative min-h-[190px] flex-1 overflow-hidden rounded-[20px] bg-sable lg:fixed lg:inset-y-0 lg:right-0 lg:left-[640px] lg:h-auto lg:rounded-none"
         >
           <Carte key={choix} marges={MARGES} decor ville={choix} partie={RESEAU_ACTUEL} />
-          <div className="absolute top-2.5 left-2.5 flex gap-1.5 lg:hidden">
-            <span className="rounded-full bg-encre px-2.5 py-1 text-xs font-extrabold text-white">{t.pastilles[0]}</span>
-            <span className="chiffres rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-encre shadow-[inset_0_0_0_1.5px_var(--color-encre)]">
-              {t.pastilles[1]}
-            </span>
-          </div>
+          <span className="absolute top-2.5 left-2.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-extrabold text-encre shadow-flotte lg:top-6 lg:left-6 lg:px-3 lg:py-1.5 lg:text-[13px]">
+            Le réseau aujourd’hui
+          </span>
         </div>
 
         <Etapes key={choix} etapes={t.etapes} />
 
-        <motion.div variants={cascade.enfant} className="mt-auto flex flex-col gap-3">
-          {confirmer && enregistree ? (
+        <BoutonDevoilement ouvrir={() => setDevoilement(true)} />
+
+        {/* Sur téléphone, le bouton pour commencer reste en bas de l'écran pendant qu'on lit, et le choix du
+            mode s'ouvre au même endroit. */}
+        <motion.div
+          variants={cascade.enfant}
+          className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-4 bg-rouge px-6 pt-2 pb-[max(12px,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-linear-to-t before:from-rouge before:to-transparent lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:before:hidden"
+        >
+          {enAttente && !acces ? (
+            <FormulaireAcces
+              ouvrir={() => {
+                enAttente()
+                setEnAttente(null)
+              }}
+              annuler={() => setEnAttente(null)}
+            />
+          ) : choixMode ? (
+            <ChoixMode pourLignes={t.pourLignes} choisir={choisirMode} annuler={() => setEtape(null)} />
+          ) : confirmer && enregistree && reseauEnregistre ? (
             <div role="group" aria-labelledby="remplacer-partie" className="flex flex-col gap-3 rounded-2xl bg-white/12 p-4">
               <p id="remplacer-partie" className="text-[15px] leading-relaxed font-semibold">
                 {!enregistree.terminee
-                  ? `Votre partie en cours à ${villeEnregistree} sera effacée.`
+                  ? `Votre partie en cours ${reseauEnregistre.ou} sera effacée.`
                   : enregistree.publiee
-                    ? `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Il reste dans les réseaux publiés.`
-                    : `Votre réseau de ${villeEnregistree} sera effacé de ce navigateur. Pour le garder, revoyez-le d’abord et publiez-le ou copiez son lien.`}
+                    ? `Votre réseau ${reseauEnregistre.nom} sera effacé de ce navigateur. Il reste dans les réseaux publiés.`
+                    : `Votre réseau ${reseauEnregistre.nom} sera effacé de ce navigateur. Pour le garder, revoyez-le d’abord et publiez-le ou copiez son lien.`}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Bouton genre="blanc" onClick={() => commencer(choix)}>
+                <Bouton genre="blanc" onClick={() => commencer(choix, etape?.libre)}>
                   Effacer et commencer
                 </Bouton>
-                <Bouton genre="contourBlanc" onClick={() => setConfirmerPour(null)}>
+                <Bouton genre="contourBlanc" onClick={() => setEtape(null)}>
                   {enregistree.terminee ? 'Garder mon réseau' : 'Garder ma partie'}
                 </Bouton>
               </div>
             </div>
-          ) : enregistree ? (
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-              {/* Dans la ville de la partie enregistrée, on la retrouve d'abord ; ailleurs, on commence d'abord. */}
-              {ici ? (
-                <>
-                  <Bouton genre="blanc" icone="fleche" taille="grand" onClick={enregistree.reprendre} className="w-full lg:w-[250px]">
-                    {enregistree.terminee ? 'Revoir mon réseau' : 'Reprendre ma partie'}
-                  </Bouton>
-                  <Bouton genre="contourBlanc" taille="grand" onClick={() => setConfirmerPour(choix)} className="whitespace-nowrap">
-                    Nouvelle partie à {ville.nom}
-                  </Bouton>
-                </>
-              ) : (
-                <>
-                  <Bouton
-                    genre="blanc"
-                    icone="fleche"
-                    taille="grand"
-                    onClick={() => setConfirmerPour(choix)}
-                    className="w-full lg:w-[250px]"
-                  >
-                    Commencer à {ville.nom}
-                  </Bouton>
-                  <Bouton genre="contourBlanc" taille="grand" onClick={enregistree.reprendre} className="whitespace-nowrap">
-                    {enregistree.terminee ? `Revoir mon réseau de ${villeEnregistree}` : `Reprendre ma partie à ${villeEnregistree}`}
-                  </Bouton>
-                </>
-              )}
+          ) : enregistree && reseauEnregistre ? (
+            <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-5">
+              {/* Sur le réseau de la partie enregistrée, on la retrouve d'abord ; ailleurs, on commence d'abord.
+                  L'autre choix reste discret, pour que la barre du téléphone ne cache pas la page. */}
+              <Bouton
+                genre="blanc"
+                icone="fleche"
+                taille="grand"
+                onClick={() => avecAcces(ici ? enregistree.reprendre : () => setEtape({ ville: choix }))}
+                className="w-full shrink-0 lg:w-[280px]"
+              >
+                {ici ? (enregistree.terminee ? 'Revoir mon réseau' : 'Reprendre ma partie') : 'Commencer la partie'}
+              </Bouton>
+              <button
+                type="button"
+                onClick={() => avecAcces(ici ? () => setEtape({ ville: choix }) : enregistree.reprendre)}
+                className="min-h-10 self-center text-[14px] font-extrabold underline decoration-white/50 underline-offset-3 hover:decoration-white lg:self-auto lg:text-left"
+              >
+                {ici
+                  ? 'Commencer une nouvelle partie'
+                  : enregistree.terminee
+                    ? `Revoir mon réseau ${reseauEnregistre.nom}`
+                    : `Reprendre ma partie ${reseauEnregistre.ou}`}
+              </button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-              <Bouton genre="blanc" icone="fleche" taille="grand" onClick={() => commencer(choix)} className="w-full lg:w-[250px]">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-5">
+              <Bouton
+                genre="blanc"
+                icone="fleche"
+                taille="grand"
+                onClick={() => avecAcces(() => setEtape({ ville: choix }))}
+                className="w-full shrink-0 lg:w-[280px]"
+              >
                 Commencer la partie
               </Bouton>
-              {communauteActive ? (
-                <Link
-                  href={adresseReseaux(choix)}
-                  className="flex min-h-14 items-center justify-center gap-2 rounded-full px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.6)] transition-colors hover:bg-white/10"
-                >
-                  <Icone nom="voyageurs" taille={19} />
-                  Voir les réseaux publiés
-                </Link>
-              ) : null}
+              <p className="text-center text-[13px] leading-snug font-semibold opacity-85 lg:text-left">
+                Sans compte : votre partie reste dans ce navigateur.
+              </p>
             </div>
-          )}
-          {enregistree ? (
-            communauteActive && !confirmer ? (
-              <Link
-                href={adresseReseaux(choix)}
-                className="self-center text-[14px] font-extrabold underline underline-offset-3 lg:self-start"
-              >
-                Voir les réseaux publiés
-              </Link>
-            ) : null
-          ) : (
-            <p className="text-center text-[13px] leading-snug font-semibold opacity-90 lg:text-left lg:text-sm">
-              Sans compte. Votre partie reste dans ce navigateur.
-            </p>
           )}
         </motion.div>
 
-        <section
-          id="sources"
-          className="flex flex-col gap-2 border-t border-white/30 pt-5 text-[13px] leading-relaxed opacity-95 lg:hidden"
-        >
-          <p>{t.sources}</p>
-        </section>
+        {choixMode || confirmer || enAttente ? null : (
+          <motion.nav
+            variants={cascade.enfant}
+            aria-label="Pour aller plus loin"
+            className="flex flex-wrap justify-center gap-x-5 gap-y-0.5 border-t border-white/25 pt-2 text-[13.5px] font-extrabold lg:justify-start"
+          >
+            <Link
+              href={adresseMethode(choix)}
+              className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
+            >
+              Comment nous calculons le budget et les voyageurs
+            </Link>
+            {communauteActive ? (
+              <Link
+                href={adresseReseaux(choix)}
+                className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
+              >
+                Les réseaux publiés
+              </Link>
+            ) : null}
+          </motion.nav>
+        )}
       </motion.div>
-      <section className="sr-only lg:not-sr-only lg:absolute lg:right-6 lg:bottom-6 lg:w-[420px] lg:rounded-2xl lg:bg-white lg:p-4 lg:text-[12.5px] lg:leading-relaxed lg:text-gris lg:shadow-flotte">
-        <p>{t.sources}</p>
-      </section>
+      <Devoilement
+        ouvert={devoilement}
+        acces={acces}
+        fermer={() => setDevoilement(false)}
+        commencer={() => {
+          setDevoilement(false)
+          avecAcces(() => setEtape({ ville: choix }))
+        }}
+      />
     </main>
   )
 }

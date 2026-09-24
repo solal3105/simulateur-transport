@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "data": "node scripts/build-data.mjs"
+    "data": "node scripts/build-data.mjs",
+    "budgets": "jiti scripts/verifier-budgets.ts"
   },
   "engines": {
     "node": ">=20.9"

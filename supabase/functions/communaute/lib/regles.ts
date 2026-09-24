@@ -1,4 +1,6 @@
 // Copie de lib/regles.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
+import { enveloppe, reserve as reserveDuMandat } from './budget.ts'
+import { effetLeviers } from './leviers.ts'
 import { MANDATS, PROJETS } from './catalogue.ts'
 import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, ModeLigne, Projet } from './types.ts'
 import type { Ville } from './villes.ts'
@@ -23,17 +25,6 @@ export function resoudre(projet: Projet, choix?: Pick<Chantier, 'varianteId' | '
   return { projet, mode: variante?.mode ?? projet.mode, cout, voyageurs: variante?.voyageurs ?? projet.voyageurs, duree }
 }
 
-// Leviers de financement, en millions d'euros par mandat.
-export const RENDEMENT = { abonnements: 12, tickets: 8, versementMobilite: 28 }
-export const LEVIERS_FIXES = {
-  gratuiteTotale: -1925,
-  gratuiteMoins25: -240,
-  gratuiteJeunesAbonnes: -48,
-  suppressionTarifSocial: 240,
-  metroNuit: -24,
-  tva: 96,
-} as const
-
 export const LEVIERS_NEUTRES: Leviers = {
   abonnements: 0,
   tickets: 0,
@@ -46,23 +37,6 @@ export const LEVIERS_NEUTRES: Leviers = {
   tva: false,
 }
 
-/** Ce que les leviers ajoutent ou retirent à l'enveloppe d'un mandat. */
-export function effetLeviers(l: Leviers): number {
-  let total = 0
-  if (l.gratuiteTotale) total += LEVIERS_FIXES.gratuiteTotale
-  else {
-    // La gratuité totale rend sans objet les autres mesures tarifaires.
-    if (l.gratuiteMoins25) total += LEVIERS_FIXES.gratuiteMoins25
-    if (l.gratuiteJeunesAbonnes) total += LEVIERS_FIXES.gratuiteJeunesAbonnes
-    if (l.suppressionTarifSocial) total += LEVIERS_FIXES.suppressionTarifSocial
-    total += l.abonnements * RENDEMENT.abonnements + l.tickets * RENDEMENT.tickets
-  }
-  if (l.metroNuit) total += LEVIERS_FIXES.metroNuit
-  if (l.tva) total += LEVIERS_FIXES.tva
-  total += l.versementMobilite * RENDEMENT.versementMobilite
-  return total
-}
-
 /** Part d'un coût payée sur un mandat donné. */
 function part(cout: number, decision: { mandat: Mandat; etale: boolean }, mandat: Mandat): number {
   if (decision.etale) return decision.mandat === 1 ? cout / 2 : decision.mandat === mandat ? cout : 0
@@ -70,11 +44,13 @@ function part(cout: number, decision: { mandat: Mandat; etale: boolean }, mandat
 }
 
 export interface Bilan {
+  /** Tout l'investissement du mandat, hors projets décidés déjà sur la carte. */
   enveloppe: number
   leviers: number
   /** Argent non dépensé au premier mandat, qui passe au second. */
   reliquat: number
-  bus: number
+  /** Ce qui est réservé d'office aux bus et aux lignes existantes. */
+  reserve: number
   /** Projets décidés pendant ce mandat. */
   projets: number
   /** Moitiés de projets étalés depuis le mandat précédent. */
@@ -82,18 +58,18 @@ export interface Bilan {
   reste: number
 }
 
-/** Le budget d'une ville : son enveloppe, l'entretien des bus, et si ses leviers de financement sont calculés. */
-export type Budget = Pick<Ville, 'enveloppe' | 'entretienBus' | 'leviers'>
+/** Ce que les règles demandent à un réseau : son budget, avec ses leviers de financement s'il en a. */
+export type Budget = Pick<Ville, 'budget'>
 
 export function bilanMandat(
   mandat: Mandat,
   chantiers: Chantier[],
   lignes: LigneJoueur[],
   leviers: Record<Mandat, Leviers>,
-  budget: Budget,
+  ville: Budget,
 ): Bilan {
   // Ce qui n'a pas été dépensé au premier mandat reste disponible au second.
-  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers, budget).reste) : 0
+  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers, ville).reste) : 0
   let projets = 0
   let reports = 0
   const ajouter = (cout: number, d: { mandat: Mandat; etale: boolean }) => {
@@ -107,13 +83,15 @@ export function bilanMandat(
   }
   for (const l of lignes) ajouter(l.estimation.cout, l)
   // Là où les leviers ne sont pas calculés, ils ne changent rien au budget.
-  const effet = budget.leviers ? effetLeviers(leviers[mandat]) : 0
-  const reste = budget.enveloppe + effet + reliquat - budget.entretienBus - projets - reports
+  const effet = ville.budget.leviers ? effetLeviers(leviers[mandat], ville.budget.leviers) : 0
+  const total = enveloppe(ville.budget, mandat)
+  const reserve = reserveDuMandat(ville.budget, mandat)
+  const reste = total + effet + reliquat - reserve - projets - reports
   return {
-    enveloppe: budget.enveloppe,
+    enveloppe: total,
     leviers: effet,
     reliquat,
-    bus: budget.entretienBus,
+    reserve,
     projets: Math.round(projets),
     reports: Math.round(reports),
     reste: Math.round(reste),
@@ -174,9 +152,9 @@ export function score(chantiers: Chantier[], lignes: LigneJoueur[]): number {
 }
 
 /** Les chiffres qui résument un réseau, pour le bilan comme pour la comparaison de deux réseaux. */
-export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>, budget: Budget) {
-  const b1 = bilanMandat(1, chantiers, lignes, leviers, budget)
-  const b2 = bilanMandat(2, chantiers, lignes, leviers, budget)
+export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>, ville: Budget) {
+  const b1 = bilanMandat(1, chantiers, lignes, leviers, ville)
+  const b2 = bilanMandat(2, chantiers, lignes, leviers, ville)
   const investi =
     chantiers.reduce((t, c) => {
       const p = PROJETS.get(c.id)
