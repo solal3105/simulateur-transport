@@ -13,9 +13,10 @@ const PARTIES = ['c29sYWwuZ2VuZHJpbg==', 'Z21haWwuY29t']
 const adresse = () => PARTIES.map((p) => atob(p)).join('@')
 
 /** Ouvre la messagerie avec un objet déjà rempli, et renvoie l'adresse pour l'afficher au besoin. */
-export function ouvrirMessagerie(sujet: string) {
+export function ouvrirMessagerie(sujet: string, corps?: string) {
   const a = adresse()
-  window.location.href = `mailto:${a}?subject=${encodeURIComponent(`Simulateur transport : ${sujet}`)}`
+  const texte = corps ? `&body=${encodeURIComponent(corps)}` : ''
+  window.location.href = `mailto:${a}?subject=${encodeURIComponent(`Simulateur transport : ${sujet}`)}${texte}`
   return a
 }
 

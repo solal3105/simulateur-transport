@@ -1,16 +1,15 @@
 // Copie de lib/modele.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
+import { coutLigne, totalCout } from './couts.ts'
 import { FORMULE } from './formule.ts'
+import type { Terrain } from './terrain.ts'
 import type { Estimation, ModeLigne } from './types.ts'
 import type { IdVille, Ville } from './villes.ts'
 
 /**
  * Estimation du coût et de la fréquentation d'une ligne tracée par le joueur.
  *
- * Le coût est la longueur multipliée par un prix au kilomètre tiré de chantiers récents :
- * tramway, moyenne des T6 nord, T9 et T10 (32 à 37 M€ HT par km) ; bus à haut niveau de
- * service, ligne TB12 Part-Dieu - Sept Chemins (12 à 17) ; métro, prolongement du B à
- * Saint-Genis-Laval (157 à 163) et ligne C de Toulouse (117 à 127) ; téléphérique, Téléo à
- * Toulouse et Câble C1 à Créteil (27 à 31).
+ * Le coût additionne la voie, les stations et les ouvrages qu'impose le terrain (lib/couts.ts), calés sur
+ * 53 chantiers français (docs/couts.md).
  *
  * La fréquentation suit la formule retenue par le moteur de fréquentation (scripts/modele/moteur.py,
  * docs/modele.md), écrite dans lib/formule.ts : elle a été choisie parmi des milliers d'autres, calées
@@ -18,7 +17,6 @@ import type { IdVille, Ville } from './villes.ts'
  * et jugées sur des lignes et des villes absentes de leur calage. Ce module ne fait que la calculer :
  * les coefficients, les distances et la constante de chaque ville viennent tous de lib/formule.ts.
  */
-export const PRIX_KM: Record<ModeLigne, number> = { tram: 34, bus: 15, metro: 150, cable: 30 }
 export const DUREE_CHANTIER: Record<ModeLigne, number> = { tram: 5, bus: 3, metro: 8, cable: 4 }
 /** Les rues ne sont pas droites : un tracé réel est plus long que la somme des segments. */
 const DETOUR: Record<ModeLigne, number> = { tram: 1.12, bus: 1.12, metro: 1.05, cable: 1 }
@@ -55,11 +53,18 @@ export interface Carreaux {
   /** Le centre de la ville, [lon, lat], d'où se mesure la distance au centre. */
   centre: [number, number]
   ville: IdVille
+  /** Le relief et les grands cours d'eau, pour le coût des ouvrages ; sans eux, la voie et les stations seulement. */
+  terrain?: Terrain
 }
 
 const TUILE = 500
 
-export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pick<Ville, 'id' | 'latitude' | 'centre'>): Carreaux {
+export function preparerCarreaux(
+  brut: number[][],
+  arrets: number[][],
+  ville: Pick<Ville, 'id' | 'latitude' | 'centre'>,
+  terrain?: Terrain,
+): Carreaux {
   const mx = metresParDegre(ville.latitude)
   const metres = distance(mx)
   const cle = (lon: number, lat: number) => `${Math.floor((lon * mx) / TUILE)}:${Math.floor((lat * MY) / TUILE)}`
@@ -93,7 +98,7 @@ export function preparerCarreaux(brut: number[][], arrets: number[][], ville: Pi
     l.push(i)
     index.set(k, l)
   })
-  return { cellules, index, mx, constante: FORMULE.constantes[ville.id], centre: ville.centre, ville: ville.id }
+  return { cellules, index, mx, constante: FORMULE.constantes[ville.id], centre: ville.centre, ville: ville.id, terrain }
 }
 
 export function longueurKm(arrets: [number, number][], mode: ModeLigne, mx: number) {
@@ -107,7 +112,8 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
   const { mx } = carreaux
   const metres = distance(mx)
   const km = longueurKm(arrets, mode, mx)
-  const cout = Math.round(km * PRIX_KM[mode])
+  const detail = coutLigne(mode, arrets, km, mx, carreaux.ville, carreaux.terrain)
+  const cout = totalCout(detail)
   const c = FORMULE.coefficients
   const r = rayonBassin(mode)
   const w = FORMULE.poidsEmplois
@@ -185,5 +191,6 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
     habitants: Math.round(habitants),
     emplois: Math.round(emplois),
     habitantsNonDesservis: Math.round(habitantsNonDesservis),
+    detail,
   }
 }

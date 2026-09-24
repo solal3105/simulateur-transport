@@ -1,9 +1,10 @@
+// Copie de lib/terrain.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 /**
  * Le terrain sous une ligne : son relief, tiré du RGE ALTI de l'IGN (scripts/relief.mjs), et les grands
  * cours d'eau qu'elle franchit. Ce module ne dépend d'aucun navigateur : la fonction serveur de la
  * communauté l'utilise pour recalculer le coût d'une ligne publiée.
  */
-import type { ModeLigne } from './types'
+import type { ModeLigne } from './types.ts'
 
 /** La grille d'altitudes d'un réseau, telle que scripts/relief.mjs l'écrit. */
 export interface ReliefBrut {

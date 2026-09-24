@@ -24,3 +24,8 @@ La base est le projet Supabase « simulateur-transport » (organisation TCL2040)
 7. Fusionner, sans fusion automatique. Netlify publie `main` en quelques minutes.
 
 Avant la fusion, `npm run build`, `npm run lint`, `npm run typecheck` et `npm run budgets -- --liens` doivent passer.
+
+## Le relief (24 septembre 2026)
+
+Le coût des lignes tient compte du relief et des grands fleuves (`docs/couts.md`). La fonction serveur lit le terrain de chaque réseau dans la colonne `terrain` de la table `modele` (migration `20260924120000_terrain.sql`). Après avoir redéployé la fonction, on dépose le terrain une fois par réseau avec `node scripts/deposer-terrain.mjs <réseau>`, qui doit répondre `200 {"ok":true}`. Si le relief est relevé à nouveau (`node scripts/relief.mjs <réseau>`), il faut mettre à jour l'empreinte `EMPREINTES_TERRAIN` de la fonction, vider la colonne du réseau et le redéposer.
+
