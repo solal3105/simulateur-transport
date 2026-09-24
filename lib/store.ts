@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { PROJETS } from './catalogue'
 import { approx } from './format'
+import { estimer, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
@@ -91,6 +92,8 @@ interface Etat {
   retirerArret: () => void
   abandonnerTrace: () => void
   construireLigne: (nom: string, estimation: Estimation, etale: boolean) => void
+  /** Recalcule le coût et les voyageurs des lignes tracées avec le modèle actuel, quand il a changé. */
+  actualiserLignes: (carreaux: Carreaux) => void
   effacerMessage: () => void
   setApercu: (v: number) => void
 }
@@ -234,6 +237,19 @@ export const useJeu = create<Etat>()(
               texte: `Environ ${approx(estimation.nouveaux)} nouveaux voyageurs par jour pour le réseau.`,
             },
           }
+        }),
+      actualiserLignes: (carreaux) =>
+        set((s) => {
+          if (carreaux.ville !== s.ville || s.lignes.length === 0) return {}
+          let change = false
+          const lignes = s.lignes.map((l) => {
+            const e = estimer(l.mode, l.arrets, carreaux)
+            const estimation = { ...e, nouveaux: Math.round(e.nouveaux / 100) * 100 }
+            if (estimation.cout === l.estimation.cout && estimation.nouveaux === l.estimation.nouveaux && l.estimation.detail) return l
+            change = true
+            return { ...l, estimation }
+          })
+          return change ? { lignes } : {}
         }),
       effacerMessage: () => set({ message: null }),
       setApercu: (apercu) => set({ apercu }),

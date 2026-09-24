@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import { aAcces } from '@/lib/acces'
+import { chargerDonnees } from '@/lib/donnees'
 import { decoderPartie, type PartiePartagee } from '@/lib/lien'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, VILLES, type IdVille } from '@/lib/villes'
@@ -53,6 +54,19 @@ export function Jeu({ ville }: { ville?: IdVille }) {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [ecran])
+
+  // Les lignes d'une partie enregistrée gardent les chiffres du jour où elles ont été tracées : dès que les
+  // données du réseau arrivent, on les recalcule avec le modèle actuel, comme le fera le serveur à la publication.
+  useEffect(() => {
+    if (!pret) return
+    let actif = true
+    chargerDonnees(villePartie)
+      .then((d) => actif && useJeu.getState().actualiserLignes(d.carreaux))
+      .catch(() => {})
+    return () => {
+      actif = false
+    }
+  }, [pret, villePartie])
 
   // Pendant une partie, l'onglet et l'adresse disent la ville jouée ; un réseau reçu garde la sienne.
   const autreVille = ville !== undefined && villePartie !== ville && !reprise

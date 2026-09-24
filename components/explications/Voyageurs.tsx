@@ -2,7 +2,8 @@
 
 import { de, n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
-import { FOURCHETTE, PRIX_KM } from '@/lib/modele'
+import { COEFFICIENT_RESEAU, prixReseau } from '@/lib/couts'
+import { FOURCHETTE } from '@/lib/modele'
 import type { IdVille, Ville } from '@/lib/villes'
 
 import { Deplier } from './Deplier'
@@ -114,8 +115,13 @@ export function ExplicationVoyageurs({ ville }: { ville: Ville }) {
         </div>
       ) : null}
       <p className="text-[15px] leading-relaxed">
-        Le prix d’une ligne est sa longueur multipliée par un coût au kilomètre tiré de chantiers lyonnais récents : {PRIX_KM.tram} M€ pour
-        un tramway, {PRIX_KM.bus} M€ pour un bus à haut niveau de service, {PRIX_KM.metro} M€ pour un métro automatique.
+        Le prix d’une ligne additionne sa voie, {prixReseau('tram', ville.id).km} M€ par km pour un tramway et{' '}
+        {prixReseau('metro', ville.id).km} M€ pour un métro, ses stations, et ce que le terrain impose : un tunnel quand la pente est trop
+        forte pour le mode, un pont pour chaque grand fleuve, une station de métro creusée plus profond sous une colline. Ces prix viennent
+        de 53 chantiers français récents
+        {COEFFICIENT_RESEAU[ville.id] > 1
+          ? `, et nous les majorons de ${Math.round((COEFFICIENT_RESEAU[ville.id] - 1) * 100)} % ${ville.territoire.replace(/^de /, 'dans ').replace(/^d’/, 'en ')}, où l’on construit plus cher qu’ailleurs.`
+          : '.'}
       </p>
       <Deplier titre="Voir le détail de la formule">
         <p className="text-[14.5px] leading-relaxed">
