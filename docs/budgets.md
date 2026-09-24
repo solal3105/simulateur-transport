@@ -21,7 +21,9 @@ Quelques règles valent partout :
 - Chaque chiffre d'une explication vient d'une source citée, ou se présente comme notre estimation.
 - On préfère, dans l'ordre, les budgets votés et les comptes, les programmes pluriannuels, les prospectus obligataires et les analyses de notation, les rapports d'orientation budgétaire, puis les rapports des chambres régionales des comptes. La presse ne sert qu'en dernier recours, et la liste des limites le signale.
 
-Lyon garde les montants du jeu depuis sa première version, 2 000 M€ par mandat dont 400 M€ pour les bus, désormais sourcés : c'est à peu près ce que Sytral Mobilités a investi de 2021 à 2025, et ce qu'il peut investir sans s'endetter davantage. Sytral a programmé davantage pour 2026-2031, en empruntant ; le fichier de Lyon le dit, avec ce que le jeu ne compte pas, comme l'entretien du réseau existant.
+Lyon dispose de 1 940 M€ par mandat, dont 400 M€ pour les bus : c'est ce que Sytral Mobilités a investi de 2021 à 2025, retenu comme l'investissement disponible pour le réseau à chaque mandat. Sytral a programmé davantage pour 2026-2031, en empruntant ; le fichier de Lyon le dit, avec ce que le jeu ne compte pas, comme l'entretien du réseau existant.
+
+Les leviers de Lyon gardent les montants de la première version du jeu, à la demande de Solal, et leur explication les met en regard des comptes de Sytral. Ils supposent environ 330 M€ de recettes par an, quand le réseau TCL en a encaissé environ 282 M€ en 2025 (299,3 M€ pour tous les réseaux de Sytral). Par mandat, le jeu compte 12 M€ par point d'abonnement et 8 M€ par point de ticket, là où les comptes donneraient 10 et 7 ; 1 925 M€ pour la gratuité totale contre environ 1 700 M€ ; 240 M€ pour la gratuité des moins de 25 ans contre environ 300 M€ selon notre estimation ; 240 M€ pour ramener les réductions solidaires à 50 %, sous le plafond de 320 M€ ; 24 M€ pour le métro toute la nuit contre environ 22 M€ selon notre estimation ; 96 M€ pour la TVA contre 72 M€. Seule la gratuité des 11-18 ans enfants d'abonnés, 48 M€, n'a pas d'autre source que la presse.
 
 ## Les leviers de financement
 
@@ -30,7 +32,7 @@ Chaque réseau propose les mêmes leviers, calculés à partir de ses propres re
 - Une hausse de 1 % du prix des abonnements rapporte 1 % des recettes d'abonnements, et de même pour les tickets.
 - Une hausse de 1 % du versement mobilité rapporte 1 % de son produit ; au-delà du taux maximal, il faut une loi.
 - La gratuité totale coûte toutes les recettes tarifaires, et la gratuité des moins de 25 ans ce qu'ils paient aujourd'hui.
-- La suppression des tarifs sociaux rapporte la différence entre ce que paient leurs bénéficiaires et le plein tarif.
+- La loi impose au moins 50 % de réduction aux plus modestes : on ne peut pas supprimer les tarifs solidaires, seulement les ramener à ce minimum. La mesure rapporte la différence entre ce que paient leurs bénéficiaires et la moitié du plein tarif ; là où ils paient déjà la moitié, comme à Nice, elle n'est pas proposée.
 - Le service de nuit le week-end coûte ce que coûtent les heures de métro ou de tram en plus, d'après une étude publiée ou le coût d'exploitation du réseau.
 - La TVA à 5,5 % au lieu de 10 % laisse au réseau la différence sur ce que paient les voyageurs.
 

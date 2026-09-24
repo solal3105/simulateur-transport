@@ -161,7 +161,7 @@ export function ExplicationBudget({ ville }: { ville: Ville }) {
           {POSTES.filter((p) => b[p].explication).map((p) => (
             <section key={p} className="flex flex-col gap-2">
               <h4 className="text-[15.5px] font-black">{TITRES[p]}</h4>
-              <p className="text-[14.5px] leading-relaxed">{b[p].explication}</p>
+              <Paragraphes texte={b[p].explication} />
               <Sources sources={b[p].sources} />
             </section>
           ))}
@@ -230,7 +230,7 @@ export function ExplicationLeviers({ ville }: { ville: Ville }) {
       <p className="text-[15px] leading-relaxed">{p.simple}</p>
       {p.sources.length ? (
         <Deplier titre="Voir le détail du calcul et les sources">
-          <p className="text-[14.5px] leading-relaxed">{p.explication}</p>
+          <Paragraphes texte={p.explication} />
           <Sources sources={p.sources} />
         </Deplier>
       ) : (
@@ -238,6 +238,15 @@ export function ExplicationLeviers({ ville }: { ville: Ville }) {
       )}
     </div>
   )
+}
+
+/** Une explication détaillée, en paragraphes séparés par une ligne vide dans le texte. */
+function Paragraphes({ texte }: { texte: string }) {
+  return texte.split('\n\n').map((paragraphe) => (
+    <p key={paragraphe} className="text-[14.5px] leading-relaxed">
+      {paragraphe}
+    </p>
+  ))
 }
 
 /** L'invitation à corriger un chiffre du budget ou des leviers. */

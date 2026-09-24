@@ -110,7 +110,7 @@ export const toulouse: BudgetVille = {
     tarifs: { abonnement: 59, ticket: 1.9 },
     rendement: { abonnements: 3, tickets: 3.3, versementMobilite: 21 },
     tauxVersement: 2,
-    fixes: { gratuiteTotale: -694, gratuiteMoins25: -150, suppressionTarifSocial: 155, metroNuit: -11, tva: 30 },
+    fixes: { gratuiteTotale: -694, gratuiteMoins25: -150, suppressionTarifSocial: 78, metroNuit: -11, tva: 30 },
     textes: {
       metroNuit: {
         titre: 'Métro toute la nuit le week-end',
@@ -120,7 +120,7 @@ export const toulouse: BudgetVille = {
     simple:
       'Les billets et les abonnements rapportent environ 116 millions d’euros par an, et le versement mobilité des entreprises 352 millions.',
     explication:
-      'Les recettes de trafic ont atteint 115,7 M€ hors taxes en 2025 : 55,1 M€ de tickets et de titres occasionnels, 50,2 M€ d’abonnements, et 9,9 M€ de titres payés par le Département pour les scolaires et les allocataires du RSA. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 351,6 M€. Les moins de 26 ans font 22,5 % des recettes : leur gratuité coûterait environ 25 M€ par an avant 25 ans. Tisséo ne publie pas ce que coûte sa tarification solidaire, qui va jusqu’à la gratuité : si ses bénéficiaires payaient autant par voyage que les abonnés au plein tarif, ils rapporteraient au plus 26 M€ de plus par an, selon notre estimation. Le métro roule déjà jusqu’à 3 h les jeudis, vendredis et samedis : le faire rouler toute la nuit le week-end coûterait environ 1,8 M€ par an, d’après son coût au kilomètre. Les hausses de prix supposent que la fréquentation ne baisse pas.',
+      'Les recettes de trafic ont atteint 115,7 M€ hors taxes en 2025 : 55,1 M€ de tickets et de titres occasionnels, 50,2 M€ d’abonnements, et 9,9 M€ de titres payés par le Département pour les scolaires et les allocataires du RSA. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 351,6 M€. Les moins de 26 ans font 22,5 % des recettes : leur gratuité coûterait environ 25 M€ par an avant 25 ans. Tisséo ne publie pas ce que coûte sa tarification solidaire, qui va jusqu’à la gratuité : si ses bénéficiaires payaient la moitié du plein tarif, le minimum que la loi impose aux plus modestes, ils rapporteraient au plus 13 M€ de plus par an, selon notre estimation. Le métro roule déjà jusqu’à 3 h les jeudis, vendredis et samedis : le faire rouler toute la nuit le week-end coûterait environ 1,8 M€ par an, d’après son coût au kilomètre. Les hausses de prix supposent que la fréquentation ne baisse pas.',
     sources: [
       {
         titre: 'Tisséo Voyageurs, rapport d’activité 2025, annexe à la séance du 24 juin 2026',

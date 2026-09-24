@@ -76,9 +76,11 @@ export const MESURES: { cle: MesureFixe; titre: string; detail: string; tarifair
   },
   { cle: 'metroNuit', titre: 'Service de nuit le week-end', detail: '', tarifaire: false },
   {
+    // La clé garde son nom d'origine pour les parties déjà enregistrées ; la loi interdit de supprimer les
+    // tarifs solidaires, on ne peut que les ramener au minimum légal.
     cle: 'suppressionTarifSocial',
-    titre: 'Supprimer les tarifs sociaux',
-    detail: 'Les abonnés aux revenus modestes paient le plein tarif.',
+    titre: 'Ramener les réductions solidaires à 50 %',
+    detail: 'La loi impose au moins 50 % de réduction aux plus modestes : on ne peut que reprendre ce qui est accordé au-delà.',
     tarifaire: true,
   },
   { cle: 'tva', titre: 'TVA des transports à 5,5 %', detail: 'Au lieu de 10 % aujourd’hui.', tarifaire: false },

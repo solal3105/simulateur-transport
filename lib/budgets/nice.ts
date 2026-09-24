@@ -104,7 +104,7 @@ export const nice: BudgetVille = {
     tarifs: { abonnement: 45, ticket: 1.7 },
     rendement: { abonnements: 1.3, tickets: 2.8, versementMobilite: 6.1 },
     tauxVersement: 2,
-    fixes: { gratuiteTotale: -424, gratuiteMoins25: -51, suppressionTarifSocial: 13, metroNuit: -6, tva: 18 },
+    fixes: { gratuiteTotale: -424, gratuiteMoins25: -51, metroNuit: -6, tva: 18 },
     textes: {
       metroNuit: {
         titre: 'Tram toute la nuit le week-end',
@@ -114,7 +114,7 @@ export const nice: BudgetVille = {
     simple:
       'Les billets et les abonnements rapportent environ 71 millions d’euros par an, et le versement mobilité des entreprises 101 millions. Les tickets pèsent deux fois plus que les abonnements.',
     explication:
-      'La billetterie a rapporté 73,7 M€ hors taxes en 2025. Nous en retirons environ 3 M€ par an pour les gratuités votées en 2026, dont celle des 65 ans et plus, ce qui laisse 70,7 M€ : d’après la régie, environ 46 M€ de tickets et 21 M€ d’abonnements. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 101,5 M€ en 2025. La gratuité des moins de 25 ans coûterait ce qu’ils paient aujourd’hui, environ 8,5 M€ par an ; celle des moins de 11 ans existe déjà. L’abonnement social coûte la moitié du plein tarif : le supprimer rapporterait environ 2,2 M€ par an. Un tram toute la nuit le week-end, avec une rame toutes les 30 minutes et deux agents par rame, coûterait environ 1 M€ par an, d’après le coût d’exploitation que la Métropole retient pour la ligne 5. Les hausses de prix supposent que la fréquentation ne baisse pas.',
+      'La billetterie a rapporté 73,7 M€ hors taxes en 2025. Nous en retirons environ 3 M€ par an pour les gratuités votées en 2026, dont celle des 65 ans et plus, ce qui laisse 70,7 M€ : d’après la régie, environ 46 M€ de tickets et 21 M€ d’abonnements. Le versement mobilité est déjà à son taux maximal, 2 % de la masse salariale, et a rapporté 101,5 M€ en 2025. La gratuité des moins de 25 ans coûterait ce qu’ils paient aujourd’hui, environ 8,5 M€ par an ; celle des moins de 11 ans existe déjà. L’abonnement social coûte déjà la moitié du plein tarif, le minimum que la loi impose aux plus modestes : il n’y a rien à reprendre de ce côté. Un tram toute la nuit le week-end, avec une rame toutes les 30 minutes et deux agents par rame, coûterait environ 1 M€ par an, d’après le coût d’exploitation que la Métropole retient pour la ligne 5. Les hausses de prix supposent que la fréquentation ne baisse pas.',
     sources: [
       {
         titre: 'Métropole Nice Côte d’Azur, compte financier 2025',
