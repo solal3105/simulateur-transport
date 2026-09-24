@@ -114,6 +114,10 @@ export function PageMethode({ ville: id }: { ville: IdVille }) {
             Jouer {ville.ou}
             <Icone nom="fleche" taille={19} epaisseur={2.3} />
           </Link>
+          <p className="pt-4 text-[13px] leading-relaxed text-gris">
+            La carte vient d’OpenStreetMap et de Wikidata, les habitants et les emplois de l’INSEE. Les coûts et les voyageurs sont des
+            estimations, pas des devis signés. Projet citoyen, sous licence CC BY-NC 4.0.
+          </p>
         </div>
       </div>
     </main>
