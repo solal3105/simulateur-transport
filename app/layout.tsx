@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: VILLES.lyon.titrePage,
     description: `Deux mandats, ${MONTANT} et ${PROJETS}. Lesquels construiriez-vous ?`,
-    images: ['/og-image.png'],
     locale: 'fr_FR',
   },
+  twitter: { card: 'summary_large_image' },
 }
 
 export const viewport: Viewport = {

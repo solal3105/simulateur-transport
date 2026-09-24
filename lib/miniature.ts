@@ -24,10 +24,14 @@ export function cadreMiniature(ville: Pick<Ville, 'emprise' | 'latitude'>) {
   const kx = Math.cos((ville.latitude * Math.PI) / 180)
   const echelle = LARGEUR_MINIATURE / ((lon1 - lon0) * kx)
   const hauteur = Math.round((lat1 - lat0) * echelle)
-  const point = (lon: number, lat: number) => `${((lon - lon0) * kx * echelle).toFixed(1)} ${((lat1 - lat) * echelle).toFixed(1)}`
+  const xy = (lon: number, lat: number): [number, number] => [(lon - lon0) * kx * echelle, (lat1 - lat) * echelle]
+  const point = (lon: number, lat: number) =>
+    xy(lon, lat)
+      .map((v) => v.toFixed(1))
+      .join(' ')
   const chemin = (parties: number[][][]) => parties.map((l) => 'M' + l.map(([lon, lat]) => point(lon!, lat!)).join('L')).join('')
   // Le cadre montré est un peu resserré sur le centre de l'agglomération.
-  return { hauteur, viewBox: `60 40 ${LARGEUR_MINIATURE - 120} ${hauteur - 80}`, chemin }
+  return { hauteur, viewBox: `60 40 ${LARGEUR_MINIATURE - 120} ${hauteur - 80}`, chemin, xy }
 }
 
 export function cheminsFond(fond: Fond, ville: Pick<Ville, 'emprise' | 'latitude'>) {

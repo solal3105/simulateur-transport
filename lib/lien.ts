@@ -42,7 +42,14 @@ export async function lirePartie(brut: unknown): Promise<PartiePartagee | null> 
   return ville ? normaliserPartie(brut, (await chargerDonnees(ville)).carreaux) : null
 }
 
-/** L'adresse complète à partager. */
+/** Au-delà, l'adresse /p/<code> risque d'être refusée par certains services : on garde alors #r=. */
+const LONGUEUR_ADRESSE = 1800
+
+/**
+ * L'adresse complète à partager. L'adresse /p/<code> donne aux réseaux sociaux une image de ce réseau
+ * (app/p/[code]) ; une partie trop longue passe par #r=, que seul le navigateur lit.
+ */
 export async function lienDePartage(p: PartiePartagee) {
-  return `${window.location.origin}/#r=${await encoderPartie(p)}`
+  const code = await encoderPartie(p)
+  return code.length <= LONGUEUR_ADRESSE ? `${window.location.origin}/p/${code}` : `${window.location.origin}/#r=${code}`
 }

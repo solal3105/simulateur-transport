@@ -1,13 +1,11 @@
-import { imageVille } from '@/lib/apercuVille'
+import { imageAccueil, TAILLE } from '@/lib/apercus'
 import { VILLES } from '@/lib/villes'
-import fond from '@/public/data/toulouse/fond.json'
 
-/** L'image qui accompagne un lien vers l'accueil de Toulouse : la carte du réseau actuel et ce qu'on y fait. */
-
-export const alt = 'La carte du métro et du tram de Toulouse, avec le titre du jeu'
-export const size = { width: 1200, height: 630 }
+/** L'image qui accompagne un lien vers l'accueil de ce réseau (lib/apercus.tsx). */
+export const alt = `La carte du réseau ${VILLES.toulouse.nom}, avec le titre du jeu et l’argent disponible pour vos lignes`
+export const size = TAILLE
 export const contentType = 'image/png'
 
 export default function Image() {
-  return imageVille(VILLES.toulouse, fond)
+  return imageAccueil(VILLES.toulouse)
 }
