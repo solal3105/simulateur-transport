@@ -72,6 +72,25 @@ export interface Estimation {
   habitants: number
   emplois: number
   habitantsNonDesservis: number
+  /** D'où vient le coût : la voie, les stations et les ouvrages qu'impose le terrain (lib/couts.ts). */
+  detail?: DetailCout
+}
+
+/** Le coût d'une ligne, part par part, en millions d'euros, avec ce qui l'explique. */
+export interface DetailCout {
+  voie: number
+  stations: number
+  /** Tunnels, tranchées couvertes ou viaducs là où la pente est trop forte pour le mode. */
+  ouvrages: number
+  /** Ponts sur les grands cours d'eau. */
+  ponts: number
+  /** Stations de métro plus profondes que d'ordinaire, sous une colline. */
+  profondeur: number
+  kmOuvrage: number
+  franchissements: number
+  stationsProfondes: number
+  /** Plus forte pente du terrain sur 200 m, en pourcentage. */
+  penteTerrain: number
 }
 
 export interface Leviers {

@@ -6,7 +6,9 @@ import { useMemo, useState } from 'react'
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
 import { nommerArrets } from '@/lib/lieux'
-import { DUREE_CHANTIER, estimer, PRIX_KM, rayonBassin } from '@/lib/modele'
+import { prixReseau } from '@/lib/couts'
+import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
+import { DUREE_CHANTIER, estimer, rayonBassin } from '@/lib/modele'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, ModeLigne } from '@/lib/types'
@@ -15,29 +17,35 @@ import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
 import { Panneau } from './Panneau'
 
-// Les prix au kilomètre viennent de chantiers lyonnais, dans toutes les villes : les textes le disent.
+// Les prix viennent de 53 chantiers français (lib/couts.ts, docs/couts.md) ; chaque repère dit ce qui fait monter le coût.
 const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; repere: string }[] = [
-  { id: 'tram', nom: 'Tramway', court: 'Tram', icone: 'tram', repere: 'Moyenne des T6 nord, T9 et T10 de Lyon, entre 32 et 37 M€ par km.' },
+  {
+    id: 'tram',
+    nom: 'Tramway',
+    court: 'Tram',
+    icone: 'tram',
+    repere: 'Il ne monte pas au-delà de 6 % : plus raide, il lui faut un tunnel, et un pont pour chaque grand fleuve.',
+  },
   {
     id: 'bus',
     nom: 'Bus à haut niveau de service',
     court: 'Bus rapide',
     icone: 'bus',
-    repere: 'Comme la ligne TB12 Part-Dieu - Sept Chemins à Lyon, entre 12 et 17 M€ par km.',
+    repere: 'Le moins cher au kilomètre, sur des voies réservées, et il grimpe jusqu’à 10 %.',
   },
   {
     id: 'metro',
     nom: 'Métro automatique',
     court: 'Métro',
     icone: 'metro',
-    repere: 'Le prolongement du métro B de Lyon à Saint-Genis-Laval a coûté environ 160 M€ par km.',
+    repere: 'Chaque station coûte cher, et plus encore creusée profond sous une colline.',
   },
   {
     id: 'cable',
     nom: 'Téléphérique',
     court: 'Câble',
     icone: 'cable',
-    repere: 'Comme Téléo à Toulouse ou le Câble C1 à Créteil, entre 27 et 31 M€ par km.',
+    repere: 'Il passe au-dessus des fleuves et des collines sans ouvrage, et ne tourne qu’à une gare.',
   },
 ]
 const NOM_MODE: Record<ModeLigne, string> = { tram: 'tramway', bus: 'bus rapide', metro: 'métro', cable: 'téléphérique' }
@@ -63,6 +71,115 @@ function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {
   )
 }
 
+/** D'où vient le coût d'une ligne : la voie, les stations, et ce que le terrain impose en plus. */
+export function DetailCout({ e, arrets, mode }: { e: Estimation; arrets: number; mode: ModeLigne }) {
+  const d = e.detail
+  if (!d) return null
+  const pluriel = (k: number, un: string, plusieurs: string) => (k > 1 ? plusieurs : un)
+  const lignes: [string, number][] = [
+    [`La voie, ${km(e.km)} km`, d.voie],
+    [`${arrets} ${pluriel(arrets, 'station', 'stations')}`, d.stations],
+  ]
+  if (d.ouvrages > 0)
+    lignes.push([
+      mode === 'metro'
+        ? `Tunnel à plus de ${TUNNEL_PROFOND} m sous le sol sur ${km(d.kmOuvrage)} km`
+        : `Tunnel ou tranchée sur ${km(d.kmOuvrage)} km, le terrain montant jusqu’à ${n(d.penteTerrain)} %`,
+      d.ouvrages,
+    ])
+  if (d.ponts > 0)
+    lignes.push([
+      mode === 'metro'
+        ? `${d.franchissements} ${pluriel(d.franchissements, 'passage', 'passages')} sous un fleuve`
+        : `${d.franchissements} ${pluriel(d.franchissements, 'pont', 'ponts')} sur un fleuve`,
+      d.ponts,
+    ])
+  if (d.profondeur > 0)
+    lignes.push([
+      mode === 'metro'
+        ? `${d.stationsProfondes} ${pluriel(d.stationsProfondes, 'station creusée', 'stations creusées')} plus profond sous une colline`
+        : `${d.stationsProfondes} ${pluriel(d.stationsProfondes, 'station souterraine', 'stations souterraines')} sous la colline`,
+      d.profondeur,
+    ])
+  return (
+    <div className="flex flex-col">
+      {lignes.map(([libelle, valeur]) => (
+        <Ligne key={libelle} libelle={libelle} valeur={`${n(valeur)} M€`} />
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Le profil en long de la ligne en cours de tracé : le terrain, la voie que le mode peut suivre, et chaque
+ * station. En métro, la profondeur de chaque station ; en tram et en bus, les passages en tunnel.
+ */
+function Profil({ mode, arrets }: { mode: ModeLigne; arrets: [number, number][] }) {
+  const donnees = useDonnees(useVille().id)
+  const terrain = donnees?.carreaux.terrain
+  const r = useMemo(
+    () => (terrain && donnees && arrets.length >= 2 ? relief(terrain, mode, arrets, donnees.carreaux.mx) : null),
+    [terrain, donnees, mode, arrets],
+  )
+  if (!r || r.profil.length < 2) return null
+  const L = 320
+  const H = 116
+  const haut = 14
+  const bas = 18
+  const total = r.profil.at(-1)!.s || 1
+  const valeurs = r.profil.flatMap((p) => [p.z, p.voie])
+  const min = Math.min(...valeurs) - 4
+  const max = Math.max(...valeurs) + 4
+  const x = (s: number) => (s / total) * L
+  const y = (z: number) => haut + (1 - (z - min) / (max - min)) * (H - haut - bas)
+  const sol = `M0,${H} ${r.profil.map((p) => `L${x(p.s).toFixed(1)},${y(p.z).toFixed(1)}`).join(' ')} L${L},${H} Z`
+  const voie = r.profil.map((p, i) => `${i ? 'L' : 'M'}${x(p.s).toFixed(1)},${y(p.voie).toFixed(1)}`).join(' ')
+  // Les passages où la voie quitte le terrain : tunnel ou tranchée en tram et en bus.
+  const ouvrages =
+    mode === 'tram' || mode === 'bus'
+      ? r.profil
+          .map((p, i) =>
+            i > 0 && Math.abs(p.z - p.voie) > 6
+              ? `M${x(r.profil[i - 1]!.s).toFixed(1)},${y(r.profil[i - 1]!.voie).toFixed(1)} L${x(p.s).toFixed(1)},${y(p.voie).toFixed(1)}`
+              : '',
+          )
+          .join(' ')
+      : ''
+  const profondeMax = mode === 'metro' ? Math.max(...r.stations.map((st) => st.z - st.voie)) : 0
+  return (
+    <div className="flex flex-col gap-1.5">
+      <svg viewBox={`0 0 ${L} ${H}`} className="w-full" role="img" aria-label="Profil en long de la ligne">
+        <path d={sol} fill="#e9e3d8" stroke="#b9b1a3" strokeWidth={1} />
+        <path d={voie} fill="none" stroke="var(--color-rouge)" strokeWidth={2.5} strokeDasharray={mode === 'metro' ? '5 3' : undefined} />
+        {ouvrages ? <path d={ouvrages} fill="none" stroke="#1b1b1f" strokeWidth={3.5} /> : null}
+        {r.stations.map((st, i) => (
+          <g key={i}>
+            {mode === 'metro' || st.z - st.voie > 6 ? (
+              <line x1={x(st.s)} x2={x(st.s)} y1={y(st.z)} y2={y(st.voie)} stroke="#1b1b1f" strokeWidth={1} strokeDasharray="2 2" />
+            ) : null}
+            <circle cx={x(st.s)} cy={y(st.voie)} r={3.5} fill="white" stroke="var(--color-rouge)" strokeWidth={2} />
+            {mode === 'metro' || st.z - st.voie > 6 ? (
+              <text x={Math.min(L - 14, Math.max(14, x(st.s)))} y={H - 4} textAnchor="middle" fontSize={10} fontWeight={800} fill="#1b1b1f">
+                {Math.round(st.z - st.voie)} m
+              </text>
+            ) : null}
+          </g>
+        ))}
+        <text x={2} y={10} fontSize={9.5} fontWeight={700} fill="#6b6760">
+          {Math.round(max - 4)} m
+        </text>
+      </svg>
+      <p className="text-[12.5px] leading-snug text-gris">
+        {mode === 'metro'
+          ? `Le tunnel suit le terrain d’aussi près que sa pente de ${Math.round(PENTE_MAX.metro * 100)} % le permet. Sous chaque station, sa profondeur : la plus basse est à ${Math.round(profondeMax)} m.`
+          : mode === 'cable'
+            ? `Le câble passe au-dessus du terrain, qui varie de ${r.denivele} m le long de la ligne.`
+            : `Le terrain monte jusqu’à ${n(r.penteTerrain)} %, et la voie ne dépasse pas ${Math.round(PENTE_MAX[mode] * 100)} %${r.kmOuvrage > 0 ? ' : en noir, les passages en tunnel ou en tranchée' : ''}.`}
+      </p>
+    </div>
+  )
+}
+
 function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: ModeLigne }) {
   const cellule = (valeur: string, unite: string, legende: string, accent?: boolean) => (
     <div className="flex flex-col gap-0.5">
@@ -77,7 +194,7 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
     <div className="grid grid-cols-4 gap-2">
       {cellule(km(e.km), 'km', 'de ligne')}
       {cellule(String(arrets), '', arrets > 1 ? 'arrêts' : 'arrêt')}
-      {cellule(n(e.cout), 'M€', `à ${PRIX_KM[mode]} M€ / km`)}
+      {cellule(n(e.cout), 'M€', 'de construction')}
       {cellule(`~${approx(e.voyageurs)}`, '', 'voyageurs / jour', true)}
     </div>
   )
@@ -174,6 +291,7 @@ function AjoutParNom() {
 /** Le panneau affiché pendant qu'on pose les arrêts. */
 export function Traceur() {
   const { brouillon, changerMode, retirerArret, abandonnerTrace, ouvrir, libre } = useJeu()
+  const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
   const e = useEstimation()
@@ -272,7 +390,7 @@ export function Traceur() {
             <span className="flex flex-1 flex-col gap-0.5">
               <span className="flex items-baseline justify-between gap-2">
                 <span className="text-[15px] font-extrabold">{m.nom}</span>
-                <span className="chiffres text-sm font-black whitespace-nowrap">{PRIX_KM[m.id]} M€ / km</span>
+                <span className="chiffres text-sm font-black whitespace-nowrap">{prixReseau(m.id, ville.id).km} M€ / km</span>
               </span>
               <span className="text-[12.5px] leading-snug text-gris">
                 {m.repere} Chantier d’environ {DUREE_CHANTIER[m.id]} ans.
@@ -301,6 +419,14 @@ export function Traceur() {
             {noms.at(-1)}
             {noms.length > 2 ? <span className="text-gris">, par {noms.slice(1, -1).join(', ')}</span> : null}
           </p>
+          <div className="flex flex-col gap-1">
+            <Surtitre>Le relief sous la ligne</Surtitre>
+            <Profil mode={brouillon.mode} arrets={brouillon.arrets} />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <Surtitre>Ce que coûte la ligne</Surtitre>
+            <DetailCout e={e} arrets={arrets} mode={brouillon.mode} />
+          </div>
           <div className="hidden flex-col gap-0.5 lg:flex">
             <Surtitre>Autour de vos arrêts, à moins de {distanceBassin(brouillon.mode)}</Surtitre>
             <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
@@ -382,7 +508,7 @@ export function MaLigne() {
       }
     >
       <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`${km(e.km)} km à ${PRIX_KM[brouillon.mode]} M€ le km`} />
+        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${brouillon.arrets.length} stations`} />
         <CarteChiffre
           icone="voyageurs"
           valeur={`~${approx(e.voyageurs)}`}
@@ -390,6 +516,10 @@ export function MaLigne() {
           accent
         />
         <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <Surtitre>Ce que coûte la ligne</Surtitre>
+        <DetailCout e={e} arrets={brouillon.arrets.length} mode={brouillon.mode} />
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>

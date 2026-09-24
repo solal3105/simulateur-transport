@@ -14,6 +14,7 @@ import { join } from 'node:path'
 import { preparerCarreaux } from '../lib/modele'
 import { normaliserPartie, villeDePartie } from '../lib/partie'
 import { resumer } from '../lib/regles'
+import { fleuvesDe, preparerTerrain } from '../lib/terrain'
 import { VILLES } from '../lib/villes'
 
 const racine = join(__dirname, '..')
@@ -28,7 +29,9 @@ for (const r of reseaux) {
   const dossier = VILLES[ville].dossier
   const lire = (nom: string) =>
     JSON.parse(readFileSync(join(racine, 'public', 'data', ...(dossier ? [dossier] : []), `${nom}.json`), 'utf8'))
-  const carreaux = preparerCarreaux(lire('carreaux'), lire('arrets'), VILLES[ville])
+  // Le coût des lignes tient compte du relief et des fleuves, comme dans le jeu et la fonction serveur.
+  const terrain = preparerTerrain(lire('relief'), fleuvesDe(lire('fond')))
+  const carreaux = preparerCarreaux(lire('carreaux'), lire('arrets'), VILLES[ville], terrain)
   const partie = normaliserPartie(r.partie, carreaux)
   if (!partie) {
     console.log(`-- ${r.id} : partie illisible avec les données actuelles, laissée telle quelle`)

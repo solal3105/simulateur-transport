@@ -89,9 +89,11 @@ export function Liste() {
                   <button
                     type="button"
                     onClick={() => retirer(l.id)}
-                    className="min-h-10 rounded-full bg-white px-3.5 text-[13px] font-extrabold"
+                    aria-label={`Retirer ${l.nom}`}
+                    title="Retirer"
+                    className="grid size-10 place-items-center rounded-full bg-white text-rouge-fonce transition-colors hover:bg-rouge hover:text-white"
                   >
-                    Retirer
+                    <Icone nom="poubelle" taille={18} />
                   </button>
                 </span>
               ) : null}

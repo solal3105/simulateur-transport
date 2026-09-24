@@ -109,6 +109,13 @@ function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () 
   const [mot, setMot] = useState('')
   const [etat, setEtat] = useState<'saisie' | 'envoi' | 'faux' | 'erreur'>('saisie')
   const [adresse, setAdresse] = useState<string | null>(null)
+  const demander = () =>
+    setAdresse(
+      ouvrirMessagerie(
+        'demande d’accès anticipé',
+        'Bonjour,\n\nJ’aimerais essayer le Simulateur transport en accès anticipé. Pourriez-vous m’envoyer le mot de passe ?\n\nMerci !',
+      ),
+    )
   const envoyer = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!mot.trim() || etat === 'envoi') return
@@ -154,27 +161,34 @@ function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () 
             ? 'Nous n’avons pas pu vérifier le mot de passe. Réessayez dans un instant.'
             : ''}
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[14px] font-extrabold lg:justify-start">
-        <button
-          type="button"
-          onClick={() => setAdresse(ouvrirMessagerie('accès anticipé'))}
-          className="min-h-10 underline decoration-white/50 underline-offset-3 hover:decoration-white"
-        >
-          Demander le mot de passe
-        </button>
-        <button
-          type="button"
-          onClick={annuler}
-          className="min-h-10 underline decoration-white/50 underline-offset-3 hover:decoration-white"
-        >
-          Revenir
-        </button>
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/15 p-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-rouge">
+            <Icone nom="lettre" taille={20} epaisseur={2.2} />
+          </span>
+          <span className="flex flex-col gap-0.5">
+            <span className="text-[15.5px] leading-tight font-black">Pas encore de mot de passe ?</span>
+            <span className="text-[13.5px] leading-snug font-semibold opacity-90">
+              Demandez votre accès anticipé : votre messagerie s’ouvre avec un message déjà écrit, il ne reste qu’à l’envoyer.
+            </span>
+          </span>
+        </div>
+        <Bouton genre="contourBlanc" iconeAGauche="lettre" onClick={demander} className="w-full sm:w-auto sm:self-start">
+          Demander mon accès anticipé
+        </Bouton>
+        {adresse ? (
+          <p className="text-[13px] leading-snug opacity-90" aria-live="polite">
+            Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span>.
+          </p>
+        ) : null}
       </div>
-      {adresse ? (
-        <p className="text-center text-[13px] leading-snug opacity-90 lg:text-left" aria-live="polite">
-          Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span>.
-        </p>
-      ) : null}
+      <button
+        type="button"
+        onClick={annuler}
+        className="min-h-10 self-center text-[14px] font-extrabold underline decoration-white/50 underline-offset-3 hover:decoration-white lg:self-start"
+      >
+        Revenir
+      </button>
     </form>
   )
 }
@@ -414,9 +428,24 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
               >
                 Commencer la partie
               </Bouton>
-              <p className="text-center text-[13px] leading-snug font-semibold opacity-85 lg:text-left">
-                Sans compte : votre partie reste dans ce navigateur.
-              </p>
+              {acces ? (
+                <p className="text-center text-[13px] leading-snug font-semibold opacity-85 lg:text-left">
+                  Sans compte : votre partie reste dans ce navigateur.
+                </p>
+              ) : (
+                <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] leading-snug font-semibold lg:justify-start">
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[12px] font-black tracking-wide uppercase">
+                    Accès anticipé
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEnAttente(() => () => setEtape({ ville: choix }))}
+                    className="min-h-8 font-extrabold underline decoration-white/50 underline-offset-3 hover:decoration-white"
+                  >
+                    Obtenir le mot de passe
+                  </button>
+                </p>
+              )}
             </div>
           )}
         </motion.div>

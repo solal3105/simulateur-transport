@@ -10,6 +10,7 @@ import { PROJETS } from './lib/catalogue.ts'
 import { preparerCarreaux, type Carreaux } from './lib/modele.ts'
 import { compacter, normaliserPartie, villeDePartie } from './lib/partie.ts'
 import { resoudre, resumer } from './lib/regles.ts'
+import { preparerTerrain, type ReliefBrut } from './lib/terrain.ts'
 import { estVille, VILLES, type IdVille } from './lib/villes.ts'
 
 const base = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -24,6 +25,16 @@ const EMPREINTES: Record<IdVille, string> = {
   marseille: '559c8700d0582cc5f128704869d91843b4e0ce655b4e8a4a77b75c44cc51a2f1',
   nice: '18766bf4503eb0e2fea45f62571b703e1bf9cc611ae5c5d48df35cee46127fff',
   idf: '2899dcf2ef96441bfc27385f07c7ea65db3327c1facc89043e8da9bc3115aebb',
+}
+
+// Empreinte du terrain de chaque ville (relief.json et grands cours d'eau de fond.json), déposé par
+// scripts/deposer-terrain.mjs : le coût d'une ligne tient compte des pentes et des fleuves.
+const EMPREINTES_TERRAIN: Record<IdVille, string> = {
+  lyon: '9f45bf50914e61814e647713485d09f1abcefa2c86a279405b9158000c7c9475',
+  toulouse: 'a8cd3128bd12119781338530bc821317926e4b7108e488238e5b09d163db3c37',
+  marseille: '0e2e7a4c0bf5746cbd5c9b8747075ef4bc8c258f6144e7fd3fc111e2e32ad714',
+  nice: '0854b2d1bff72cef0cdd8c26a82b1d638d64c10ccd902ee7d2ee7ed39d59b211',
+  idf: 'cccac0219febb9e39866f2056bcdb883d4c6f0433b9f9509d2fe169f77411076',
 }
 
 const ENTETES = {
@@ -45,9 +56,15 @@ function chargerCarreaux(ville: IdVille) {
   let p = carreaux.get(ville)
   if (!p) {
     p = (async () => {
-      const { data, error } = await base.from('modele').select('carreaux, arrets').eq('ville', ville).single()
+      const { data, error } = await base.from('modele').select('carreaux, arrets, terrain').eq('ville', ville).single()
       if (error || !data) throw new Error(`Données du modèle absentes pour ${ville}`)
-      return preparerCarreaux(data.carreaux as number[][], data.arrets as number[][], VILLES[ville])
+      const terrain = data.terrain as { relief: ReliefBrut; fleuves: [number, number][][] } | null
+      return preparerCarreaux(
+        data.carreaux as number[][],
+        data.arrets as number[][],
+        VILLES[ville],
+        terrain ? preparerTerrain(terrain.relief, terrain.fleuves) : undefined,
+      )
     })().catch((e) => {
       carreaux.delete(ville)
       throw e
@@ -138,6 +155,26 @@ Deno.serve(async (req) => {
       }
       const { error } = await base.from('modele').insert({ ville, carreaux: corps.carreaux, arrets: corps.arrets })
       if (error) throw error
+      return repondre({ ok: true })
+    }
+
+    // Dépôt unique du terrain d'une ville, vérifié par son empreinte.
+    if (action === 'deposer-terrain') {
+      const ville = corps.ville
+      if (!estVille(ville)) return refuser('Ville inconnue.')
+      const { data: ligne } = await base.from('modele').select('terrain').eq('ville', ville).maybeSingle()
+      if (!ligne) return refuser('Les données du modèle ne sont pas encore déposées.', 409)
+      if (ligne.terrain) return refuser('Le terrain est déjà déposé.', 409)
+      if (!corps.relief || !Array.isArray(corps.fleuves)) return refuser('Données incomplètes.')
+      if ((await empreinte(`${JSON.stringify(corps.relief)}|${JSON.stringify(corps.fleuves)}`)) !== EMPREINTES_TERRAIN[ville]) {
+        return refuser('Ces données ne sont pas celles du terrain.', 403)
+      }
+      const { error } = await base
+        .from('modele')
+        .update({ terrain: { relief: corps.relief, fleuves: corps.fleuves } })
+        .eq('ville', ville)
+      if (error) throw error
+      carreaux.delete(ville)
       return repondre({ ok: true })
     }
 

@@ -65,7 +65,7 @@ export function useProgramme() {
 }
 
 export function Programme() {
-  const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir, libre } = useJeu()
+  const { mandat, ouvrir, finirMandat, ecran, tuto, aVenir, libre, retirer } = useJeu()
   const ville = useVille()
   // Sans catalogue, le programme ne compte que des lignes tracées.
   const mot = ville.catalogue ? 'projet' : 'ligne'
@@ -112,11 +112,11 @@ export function Programme() {
           ) : (
             <ul>
               {courant.map((l) => (
-                <li key={l.id}>
+                <li key={l.id} className="flex items-center gap-1 border-b border-trait">
                   <button
                     type="button"
                     onClick={() => ouvrir(l.joueur ? { type: 'liste' } : { type: 'projet', id: l.id })}
-                    className="flex w-full items-center gap-3 border-b border-trait py-3 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-3 py-3 text-left"
                   >
                     <span className="grid size-8.5 shrink-0 place-items-center rounded-[10px] text-white" style={{ background: l.couleur }}>
                       <Icone nom={l.joueur ? 'trace' : 'valider'} taille={17} epaisseur={2.6} />
@@ -128,6 +128,15 @@ export function Programme() {
                       </span>
                     </span>
                     <span className="chiffres text-sm font-black">{n(l.etale && mandat === 1 ? l.cout / 2 : l.cout)}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => retirer(l.id)}
+                    aria-label={`Retirer ${l.nom}`}
+                    title="Retirer"
+                    className="grid size-9 shrink-0 place-items-center rounded-full text-gris transition-colors hover:bg-rouge-pale hover:text-rouge-fonce"
+                  >
+                    <Icone nom="poubelle" taille={18} />
                   </button>
                 </li>
               ))}

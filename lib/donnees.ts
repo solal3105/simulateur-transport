@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 
 import type { Lieux } from './lieux'
 import { preparerCarreaux, type Carreaux } from './modele'
+import { fleuvesDe, preparerTerrain, type ReliefBrut } from './terrain'
 import { VILLES, type IdVille } from './villes'
 
 export interface Donnees {
@@ -57,13 +58,16 @@ export function chargerTraces(ville: IdVille) {
 
 export function chargerDonnees(ville: IdVille) {
   return memoriser(promesses, ville, async () => {
-    const [{ fond, projets }, carreauxBruts, arrets, lieux] = await Promise.all([
+    const [{ fond, projets }, carreauxBruts, arrets, lieux, relief] = await Promise.all([
       chargerTraces(ville),
       lire<number[][]>(ville, 'carreaux'),
       lire<number[][]>(ville, 'arrets'),
       lire<Lieux>(ville, 'lieux'),
+      // Sans relief relevé, le coût ne compte que la voie et les stations.
+      lire<ReliefBrut>(ville, 'relief').catch(() => null),
     ])
-    return { fond, projets, carreauxBruts, carreaux: preparerCarreaux(carreauxBruts, arrets, VILLES[ville]), lieux, arrets }
+    const terrain = relief ? preparerTerrain(relief, fleuvesDe(fond)) : undefined
+    return { fond, projets, carreauxBruts, carreaux: preparerCarreaux(carreauxBruts, arrets, VILLES[ville], terrain), lieux, arrets }
   })
 }
 
