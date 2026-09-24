@@ -8,6 +8,7 @@ import {
   type FilterSpecification,
   type GeoJSONSource,
   type MapMouseEvent,
+  type MapTouchEvent,
   type StyleSpecification,
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -338,13 +339,21 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': ['coalesce', ['get', 'couleur'], COULEURS.encre], 'line-width': largeur(5.5) },
       },
+      // Une bande invisible autour du tracé en cours : la toucher insère un arrêt entre les deux voisins.
+      {
+        id: 'brouillon-cible',
+        type: 'line',
+        source: 'brouillon',
+        filter: ['==', ['geometry-type'], 'LineString'],
+        paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 18 },
+      },
       {
         id: 'brouillon-arrets',
         type: 'circle',
         source: 'brouillon',
         filter: ['==', ['geometry-type'], 'Point'],
         paint: {
-          'circle-radius': ['case', ['get', 'dernier'], 8, 6],
+          'circle-radius': ['case', ['get', 'dernier'], 9, 7.5],
           'circle-color': ['case', ['get', 'dernier'], ville.couleurs.principale, '#fff'],
           'circle-stroke-color': COULEURS.encre,
           'circle-stroke-width': 2.5,
@@ -352,6 +361,13 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       },
     ],
   }
+}
+
+/** Distance en pixels d'un point à un segment, pour savoir entre quels arrêts insérer le nouveau. */
+function distanceSegment(p: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) {
+  const [dx, dy] = [b.x - a.x, b.y - a.y]
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)))
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
 }
 
 const reduit = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -526,10 +542,74 @@ export function Carte({
       etiquettes.set(f.properties.id, el)
     }
 
-    // Un clic pose un arrêt pendant le tracé ; sinon il ouvre la ligne du joueur touchée, ou à défaut le projet.
+    // Pendant le tracé, on fait glisser un arrêt pour le déplacer. Un glissement ne doit pas poser d'arrêt au
+    // clic qui le termine, et les mises à jour sont regroupées à chaque image pour garder le tracé fluide.
+    let glisse: number | null = null
+    let vientDeGlisser = false
+    let attente: [number, number] | null = null
+    const saisir = (e: MapMouseEvent | MapTouchEvent) => {
+      if (!useJeu.getState().brouillon || decor) return
+      const i = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties?.i
+      if (typeof i !== 'number') return
+      e.preventDefault()
+      glisse = i
+      vientDeGlisser = false
+      m.dragPan.disable()
+      m.getCanvas().style.cursor = 'grabbing'
+    }
+    const bouger = (e: MapMouseEvent | MapTouchEvent) => {
+      if (glisse === null) return
+      if (!attente) {
+        requestAnimationFrame(() => {
+          if (glisse !== null && attente) useJeu.getState().deplacerArret(glisse, attente)
+          attente = null
+        })
+      }
+      attente = [e.lngLat.lng, e.lngLat.lat]
+      vientDeGlisser = true
+    }
+    const lacher = () => {
+      if (glisse === null) return
+      glisse = null
+      m.dragPan.enable()
+      m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+      // Le clic qui suit la fin d'un glissement est ignoré, puis tout redevient normal.
+      setTimeout(() => (vientDeGlisser = false), 50)
+    }
+    m.on('mousedown', 'brouillon-arrets', saisir)
+    m.on('touchstart', 'brouillon-arrets', (e) => {
+      if (e.points.length === 1) saisir(e)
+    })
+    m.on('mousemove', bouger)
+    m.on('touchmove', bouger)
+    m.on('mouseup', lacher)
+    m.on('touchend', lacher)
+    m.on('mouseenter', 'brouillon-arrets', () => {
+      if (glisse === null) m.getCanvas().style.cursor = 'grab'
+    })
+    m.on('mouseleave', 'brouillon-arrets', () => {
+      if (glisse === null) m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+    })
+
+    // Un clic pose un arrêt pendant le tracé, ou l'insère s'il touche la ligne entre deux arrêts ; sinon il
+    // ouvre la ligne du joueur touchée, ou à défaut le projet.
     m.on('click', (e: MapMouseEvent) => {
       const jeu = useJeu.getState()
-      if (jeu.brouillon) return jeu.ajouterArret([e.lngLat.lng, e.lngLat.lat])
+      if (jeu.brouillon) {
+        if (vientDeGlisser || m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] }).length) return
+        const p: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+        if (m.queryRenderedFeatures(e.point, { layers: ['brouillon-cible'] }).length) {
+          const arrets = jeu.brouillon.arrets
+          let meilleur = 0
+          let distance = Infinity
+          for (let j = 1; j < arrets.length; j += 1) {
+            const d = distanceSegment(e.point, m.project(arrets[j - 1]!), m.project(arrets[j]!))
+            if (d < distance) [distance, meilleur] = [d, j]
+          }
+          if (meilleur > 0) return jeu.insererArret(meilleur, p)
+        }
+        return jeu.ajouterArret(p)
+      }
       if (decor) return
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
@@ -630,6 +710,8 @@ export function Carte({
         type: 'FeatureCollection',
         features: lignes
           .filter((l) => anneeMax === undefined || ouverture(l.mandat, l.estimation.duree) <= anneeMax)
+          // La ligne qu'on modifie n'apparaît qu'une fois, sous la forme de son nouveau tracé.
+          .filter((l) => l.id !== brouillon?.edition)
           .map((l) => ({
             type: 'Feature',
             properties: {
@@ -652,7 +734,7 @@ export function Carte({
           geometry: { type: 'LineString', coordinates: arrets },
         })
       arrets.forEach((a, i) =>
-        traits.push({ type: 'Feature', properties: { dernier: i === arrets.length - 1 }, geometry: { type: 'Point', coordinates: a } }),
+        traits.push({ type: 'Feature', properties: { i, dernier: i === arrets.length - 1 }, geometry: { type: 'Point', coordinates: a } }),
       )
       ;(m.getSource('brouillon') as GeoJSONSource).setData({ type: 'FeatureCollection', features: traits })
       const rayon = brouillon ? rayonBassin(brouillon.mode) : FORMULE.rayonAutres

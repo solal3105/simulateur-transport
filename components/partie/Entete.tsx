@@ -64,7 +64,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
   const etape = libre ? `${ville.nom}, jeu libre` : `${ville.nom}, mandat ${mandat} sur 2`
   const part = nomReserve(ville.budget)
   const labelJauge = libre
-    ? `Jeu libre : ${n(depenses.investi)} M€ investis, pour un budget réel de ${n(depenses.budgetReel)} M€ sur deux mandats.`
+    ? `Jeu libre : ${n(depenses.investi)} M€ investis, pour un budget réel de ${n(depenses.budgetReel)} M€ de 2026 à 2038.`
     : `Budget du mandat : ${n(bilan.reserve)} M€ réservés ${part.phrase}, ${n(bilan.projets + bilan.reports)} M€ de projets, ${reste.valeur} ${reste.texte}.`
 
   return (
