@@ -45,11 +45,11 @@ export const PRIX: Record<ModeLigne, PrixMode> = {
   bus: { km: 15, station: 0.6, ouvrageKm: 100, pont: 15, metreProfondeur: 0, stationSouterraine: 30 },
   // Métro automatique entièrement souterrain : 100 M€ par km et 40 M€ par station (Toulouse C, Rennes b et
   // les métros d'Île-de-France : écart moyen de 14 %). Sous une colline, le tunnel passe à plus de 30 m
-  // (250 M€ de plus par km : roche, puits d'accès et de secours plus hauts) et les stations se creusent plus
-  // bas (7 M€ par mètre au-delà de 25 m) ; passer sous un grand fleuve coûte 30 M€. Ces montants sont calés
-  // sur la ligne E de Lyon, estimée à 316 M€ 2025 par km, retrouvée à 11 % près, et sur le métro B à
-  // Saint-Genis-Laval, retrouvé à 3 % près.
-  metro: { km: 100, station: 40, ouvrageKm: 250, pont: 30, metreProfondeur: 7, stationSouterraine: 0 },
+  // (80 M€ de plus par km : roche, puits d'accès et de secours plus hauts) et les stations se creusent plus
+  // bas (4 M€ par mètre au-delà de 25 m) ; passer sous un grand fleuve coûte 30 M€. Avec une pente de 4 %, ces
+  // montants retrouvent la ligne E de Lyon, estimée à 316 M€ 2025 par km, et le métro B à Saint-Genis-Laval
+  // à 6 % près.
+  metro: { km: 100, station: 40, ouvrageKm: 80, pont: 30, metreProfondeur: 4, stationSouterraine: 0 },
   // Téléphériques urbains : Brest, Ajaccio, La Réunion, Grenoble, Téléo et le Câble C1.
   cable: { km: 10, station: 9, ouvrageKm: 0, pont: 0, metreProfondeur: 0, stationSouterraine: 0 },
 }

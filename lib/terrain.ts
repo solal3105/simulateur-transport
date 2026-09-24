@@ -61,10 +61,11 @@ export function altitude(t: Terrain, lon: number, lat: number): number {
 /** La pente maximale que chaque mode peut suivre sans ouvrage, en mètres par mètre. */
 // Tram : 6 %. Le référentiel du Cerema (2018) admet 8 % par exception, mais les directives des tramways de
 // Genève recommandent 3 %, fixent 4 % en site propre et n'admettent 5 à 6 % que sur de courtes rampes : au-delà
-// de 6 % sur une longue distance, on passe en tunnel ou en tranchée. Métro sur pneus : 10 %, comme le Sytral
-// l'étudiait pour la ligne E (10 à 12 %). Bus : aucune limite publiée, 10 % est notre estimation. Le
-// téléphérique ne craint pas la pente.
-export const PENTE_MAX: Record<ModeLigne, number> = { tram: 0.06, bus: 0.1, metro: 0.1, cable: Infinity }
+// de 6 % sur une longue distance, on passe en tunnel ou en tranchée. Métro : 4 %, la pente courante du métro sur
+// fer (5 % seulement par exception sur la ligne 15 du Grand Paris) ; le métro sur pneus monte plus raide (8 % pour
+// le VAL), mais les données de coût se calent aussi bien à 4 qu'à 6 %. Bus : aucune limite publiée, 10 % est
+// notre estimation. Le téléphérique ne craint pas la pente.
+export const PENTE_MAX: Record<ModeLigne, number> = { tram: 0.06, bus: 0.1, metro: 0.04, cable: Infinity }
 
 /** Pas d'échantillonnage du profil en long, en mètres. */
 const PAS_PROFIL = 25
