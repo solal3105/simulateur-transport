@@ -58,7 +58,8 @@ export const nice: BudgetVille = {
   },
   decides: {
     montants: { 1: 0, 2: 0 },
-    simple: 'Les lignes 4 et 5 du tramway ne sont pas encore construites : elles sont dans le catalogue, et leur argent reste dans votre budget.',
+    simple:
+      'Les lignes 4 et 5 du tramway ne sont pas encore construites : elles sont dans le catalogue, et leur argent reste dans votre budget.',
     explication:
       'La ligne 5 est le seul grand projet décidé. Elle est dans le catalogue avec la ligne 4, dont l’avenir est incertain, et aucune des deux n’est dessinée sur notre carte : nous ne retirons rien. Le parc-relais Tzarewitch, qui ouvre en 2026, est soldé la même année.',
     sources: [

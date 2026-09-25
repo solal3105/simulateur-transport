@@ -11,7 +11,7 @@ const projets: Projet[] = [
     nom: 'Ligne 5 du tramway',
     genre: 'Nouvelle ligne de tramway',
     description:
-      'La ligne relie le Palais des Expositions, à Nice, au centre de Drap en longeant le Paillon par Bon Voyage, l’Ariane et La Trinité : quinze stations sur 7,5 km, en correspondance avec la ligne 1 à Pont-Michel et au Palais des Expositions, et quatre parkings relais.',
+      'La ligne relie le Palais des Expositions, à Nice, futur Palais des Arts et de la Culture, au centre de Drap en longeant le Paillon par Bon Voyage, l’Ariane et La Trinité : quinze stations sur 7,5 km, en correspondance avec la ligne 1 à Pont-Michel et au Palais des Expositions, et quatre parkings relais.',
     mode: 'tram',
     cout: 376,
     voyageurs: 45900,
