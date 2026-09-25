@@ -85,16 +85,30 @@ const nomStation = (nom) => {
     .replace(/\s*-?\s*Voie\s+\w+$/i, '')
     .replace(/^Paris[\s-]+(?=Gare\b)/, '')
     .trim()
-  return GRANDES_GARES[propre] ?? propre
+  return NOMS_GARES.get(cleNom(propre)) ?? propre
 }
 
-/** Les grandes gares parisiennes portent parfois « Paris » devant leur nom : on garde celui de leur station de métro. */
-const GRANDES_GARES = {
-  'Paris Austerlitz': 'Gare d’Austerlitz',
-  'Paris Montparnasse': 'Gare Montparnasse',
-  'Paris Saint-Lazare': 'Saint-Lazare',
-  'Paris Est': 'Gare de l’Est',
-}
+/**
+ * Les gares dont le nom dans OpenStreetMap n'est pas celui qu'on lit sur un plan. Les grandes gares parisiennes portent
+ * parfois « Paris » devant leur nom : on garde celui de leur station de métro, écrit de la même façon sur toutes les
+ * lignes (« Gare de L'Est » sur certaines). D'autres ont « Gare » devant leur nom ou un nom abrégé. On compare les noms
+ * sans tirets, espaces ni apostrophes : « Paris-Saint-Lazare » est « Paris Saint-Lazare ».
+ */
+const NOMS_GARES = new Map(
+  Object.entries({
+    'Gare d’Austerlitz': 'Gare d’Austerlitz',
+    'Gare de l’Est': 'Gare de l’Est',
+    'Paris Austerlitz': 'Gare d’Austerlitz',
+    'Paris Austerlitz RER': 'Gare d’Austerlitz',
+    'Paris Montparnasse': 'Gare Montparnasse',
+    'Paris Montparnasse 3 - Vaugirard': 'Gare Montparnasse',
+    'Paris Saint-Lazare': 'Saint-Lazare',
+    'Paris Est': 'Gare de l’Est',
+    'Gare Albigny - Neuville': 'Albigny-Neuville',
+    'Gare d’Istres': 'Istres',
+    Salon: 'Salon-de-Provence',
+  }).map(([avant, apres]) => [cleNom(avant), apres]),
+)
 
 /** Le nom de la ligne tel qu'on le montre : « A », « T1 », « 14 », « Téléo ». */
 function reference(tags) {
@@ -444,6 +458,32 @@ async function lireOuInterroger(ville, fichier, requete) {
   return brut
 }
 
+/**
+ * Les gares et les haltes ferroviaires du territoire, pour qu'on les repère sur la carte et qu'une station posée tout
+ * près s'y accroche : on écarte les stations de métro, de tram et de funiculaire, les petits trains des parcs
+ * d'attractions et les gares sans nom. Une gare est un point, ou une surface dont on prend le centre.
+ */
+function construireGares(brut) {
+  const gares = []
+  for (const e of brut.elements.filter((e) => e.tags?.name)) {
+    const t = e.tags
+    const [lon, lat] = e.type === 'node' ? [e.lon, e.lat] : [e.center?.lon, e.center?.lat]
+    if (lon === undefined || lat === undefined) continue
+    if (/^(subway|light_rail|tram|funicular|monorail|miniature)$/.test(t.station ?? '')) continue
+    if ((t.subway === 'yes' || t.light_rail === 'yes' || t.tram === 'yes') && t.train !== 'yes') continue
+    if (t.usage === 'tourism' || t.tourism || t['railway:historic'] || /touristique|historique|petit train|railroad|vélorail/i.test(t.name))
+      continue
+    // Une gare fermée garde souvent son bâtiment et son nom ; une gare en service a un exploitant, un réseau ou un code.
+    if (t['disused:railway'] || t.disused || t.train === 'no') continue
+    if (!(t.operator || t.network || t.train === 'yes' || t.public_transport || t.uic_ref || t['railway:ref'])) continue
+    const nom = nomStation(t.name)
+    // Une gare a parfois plusieurs éléments du même nom (le bâtiment, son emprise, un quai) : on n'en garde qu'un.
+    if (gares.some((g) => cleNom(g.nom) === cleNom(nom) && Math.hypot((g.pos[0] - lon) * 73000, (g.pos[1] - lat) * 111320) < 500)) continue
+    gares.push({ nom, pos: [arrondi(lon), arrondi(lat)] })
+  }
+  return gares.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+}
+
 for (const [ville, { dossier, zone, trains }] of Object.entries(VILLES)) {
   if (demandees.length && !demandees.includes(ville)) continue
   const brut = await lireOuInterroger(
@@ -468,10 +508,13 @@ for (const [ville, { dossier, zone, trains }] of Object.entries(VILLES)) {
   const lignes = [...ajouterFutures(ville, construire(brut)), ...ferroviaires].sort(
     (a, b) => a.mode.localeCompare(b.mode) || a.ref.localeCompare(b.ref, 'fr', { numeric: true }),
   )
+  const gares = construireGares(
+    await lireOuInterroger(ville, 'gares.json', `[out:json][timeout:180];nwr["railway"~"^(station|halt)$"](${zone});out center;`),
+  )
   const sortie = join(racine, 'public', 'data', ...(dossier ? [dossier] : []), 'lignes.json')
-  writeFileSync(sortie, JSON.stringify({ lignes }))
+  writeFileSync(sortie, JSON.stringify({ lignes, gares }))
   console.log(
     `${ville} : ${lignes.length} lignes (${lignes.map((l) => `${l.ref} ${l.branches.map((b) => b.length).join('+')}`).join(', ')}), ` +
-      `${Math.round(JSON.stringify({ lignes }).length / 1024)} Ko`,
+      `${gares.length} gares, ${Math.round(JSON.stringify({ lignes, gares }).length / 1024)} Ko`,
   )
 }

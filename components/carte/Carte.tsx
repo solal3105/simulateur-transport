@@ -61,6 +61,35 @@ const ZOOM_REPERES = 11
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
 
+/**
+ * Des noms qui n'apparaissent qu'en zoomant, ceux des quartiers et des gares : la carte ne porte que ceux des environs
+ * de la vue, remis à jour à la fin de chaque déplacement. L'Île-de-France en compte plus de deux mille, et les poser
+ * tous ralentit chaque glissement sur un téléphone.
+ */
+function poserProches(m: CarteMaplibre, reperes: { pos: [number, number]; marker: Marker }[], zoomMin: number) {
+  const poses = new Set<Marker>()
+  const actualiser = () => {
+    const b = m.getBounds()
+    // Une demi-vue de marge de chaque côté : un glissement ne découvre pas de noms manquants.
+    const dx = (b.getEast() - b.getWest()) / 2
+    const dy = (b.getNorth() - b.getSouth()) / 2
+    const proche = m.getZoom() >= zoomMin
+    for (const { pos, marker } of reperes) {
+      const garder =
+        proche && pos[0] > b.getWest() - dx && pos[0] < b.getEast() + dx && pos[1] > b.getSouth() - dy && pos[1] < b.getNorth() + dy
+      if (garder && !poses.has(marker)) {
+        marker.addTo(m)
+        poses.add(marker)
+      } else if (!garder && poses.has(marker)) {
+        marker.remove()
+        poses.delete(marker)
+      }
+    }
+  }
+  actualiser()
+  m.on('moveend', actualiser)
+}
+
 const largeur = (base: number) =>
   ['interpolate', ['exponential', 1.5], ['zoom'], 10, base * 0.6, 13, base * 1.4, 15, base * 3] as unknown as number
 
@@ -631,22 +660,24 @@ export function Carte({
     }
     // Les quartiers n'apparaissent qu'en zoomant, pour ne pas charger la vue d'ensemble.
     const [[ouest, sud], [est, nord]] = ville.zoneQuartiers
-    for (const [lon, lat, nom] of donnees.lieux.quartiers) {
-      if (lon < ouest || lon > est || lat < sud || lat > nord) continue
+    const quartiers = donnees.lieux.quartiers.flatMap(([lon, lat, nom]) => {
+      if (lon < ouest || lon > est || lat < sud || lat > nord) return []
       const el = document.createElement('div')
       el.className = 'lieu quartier'
       el.textContent = nom
-      new Marker({ element: el }).setLngLat([lon, lat]).addTo(m)
-    }
+      return [{ pos: [lon, lat] as [number, number], marker: new Marker({ element: el }).setLngLat([lon, lat]) }]
+    })
+    poserProches(m, quartiers, ZOOM_QUARTIERS)
     // Le nom des gares, en zoomant, pour se repérer.
-    for (const s of donnees.stations) {
-      if (!s.gare || !s.nom) continue
+    const gares = donnees.stations.flatMap((s) => {
+      if (!s.gare || !s.nom) return []
       const el = document.createElement('div')
       el.className = 'nom-gare'
       el.setAttribute('aria-hidden', 'true')
       el.textContent = s.nom
-      new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(s.pos).addTo(m)
-    }
+      return [{ pos: s.pos, marker: new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(s.pos) }]
+    })
+    poserProches(m, gares, ZOOM_GARES)
     // Le nom de chaque ligne du réseau actuel, à ses deux terminus, comme sur un plan de réseau. Deux lignes qui
     // finissent à la même station partagent un seul repère.
     const terminus = new Map<string, { pos: [number, number]; lignes: { ref: string; mode: string; nom: string }[] }>()
