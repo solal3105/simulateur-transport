@@ -18,6 +18,29 @@ const parVille = (dossier) =>
     .filter((f) => f.endsWith('.ts'))
     .map((f) => `${dossier}/${f.slice(0, -3)}`)
 
+/**
+ * Le serveur ne recalcule que les chiffres d'un réseau : dans sa copie des catalogues, on retire les textes, les tracés et
+ * les sources des projets, qui pèsent plus que tout le reste. Les fichiers sont mis en forme par Prettier : chaque champ
+ * d'un projet commence à quatre espaces, et un tableau se ferme par « ], » à la même marge.
+ */
+const ALLEGES = /^ {4}(description|statut|parcours|precisions|sources):/
+function alleger(source) {
+  const lignes = source.split('\n')
+  const gardees = []
+  for (let i = 0; i < lignes.length; i += 1) {
+    const champ = ALLEGES.exec(lignes[i])?.[1]
+    if (!champ) {
+      gardees.push(lignes[i])
+      continue
+    }
+    if (lignes[i].endsWith('[')) while (lignes[i] !== '    ],') i += 1
+    else if (lignes[i].endsWith(':')) i += 1
+    // La description est obligatoire dans le type d'un projet.
+    if (champ === 'description') gardees.push("    description: '',")
+  }
+  return gardees.join('\n')
+}
+
 for (const nom of [
   'types',
   'villes',
@@ -33,7 +56,8 @@ for (const nom of [
   ...parVille('budgets'),
   ...parVille('catalogues'),
 ]) {
-  const source = readFileSync(join(racine, 'lib', `${nom}.ts`), 'utf8')
+  const lu = readFileSync(join(racine, 'lib', `${nom}.ts`), 'utf8')
+  const source = nom.startsWith('catalogues/') ? alleger(lu) : lu
   const copie = source.replace(/from '(\.\.?\/[a-z/-]+)'/g, "from '$1.ts'")
   mkdirSync(dirname(join(cible, `${nom}.ts`)), { recursive: true })
   writeFileSync(
