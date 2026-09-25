@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 
 import { libre as libreDuMandat } from '@/lib/budget'
-import { CATALOGUE, MANDATS, PROJETS } from '@/lib/catalogue'
+import { catalogueDe, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
 import { enLettres, n } from '@/lib/format'
 import { ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
@@ -23,8 +23,6 @@ import { Publier } from '../communaute/Publier'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
 import { Comparaison } from './Comparaison'
 
-const AVEC_TRACE = CATALOGUE.filter((p) => p.trace)
-const TOTAL = totauxCatalogue(AVEC_TRACE)
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
 const lignesTracees = (nombre: number) => `${nombre} ligne${nombre > 1 ? 's' : ''} tracée${nombre > 1 ? 's' : ''}`
 
@@ -71,9 +69,13 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     quitter?.()
   }
 
+  // Les projets du catalogue de ce réseau qui ont un tracé : ceux qu'on montre sur la carte et qu'on compte.
+  const avecTrace = useMemo(() => catalogueDe(ville.id).filter((p) => p.trace), [ville])
+  const total = useMemo(() => totauxCatalogue(avecTrace), [avecTrace])
+
   const resultat = useMemo(() => {
     const faits = new Set(chantiers.map((c) => c.id))
-    const laisses = ville.catalogue ? AVEC_TRACE.filter((p) => !faits.has(p.id)) : []
+    const laisses = ville.catalogue ? avecTrace.filter((p) => !faits.has(p.id)) : []
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
       ...resumer(chantiers, lignes, leviers, ville),
@@ -82,7 +84,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       plusGros,
       ouvertures: ouvertures(chantiers, lignes),
     }
-  }, [chantiers, lignes, leviers, ville])
+  }, [avecTrace, chantiers, lignes, leviers, ville])
 
   // Le lien contient toute la partie : qui l'ouvre voit ce réseau se construire, sans compte ni serveur.
   const copierLien = async () => {
@@ -119,7 +121,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       {
         ville,
         voyageurs: resultat.voyageurs,
-        contenu: ville.catalogue ? `${resultat.retenus} projets sur ${AVEC_TRACE.length}` : lignesTracees(lignes.length),
+        contenu: ville.catalogue ? `${resultat.retenus} projets sur ${avecTrace.length}` : lignesTracees(lignes.length),
         equilibre: resultat.equilibre,
         libre,
         traces,
@@ -154,8 +156,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const cumul = termine ? resultat.voyageurs : resultat.ouvertures.filter((o) => o.annee <= annee).reduce((t, o) => t + o.voyageurs, 0)
   const voyageursAnimes = useCompteur(cumul, 0.6, 0)
 
-  const partCatalogue = TOTAL.voyageurs > 0 ? Math.round((resultat.voyageurs / TOTAL.voyageurs) * 100) : 0
-  const partCout = TOTAL.cout > 0 ? Math.round((resultat.investi / TOTAL.cout) * 100) : 0
+  const partCatalogue = total.voyageurs > 0 ? Math.round((resultat.voyageurs / total.voyageurs) * 100) : 0
+  const partCout = total.cout > 0 ? Math.round((resultat.investi / total.cout) * 100) : 0
   // Sans catalogue, il n'y a rien à quoi rapporter le réseau : seule la remarque sur les ouvertures tardives reste.
   const explication = [
     ville.catalogue ? `C’est ${partCatalogue} % de ce que le catalogue entier apporterait, pour ${partCout} % de son coût.` : '',
@@ -256,7 +258,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         <div className="grid grid-cols-3 gap-2">
           {[
             ville.catalogue
-              ? [`${resultat.retenus} sur ${AVEC_TRACE.length}`, 'projets retenus']
+              ? [`${resultat.retenus} sur ${avecTrace.length}`, 'projets retenus']
               : [String(lignes.length), lignes.length > 1 ? 'lignes tracées' : 'ligne tracée'],
             [n(resultat.investi), 'M€ investis'],
             libre

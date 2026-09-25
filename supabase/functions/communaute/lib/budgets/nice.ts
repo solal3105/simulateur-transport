@@ -42,9 +42,9 @@ export const nice: BudgetVille = {
   total: {
     montants: { 1: 725, 2: 290 },
     simple:
-      'La Métropole investit environ 290 millions d’euros par mandat dans ses transports, plus 435 millions pour la ligne 5 du tram au premier mandat.',
+      'La Métropole investit environ 290 millions d’euros par mandat dans ses transports, plus 435 millions pour étendre le tramway au premier mandat.',
     explication:
-      'La Métropole n’a publié aucun programme d’investissement pour 2026-2032. De 2020 à 2025, son budget des transports a investi 157,8 M€ en dehors des lignes nouvelles, et sa régie Ligne d’Azur environ 22 M€ par an, surtout en bus : cela fait environ 290 M€ par mandat. Au premier mandat s’ajoutent les 435 M€ inscrits pour la ligne 5 du tram, de Nice à Drap. Elle n’est pas encore sur notre carte : cet argent reste dans votre budget, pour que vous puissiez la tracer vous-même ou en faire autre chose. Au second mandat, nous ne vous rendons pas sa place : payée presque entièrement par l’emprunt, elle laissera la Métropole plus endettée.',
+      'La Métropole n’a publié aucun programme d’investissement pour 2026-2032. De 2020 à 2025, son budget des transports a investi 157,8 M€ en dehors des lignes nouvelles, et sa régie Ligne d’Azur environ 22 M€ par an, surtout en bus : cela fait environ 290 M€ par mandat. Au premier mandat s’ajoutent les 435 M€ qui restent inscrits pour étendre le tramway, sur une enveloppe de 500 M€ votée en 2021 pour les lignes 4 et 5. Aucune des deux n’est dessinée sur notre carte : cet argent reste dans votre budget, et les deux lignes sont dans le catalogue, à construire ou non. Au second mandat, nous ne vous rendons pas cette somme : payées presque entièrement par l’emprunt, ces lignes laisseront la Métropole plus endettée.',
     sources: [
       ...COMPTES,
       {
@@ -58,9 +58,9 @@ export const nice: BudgetVille = {
   },
   decides: {
     montants: { 1: 0, 2: 0 },
-    simple: 'La ligne 5 n’est pas encore sur notre carte : son argent reste dans votre budget, pour que vous puissiez la tracer.',
+    simple: 'Les lignes 4 et 5 du tramway ne sont pas encore construites : elles sont dans le catalogue, et leur argent reste dans votre budget.',
     explication:
-      'La ligne 5 est le seul grand projet décidé, et elle n’est pas sur notre carte : nous ne retirons rien. Le parc-relais Tzarewitch, qui ouvre en 2026, est soldé la même année.',
+      'La ligne 5 est le seul grand projet décidé. Elle est dans le catalogue avec la ligne 4, dont l’avenir est incertain, et aucune des deux n’est dessinée sur notre carte : nous ne retirons rien. Le parc-relais Tzarewitch, qui ouvre en 2026, est soldé la même année.',
     sources: [
       {
         titre: 'Préfecture des Alpes-Maritimes, déclaration d’utilité publique de la ligne 5, 27 juillet 2026',

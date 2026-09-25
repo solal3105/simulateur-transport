@@ -1,5 +1,5 @@
 // Copie de lib/partie.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
-import { PROJETS } from './catalogue.ts'
+import { PROJETS, projetDe } from './catalogue.ts'
 import { leviersPossibles } from './leviers.ts'
 import { estimer, prolongementPossible, type Carreaux } from './modele.ts'
 import { LEVIERS_NEUTRES } from './regles.ts'
@@ -91,7 +91,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   for (const entree of catalogue ? b.c : []) {
     if (!Array.isArray(entree)) continue
     const [id, mandat, etale, varianteId, option] = entree
-    const projet = typeof id === 'string' ? PROJETS.get(id) : undefined
+    // Seuls les projets du catalogue de la ville : une partie de Toulouse ne peut pas décider d'un projet lyonnais.
+    const projet = projetDe(ville, id)
     if (!projet || vus.has(projet.id)) continue
     vus.add(projet.id)
     chantiers.push({

@@ -44,7 +44,7 @@ export const marseille: BudgetVille = {
     montants: { 1: 50, 2: 0 },
     simple: 'Il reste environ 50 millions à payer sur l’extension du T3 et le Val’Tram, déjà sur la carte.',
     explication:
-      'L’extension du T3 ouverte en janvier 2026, le Val’Tram d’Aubagne et les bus à haut niveau de service livrés en 2025 sont déjà dessinés sur notre carte, et presque payés : 96,8 M€ ont été versés pour le T3 et 50,4 M€ pour le Val’Tram en 2024. Nous estimons à environ 50 M€ ce qui reste à régler après 2026. Les trams qui n’ont pas encore de déclaration d’utilité publique, jusqu’à La Bricarde, au 4-Septembre ou à la Belle de Mai, ne sont pas sur la carte : c’est à vous de les tracer si vous le voulez.',
+      'L’extension du T3 ouverte en janvier 2026, le Val’Tram d’Aubagne et les bus à haut niveau de service livrés en 2025 sont déjà dessinés sur notre carte, et presque payés : 96,8 M€ ont été versés pour le T3 et 50,4 M€ pour le Val’Tram en 2024. Nous estimons à environ 50 M€ ce qui reste à régler après 2026. Les trams qui n’ont pas encore de déclaration d’utilité publique, jusqu’à La Bricarde, au 4-Septembre ou à la Belle de Mai, ne sont pas sur la carte : ils sont dans le catalogue, à vous de les construire ou non.',
     sources: [
       CA_2024,
       {

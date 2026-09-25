@@ -15,7 +15,7 @@ import {
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
+import { CATALOGUES, MANDATS, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
@@ -483,6 +483,7 @@ export function Carte({
   const villePartie = useJeu((s) => s.ville)
   const ville = VILLES[villeImposee ?? villePartie]
   const donnees = useDonnees(ville.id)
+  const catalogue = CATALOGUES[ville.id]
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
   const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
@@ -501,7 +502,7 @@ export function Carte({
   const etats = useMemo(() => {
     const etat = new Map<string, EtatProjet>()
     const faits = new Map(chantiers.map((c) => [c.id, c]))
-    for (const p of CATALOGUE) {
+    for (const p of catalogue.projets) {
       if (!p.trace) continue
       const c = faits.get(p.id)
       let e: EtatProjet = 'etude'
@@ -512,11 +513,11 @@ export function Carte({
         else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
       } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
-      if (ecran === 'tuto' && tuto === 0 && p.id === 't8') e = 'choisi'
+      if (ecran === 'tuto' && tuto === 0 && p.id === catalogue.tutoriel?.projet) e = 'choisi'
       etat.set(p.trace, e)
     }
     return etat
-  }, [chantiers, panneau, ecran, tuto, anneeMax])
+  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax])
 
   // Création de la carte.
   useEffect(() => {
@@ -588,7 +589,7 @@ export function Carte({
     m.on('zoom', majZoom)
 
     for (const f of donnees.projets.features) {
-      const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
+      const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
       if (!projet) continue
       const el = document.createElement('button')
       el.type = 'button'
@@ -679,7 +680,7 @@ export function Carte({
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
       const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
-      const projet = CATALOGUE.find((p) => p.trace === trace)
+      const projet = catalogue.projets.find((p) => p.trace === trace)
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
       const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['stations'] })[0]
@@ -756,7 +757,7 @@ export function Carte({
       pret.current = false
       etiquettes.clear()
     }
-  }, [donnees, decor, etiquettes, ville])
+  }, [catalogue, donnees, decor, etiquettes, ville])
 
   // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {
@@ -767,7 +768,7 @@ export function Carte({
       ;(m.getSource('projets') as GeoJSONSource).setData({
         ...donnees.projets,
         features: donnees.projets.features.map((f) => {
-          const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
+          const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
           const choix = projet && chantiers.find((x) => x.id === projet.id)
           return {
             ...f,
@@ -790,7 +791,7 @@ export function Carte({
           const brille = anneeMax === undefined ? estFait && !etaitFait : etat === 'construit' && avant.get(nomTrace) !== 'construit'
           if (!brille) continue
           const f = donnees.projets.features.find((x) => x.properties.id === nomTrace)
-          const projet = CATALOGUE.find((p) => p.trace === nomTrace)
+          const projet = catalogue.projets.find((p) => p.trace === nomTrace)
           const c = projet && chantiers.find((x) => x.id === projet.id)
           if (!f) continue
           eclat(m, f.geometry.coordinates, projet ? couleurProjet(projet.id, c) : ville.couleurs.principale)
@@ -803,7 +804,7 @@ export function Carte({
         const el = etiquettes.get(nomTrace)
         if (!el) continue
         el.dataset.etat = etat
-        const projet = CATALOGUE.find((p) => p.trace === nomTrace)
+        const projet = catalogue.projets.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
         if (projet) el.style.setProperty('--mode', couleurProjet(projet.id, c))
         el.textContent =
@@ -877,14 +878,15 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
+  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
 
-  // Pendant la première étape du tutoriel, la carte montre le T8.
+  // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {
     const m = carte.current
-    const t8 = donnees?.projets.features.find((f) => f.properties.id === 't8')
-    if (!m || !t8 || ecran !== 'tuto' || tuto !== 0) return
-    const points = t8.geometry.coordinates.flat()
+    const nomTrace = catalogue.projets.find((p) => p.id === catalogue.tutoriel?.projet)?.trace
+    const projet = donnees?.projets.features.find((f) => f.properties.id === nomTrace)
+    if (!m || !projet || ecran !== 'tuto' || tuto !== 0) return
+    const points = projet.geometry.coordinates.flat()
     const lons = points.map((p) => p[0]!)
     const lats = points.map((p) => p[1]!)
     const grand = window.innerWidth >= 1024
@@ -902,7 +904,7 @@ export function Carte({
       )
     if (pret.current) cadrer()
     else m.once('load', cadrer)
-  }, [donnees, ecran, tuto])
+  }, [catalogue, donnees, ecran, tuto])
 
   // À la sortie du tutoriel, la carte revient sur toute la Métropole.
   const ecranPrecedent = useRef(ecran)

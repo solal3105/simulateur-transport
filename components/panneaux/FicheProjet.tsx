@@ -3,17 +3,18 @@
 import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
-import { MANDATS, mots, PROJETS } from '@/lib/catalogue'
+import { catalogueDe, MANDATS, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
+import type { PointProjet } from '@/lib/types'
 
+import { Deplier } from '../explications/Deplier'
+import { Sources } from '../explications/Budget'
 import { useBilan } from '../partie/budget'
-import { Bouton, CarteChiffre, Icone, ICONE_MODE, Pastille } from '../ui'
+import { Bouton, CarteChiffre, Icone, ICONE_MODE, Pastille, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
-
-const MEILLEUR = totauxCatalogue(PROJETS.values()).meilleur
 
 function Voie({ titre, detail, onClick, possible }: { titre: string; detail: string; onClick: () => void; possible?: boolean }) {
   return (
@@ -49,6 +50,9 @@ export function FicheProjet({ id }: { id: string }) {
   const [varianteId, setVarianteId] = useState(existant?.varianteId ?? projet.variantes?.[0]?.id)
   const [option, setOption] = useState(existant?.option ?? false)
   const r = useMemo(() => resoudre(projet, { varianteId, option }), [projet, varianteId, option])
+  // Le meilleur rapport entre voyageurs et coût du catalogue de ce réseau, pour situer le projet.
+  const ville = useVille()
+  const meilleur = useMemo(() => totauxCatalogue(catalogueDe(ville.id)).meilleur, [ville])
 
   const dependance = projet.requiert ? PROJETS.get(projet.requiert) : undefined
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
@@ -187,6 +191,13 @@ export function FicheProjet({ id }: { id: string }) {
 
       <p className="text-[15px] leading-relaxed text-gris">{projet.description}</p>
 
+      {projet.statut ? (
+        <div className="flex flex-col gap-1 rounded-2xl bg-sable px-4 py-3">
+          <Surtitre>Où en est le projet</Surtitre>
+          <p className="text-[14px] leading-snug font-semibold">{projet.statut}</p>
+        </div>
+      ) : null}
+
       {corpsManque}
 
       {existant ? (
@@ -303,13 +314,24 @@ export function FicheProjet({ id }: { id: string }) {
           legende={
             existant
               ? 'investis'
-              : reste > 0
-                ? `${Math.min(999, Math.round((r.cout / reste) * 100))} % de ce qui vous reste`
-                : 'votre budget est épuisé'
+              : libre
+                ? 'sans budget à tenir, en jeu libre'
+                : reste > 0
+                  ? `${Math.min(999, Math.round((r.cout / reste) * 100))} % de ce qui vous reste`
+                  : 'votre budget est épuisé'
           }
         />
-        <CarteChiffre icone="voyageurs" valeur={r.voyageurs > 0 ? `+${n(r.voyageurs)}` : '0'} legende="voyageurs par jour" accent />
-        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier`} />
+        <CarteChiffre
+          icone="voyageurs"
+          valeur={r.voyageurs > 0 ? `+${n(r.voyageurs)}` : '0'}
+          legende={projet.estime?.voyageurs ? 'voyageurs par jour, selon notre estimation' : 'voyageurs par jour'}
+          accent
+        />
+        <CarteChiffre
+          icone="horloge"
+          valeur={String(annee)}
+          legende={`après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier${projet.estime?.duree ? ', selon notre estimation' : ''}`}
+        />
       </div>
 
       {apresFin ? (
@@ -325,15 +347,51 @@ export function FicheProjet({ id }: { id: string }) {
             <span className="chiffres font-black">{n(r.voyageurs / r.cout)}</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white">
-            <div className="h-full rounded-full bg-rouge" style={{ width: `${Math.max(2, (r.voyageurs / r.cout / MEILLEUR) * 100)}%` }} />
+            <div className="h-full rounded-full bg-rouge" style={{ width: `${Math.max(2, (r.voyageurs / r.cout / meilleur) * 100)}%` }} />
           </div>
           <div className="text-[13px] text-gris">
-            {r.voyageurs / r.cout >= MEILLEUR * 0.99
+            {r.voyageurs / r.cout >= meilleur * 0.99
               ? 'C’est le meilleur rapport de tout le catalogue.'
-              : `Le meilleur projet du catalogue en apporte ${n(MEILLEUR)}.`}
+              : `Le meilleur projet du catalogue en apporte ${n(meilleur)}.`}
           </div>
         </div>
       ) : null}
+
+      <StationsProjet parcours={projet.parcours} />
+
+      {projet.precisions?.length || projet.sources?.length ? (
+        <Deplier titre="D’où viennent ces chiffres">
+          {projet.precisions?.length ? (
+            <ul className="flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-relaxed text-gris">
+              {projet.precisions.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          ) : null}
+          <Sources sources={projet.sources ?? []} />
+        </Deplier>
+      ) : null}
     </Panneau>
+  )
+}
+
+/** Les stations d'un projet, dans l'ordre, branche par branche ; les points de passage n'ont pas de nom. */
+function StationsProjet({ parcours }: { parcours?: PointProjet[][] }) {
+  const branches = (parcours ?? []).map((b) => b.flatMap((p) => (p.nom ? [p.nom] : []))).filter((b) => b.length)
+  if (!branches.length) return null
+  return (
+    <div className="flex flex-col gap-2">
+      <Surtitre>{branches.length > 1 ? 'Les stations, branche par branche' : 'Les stations, dans l’ordre'}</Surtitre>
+      {branches.map((noms, k) => (
+        <ol key={k} className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13px] font-bold">
+          {noms.map((nom, i) => (
+            <li key={`${nom}-${i}`} className="flex items-center gap-1">
+              <span className="rounded-full bg-sable px-2.5 py-1">{nom}</span>
+              {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+            </li>
+          ))}
+        </ol>
+      ))}
+    </div>
   )
 }

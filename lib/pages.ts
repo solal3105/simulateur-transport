@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 
 import { libre } from './budget'
+import { nombreProjets } from './catalogue'
 import { enLettres } from './format'
 import { VILLES, type IdVille } from './villes'
 
@@ -8,7 +9,8 @@ import { VILLES, type IdVille } from './villes'
 export function metadonnees(id: IdVille): Metadata {
   const ville = VILLES[id]
   const pourLignes = libre(ville.budget, 1) + libre(ville.budget, 2)
-  const description = `Deux mandats pour construire le réseau ${ville.reseau} de 2038, avec ${enLettres(pourLignes)} d’euros pour de nouvelles lignes. Tracez vos lignes de tram, de bus ou de métro, et voyez combien de voyageurs elles gagnent.`
+  const projets = ville.catalogue ? `Choisissez parmi ${nombreProjets(id)} projets réels ou tracez` : 'Tracez'
+  const description = `Deux mandats pour construire le réseau ${ville.reseau} de 2038, avec ${enLettres(pourLignes)} d’euros pour de nouvelles lignes. ${projets} vos lignes de tram, de bus ou de métro, et voyez combien de voyageurs elles gagnent.`
   return {
     title: ville.titrePage,
     description,

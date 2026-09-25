@@ -3,13 +3,13 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 
-import { CATALOGUE } from '@/lib/catalogue'
+import { nombreProjets } from '@/lib/catalogue'
 import { FORMULE } from '@/lib/formule'
 import { ID_VILLES, VILLES } from '@/lib/villes'
 
 import { Bouton, BoutonRond, Icone, type NomIcone } from '../ui'
 
-const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
+const NOMBRE_PROJETS = ID_VILLES.reduce((t, id) => t + nombreProjets(id), 0)
 const noms = ID_VILLES.map((id) => VILLES[id].nom)
 const RESEAUX = `${noms.slice(0, -1).join(', ')} et ${noms.at(-1)}`
 
@@ -33,8 +33,8 @@ const DECOUVERTES: { icone: NomIcone; titre: string; texte: string }[] = [
   },
   {
     icone: 'liste',
-    titre: 'Les grands projets lyonnais sur la table',
-    texte: `À Lyon, ${NOMBRE_PROJETS} projets réels vous attendent, du métro E au tramway express de l’ouest, certains en plusieurs versions.`,
+    titre: 'Les vrais projets de chaque réseau',
+    texte: `${NOMBRE_PROJETS} projets réels vous attendent, du métro E lyonnais à la ligne 5 du tramway niçois, avec leur prix, leurs voyageurs et leur durée de chantier.`,
   },
   {
     icone: 'pieces',
