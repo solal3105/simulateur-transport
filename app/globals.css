@@ -134,6 +134,18 @@
   border-radius: 999px;
   background: #8a8278;
 }
+/* Le RER et les trains Transilien en lettres foncées sur blanc, comme sur les plans du réseau francilien. */
+.repere-ligne[data-mode='rer'] {
+  border-color: #6f6860;
+  background: #fff;
+  color: #4a4540;
+}
+.repere-ligne[data-mode='train'] {
+  border-color: #aaa298;
+  border-radius: 999px;
+  background: #fff;
+  color: #6f6860;
+}
 [data-loin='1'] .reperes-ligne {
   display: none;
 }

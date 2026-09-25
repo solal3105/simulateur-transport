@@ -1,6 +1,6 @@
 'use client'
 
-import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geojson'
+import type { Feature, FeatureCollection, LineString, MultiLineString, Point, Polygon } from 'geojson'
 import {
   Map as CarteMaplibre,
   Marker,
@@ -46,6 +46,9 @@ const COULEURS = {
   // pour qu'on voie tout de suite où passent déjà le tram et le métro.
   tram: '#9a9288',
   metroActuel: '#5d5852',
+  // Le RER presque comme le métro, les trains Transilien plus discrets.
+  rer: '#6f6860',
+  train: '#aaa298',
 }
 
 /** En deçà de ce zoom, les noms de quartiers restent cachés. */
@@ -104,13 +107,29 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
             // Les lignes en service d'un côté, celles en chantier de l'autre, avec leur date d'ouverture.
             lignes: direLignes(s.lignes.filter((l) => !l.ouverture)),
             ouvertures: direOuvertures(s.lignes),
-            metro: s.lignes.some((l) => l.mode === 'metro'),
+            // Une gare de métro, de RER ou de train, dessinée plus grande qu'un arrêt de tram.
+            gare: s.lignes.some((l) => l.mode === 'metro' || l.mode === 'rer' || l.mode === 'train'),
           },
           geometry: { type: 'Point', coordinates: s.pos },
         }))
       : donnees.arrets
           .filter((a) => a[2] === 1)
-          .map((a) => ({ type: 'Feature', properties: { metro: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+          .map((a) => ({ type: 'Feature', properties: { gare: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+  }
+  // Le RER et les trains Transilien, que le fond de carte ne dessine pas : leur tracé vient des lignes existantes.
+  const trains: FeatureCollection<MultiLineString> = {
+    type: 'FeatureCollection',
+    features: (donnees.reseau?.lignes ?? []).flatMap((l) =>
+      l.trace
+        ? [
+            {
+              type: 'Feature' as const,
+              properties: { rer: l.mode === 'rer' },
+              geometry: { type: 'MultiLineString' as const, coordinates: l.trace },
+            },
+          ]
+        : [],
+    ),
   }
   // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
@@ -121,6 +140,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
+      trains: { type: 'geojson', data: trains },
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
       joueur: { type: 'geojson', data: vide() },
@@ -202,6 +222,38 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         },
       },
       {
+        id: 'train-bord',
+        type: 'line',
+        source: 'trains',
+        filter: ['!', ['get', 'rer']],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
+      },
+      {
+        id: 'train-actuel',
+        type: 'line',
+        source: 'trains',
+        filter: ['!', ['get', 'rer']],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.train, 'line-width': largeur(1.8) },
+      },
+      {
+        id: 'rer-bord',
+        type: 'line',
+        source: 'trains',
+        filter: ['get', 'rer'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(5.6) },
+      },
+      {
+        id: 'rer-actuel',
+        type: 'line',
+        source: 'trains',
+        filter: ['get', 'rer'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.rer, 'line-width': largeur(3) },
+      },
+      {
         id: 'tram-bord',
         type: 'line',
         source: 'fond',
@@ -247,12 +299,12 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
             ['linear'],
             ['zoom'],
             10.5,
-            ['case', ['get', 'metro'], 2.4, 1.6],
+            ['case', ['get', 'gare'], 2.4, 1.6],
             14,
-            ['case', ['get', 'metro'], 5.5, 4],
+            ['case', ['get', 'gare'], 5.5, 4],
           ],
           'circle-color': '#fff',
-          'circle-stroke-color': ['case', ['get', 'metro'], COULEURS.metroActuel, COULEURS.tram],
+          'circle-stroke-color': ['case', ['get', 'gare'], COULEURS.metroActuel, COULEURS.tram],
           'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10.5, 1.2, 14, 2],
         },
       },
@@ -680,7 +732,8 @@ export function Carte({
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
       const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
-      const projet = catalogue.projets.find((p) => p.trace === trace)
+      // Sans tracé touché, aucun projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
+      const projet = trace ? catalogue.projets.find((p) => p.trace === trace) : undefined
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
       const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['stations'] })[0]

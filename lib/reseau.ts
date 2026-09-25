@@ -16,10 +16,13 @@ export interface StationLigne {
   ouverture?: string
 }
 
+/** Le mode d'une ligne existante : ceux du joueur, plus le RER et les trains Transilien d'Île-de-France. */
+export type ModeExistant = ModeLigne | 'rer' | 'train'
+
 export interface LigneExistante {
-  /** « metro-A », « tram-T1 ». */
+  /** « metro-A », « tram-T1 », « rer-B ». */
   id: string
-  mode: ModeLigne
+  mode: ModeExistant
   /** Le nom court de la ligne : « A », « T1 », « 14 ». */
   ref: string
   /** « Métro A », « Tram T1 ». */
@@ -28,17 +31,24 @@ export interface LigneExistante {
   couleur: string | null
   /** Ses parcours, stations dans l'ordre : un seul le plus souvent, plusieurs quand la ligne a des branches. */
   branches: StationLigne[][]
+  /** Ses terminus, quand le script les établit lui-même : les RER, dont OpenStreetMap coupe parfois les parcours. */
+  terminus?: string[]
+  /** Le tracé de ses voies, pour les lignes que le fond de carte ne dessine pas : le RER et les trains Transilien. */
+  trace?: [number, number][][]
 }
 
 export interface ReseauActuel {
   lignes: LigneExistante[]
 }
 
+/** Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train. */
+export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: 'metro' | 'tram' } => l.mode === 'metro' || l.mode === 'tram'
+
 /** Une station du réseau actuel, et les lignes qui s'y arrêtent. */
 export interface StationExistante {
   nom: string
   pos: [number, number]
-  lignes: { id: string; mode: ModeLigne; ref: string; ouverture?: string }[]
+  lignes: { id: string; mode: ModeExistant; ref: string; ouverture?: string }[]
   /** Les lignes dont elle est un terminus : on peut les prolonger d'ici. */
   terminus: string[]
 }
@@ -64,6 +74,12 @@ const MEME_LIEU = 60
  * le terminus d'un service partiel, et sauf la station où une ligne en boucle se referme.
  */
 export function terminusDe(ligne: LigneExistante): StationLigne[] {
+  if (ligne.terminus) {
+    const noms = new Set(ligne.terminus.map(cleNom))
+    const trouves = new Map<string, StationLigne>()
+    for (const s of ligne.branches.flat()) if (noms.has(cleNom(s.nom)) && !trouves.has(cleNom(s.nom))) trouves.set(cleNom(s.nom), s)
+    return [...trouves.values()]
+  }
   const traversees = new Set(ligne.branches.flatMap((b) => b.slice(1, -1).map((s) => cleNom(s.nom))))
   const bouts = new Map<string, StationLigne>()
   for (const b of ligne.branches) {
@@ -109,10 +125,9 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
 
 /** « Métro C, ouverture fin 2028 » : les lignes en chantier d'une station, une par ligne de texte. */
 export function direOuvertures(lignes: StationExistante['lignes']) {
-  const mot = { metro: 'Métro', tram: 'Tram', cable: 'Téléphérique', bus: 'Bus' }
   return lignes
     .filter((l) => l.ouverture)
-    .map((l) => `${mot[l.mode]} ${l.ref}, ouverture ${l.ouverture}`)
+    .map((l) => `${MOTS[l.mode].replace(/^./, (c) => c.toUpperCase())} ${l.ref}, ouverture ${l.ouverture}`)
     .join('\n')
 }
 
@@ -130,13 +145,14 @@ export function stationProche(stations: StationExistante[], p: [number, number],
   return meilleure
 }
 
-/** « métro A et D », « tram T1 » : les lignes d'une station, dites dans une phrase. */
-export function direLignes(lignes: { mode: ModeLigne; ref: string }[]) {
-  const parMode = (['metro', 'tram', 'cable'] as ModeLigne[])
+const MOTS: Record<ModeExistant, string> = { metro: 'métro', rer: 'RER', tram: 'tram', train: 'train', cable: 'téléphérique', bus: 'bus' }
+
+/** « métro A et D », « RER B », « tram T1 » : les lignes d'une station, dites dans une phrase. */
+export function direLignes(lignes: { mode: ModeExistant; ref: string }[]) {
+  const parMode = (['metro', 'rer', 'tram', 'train', 'cable'] as ModeExistant[])
     .map((mode) => ({ mode, refs: lignes.filter((l) => l.mode === mode).map((l) => l.ref) }))
     .filter((g) => g.refs.length)
-  const mot = { metro: 'métro', tram: 'tram', cable: 'téléphérique', bus: 'bus' }
-  return enumerer(parMode.map((g) => `${mot[g.mode]} ${enumerer(g.refs)}`))
+  return enumerer(parMode.map((g) => `${MOTS[g.mode]} ${enumerer(g.refs)}`))
 }
 
 const enumerer = (mots: string[]) => (mots.length <= 1 ? (mots[0] ?? '') : `${mots.slice(0, -1).join(', ')} et ${mots.at(-1)}`)

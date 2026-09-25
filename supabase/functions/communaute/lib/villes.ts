@@ -313,7 +313,7 @@ export const VILLES: Record<IdVille, Ville> = {
     latitude: 48.86,
     centre: [2.3522, 48.8566],
     budget: idf,
-    catalogue: false,
+    catalogue: true,
     emprise: [
       [2.2, 48.79],
       [2.5, 48.93],
