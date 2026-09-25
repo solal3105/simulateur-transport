@@ -54,10 +54,22 @@ export interface LigneJoueur {
   id: string
   nom: string
   mode: ModeLigne
+  /** Les points du tracé, dans l'ordre : des stations, et des points de passage. */
   arrets: [number, number][]
+  /** Les rangs des points de passage dans `arrets` : la ligne y passe sans s'arrêter. Les terminus sont toujours des stations. */
+  passages?: number[]
+  /** La ligne existante que celle-ci prolonge depuis son terminus, qui est alors son premier point : « metro-D ». */
+  prolonge?: string
   mandat: Mandat
   etale: boolean
   estimation: Estimation
+}
+
+/** Ce que le calcul d'une ligne doit savoir en plus de ses points. */
+export interface OptionsLigne {
+  passages?: number[]
+  /** Le premier point est le terminus d'une ligne existante : sa station est déjà construite. */
+  prolonge?: boolean
 }
 
 export interface Estimation {

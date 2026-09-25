@@ -112,7 +112,7 @@ export interface Relief {
  * de quelques mètres sous le sol demandent une tranchée ou un tunnel ; pour le métro, la voie passe sous le terrain, et une station sous
  * une colline se retrouve plus profonde.
  */
-export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], mx: number): Relief {
+export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], mx: number, estStation?: boolean[]): Relief {
   const MY = 111320
   const points: { s: number; z: number; station: boolean }[] = []
   let s = 0
@@ -128,7 +128,8 @@ export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], 
       }
       s += d
     }
-    points.push({ s, z: altitude(t, a[0], a[1]), station: true })
+    // Un point de passage guide le tracé sans être une station : il n'a ni quai ni profondeur.
+    points.push({ s, z: altitude(t, a[0], a[1]), station: estStation ? estStation[k] !== false : true })
   }
   const zs = points.map((p) => p.z)
   const denivele = zs.length ? Math.max(...zs) - Math.min(...zs) : 0

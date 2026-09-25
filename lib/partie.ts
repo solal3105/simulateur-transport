@@ -1,6 +1,6 @@
 import { PROJETS } from './catalogue'
 import { leviersPossibles } from './leviers'
-import { estimer, type Carreaux } from './modele'
+import { estimer, prolongementPossible, type Carreaux } from './modele'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
@@ -21,6 +21,9 @@ export interface PartiePartagee {
 
 export const VERSION_PARTIE = 1
 
+/** Au-delà, un tracé ne vient pas du jeu : même avec des points de passage, une ligne en compte bien moins. */
+export const POINTS_MAX = 150
+
 /** La forme compacte : choix du joueur seulement, sans aucun chiffre calculé. */
 export interface PartieCompacte {
   v: number
@@ -29,7 +32,8 @@ export interface PartieCompacte {
   /** 1 pour une partie en jeu libre, absent sinon. */
   x?: 1
   c: [string, number, number, string, number][]
-  l: { n: string; m: string; d: number; e: number; a: [number, number][] }[]
+  /** Les lignes : nom, mode, mandat, paiement étalé, points, et au besoin les rangs des points de passage et la ligne prolongée. */
+  l: { n: string; m: string; d: number; e: number; a: [number, number][]; p?: number[]; o?: string }[]
   f: Record<1 | 2, Leviers>
 }
 
@@ -45,6 +49,8 @@ export function compacter(p: PartiePartagee): PartieCompacte {
       d: l.mandat,
       e: l.etale ? 1 : 0,
       a: l.arrets.map(([lon, lat]) => [Math.round(lon * 1e5) / 1e5, Math.round(lat * 1e5) / 1e5] as [number, number]),
+      ...(l.passages?.length ? { p: l.passages } : {}),
+      ...(l.prolonge ? { o: l.prolonge } : {}),
     })),
     f: p.leviers,
   }
@@ -107,12 +113,23 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   b.l.forEach((l, i) => {
     if (!l || typeof l !== 'object') return
     const mode = MODES.find((m) => m === l.m)
-    if (!mode || !Array.isArray(l.a) || l.a.length < 2 || l.a.length > 60 || !l.a.every(estPoint)) return
-    const estimation = estimer(mode, l.a, carreaux)
+    if (!mode || !Array.isArray(l.a) || l.a.length < 2 || l.a.length > POINTS_MAX || !l.a.every(estPoint)) return
+    // Les points de passage : des rangs entiers, jamais un terminus, sans doublon.
+    const passages = Array.isArray(l.p)
+      ? [...new Set(l.p.filter((k): k is number => Number.isInteger(k) && k > 0 && k < l.a.length - 1))].sort((x, y) => x - y)
+      : []
+    // Un prolongement doit partir d'une station existante du même mode ; sinon, c'est une ligne à part entière.
+    const prolonge =
+      typeof l.o === 'string' && /^(metro|tram)-[\p{L}\p{N} .'-]{1,24}$/u.test(l.o) && prolongementPossible(mode, l.a[0], carreaux)
+        ? l.o
+        : undefined
+    const estimation = estimer(mode, l.a, carreaux, { passages, prolonge: Boolean(prolonge) })
     lignes.push({
       id: `partage-${i}`,
       nom: String(l.n ?? '').slice(0, 60) || `Ligne ${i + 1}`,
       mode,
+      ...(passages.length ? { passages } : {}),
+      ...(prolonge ? { prolonge } : {}),
       mandat: l.d === 2 && !libre ? 2 : 1,
       etale: l.e === 1 && l.d !== 2 && !libre,
       arrets: l.a,

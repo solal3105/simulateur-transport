@@ -7,6 +7,7 @@ import { couleurLigne } from './couleurs'
 import { enLettres, n } from './format'
 import { FORMULE } from './formule'
 import { cadreMiniature, cheminsFond, cheminsReseau } from './miniature'
+import { stationsDuTrace } from './modele'
 import { polices } from './og'
 import type { PartieCompacte } from './partie'
 import type { ModeLigne } from './types'
@@ -341,7 +342,12 @@ export interface ReseauApercu {
 export function imageReseau(ville: Ville, r: ReseauApercu) {
   const traces: Trace[] = [
     ...cheminsReseau(DONNEES[ville.id].projets, { ...r.partie, l: [] }, ville),
-    ...r.partie.l.map((l) => ({ d: cadreMiniature(ville).chemin([l.a]), couleur: couleurLigne(l.m as ModeLigne), arrets: l.a })),
+    // Les points de passage guident le tracé sans être des stations : pas de rond pour eux.
+    ...r.partie.l.map((l) => ({
+      d: cadreMiniature(ville).chemin([l.a]),
+      couleur: couleurLigne(l.m as ModeLigne),
+      arrets: l.a.filter((_, i) => stationsDuTrace(l.a.length, l.p)[i]),
+    })),
   ]
   const lignes = r.partie.l.length
   const projets = r.partie.c.length

@@ -71,19 +71,22 @@ export function coutLigne(
   mx: number,
   ville: IdVille,
   terrain?: Terrain,
+  options: { estStation?: boolean[]; prolonge?: boolean } = {},
 ): DetailCout {
   const p = PRIX[mode]
   const k = COEFFICIENT_RESEAU[ville]
-  const r = terrain ? relief(terrain, mode, arrets, mx) : null
+  const r = terrain ? relief(terrain, mode, arrets, mx, options.estStation) : null
+  // Les points de passage ne coûtent rien ; le terminus d'une ligne prolongée existe déjà.
+  const nombreStations = (options.estStation ? options.estStation.filter(Boolean).length : arrets.length) - (options.prolonge ? 1 : 0)
   // Le câble passe au-dessus des fleuves ; le tram et le bus ont besoin d'un pont, le métro d'un tunnel plus profond.
   const n = terrain && mode !== 'cable' ? franchissements(terrain, arrets) : 0
   // En métro, les stations plus basses que d'ordinaire ; en tram et en bus, celles qui passent sous le sol.
   const seuil = mode === 'metro' ? PROFONDEUR_ORDINAIRE : ECART_OUVRAGE
-  const profondes = r && mode !== 'cable' ? r.profondeurs.filter((d) => d > seuil) : []
+  const profondes = r && mode !== 'cable' ? (options.prolonge ? r.profondeurs.slice(1) : r.profondeurs).filter((d) => d > seuil) : []
   const kmOuvrage = r ? Math.min(r.kmOuvrage, km) : 0
   return {
     voie: km * p.km * k,
-    stations: arrets.length * p.station * k,
+    stations: Math.max(0, nombreStations) * p.station * k,
     ouvrages: kmOuvrage * p.ouvrageKm * k,
     ponts: n * p.pont * k,
     profondeur:

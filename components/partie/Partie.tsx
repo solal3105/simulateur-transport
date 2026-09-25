@@ -87,8 +87,11 @@ function Legende() {
         </span>
       ) : null}
       <span className="hidden items-center gap-1.5 text-gris lg:flex">
-        <span className="h-1 w-4 rounded-full bg-[#958e84]" />
-        Réseau actuel
+        <span className="relative flex h-3 w-5 items-center">
+          <span className="h-1 w-5 rounded-full bg-[#5d5852]" />
+          <span className="absolute left-1.5 size-2.5 rounded-full border-2 border-[#5d5852] bg-white" />
+        </span>
+        Réseau actuel et ses stations
       </span>
     </div>
   )

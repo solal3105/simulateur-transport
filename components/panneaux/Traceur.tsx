@@ -5,13 +5,13 @@ import { useMemo, useState } from 'react'
 
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
-import { nommerArrets } from '@/lib/lieux'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
-import { DUREE_CHANTIER, estimer, rayonBassin } from '@/lib/modele'
+import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace } from '@/lib/modele'
+import { correspondances, nommerTrace, stationProche, terminusDe, type LigneExistante } from '@/lib/reseau'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
-import type { Estimation, ModeLigne } from '@/lib/types'
+import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
 
 import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
@@ -59,7 +59,85 @@ const distanceBassin = (mode: ModeLigne) => {
 export function useEstimation(): Estimation | null {
   const donnees = useDonnees(useVille().id)
   const brouillon = useJeu((s) => s.brouillon)
-  return useMemo(() => (donnees && brouillon ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux) : null), [donnees, brouillon])
+  return useMemo(
+    () =>
+      donnees && brouillon
+        ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux, {
+            passages: brouillon.passages,
+            prolonge: Boolean(brouillon.prolonge),
+          })
+        : null,
+    [donnees, brouillon],
+  )
+}
+
+/** « Métro D » devient « métro D », pour le glisser dans une phrase. */
+const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice(1)
+
+/**
+ * Ce qu'un tracé sait du réseau actuel : lesquels de ses points sont des stations, leurs noms, leurs
+ * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
+ */
+function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge'> | null) {
+  const donnees = useDonnees(useVille().id)
+  return useMemo(() => {
+    if (!donnees || !trace) return null
+    const { mx } = donnees.carreaux
+    const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
+    const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx)
+    const prolongee = trace.prolonge ? donnees.reseau?.lignes.find((l) => l.id === trace.prolonge) : undefined
+    // Le terminus d'un prolongement est sur la ligne prolongée : ce n'est pas une correspondance avec elle.
+    const liste = correspondances(trace.arrets, estStation, donnees.stations, mx)
+      .map((c) =>
+        c.rang === 0 && trace.prolonge
+          ? { ...c, station: { ...c.station, lignes: c.station.lignes.filter((l) => l.id !== trace.prolonge) } }
+          : c,
+      )
+      .filter((c) => c.station.lignes.length)
+    const depart = trace.arrets[0]
+    const terminus = depart && !trace.prolonge ? stationProche(donnees.stations, depart, mx, 60) : null
+    const aProlonger = terminus?.terminus
+      .map((id) => donnees.reseau?.lignes.find((l) => l.id === id))
+      .find((l): l is LigneExistante => Boolean(l && l.mode === trace.mode && prolongementPossible(l.mode, depart!, donnees.carreaux)))
+    const stationsNommees = noms.filter((x): x is string => Boolean(x))
+    return { estStation, noms, stationsNommees, liste, prolongee, aProlonger, donnees }
+  }, [donnees, trace])
+}
+
+/** Les stations d'une ligne, dans l'ordre, reliées par un trait. */
+function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
+  if (!noms.length) return null
+  return (
+    <div className="flex flex-col gap-2">
+      <Surtitre>{titre}</Surtitre>
+      <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
+        {noms.map((nom, i) => (
+          <li key={i} className="flex items-center gap-1">
+            <span className="rounded-full bg-sable px-2.5 py-1">{nom}</span>
+            {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+/** Les correspondances d'un tracé en une phrase : « métro A et D à Bellecour, tram T1 à Perrache ». */
+function PhraseCorrespondances({ liste }: { liste: NonNullable<ReturnType<typeof useReseauDuTrace>>['liste'] }) {
+  if (!liste.length) return null
+  const morceaux = liste.map(
+    (c) =>
+      `${c.station.lignes.map((l) => (l.mode === 'metro' ? `métro ${l.ref}` : l.mode === 'tram' ? `tram ${l.ref}` : l.ref)).join(', ')} à ${c.station.nom}`,
+  )
+  return (
+    <p className="flex items-start gap-2 rounded-2xl bg-sable px-3.5 py-2.5 text-[13.5px] leading-snug">
+      <Icone nom="voyageurs" taille={17} epaisseur={2.3} className="mt-0.5 shrink-0" />
+      <span>
+        {liste.length > 1 ? `${liste.length} correspondances avec le réseau actuel : ` : 'Une correspondance avec le réseau actuel : '}
+        {morceaux.join(', ')}.
+      </span>
+    </p>
+  )
 }
 
 function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {
@@ -72,13 +150,13 @@ function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {
 }
 
 /** D'où vient le coût d'une ligne : la voie, les stations, et ce que le terrain impose en plus. */
-export function DetailCout({ e, arrets, mode }: { e: Estimation; arrets: number; mode: ModeLigne }) {
+export function DetailCout({ e, arrets, mode, prolonge }: { e: Estimation; arrets: number; mode: ModeLigne; prolonge?: boolean }) {
   const d = e.detail
   if (!d) return null
   const pluriel = (k: number, un: string, plusieurs: string) => (k > 1 ? plusieurs : un)
   const lignes: [string, number][] = [
     [`La voie, ${km(e.km)} km`, d.voie],
-    [`${arrets} ${pluriel(arrets, 'station', 'stations')}`, d.stations],
+    [`${arrets} ${pluriel(arrets, 'station', 'stations')}${prolonge ? `, le terminus existant en plus` : ''}`, d.stations],
   ]
   if (d.ouvrages > 0)
     lignes.push([
@@ -114,12 +192,15 @@ export function DetailCout({ e, arrets, mode }: { e: Estimation; arrets: number;
  * Le profil en long de la ligne en cours de tracé : le terrain, la voie que le mode peut suivre, et chaque
  * station. En métro, la profondeur de chaque station ; en tram et en bus, les passages en tunnel.
  */
-function Profil({ mode, arrets }: { mode: ModeLigne; arrets: [number, number][] }) {
+function Profil({ mode, arrets, passages }: { mode: ModeLigne; arrets: [number, number][]; passages?: number[] }) {
   const donnees = useDonnees(useVille().id)
   const terrain = donnees?.carreaux.terrain
   const r = useMemo(
-    () => (terrain && donnees && arrets.length >= 2 ? relief(terrain, mode, arrets, donnees.carreaux.mx) : null),
-    [terrain, donnees, mode, arrets],
+    () =>
+      terrain && donnees && arrets.length >= 2
+        ? relief(terrain, mode, arrets, donnees.carreaux.mx, stationsDuTrace(arrets.length, passages))
+        : null,
+    [terrain, donnees, mode, arrets, passages],
   )
   if (!r || r.profil.length < 2) return null
   const L = 320
@@ -193,7 +274,7 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
   return (
     <div className="grid grid-cols-4 gap-2">
       {cellule(km(e.km), 'km', 'de ligne')}
-      {cellule(String(arrets), '', arrets > 1 ? 'arrêts' : 'arrêt')}
+      {cellule(String(arrets), '', arrets > 1 ? 'stations' : 'station')}
       {cellule(n(e.cout), 'M€', 'de construction')}
       {cellule(`~${approx(e.voyageurs)}`, '', 'voyageurs / jour', true)}
     </div>
@@ -290,24 +371,38 @@ function AjoutParNom() {
 
 /** Le panneau affiché pendant qu'on pose les arrêts. */
 export function Traceur() {
-  const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes } = useJeu()
+  const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes, basculerPassage, choisirOutil } =
+    useJeu()
+  const { detacher, rattacher } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
   const e = useEstimation()
-  const noms = useNomsArrets()
+  const r = useReseauDuTrace(brouillon)
   // Fermer le panneau efface le tracé : au-delà d'un arrêt posé, on demande d'abord.
   const [confirmer, setConfirmer] = useState(false)
+  // La suggestion de prolonger une ligne, écartée pour ce terminus.
+  const [ecartee, setEcartee] = useState<string | null>(null)
   if (!brouillon) return null
   const arrets = brouillon.arrets.length
   const pret = arrets >= 2 && e
+  const noms = r?.noms ?? []
+  const nomsStations = r?.stationsNommees ?? []
+  const stations = r ? r.estStation.filter(Boolean).length : arrets
+  const outil = brouillon.outil ?? 'station'
   // En modification, fermer ramène à la fiche de la ligne sans rien changer.
   const modifiee = brouillon.edition ? lignes.find((l) => l.id === brouillon.edition) : undefined
   const fermer = () => (arrets >= 2 && !confirmer ? setConfirmer(true) : abandonnerTrace())
 
   return (
     <Panneau
-      titre={modifiee ? `Modifier ${modifiee.nom}` : `Tracer un ${NOM_MODE[brouillon.mode]}`}
+      titre={
+        modifiee
+          ? `Modifier ${modifiee.nom}`
+          : r?.prolongee
+            ? `Prolonger le ${minuscule(r.prolongee.nom)}`
+            : `Tracer un ${NOM_MODE[brouillon.mode]}`
+      }
       onFermer={fermer}
       pied={
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
@@ -348,6 +443,21 @@ export function Traceur() {
               Continuer le tracé
             </Bouton>
           </div>
+        </div>
+      ) : null}
+      {r?.prolongee ? (
+        <div className="flex flex-col gap-1.5 rounded-2xl bg-rouge-pale px-4 py-3">
+          <p className="text-[14px] leading-snug font-semibold">
+            Vous prolongez le {minuscule(r.prolongee.nom)} depuis {noms[0] ?? 'son terminus'}. Cette station existe déjà : vous ne payez que
+            les nouvelles.
+          </p>
+          <button
+            type="button"
+            onClick={detacher}
+            className="min-h-9 self-start text-[13px] font-extrabold text-rouge-fonce underline underline-offset-3"
+          >
+            En faire une ligne à part
+          </button>
         </div>
       ) : null}
       <fieldset className="flex flex-col gap-2">
@@ -404,35 +514,112 @@ export function Traceur() {
         ))}
       </fieldset>
 
+      <div className="flex flex-col gap-1.5">
+        <div role="radiogroup" aria-label="Ce que pose un toucher sur la carte" className="grid grid-cols-2 rounded-full bg-sable p-1">
+          {(
+            [
+              { valeur: 'station', texte: 'Poser une station', court: 'Station' },
+              { valeur: 'passage', texte: 'Poser un point de passage', court: 'Point de passage' },
+            ] as const
+          ).map((o) => (
+            <button
+              key={o.valeur}
+              type="button"
+              role="radio"
+              aria-checked={outil === o.valeur}
+              onClick={() => choisirOutil(o.valeur)}
+              className={clsx(
+                'min-h-10 rounded-full px-2 text-[13px] leading-tight font-extrabold transition-colors',
+                outil === o.valeur ? 'bg-encre text-white' : 'text-gris hover:text-encre',
+              )}
+            >
+              {/* Sur téléphone, un libellé court garde la carte visible ; le nom complet reste lu à voix haute. */}
+              <span className="lg:hidden" aria-hidden="true">
+                {o.court}
+              </span>
+              <span className="sr-only lg:not-sr-only">{o.texte}</span>
+            </button>
+          ))}
+        </div>
+        {outil === 'passage' ? (
+          <p className="text-[12.5px] leading-snug text-gris">
+            La ligne passe par ce point sans s’y arrêter : il ne coûte rien et n’attire pas de voyageurs, il sert à suivre une rue ou à
+            contourner un obstacle.
+          </p>
+        ) : null}
+      </div>
+
       <AjoutParNom />
+
+      {arrets === 0 && !modifiee && r?.donnees.reseau ? <Prolonger lignes={r.donnees.reseau.lignes} /> : null}
+
+      {r?.aProlonger && ecartee !== r.aProlonger.id ? (
+        <div role="group" aria-labelledby="proposer-prolongement" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
+          <p id="proposer-prolongement" className="text-[14.5px] leading-relaxed">
+            Votre ligne part du terminus du {minuscule(r.aProlonger.nom)}. Voulez-vous la prolonger ? Sa première station existe déjà.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Bouton genre="rouge" taille="petit" onClick={() => rattacher(r.aProlonger!.id)}>
+              Prolonger le {minuscule(r.aProlonger.nom)}
+            </Bouton>
+            <Bouton genre="contour" taille="petit" onClick={() => setEcartee(r.aProlonger!.id)}>
+              Garder une ligne à part
+            </Bouton>
+          </div>
+        </div>
+      ) : null}
 
       {arrets > 0 ? (
         <div className="flex flex-col gap-2">
-          <Surtitre>Vos arrêts</Surtitre>
+          <Surtitre>Votre tracé</Surtitre>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
-            {brouillon.arrets.map((_, i) => (
-              <li key={i} className="flex items-center gap-1">
-                <span className="flex items-center gap-0.5 rounded-full bg-sable py-0.5 pr-0.5 pl-2.5">
-                  {noms[i] ?? `Arrêt ${i + 1}`}
-                  <button
-                    type="button"
-                    onClick={() => enleverArret(i)}
-                    aria-label={`Retirer l’arrêt ${noms[i] ?? i + 1}`}
-                    title="Retirer cet arrêt"
-                    className="grid size-7 place-items-center rounded-full text-gris transition-colors hover:bg-white hover:text-rouge-fonce"
+            {brouillon.arrets.map((_, i) => {
+              const passage = r ? !r.estStation[i] : false
+              const milieu = i > 0 && i < arrets - 1
+              const libelle = passage ? 'Point de passage' : (noms[i] ?? `Station ${i + 1}`)
+              return (
+                <li key={i} className="flex items-center gap-1">
+                  <span
+                    className={clsx(
+                      'flex items-center gap-0.5 rounded-full py-0.5 pr-0.5 pl-2.5',
+                      passage ? 'bg-white text-gris shadow-[inset_0_0_0_1.5px_var(--color-trait)]' : 'bg-sable',
+                    )}
                   >
-                    <Icone nom="fermer" taille={13} epaisseur={2.6} />
-                  </button>
-                </span>
-                {i < arrets - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
-              </li>
-            ))}
+                    {milieu ? (
+                      <button
+                        type="button"
+                        onClick={() => basculerPassage(i)}
+                        title={passage ? 'En faire une station' : 'En faire un point de passage'}
+                        aria-label={passage ? `Faire de ce point de passage une station` : `Faire de ${libelle} un point de passage`}
+                        className="text-left underline decoration-transparent underline-offset-3 hover:decoration-current"
+                      >
+                        {libelle}
+                      </button>
+                    ) : (
+                      libelle
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => enleverArret(i)}
+                      aria-label={`Retirer ${passage ? 'ce point de passage' : libelle}`}
+                      title="Retirer ce point"
+                      className="grid size-7 place-items-center rounded-full text-gris transition-colors hover:bg-white hover:text-rouge-fonce"
+                    >
+                      <Icone nom="fermer" taille={13} epaisseur={2.6} />
+                    </button>
+                  </span>
+                  {i < arrets - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+                </li>
+              )
+            })}
           </ol>
           {arrets >= 2 ? (
             <p className="text-[12.5px] leading-snug text-gris">
-              Faites glisser un arrêt sur la carte pour le déplacer, ou touchez la ligne entre deux arrêts pour en ajouter un.
+              Faites glisser un point sur la carte pour le déplacer, ou touchez la ligne entre deux points pour en ajouter un. Touchez le
+              nom d’une station pour en faire un point de passage.
             </p>
           ) : null}
+          {r ? <PhraseCorrespondances liste={r.liste} /> : null}
         </div>
       ) : null}
 
@@ -440,26 +627,31 @@ export function Traceur() {
         <p className="flex items-start gap-2.5 rounded-2xl bg-encre px-4 py-3 text-sm leading-snug font-semibold text-white">
           <Icone nom="main" taille={20} className="mt-0.5" />
           {arrets === 0
-            ? 'Touchez la carte pour poser le premier arrêt. Les zones les plus colorées sont celles où vivent et travaillent le plus de gens.'
-            : 'Posez au moins un deuxième arrêt pour voir le prix et les voyageurs.'}
+            ? 'Touchez la carte pour poser la première station. Les zones les plus colorées sont celles où vivent et travaillent le plus de gens ; une station posée sur une station existante s’y accroche.'
+            : 'Posez au moins une deuxième station pour voir le prix et les voyageurs.'}
         </p>
       ) : (
         <>
-          <Chiffres e={e} arrets={arrets} mode={brouillon.mode} />
+          <Chiffres e={e} arrets={stations} mode={brouillon.mode} />
           <p className="text-[13px] leading-snug font-semibold">
             <span className="text-gris">De </span>
-            {noms[0]}
+            {nomsStations[0]}
             <span className="text-gris"> à </span>
-            {noms.at(-1)}
-            {noms.length > 2 ? <span className="text-gris">, par {noms.slice(1, -1).join(', ')}</span> : null}
+            {nomsStations.at(-1)}
+            {nomsStations.length > 2 ? <span className="text-gris">, par {nomsStations.slice(1, -1).join(', ')}</span> : null}
           </p>
           <div className="flex flex-col gap-1">
             <Surtitre>Le relief sous la ligne</Surtitre>
-            <Profil mode={brouillon.mode} arrets={brouillon.arrets} />
+            <Profil mode={brouillon.mode} arrets={brouillon.arrets} passages={brouillon.passages} />
           </div>
           <div className="flex flex-col gap-0.5">
             <Surtitre>Ce que coûte la ligne</Surtitre>
-            <DetailCout e={e} arrets={arrets} mode={brouillon.mode} />
+            <DetailCout
+              e={e}
+              arrets={stations - (brouillon.prolonge ? 1 : 0)}
+              mode={brouillon.mode}
+              prolonge={Boolean(brouillon.prolonge)}
+            />
           </div>
           <div className="hidden flex-col gap-0.5 lg:flex">
             <Surtitre>Autour de vos arrêts, à moins de {distanceBassin(brouillon.mode)}</Surtitre>
@@ -481,11 +673,66 @@ export function Traceur() {
   )
 }
 
-/** Noms des arrêts du tracé en cours, d'après les quartiers et les communes. */
-function useNomsArrets() {
+/**
+ * Prolonger une ligne existante : on choisit la ligne, puis le terminus d'où partir. Le tracé commence alors sur
+ * sa station, qui existe déjà, dans le mode de la ligne.
+ */
+function Prolonger({ lignes }: { lignes: LigneExistante[] }) {
+  const prolonger = useJeu((s) => s.prolonger)
   const donnees = useDonnees(useVille().id)
-  const brouillon = useJeu((s) => s.brouillon)
-  return useMemo(() => (donnees && brouillon ? nommerArrets(brouillon.arrets, donnees.lieux) : []), [donnees, brouillon])
+  const [choisie, setChoisie] = useState<string | null>(null)
+  // Sur téléphone, la liste reste repliée pour laisser la carte visible.
+  const [ouvert, setOuvert] = useState(false)
+  // Seules les lignes de métro et de tram se prolongent, et seulement depuis une station que nous connaissons.
+  const possibles = lignes.filter(
+    (l) =>
+      (l.mode === 'metro' || l.mode === 'tram') &&
+      donnees &&
+      terminusDe(l).some((s) => prolongementPossible(l.mode, s.pos, donnees.carreaux)),
+  )
+  if (!possibles.length || !donnees) return null
+  const ligne = possibles.find((l) => l.id === choisie)
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOuvert(true)}
+        className={clsx('self-start text-[13px] font-extrabold text-gris underline underline-offset-3 lg:hidden', ouvert && 'hidden')}
+      >
+        Prolonger une ligne existante
+      </button>
+      <div className={clsx('flex-col gap-2 lg:flex', ouvert ? 'flex' : 'hidden')}>
+        <Surtitre>Ou prolongez une ligne existante</Surtitre>
+        <div className="flex flex-wrap gap-1.5">
+          {possibles.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              aria-pressed={choisie === l.id}
+              onClick={() => setChoisie(choisie === l.id ? null : l.id)}
+              className={clsx(
+                'min-h-9 rounded-full px-3 text-[13px] font-extrabold transition-colors',
+                choisie === l.id ? 'bg-encre text-white' : 'bg-white shadow-[inset_0_0_0_1.5px_var(--color-trait)] hover:bg-sable',
+              )}
+            >
+              {l.nom}
+            </button>
+          ))}
+        </div>
+        {ligne ? (
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {terminusDe(ligne)
+              .filter((s) => prolongementPossible(ligne.mode, s.pos, donnees.carreaux))
+              .map((s) => (
+                <Bouton key={s.nom} genre="contour" taille="petit" icone="fleche" onClick={() => prolonger(ligne.id, ligne.mode, s.pos)}>
+                  Depuis {s.nom}
+                </Bouton>
+              ))}
+          </div>
+        ) : null}
+      </div>
+    </>
+  )
 }
 
 /** Le résultat d'une ligne terminée, avant de la construire. */
@@ -494,14 +741,19 @@ export function MaLigne() {
   const ville = useVille()
   const bilan = useBilan()
   const e = useEstimation()
-  const noms = useNomsArrets()
+  const r = useReseauDuTrace(brouillon)
+  const noms = r?.stationsNommees ?? []
   // Une ligne modifiée garde son nom, son mandat et son paiement ; on la compare à ce qu'elle était.
   const ancienne = brouillon?.edition ? lignes.find((l) => l.id === brouillon.edition) : undefined
-  // Une ligne porte le nom de ses deux terminus, comme sur le réseau.
-  // Tant que le joueur ne l'a pas renommée, la ligne porte le nom de ses terminus.
+  // Tant que le joueur ne l'a pas renommée, la ligne porte le nom de ses terminus, ou celui de la ligne qu'elle prolonge.
   const [nomSaisi, setNom] = useState<string | null>(ancienne?.nom ?? null)
   const nom =
-    nomSaisi ?? (noms.length >= 2 ? `${noms[0]} - ${noms.at(-1)}` : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+    nomSaisi ??
+    (r?.prolongee
+      ? `Prolongement du ${minuscule(r.prolongee.nom)}`
+      : noms.length >= 2
+        ? `${noms[0]} - ${noms.at(-1)}`
+        : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
   // La part payée sur ce mandat ; en modification, l'ancienne version libère la sienne.
@@ -514,7 +766,13 @@ export function MaLigne() {
   return (
     <Panneau
       surtitre={
-        <Pastille icone="trace">{ancienne ? 'Modification de votre ligne' : `Votre ligne de ${NOM_MODE[brouillon.mode]}`}</Pastille>
+        <Pastille icone="trace">
+          {ancienne
+            ? 'Modification de votre ligne'
+            : r?.prolongee
+              ? `Prolongement du ${minuscule(r.prolongee.nom)}`
+              : `Votre ligne de ${NOM_MODE[brouillon.mode]}`}
+        </Pastille>
       }
       titre={
         <label className="flex items-center gap-2">
@@ -554,7 +812,7 @@ export function MaLigne() {
       }
     >
       <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${brouillon.arrets.length} stations`} />
+        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
         <CarteChiffre
           icone="voyageurs"
           valeur={`~${approx(e.voyageurs)}`}
@@ -571,27 +829,23 @@ export function MaLigne() {
       ) : null}
       <div className="flex flex-col gap-0.5">
         <Surtitre>Ce que coûte la ligne</Surtitre>
-        <DetailCout e={e} arrets={brouillon.arrets.length} mode={brouillon.mode} />
+        <DetailCout
+          e={e}
+          arrets={noms.length - (brouillon.prolonge ? 1 : 0)}
+          mode={brouillon.mode}
+          prolonge={Boolean(brouillon.prolonge)}
+        />
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>
-          Autour de vos {brouillon.arrets.length} arrêts, à moins de {distanceBassin(brouillon.mode)}
+          Autour de vos {noms.length} stations, à moins de {distanceBassin(brouillon.mode)}
         </Surtitre>
         <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
       </div>
-      <div className="flex flex-col gap-2">
-        <Surtitre>Vos arrêts</Surtitre>
-        <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
-          {noms.map((nomArret, i) => (
-            <li key={i} className="flex items-center gap-1">
-              <span className="rounded-full bg-sable px-2.5 py-1">{nomArret}</span>
-              {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
-            </li>
-          ))}
-        </ol>
-      </div>
+      <ListeStations noms={noms} titre="Vos stations" />
+      {r ? <PhraseCorrespondances liste={r.liste} /> : null}
       <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
         Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs seraient nouveaux sur le réseau, les autres viendraient
         d’une ligne voisine. C’est ce chiffre qui s’ajoute à votre score.
@@ -617,9 +871,9 @@ export function MaLigne() {
 export function FicheLigne({ id }: { id: string }) {
   const { lignes, mandat, retirer, fermer, changerPaiement, libre, modifierLigne } = useJeu()
   const ville = useVille()
-  const donnees = useDonnees(ville.id)
   const l = lignes.find((x) => x.id === id)
-  const noms = useMemo(() => (donnees && l ? nommerArrets(l.arrets, donnees.lieux) : []), [donnees, l])
+  const r = useReseauDuTrace(l ?? null)
+  const noms = r?.stationsNommees ?? []
   const [confirmer, setConfirmer] = useState(false)
   if (!l) return null
   const e = l.estimation
@@ -673,9 +927,17 @@ export function FicheLigne({ id }: { id: string }) {
   }
 
   return (
-    <Panneau surtitre={<Pastille icone="trace">Votre ligne de {NOM_MODE[l.mode]}</Pastille>} titre={l.nom} pied={pied}>
+    <Panneau
+      surtitre={
+        <Pastille icone="trace">
+          {r?.prolongee ? `Prolongement du ${minuscule(r.prolongee.nom)}` : `Votre ligne de ${NOM_MODE[l.mode]}`}
+        </Pastille>
+      }
+      titre={l.nom}
+      pied={pied}
+    >
       <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${l.arrets.length} stations`} />
+        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
         <CarteChiffre
           icone="voyageurs"
           valeur={`~${approx(e.voyageurs)}`}
@@ -695,33 +957,22 @@ export function FicheLigne({ id }: { id: string }) {
       </p>
       <div className="flex flex-col gap-1">
         <Surtitre>Le relief sous la ligne</Surtitre>
-        <Profil mode={l.mode} arrets={l.arrets} />
+        <Profil mode={l.mode} arrets={l.arrets} passages={l.passages} />
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>Ce que coûte la ligne</Surtitre>
-        <DetailCout e={e} arrets={l.arrets.length} mode={l.mode} />
+        <DetailCout e={e} arrets={noms.length - (l.prolonge ? 1 : 0)} mode={l.mode} prolonge={Boolean(l.prolonge)} />
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>
-          Autour de ses {l.arrets.length} arrêts, à moins de {distanceBassin(l.mode)}
+          Autour de ses {noms.length} stations, à moins de {distanceBassin(l.mode)}
         </Surtitre>
         <Ligne libelle="Habitants" valeur={approx(e.habitants)} />
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
       </div>
-      {noms.length ? (
-        <div className="flex flex-col gap-2">
-          <Surtitre>Ses arrêts</Surtitre>
-          <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
-            {noms.map((nomArret, i) => (
-              <li key={i} className="flex items-center gap-1">
-                <span className="rounded-full bg-sable px-2.5 py-1">{nomArret}</span>
-                {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
+      <ListeStations noms={noms} titre="Ses stations" />
+      {r ? <PhraseCorrespondances liste={r.liste} /> : null}
     </Panneau>
   )
 }
