@@ -1,7 +1,7 @@
 import { coutLigne, totalCout } from './couts'
 import { FORMULE } from './formule'
 import type { Terrain } from './terrain'
-import type { Estimation, ModeLigne } from './types'
+import type { Estimation, ModeLigne, OptionsLigne } from './types'
 import type { IdVille, Ville } from './villes'
 
 /**
@@ -54,6 +54,8 @@ export interface Carreaux {
   ville: IdVille
   /** Le relief et les grands cours d'eau, pour le coût des ouvrages ; sans eux, la voie et les stations seulement. */
   terrain?: Terrain
+  /** Les arrêts du réseau actuel, [lon, lat, métro (1) ou tram (0)] : un prolongement doit partir de l'un d'eux. */
+  existants: number[][]
 }
 
 const TUILE = 500
@@ -97,7 +99,7 @@ export function preparerCarreaux(
     l.push(i)
     index.set(k, l)
   })
-  return { cellules, index, mx, constante: FORMULE.constantes[ville.id], centre: ville.centre, ville: ville.id, terrain }
+  return { cellules, index, mx, constante: FORMULE.constantes[ville.id], centre: ville.centre, ville: ville.id, terrain, existants: arrets }
 }
 
 export function longueurKm(arrets: [number, number][], mode: ModeLigne, mx: number) {
@@ -107,11 +109,35 @@ export function longueurKm(arrets: [number, number][], mode: ModeLigne, mx: numb
   return (m / 1000) * DETOUR[mode]
 }
 
-export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: Carreaux): Estimation {
+/** Distance, en mètres, en deçà de laquelle le premier point d'un prolongement est bien la station existante. */
+const ECART_TERMINUS = 150
+
+/**
+ * Le premier point d'un prolongement doit être une station du réseau actuel, du même mode : une station de
+ * métro pour un métro, un arrêt de tram pour un tram. Sinon, la ligne est une ligne à part entière.
+ */
+export function prolongementPossible(mode: ModeLigne, depart: [number, number] | undefined, carreaux: Pick<Carreaux, 'mx' | 'existants'>) {
+  if (!depart || (mode !== 'metro' && mode !== 'tram')) return false
+  const metres = distance(carreaux.mx)
+  const genre = mode === 'metro' ? 1 : 0
+  return carreaux.existants.some((a) => a[2] === genre && metres(depart, [a[0]!, a[1]!]) <= ECART_TERMINUS)
+}
+
+/** Quels points du tracé sont des stations : tous, sauf les points de passage, et toujours les deux terminus. */
+export function stationsDuTrace(nombre: number, passages: number[] = []) {
+  const passe = new Set(passages)
+  return Array.from({ length: nombre }, (_, i) => i === 0 || i === nombre - 1 || !passe.has(i))
+}
+
+export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: Carreaux, options: OptionsLigne = {}): Estimation {
   const { mx } = carreaux
   const metres = distance(mx)
+  // La longueur et le relief suivent tout le tracé ; le bassin de voyageurs ne compte que les stations.
+  const estStation = stationsDuTrace(arrets.length, options.passages)
+  const prolonge = Boolean(options.prolonge) && prolongementPossible(mode, arrets[0], carreaux)
   const km = longueurKm(arrets, mode, mx)
-  const detail = coutLigne(mode, arrets, km, mx, carreaux.ville, carreaux.terrain)
+  const detail = coutLigne(mode, arrets, km, mx, carreaux.ville, carreaux.terrain, { estStation, prolonge })
+  const stations = arrets.filter((_, i) => estStation[i])
   const cout = totalCout(detail)
   const c = FORMULE.coefficients
   const r = rayonBassin(mode)
@@ -120,7 +146,7 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
   const portee = Math.max(r, FORMULE.poidsCouronne ? COURONNE : 0, DEJA_DESSERVI, c.bassinLarge ? LARGE : 0)
   const pas = Math.ceil(portee / TUILE)
   const proches = new Map<number, number>()
-  for (const a of arrets) {
+  for (const a of stations) {
     const tx = Math.floor((a[0] * mx) / TUILE)
     const ty = Math.floor((a[1] * MY) / TUILE)
     for (let dx = -pas; dx <= pas; dx += 1) {
@@ -164,20 +190,20 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
     }
   }
   const poids = habitants + w * emplois
-  const auCentre = arrets.map((a) => metres(a, carreaux.centre))
+  const auCentre = stations.map((a) => metres(a, carreaux.centre))
   const variables = {
     bassin: Math.log1p(poids + FORMULE.poidsCouronne * Math.max(0, loin - poids)),
-    stations: Math.log(Math.max(1, arrets.length)),
+    stations: Math.log(Math.max(1, stations.length)),
     longueur: Math.log(Math.max(0.5, km / DETOUR[mode])),
     distanceCentre: Math.log1p(Math.min(...auCentre) / 1000),
-    partCentre: auCentre.filter((d) => d < CENTRE).length / Math.max(1, arrets.length),
+    partCentre: auCentre.filter((d) => d < CENTRE).length / Math.max(1, stations.length),
     concurrence: autour > 0 ? dejaServi / autour : 0,
     bassinLarge: Math.log1p(large),
   }
   // À Paris, le métro compte ses voyageurs aux entrées, sans les correspondances : on estime pareil.
   let exposant = carreaux.constante + FORMULE.modes[mode] + (FORMULE.ajustements[carreaux.ville]?.[mode] ?? 0)
   for (const [nom, coefficient] of Object.entries(c) as [keyof typeof variables, number][]) exposant += coefficient * variables[nom]
-  const voyageurs = arrets.length >= 2 && poids > 0 ? Math.exp(exposant) : 0
+  const voyageurs = stations.length >= 2 && poids > 0 ? Math.exp(exposant) : 0
   const nouveaux = poids > 0 ? voyageurs * (poidsNouveau / poids) : 0
   return {
     km,

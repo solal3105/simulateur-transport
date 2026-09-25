@@ -29,9 +29,29 @@ export type Panneau =
 export interface Brouillon {
   mode: ModeLigne
   arrets: [number, number][]
+  /** Les rangs des points de passage : la ligne y passe sans s'arrêter. */
+  passages?: number[]
+  /** Ce que pose le prochain clic sur la carte : une station, ou un point de passage. */
+  outil?: 'station' | 'passage'
+  /** La ligne existante prolongée depuis son terminus, qui est alors le premier point du tracé. */
+  prolonge?: string
   /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
   edition?: string
 }
+
+/** Les points de passage à garder : jamais un terminus, qui reste toujours une station. */
+const nettoyer = (passages: number[] = [], nombre: number) => {
+  const gardes = passages.filter((k) => k > 0 && k < nombre - 1)
+  return gardes.length ? gardes : undefined
+}
+
+/** Les rangs des points de passage après avoir retiré le point i. */
+const sansPoint = (passages: number[] = [], i: number) => passages.filter((k) => k !== i).map((k) => (k > i ? k - 1 : k))
+/** Les rangs des points de passage après avoir inséré un point au rang i, qui est un passage ou non. */
+const avecPoint = (passages: number[] = [], i: number, passage: boolean) => [
+  ...passages.map((k) => (k >= i ? k + 1 : k)),
+  ...(passage ? [i] : []),
+]
 
 /** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
 export interface AVenir {
@@ -103,6 +123,16 @@ interface Etat {
   insererArret: (i: number, p: [number, number]) => void
   /** Rouvre le traceur sur une ligne déjà construite, pour changer son tracé ou son mode. */
   modifierLigne: (id: string) => void
+  /** Fait d'un point une station, ou d'une station un point de passage. Les terminus restent des stations. */
+  basculerPassage: (i: number) => void
+  /** Choisit ce que pose le prochain clic : une station ou un point de passage. */
+  choisirOutil: (outil: 'station' | 'passage') => void
+  /** Commence le prolongement d'une ligne existante depuis l'un de ses terminus. */
+  prolonger: (ligne: string, mode: ModeLigne, terminus: [number, number]) => void
+  /** Fait du prolongement en cours une ligne à part entière, qui ne prolonge plus rien. */
+  detacher: () => void
+  /** Fait du tracé en cours, qui part déjà du terminus d'une ligne, le prolongement de cette ligne. */
+  rattacher: (ligne: string) => void
   abandonnerTrace: () => void
   construireLigne: (nom: string, estimation: Estimation, etale: boolean) => void
   /** Recalcule le coût et les voyageurs des lignes tracées avec le modèle actuel, quand il a changé. */
@@ -233,23 +263,95 @@ export const useJeu = create<Etat>()(
       allerAccueil: () => set({ pause: true, panneau: null, brouillon: null, message: null, apercu: 0 }),
       quitterAccueil: () => set({ pause: false }),
       tracer: (mode = 'tram') => set({ brouillon: { mode, arrets: [] }, panneau: { type: 'trace' }, apercu: 0 }),
-      changerMode: (mode) => set((s) => ({ brouillon: s.brouillon ? { ...s.brouillon, mode } : { mode, arrets: [] } })),
-      ajouterArret: (p) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets, p] } } : {})),
-      retirerArret: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.slice(0, -1) } } : {})),
+      // Un prolongement garde le mode de la ligne qu'il prolonge : changer de mode en fait une ligne à part.
+      changerMode: (mode) =>
+        set((s) => ({
+          brouillon: s.brouillon
+            ? { ...s.brouillon, mode, prolonge: s.brouillon.mode === mode ? s.brouillon.prolonge : undefined }
+            : { mode, arrets: [] },
+        })),
+      ajouterArret: (p) =>
+        set((s) => {
+          const b = s.brouillon
+          if (!b) return {}
+          const passage = b.outil === 'passage' && b.arrets.length > 0
+          return { brouillon: { ...b, arrets: [...b.arrets, p], passages: avecPoint(b.passages, b.arrets.length, passage) } }
+        }),
+      retirerArret: () =>
+        set((s) => {
+          const b = s.brouillon
+          if (!b || !b.arrets.length) return {}
+          const dernier = b.arrets.length - 1
+          // Retirer le terminus d'un prolongement, c'est ne plus rien prolonger.
+          return {
+            brouillon: {
+              ...b,
+              arrets: b.arrets.slice(0, -1),
+              passages: sansPoint(b.passages, dernier),
+              prolonge: dernier === 0 ? undefined : b.prolonge,
+            },
+          }
+        }),
       enleverArret: (i) =>
-        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.filter((_, k) => k !== i) } } : {})),
+        set((s) => {
+          const b = s.brouillon
+          if (!b) return {}
+          return {
+            brouillon: {
+              ...b,
+              arrets: b.arrets.filter((_, k) => k !== i),
+              passages: sansPoint(b.passages, i),
+              prolonge: i === 0 ? undefined : b.prolonge,
+            },
+          }
+        }),
       deplacerArret: (i, p) =>
-        set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, arrets: s.brouillon.arrets.map((a, k) => (k === i ? p : a)) } } : {})),
+        set((s) => {
+          const b = s.brouillon
+          if (!b) return {}
+          // Déplacer le terminus d'un prolongement le détache de la ligne existante.
+          return { brouillon: { ...b, arrets: b.arrets.map((a, k) => (k === i ? p : a)), prolonge: i === 0 ? undefined : b.prolonge } }
+        }),
       insererArret: (i, p) =>
-        set((s) =>
-          s.brouillon
-            ? { brouillon: { ...s.brouillon, arrets: [...s.brouillon.arrets.slice(0, i), p, ...s.brouillon.arrets.slice(i)] } }
-            : {},
-        ),
+        set((s) => {
+          const b = s.brouillon
+          if (!b) return {}
+          return {
+            brouillon: {
+              ...b,
+              arrets: [...b.arrets.slice(0, i), p, ...b.arrets.slice(i)],
+              passages: avecPoint(b.passages, i, b.outil === 'passage'),
+            },
+          }
+        }),
+      basculerPassage: (i) =>
+        set((s) => {
+          const b = s.brouillon
+          if (!b || i <= 0 || i >= b.arrets.length - 1) return {}
+          const passages = b.passages ?? []
+          return {
+            brouillon: { ...b, passages: passages.includes(i) ? passages.filter((k) => k !== i) : [...passages, i].sort((x, y) => x - y) },
+          }
+        }),
+      choisirOutil: (outil) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, outil } } : {})),
+      prolonger: (ligne, mode, terminus) =>
+        set((s) => ({
+          brouillon: { mode, arrets: [terminus], passages: [], prolonge: ligne, outil: 'station', edition: s.brouillon?.edition },
+          panneau: { type: 'trace' },
+          apercu: 0,
+        })),
+      detacher: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: undefined } } : {})),
+      rattacher: (ligne) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: ligne } } : {})),
       modifierLigne: (id) =>
         set((s) => {
           const l = s.lignes.find((x) => x.id === id && x.mandat === s.mandat)
-          return l ? { brouillon: { mode: l.mode, arrets: [...l.arrets], edition: l.id }, panneau: { type: 'trace' }, apercu: 0 } : {}
+          return l
+            ? {
+                brouillon: { mode: l.mode, arrets: [...l.arrets], passages: [...(l.passages ?? [])], prolonge: l.prolonge, edition: l.id },
+                panneau: { type: 'trace' },
+                apercu: 0,
+              }
+            : {}
         }),
       // Abandonner la modification d'une ligne ramène à sa fiche, sans rien changer.
       abandonnerTrace: () =>
@@ -270,6 +372,8 @@ export const useJeu = create<Etat>()(
               nom,
               mode: s.brouillon.mode,
               arrets: s.brouillon.arrets,
+              passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+              prolonge: s.brouillon.prolonge,
               estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
             }
             return {
@@ -288,6 +392,8 @@ export const useJeu = create<Etat>()(
             nom,
             mode: s.brouillon.mode,
             arrets: s.brouillon.arrets,
+            passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+            prolonge: s.brouillon.prolonge,
             mandat: s.mandat,
             etale,
             // Une estimation ne mérite pas plus de précision que la centaine.
@@ -308,7 +414,7 @@ export const useJeu = create<Etat>()(
           if (carreaux.ville !== s.ville || s.lignes.length === 0) return {}
           let change = false
           const lignes = s.lignes.map((l) => {
-            const e = estimer(l.mode, l.arrets, carreaux)
+            const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge) })
             const estimation = { ...e, nouveaux: Math.round(e.nouveaux / 100) * 100 }
             if (estimation.cout === l.estimation.cout && estimation.nouveaux === l.estimation.nouveaux && l.estimation.detail) return l
             change = true

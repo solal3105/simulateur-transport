@@ -4,9 +4,11 @@ import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geo
 import {
   Map as CarteMaplibre,
   Marker,
+  Popup,
   setWorkerUrl,
   type FilterSpecification,
   type GeoJSONSource,
+  type MapLayerMouseEvent,
   type MapMouseEvent,
   type MapTouchEvent,
   type StyleSpecification,
@@ -19,8 +21,8 @@ import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu } from '@/lib/geo'
-import { nommerArrets } from '@/lib/lieux'
-import { rayonBassin } from '@/lib/modele'
+import { rayonBassin, stationsDuTrace } from '@/lib/modele'
+import { direLignes, direOuvertures, nommerTrace, terminusDe } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
@@ -40,12 +42,16 @@ const COULEURS = {
   bordRoute: '#e3ddd4',
   rail: '#bdb6ac',
   limite: '#cfc8bd',
-  tram: '#d2cbc1',
-  metroActuel: '#958e84',
+  // Le réseau actuel reste neutre pour que les projets et vos lignes se lisent d'abord, mais assez sombre
+  // pour qu'on voie tout de suite où passent déjà le tram et le métro.
+  tram: '#9a9288',
+  metroActuel: '#5d5852',
 }
 
 /** En deçà de ce zoom, les noms de quartiers restent cachés. */
 const ZOOM_QUARTIERS = 13
+/** En deçà de ce zoom, les repères des lignes existantes se cachent pour laisser la vue d'ensemble lisible. */
+const ZOOM_REPERES = 11
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
 
@@ -87,11 +93,24 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         geometry: { type: 'Polygon', coordinates: [carreau(c.lon, c.lat, ville.latitude)] },
       })),
   }
+  // Les stations du réseau actuel, avec leur nom et leurs lignes ; sans le détail des lignes, les stations de métro.
   const stations: FeatureCollection<Point> = {
     type: 'FeatureCollection',
-    features: donnees.arrets
-      .filter((a) => a[2] === 1)
-      .map((a) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+    features: donnees.stations.length
+      ? donnees.stations.map((s) => ({
+          type: 'Feature',
+          properties: {
+            nom: s.nom,
+            // Les lignes en service d'un côté, celles en chantier de l'autre, avec leur date d'ouverture.
+            lignes: direLignes(s.lignes.filter((l) => !l.ouverture)),
+            ouvertures: direOuvertures(s.lignes),
+            metro: s.lignes.some((l) => l.mode === 'metro'),
+          },
+          geometry: { type: 'Point', coordinates: s.pos },
+        }))
+      : donnees.arrets
+          .filter((a) => a[2] === 1)
+          .map((a) => ({ type: 'Feature', properties: { metro: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
   }
   // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
@@ -183,41 +202,58 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         },
       },
       {
+        id: 'tram-bord',
+        type: 'line',
+        source: 'fond',
+        filter: genre('tram'),
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(4) },
+      },
+      {
         id: 'tram-actuel',
         type: 'line',
         source: 'fond',
         filter: genre('tram'),
-        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(1.8) },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(2.2) },
       },
       {
         id: 'metro-bord',
         type: 'line',
         source: 'fond',
         filter: genre('metro'),
-        layout: { 'line-cap': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(5) },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(6.2) },
       },
       {
         id: 'metro-actuel',
         type: 'line',
         source: 'fond',
         filter: genre('metro'),
-        layout: { 'line-cap': 'round' },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
           'line-color': COULEURS.metroActuel,
-          'line-width': largeur(2.6),
+          'line-width': largeur(3.4),
         },
       },
       {
         id: 'stations',
         type: 'circle',
         source: 'stations',
-        minzoom: 11.5,
+        minzoom: 10.5,
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11.5, 2, 14, 4.5],
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10.5,
+            ['case', ['get', 'metro'], 2.4, 1.6],
+            14,
+            ['case', ['get', 'metro'], 5.5, 4],
+          ],
           'circle-color': '#fff',
-          'circle-stroke-color': '#7d776f',
-          'circle-stroke-width': 1.2,
+          'circle-stroke-color': ['case', ['get', 'metro'], COULEURS.metroActuel, COULEURS.tram],
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10.5, 1.2, 14, 2],
         },
       },
       {
@@ -353,10 +389,11 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'brouillon',
         filter: ['==', ['geometry-type'], 'Point'],
         paint: {
-          'circle-radius': ['case', ['get', 'dernier'], 9, 7.5],
-          'circle-color': ['case', ['get', 'dernier'], ville.couleurs.principale, '#fff'],
-          'circle-stroke-color': COULEURS.encre,
-          'circle-stroke-width': 2.5,
+          // Un point de passage est un petit rond : la ligne y passe sans s'arrêter.
+          'circle-radius': ['case', ['get', 'passage'], 4.5, ['get', 'dernier'], 9, 7.5],
+          'circle-color': ['case', ['get', 'passage'], COULEURS.encre, ['get', 'dernier'], ville.couleurs.principale, '#fff'],
+          'circle-stroke-color': ['case', ['get', 'passage'], '#fff', COULEURS.encre],
+          'circle-stroke-width': ['case', ['get', 'passage'], 2, 2.5],
         },
       },
     ],
@@ -517,8 +554,35 @@ export function Carte({
       el.textContent = nom
       new Marker({ element: el }).setLngLat([lon, lat]).addTo(m)
     }
+    // Le nom de chaque ligne du réseau actuel, à ses deux terminus, comme sur un plan de réseau. Deux lignes qui
+    // finissent à la même station partagent un seul repère.
+    const terminus = new Map<string, { pos: [number, number]; lignes: { ref: string; mode: string; nom: string }[] }>()
+    for (const l of donnees.reseau?.lignes ?? []) {
+      for (const s of terminusDe(l)) {
+        const cle = s.nom || s.pos.join(',')
+        const t = terminus.get(cle) ?? { pos: s.pos, lignes: [] }
+        if (!t.lignes.some((x) => x.ref === l.ref && x.mode === l.mode)) t.lignes.push({ ref: l.ref, mode: l.mode, nom: l.nom })
+        terminus.set(cle, t)
+      }
+    }
+    for (const t of terminus.values()) {
+      const el = document.createElement('div')
+      el.className = 'reperes-ligne'
+      el.setAttribute('aria-hidden', 'true')
+      for (const l of t.lignes) {
+        const pastille = document.createElement('span')
+        pastille.className = 'repere-ligne'
+        pastille.dataset.mode = l.mode
+        pastille.textContent = l.ref
+        pastille.title = l.nom
+        el.appendChild(pastille)
+      }
+      new Marker({ element: el, anchor: 'bottom', offset: [0, -7] }).setLngLat(t.pos).addTo(m)
+    }
+
     const majZoom = () => {
       boite.dataset.proche = m.getZoom() >= ZOOM_QUARTIERS ? '1' : '0'
+      boite.dataset.loin = m.getZoom() < ZOOM_REPERES ? '1' : '0'
     }
     majZoom()
     m.on('zoom', majZoom)
@@ -597,7 +661,8 @@ export function Carte({
       const jeu = useJeu.getState()
       if (jeu.brouillon) {
         if (vientDeGlisser || m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] }).length) return
-        const p: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+        // Une station posée tout près d'une station existante s'y accroche : c'est une correspondance.
+        const p = jeu.brouillon.outil === 'passage' ? ([e.lngLat.lng, e.lngLat.lat] as [number, number]) : accrocher(e.point, e.lngLat)
         if (m.queryRenderedFeatures(e.point, { layers: ['brouillon-cible'] }).length) {
           const arrets = jeu.brouillon.arrets
           let meilleur = 0
@@ -615,8 +680,58 @@ export function Carte({
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
       const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
       const projet = CATALOGUE.find((p) => p.trace === trace)
-      if (projet) jeu.ouvrir({ type: 'projet', id: projet.id })
+      if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
+      // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
+      const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['stations'] })[0]
+      if (station) montrerStation(station)
     })
+
+    // Le nom d'une station du réseau actuel et ses lignes, au survol ou au toucher.
+    const bulle = new Popup({ closeButton: false, closeOnClick: true, offset: 10, className: 'bulle-station', maxWidth: '260px' })
+    const montrerStation = (f: { properties: Record<string, unknown>; geometry: unknown }) => {
+      const nom = f.properties.nom as string | undefined
+      if (!nom) return
+      const el = document.createElement('div')
+      const titre = document.createElement('strong')
+      titre.textContent = nom
+      el.appendChild(titre)
+      if (f.properties.lignes) {
+        const lignesEl = document.createElement('span')
+        lignesEl.textContent = String(f.properties.lignes).replace(/^./, (c) => c.toUpperCase())
+        el.appendChild(lignesEl)
+      }
+      // Une ligne en chantier que la carte montre déjà : on dit quand elle ouvre.
+      for (const texte of String(f.properties.ouvertures ?? '').split('\n').filter(Boolean)) {
+        const ouverture = document.createElement('span')
+        ouverture.textContent = texte
+        el.appendChild(ouverture)
+      }
+      const [lon, lat] = (f.geometry as Point).coordinates as [number, number]
+      bulle.setLngLat([lon, lat]).setDOMContent(el).addTo(m)
+    }
+    m.on('mouseenter', 'stations', (e: MapLayerMouseEvent) => {
+      const f = e.features?.[0]
+      if (f && glisse === null) montrerStation(f)
+    })
+    m.on('mouseleave', 'stations', () => bulle.remove())
+
+    /** Un petit carré autour d'un point de l'écran, pour toucher une station sans viser au pixel près. */
+    const zoneAutour = (p: { x: number; y: number }, r: number): [[number, number], [number, number]] => [
+      [p.x - r, p.y - r],
+      [p.x + r, p.y + r],
+    ]
+    /** La position d'une station posée : celle de la station existante la plus proche à l'écran, sinon le point touché. */
+    function accrocher(point: { x: number; y: number }, lngLat: { lng: number; lat: number }): [number, number] {
+      let meilleure: [number, number] | null = null
+      let distance = Infinity
+      for (const f of m.queryRenderedFeatures(zoneAutour(point, 14), { layers: ['stations'] })) {
+        const c = (f.geometry as Point).coordinates as [number, number]
+        const q = m.project(c)
+        const d = Math.hypot(q.x - point.x, q.y - point.y)
+        if (d < distance) [distance, meilleure] = [d, c]
+      }
+      return meilleure ?? [lngLat.lng, lngLat.lat]
+    }
     for (const couche of ['projets-cible', 'joueur-cible']) {
       m.on('mouseenter', couche, () => {
         if (!decor && !useJeu.getState().brouillon) m.getCanvas().style.cursor = 'pointer'
@@ -726,6 +841,7 @@ export function Carte({
       ;(m.getSource('joueur') as GeoJSONSource).setData(joueur)
 
       const arrets = brouillon?.arrets ?? []
+      const estStation = stationsDuTrace(arrets.length, brouillon?.passages)
       const traits: Feature<LineString | Point>[] = []
       if (arrets.length >= 2 && brouillon)
         traits.push({
@@ -734,18 +850,23 @@ export function Carte({
           geometry: { type: 'LineString', coordinates: arrets },
         })
       arrets.forEach((a, i) =>
-        traits.push({ type: 'Feature', properties: { i, dernier: i === arrets.length - 1 }, geometry: { type: 'Point', coordinates: a } }),
+        traits.push({
+          type: 'Feature',
+          properties: { i, dernier: i === arrets.length - 1, passage: !estStation[i] },
+          geometry: { type: 'Point', coordinates: a },
+        }),
       )
       ;(m.getSource('brouillon') as GeoJSONSource).setData({ type: 'FeatureCollection', features: traits })
       const rayon = brouillon ? rayonBassin(brouillon.mode) : FORMULE.rayonAutres
       ;(m.getSource('zones') as GeoJSONSource).setData({
         type: 'FeatureCollection',
-        features: arrets.map((a) => cercle(a, rayon, ville.latitude)),
+        features: arrets.filter((_, i) => estStation[i]).map((a) => cercle(a, rayon, ville.latitude)),
       })
 
-      // Le nom de chaque arrêt posé, d'après le quartier ou la commune.
+      // Le nom de chaque station posée : celui de la station existante où elle s'accroche, sinon son quartier.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
-      nommerArrets(arrets, donnees.lieux).forEach((nom, i) => {
+      nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx).forEach((nom, i) => {
+        if (!nom) return
         const el = document.createElement('div')
         const etiquette = document.createElement('span')
         etiquette.className = 'nom-arret'

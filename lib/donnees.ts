@@ -4,6 +4,7 @@ import type { FeatureCollection, MultiLineString } from 'geojson'
 import { useEffect, useState } from 'react'
 
 import type { Lieux } from './lieux'
+import { stationsExistantes, type ReseauActuel, type StationExistante } from './reseau'
 import { preparerCarreaux, type Carreaux } from './modele'
 import { fleuvesDe, preparerTerrain, type ReliefBrut } from './terrain'
 import { VILLES, type IdVille } from './villes'
@@ -16,6 +17,10 @@ export interface Donnees {
   lieux: Lieux
   /** [lon, lat, métro (1) ou tram (0)] */
   arrets: number[][]
+  /** Le réseau actuel ligne par ligne, avec ses stations ; absent si le fichier manque. */
+  reseau: ReseauActuel | null
+  /** Ses stations, une par lieu, avec les lignes qui s'y arrêtent. */
+  stations: StationExistante[]
 }
 
 type Traces = Pick<Donnees, 'fond' | 'projets'>
@@ -58,16 +63,19 @@ export function chargerTraces(ville: IdVille) {
 
 export function chargerDonnees(ville: IdVille) {
   return memoriser(promesses, ville, async () => {
-    const [{ fond, projets }, carreauxBruts, arrets, lieux, relief] = await Promise.all([
+    const [{ fond, projets }, carreauxBruts, arrets, lieux, relief, reseau] = await Promise.all([
       chargerTraces(ville),
       lire<number[][]>(ville, 'carreaux'),
       lire<number[][]>(ville, 'arrets'),
       lire<Lieux>(ville, 'lieux'),
       // Sans relief relevé, le coût ne compte que la voie et les stations.
       lire<ReliefBrut>(ville, 'relief').catch(() => null),
+      // Sans les lignes une par une, la carte montre le réseau actuel sans le nom de ses stations.
+      lire<ReseauActuel>(ville, 'lignes').catch(() => null),
     ])
     const terrain = relief ? preparerTerrain(relief, fleuvesDe(fond)) : undefined
-    return { fond, projets, carreauxBruts, carreaux: preparerCarreaux(carreauxBruts, arrets, VILLES[ville], terrain), lieux, arrets }
+    const carreaux = preparerCarreaux(carreauxBruts, arrets, VILLES[ville], terrain)
+    return { fond, projets, carreauxBruts, carreaux, lieux, arrets, reseau, stations: stationsExistantes(reseau, carreaux.mx) }
   })
 }
 
