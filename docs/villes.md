@@ -78,7 +78,15 @@ Les coûts, les voyageurs par jour et les durées sont ceux publiés par les por
 
 Le même script compare notre modèle aux chiffres publiés. Pour les trams, les chiffres publiés dépassent souvent notre estimation, jusqu'au double : 45 000 voyageurs par jour contre 22 200 pour le T3 prolongé à La Bricarde, 45 900 contre 26 800 pour la ligne 5 niçoise, 40 000 contre 28 800 pour la ligne 4 ; le tram du 4-Septembre fait exception, avec 22 700 contre 29 600. De leur côté, les bus à haut niveau de service de la métropole marseillaise coûtent souvent dix fois moins que ce que notre modèle compte pour un site propre intégral, parce qu'ils réaménagent surtout des rues existantes. Le jeu garde les chiffres publiés, comme à Lyon : un projet du catalogue peut donc paraître plus rentable qu'une ligne tracée au même endroit.
 
+En Île-de-France, le catalogue compte treize projets en dehors du Grand Paris Express, déjà dessiné : le métro 1 jusqu'à Val de Fontenay, les prolongements des trams T1, T7, T8, T10 et T13, et quatre bus à haut niveau de service. Le T1 vers Val de Fontenay, le T7, le T13 et le Tzen 2 sont déjà en chantier : ce qui reste à payer n'étant publié nulle part, nous comptons leur coût total, et la fiche le dit. Le coût comprend les rames ou les bus quand la source les chiffre avec le projet.
+
 À Toulouse, Tisséo n'a décidé aucun autre projet que la ligne C, la connexion de la ligne B et la ligne Aéroport, déjà dessinées : sa programmation 2026-2038, présentée le 20 mai 2026, ne nomme aucune nouvelle ligne, et les projets à l'étude (Téléo prolongé, ligne B doublée) n'ont ni coût ni fréquentation publiés. Le catalogue toulousain ne compte donc que deux projets étudiés et chiffrés en 2013, puis abandonnés : le bus à haut niveau de service de l'Ouest et le Tram Canal.
+
+## Le réseau actuel sur la carte
+
+La carte montre chaque ligne de métro, de tram et de téléphérique avec ses stations, et le nom de la ligne à ses terminus. Les lignes, leurs branches et leurs stations viennent des relations d'OpenStreetMap (`scripts/lignes-osm.mjs`, qui écrit `public/data/<ville>/lignes.json`), avec les gares des lignes en chantier que la carte dessine déjà (la ligne C à Toulouse, le Grand Paris Express). En Île-de-France s'ajoutent les RER et les trains Transilien, avec le tracé de leurs voies. Partout, les gares et haltes ferroviaires ont leur propre symbole et leur nom quand on zoome. Une station posée tout près d'une station ou d'une gare existante s'y accroche ; à moins de 150 m, elle compte comme une correspondance.
+
+Ces données servent à l'affichage et aux correspondances, pas au calcul des voyageurs : le modèle ne compte comme déjà desservis que les habitants proches d'un arrêt de tram ou d'une station de métro (`public/data/<ville>/arrets.json`), pas ceux d'une gare. Une ligne tracée le long du RER gagne donc des voyageurs qu'il transporte déjà.
 
 ## Toulouse
 

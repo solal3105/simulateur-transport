@@ -100,6 +100,18 @@ const projets: Projet[] = [
     prolonge: 'tram-T7',
   },
   {
+    id: 'idf-t13-acheres',
+    nom: 'Tram T13 jusqu’à Achères',
+    genre: 'Nouvelle branche de tram-train en chantier',
+    description: '',
+    mode: 'tram',
+    // 361,2 M€ HT d’infrastructure (janvier 2013) et 84,6 M€ de rames.
+    cout: 446,
+    voyageurs: 17000,
+    duree: 2,
+    trace: 'idf-t13-acheres',
+  },
+  {
     id: 'idf-tzen-5',
     nom: 'Tzen 5, de Paris à Choisy-le-Roi',
     genre: 'Bus à haut niveau de service',

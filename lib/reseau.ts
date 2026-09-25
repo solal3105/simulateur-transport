@@ -39,6 +39,8 @@ export interface LigneExistante {
 
 export interface ReseauActuel {
   lignes: LigneExistante[]
+  /** Les gares et haltes ferroviaires du territoire, pour qu'on les repère et qu'on s'y accroche. */
+  gares?: { nom: string; pos: [number, number] }[]
 }
 
 /** Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train. */
@@ -51,6 +53,8 @@ export interface StationExistante {
   lignes: { id: string; mode: ModeExistant; ref: string; ouverture?: string }[]
   /** Les lignes dont elle est un terminus : on peut les prolonger d'ici. */
   terminus: string[]
+  /** Une gare ferroviaire, qu'elle soit desservie ou non par les lignes affichées. */
+  gare?: boolean
 }
 
 const MY = 111320
@@ -119,6 +123,12 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
       if (bouts.has(cle(s)) && !station.terminus.includes(l.id)) station.terminus.push(l.id)
       if (!station.nom && s.nom) station.nom = s.nom
     }
+  }
+  // Les gares : une station du même nom tout près en devient une, sinon la gare s'ajoute seule.
+  for (const g of reseau.gares ?? []) {
+    const station = retrouver(g)
+    if (station) station.gare = true
+    else stations.push({ nom: g.nom, pos: g.pos, lignes: [], terminus: [], gare: true })
   }
   return stations
 }

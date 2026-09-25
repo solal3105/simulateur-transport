@@ -475,6 +475,146 @@ const projets: Projet[] = [
     ],
   },
   {
+    id: 'idf-t13-acheres',
+    nom: 'Tram T13 jusqu’à Achères',
+    genre: 'Nouvelle branche de tram-train en chantier',
+    description:
+      'Le tram-train T13, qui relie Saint-Cyr-l’École à Saint-Germain-en-Laye, reçoit une seconde branche d’environ 10 km : partie de Lisière Pereire, elle traverse la forêt de Saint-Germain sur l’ancienne Grande Ceinture, parcourt Poissy en tramway, puis longe les voies ferrées jusqu’à la gare d’Achères-Ville. Ses quatre nouvelles stations desservent le centre de Poissy et sa gare, l’écoquartier Rouget-de-Lisle et la gare d’Achères-Ville, sur le RER A.',
+    mode: 'tram',
+    // 361,2 M€ HT d’infrastructure (janvier 2013) et 84,6 M€ de rames.
+    cout: 446,
+    voyageurs: 17000,
+    duree: 2,
+    trace: 'idf-t13-acheres',
+    parcours: [
+      [
+        { nom: 'Lisière Pereire', pos: [2.07298, 48.90309] },
+        { nom: 'Poissy Gambetta', pos: [2.05023, 48.92735] },
+        { nom: 'Poissy RER', pos: [2.04394, 48.93259] },
+        { nom: 'Poissy ZAC', pos: [2.05632, 48.93978] },
+        { nom: 'Achères-Ville RER', pos: [2.07735, 48.9684] },
+      ],
+    ],
+    statut:
+      'Déclaré d’utilité publique en 2018 et en travaux depuis fin 2024 : Île-de-France Mobilités prévoit la mise en service en 2028.',
+    precisions: [
+      'Le coût additionne 361,2 M€ hors taxes d’infrastructure, aux conditions de janvier 2013, et 84,6 M€ de rames. En euros courants, l’État annonce 502 M€ pour l’infrastructure seule. Une partie est déjà engagée depuis le début des travaux, mais ce qui reste à payer n’est pas publié : nous comptons le coût total.',
+      'Les 17 000 voyageurs par jour portent sur le seul prolongement ; toute la ligne en compterait 33 000.',
+      'Les trams pour Achères partiront de Saint-Cyr-l’École : aucun ne partira de la gare de Saint-Germain-en-Laye.',
+      'Les noms des stations sont provisoires.',
+    ],
+    sources: [
+      {
+        titre:
+          'Île-de-France Mobilités, page du projet Tram T13, prolongement à Achères : 17 000 voyageurs quotidiens attendus, 10 km, quatre stations créées, calendrier',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, page Les travaux : travaux d’infrastructure de 2026 à 2028, essais et marche à blanc en 2028 avant la mise en service',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/travaux-t13',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, page Les stations et le tram : Lisière Pereire, Poissy Gambetta, Poissy RER, Poissy ZAC et Achères-Ville RER (noms provisoires), rames supplémentaires pour le prolongement',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/cinq-stations-entre-saint-germain-en-laye-et-acheres',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, page Le tracé : parcours dans la forêt de Saint-Germain, à Poissy et à Achères, emplacement des stations',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/parcourir-le-trace',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, page Poissy, les zones desservies : Poissy Gambetta sur l’avenue de Versailles au square Erard Prieur, Poissy RER au sud de la place de l’Europe, passage vers Poissy ZAC depuis la piscine Saint-Exupéry',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/les-zones-desservies',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, page du secteur Saint-Exupéry : rampe depuis la RD30 et accès depuis la piscine vers la future station Poissy ZAC, utilisés pour placer la station',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/st-exupery-bolland',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, info travaux du 17 octobre 2025 sur le futur terminus avenue de Conflans à Achères, avec le plan de la zone de travaux utilisé pour placer la station Achères-Ville RER',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/actualites/t13-it-travaux-prepa-acheres-oct2025',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre: 'Île-de-France Mobilités, page La démarche environnementale : autorisation environnementale accordée le 27 novembre 2024',
+        url: 'https://www.iledefrance-mobilites.fr/le-reseau/projets/tram-t13-prolongement/la-demarche-environnementale',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Île-de-France Mobilités, communiqué du 16 juin 2025, coup d’envoi des travaux : fin des travaux prévue fin 2027, ligne opérationnelle courant 2028, 33 000 voyageurs par jour sur la ligne, financement par l’État (21 %), la Région (49 %) et le Département des Yvelines (30 %)',
+        url: 'https://presse.iledefrance-mobilites.fr/prolongement-du-tram-t13-jusqua-acheres-coup-denvoi-des-travaux-damenagement/?lang=fr',
+      },
+      {
+        titre:
+          'DRIEAT Île-de-France, Prolongement du Tram T13 : les travaux vers Achères sont officiellement lancés, 27 novembre 2025 : 10,5 km, 33 000 voyageurs par jour à terme, coût de 502 M€, mise en service prévue à l’été 2028',
+        url: 'https://www.drieat.ile-de-france.developpement-durable.gouv.fr/prolongement-du-tram-t13-les-travaux-vers-acheres-a13251.html',
+      },
+      {
+        titre:
+          'Autorité environnementale (IGEDD), avis délibéré n° 2024-18 du 25 avril 2024 sur le tram T13 phase 2 : 9,92 km et quatre stations, 361,2 M€ HT d’infrastructure aux conditions de janvier 2013 et 84,6 M€ HT de rames, DUP du 6 décembre 2018 prorogée le 9 juin 2023, 38 000 voyageurs par jour ouvrable sur la ligne dont 24 000 vers Achères, fréquentation de la première phase',
+        url: 'https://www.igedd.developpement-durable.gouv.fr/IMG/pdf/01__240425_tramway_t13_phase_2_delibere_cle0ddabe.pdf',
+        pages: 'p. 5 (tracé et stations), p. 8 (coût et calendrier), p. 10 (DUP et prorogation), p. 23 (trafic)',
+      },
+      {
+        titre:
+          'Région Île-de-France, rapport CP 2024-224 du 27 septembre 2024 : avance de 30 M€ par la Région à la place du Département, et annexe 3, protocole de financement du T13 phase 2 (coût d’objectif de 361,24 M€ aux conditions de janvier 2013, 461,8 M€ courants pour les travaux et le foncier, 63,6 M€ courants déjà engagés pour les études)',
+        url: 'https://www.iledefrance.fr/actes/deliberations/CP2024-224RAP.pdf',
+        pages: 'p. 3, puis p. 70 à 73 du PDF',
+      },
+      {
+        titre:
+          'Commission d’enquête E24000029/78, rapport et conclusions de l’enquête publique environnementale de l’été 2024 : mise en service à la mi-2028, 21 000 voyageurs par jour sur le tronc commun et 38 000 sur les deux branches, 361,2 M€ HT hors rames, pas de trajet direct entre Achères et Saint-Germain-en-Laye',
+        url: 'https://www.cnce.fr/upload/enquiry/e24000029-78-1-rapport-et-conclusions-66ec6c747e98f365879557.pdf',
+        pages: 'p. 8 sur 168',
+      },
+      {
+        titre:
+          'Département des Yvelines, page Tram 13 Express, modifiée le 25 octobre 2024 : phase 2 estimée à 363 M€ valeur 2013, soit 502 M€ courants au stade des études de projet, dont 30 % pour le Département',
+        url: 'https://www.yvelines.fr/cadre-de-vie/deplacements/transports/tram-13-express/',
+        pages: 'page web consultée le 25 septembre 2026',
+      },
+      {
+        titre:
+          'Communauté urbaine Grand Paris Seine & Oise, convention avec Île-de-France Mobilités annexée à la délibération du 10 avril 2025 : arrêté de DUP n° 78-2018-12-06-013 du 6 décembre 2018, prorogation n° 78-2023-06-09-00003 du 9 juin 2023, tracé à Poissy et Achères',
+        url: 'https://gpseo.fr/sites/gpseo/files/document/2025-04/cc_2025-04-10_23.1_annexe-1.pdf',
+        pages: 'p. 2',
+      },
+      {
+        titre:
+          'Ville, Rail & Transports, 16 juillet 2026 : Île-de-France Mobilités commande à CAF quinze tram-trains pour le prolongement du T13, commande approuvée le 2 juillet 2026',
+        url: 'https://www.ville-rail-transports.com/ferroviaire/idfm-commande-a-caf-15-trams-trains-pour-lextension-du-t13/',
+      },
+      {
+        titre: 'Le Rail, 27 août 2026 : CAF fournira quinze tram-trains pour la ligne T13, contrat de plus de 150 M€',
+        url: 'https://lerail.com/news/114065-caf-fournira-15-tram-trains-pour-la-ligne-t13-en-%C3%AEle-de-france',
+      },
+      {
+        titre: 'OpenStreetMap, nœud de la station existante Lisière Pereire (2315855073)',
+        url: 'https://www.openstreetmap.org/node/2315855073',
+      },
+      {
+        titre: 'OpenStreetMap, nœud en chantier de la station Poissy Gambetta (3263983289)',
+        url: 'https://www.openstreetmap.org/node/3263983289',
+      },
+      {
+        titre: 'OpenStreetMap, nœud en chantier de la station Poissy RER (257399905)',
+        url: 'https://www.openstreetmap.org/node/257399905',
+      },
+    ],
+  },
+  {
     id: 'idf-tzen-5',
     nom: 'Tzen 5, de Paris à Choisy-le-Roi',
     genre: 'Bus à haut niveau de service',

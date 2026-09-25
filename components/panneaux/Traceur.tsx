@@ -93,7 +93,7 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
           ? { ...c, station: { ...c.station, lignes: c.station.lignes.filter((l) => l.id !== trace.prolonge) } }
           : c,
       )
-      .filter((c) => c.station.lignes.length)
+      .filter((c) => c.station.lignes.length || c.station.gare)
     const depart = trace.arrets[0]
     const terminus = depart && !trace.prolonge ? stationProche(donnees.stations, depart, mx, 60) : null
     const aProlonger = terminus?.terminus
@@ -125,7 +125,9 @@ function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
 /** Les correspondances d'un tracé en une phrase : « métro A et D à Bellecour, tram T1 à Perrache ». */
 function PhraseCorrespondances({ liste }: { liste: NonNullable<ReturnType<typeof useReseauDuTrace>>['liste'] }) {
   if (!liste.length) return null
-  const morceaux = liste.map((c) => `${direLignes(c.station.lignes)} à ${c.station.nom}`)
+  const morceaux = liste.map((c) =>
+    c.station.lignes.length ? `${direLignes(c.station.lignes)} à ${c.station.nom}` : `la gare de ${c.station.nom}`,
+  )
   return (
     <p className="flex items-start gap-2 rounded-2xl bg-sable px-3.5 py-2.5 text-[13.5px] leading-snug">
       <Icone nom="voyageurs" taille={17} epaisseur={2.3} className="mt-0.5 shrink-0" />
