@@ -7,12 +7,13 @@ import { communauteActive } from '@/lib/communaute'
 import { useJeu, useVille } from '@/lib/store'
 import { adresseReseaux } from '@/lib/villes'
 
+import { ouvrirRetour } from '../partie/Retour'
 import { Bouton, BoutonLien } from '../ui'
 import { Panneau } from './Panneau'
 
 /**
- * Le menu de la partie : ce qu'on est en train de faire, les réseaux publiés et l'explication des estimations
- * et du budget. Le retour à l'accueil a son propre bouton, la maison, dans l'en-tête.
+ * Le menu de la partie : ce qu'on est en train de faire, les réseaux publiés, l'explication des estimations et
+ * du budget, et le signalement d'un bug ou d'une amélioration. Le retour à l'accueil a son propre bouton, la maison, dans l'en-tête.
  */
 export function Menu() {
   const { mandat, fermer, ouvrir, libre } = useJeu()
@@ -42,6 +43,17 @@ export function Menu() {
         </Bouton>
         <Bouton genre="contour" iconeAGauche="info" className="justify-start" onClick={() => ouvrir({ type: 'budget' })}>
           Comment nous calculons votre budget
+        </Bouton>
+        <Bouton
+          genre="contour"
+          iconeAGauche="bug"
+          className="justify-start"
+          onClick={() => {
+            fermer()
+            ouvrirRetour()
+          }}
+        >
+          Signaler un bug ou proposer une amélioration
         </Bouton>
       </div>
       <Link

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 
+import { exigerAcces } from '@/lib/acces'
 import { libre as libreDuMandat } from '@/lib/budget'
 import { catalogueDe, MANDATS, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
@@ -20,6 +21,7 @@ import { Carte } from '../carte/Carte'
 import { useCouleursReseau } from '../couleurs'
 import { EnTetePublication, PiedPublication, type Publication } from '../communaute/EnTetePublication'
 import { Publier } from '../communaute/Publier'
+import { ouvrirRetour } from '../partie/Retour'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
 import { Comparaison } from './Comparaison'
 
@@ -54,20 +56,23 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const fermerPublication = useCallback(() => setPublier(false), [])
   const [envoi, setEnvoi] = useState<string | null>(null)
 
-  // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur.
-  const quitterPartage = () => {
-    if (!aUnePartie) jeu.commencer(ville.id, libre)
-    quitter?.()
-  }
-  const reprendre = () => {
-    if (!partage) return
-    if (publication) {
-      jeu.reprendre(partage, { id: publication.id, titre: publication.titre, pseudo: publication.auteur?.pseudo ?? '' })
-      // La reprise compte pour le réseau publié ; si le serveur ne répond pas, la partie commence quand même.
-      void compterReprise(publication.id).catch(() => {})
-    } else jeu.reprendre(partage)
-    quitter?.()
-  }
+  // On quitte le réseau reçu sans toucher à la partie enregistrée du visiteur. Jouer demande d'être entré dans l'accès
+  // anticipé : l'écran d'entrée passe d'abord, une fois.
+  const quitterPartage = () =>
+    exigerAcces(() => {
+      if (!aUnePartie) jeu.commencer(ville.id, libre)
+      quitter?.()
+    }, ville.id)
+  const reprendre = () =>
+    exigerAcces(() => {
+      if (!partage) return
+      if (publication) {
+        jeu.reprendre(partage, { id: publication.id, titre: publication.titre, pseudo: publication.auteur?.pseudo ?? '' })
+        // La reprise compte pour le réseau publié ; si le serveur ne répond pas, la partie commence quand même.
+        void compterReprise(publication.id).catch(() => {})
+      } else jeu.reprendre(partage)
+      quitter?.()
+    }, ville.id)
 
   // Les projets du catalogue de ce réseau qui ont un tracé : ceux qu'on montre sur la carte et qu'on compte.
   const avecTrace = useMemo(() => catalogueDe(ville.id).filter((p) => p.trace), [ville])
@@ -379,7 +384,12 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               {aUnePartie ? 'Reprendre ma partie' : 'Commencer ma propre partie'}
             </Bouton>
           ) : (
-            <Suite ville={ville} libre={libre} publie={jeu.publie !== null} />
+            <>
+              <Bouton genre="contour" iconeAGauche="bug" onClick={ouvrirRetour} className="justify-start">
+                Signaler un bug ou proposer une amélioration
+              </Bouton>
+              <Suite ville={ville} libre={libre} publie={jeu.publie !== null} />
+            </>
           )}
         </div>
 
