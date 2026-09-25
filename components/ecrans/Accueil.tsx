@@ -192,6 +192,20 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
 }
 
 /**
+ * La demande d'accès anticipé, à compléter avant de l'envoyer : les places sont comptées, et nous ne donnons
+ * l'accès qu'à ceux qui se présentent, disent ce qu'ils attendent du jeu et s'engagent à nous faire leurs retours.
+ */
+const DEMANDE_ACCES = [
+  'Bonjour,',
+  'Je voudrais tester le Simulateur transport pendant l’accès anticipé.',
+  '1. Qui je suis (usager, étudiant, professionnel des transports, élu…) :\n',
+  '2. Le réseau que je veux construire (Lyon, Toulouse, Aix-Marseille-Provence, Nice ou Île-de-France) :\n',
+  '3. Pourquoi ce jeu m’intéresse, et ce que je compte en faire :\n',
+  '4. En échange de l’accès, je m’engage à vous envoyer mes retours dans les deux semaines : oui / non',
+  'Merci !',
+].join('\n\n')
+
+/**
  * Le mot de passe de l'accès anticipé, demandé au premier clic pour jouer. Celui qui ne l'a pas peut nous
  * écrire pour le demander, ou revenir à l'accueil.
  */
@@ -199,13 +213,7 @@ function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () 
   const [mot, setMot] = useState('')
   const [etat, setEtat] = useState<'saisie' | 'envoi' | 'faux' | 'erreur'>('saisie')
   const [adresse, setAdresse] = useState<string | null>(null)
-  const demander = () =>
-    setAdresse(
-      ouvrirMessagerie(
-        'demande d’accès anticipé',
-        'Bonjour,\n\nJ’aimerais essayer le Simulateur transport en accès anticipé. Pourriez-vous m’envoyer le mot de passe ?\n\nMerci !',
-      ),
-    )
+  const demander = () => setAdresse(ouvrirMessagerie('demande d’accès anticipé', DEMANDE_ACCES))
   const envoyer = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!mot.trim() || etat === 'envoi') return
@@ -259,7 +267,8 @@ function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () 
           <span className="flex flex-col gap-0.5">
             <span className="text-[15.5px] leading-tight font-black">Pas encore de mot de passe ?</span>
             <span className="text-[13.5px] leading-snug font-semibold opacity-90">
-              Demandez votre accès anticipé : votre messagerie s’ouvre avec un message déjà écrit, il ne reste qu’à l’envoyer.
+              Les places sont limitées : nous les ouvrons aux joueurs prêts à nous envoyer leurs retours. Votre messagerie s’ouvre avec un
+              message à compléter en quatre points, et seules les demandes complètes sont étudiées.
             </span>
           </span>
         </div>
@@ -268,7 +277,9 @@ function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () 
         </Bouton>
         {adresse ? (
           <p className="text-[13px] leading-snug opacity-90" aria-live="polite">
-            Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span>.
+            Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span> en disant qui vous
+            êtes, le réseau que vous voulez construire, pourquoi le jeu vous intéresse, et si vous vous engagez à nous envoyer vos retours
+            dans les deux semaines.
           </p>
         ) : null}
       </div>
