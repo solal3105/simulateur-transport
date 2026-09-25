@@ -150,7 +150,7 @@ export function Devoilement({
               </Bouton>
               {acces ? null : (
                 <p className="text-center text-[13px] leading-snug text-gris lg:text-left">
-                  Il vous faudra le mot de passe de l’accès anticipé.
+                  Il vous faudra laisser votre adresse électronique, une seule fois.
                 </p>
               )}
             </div>

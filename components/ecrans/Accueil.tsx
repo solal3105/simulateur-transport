@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { essayerMotDePasse, useAcces } from '@/lib/acces'
+import { exigerAcces, useAcces } from '@/lib/acces'
 import { libre } from '@/lib/budget'
 import { nombreProjets } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
@@ -17,7 +17,6 @@ import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILL
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
 import { useCouleursReseau } from '../couleurs'
-import { ouvrirMessagerie } from '../explications/Ecrire'
 import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
 import { Devoilement } from './Devoilement'
 
@@ -191,109 +190,6 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
   )
 }
 
-/**
- * La demande d'accès anticipé, à compléter avant de l'envoyer : les places sont comptées, et nous ne donnons
- * l'accès qu'à ceux qui se présentent, disent ce qu'ils attendent du jeu et s'engagent à nous faire leurs retours.
- */
-const DEMANDE_ACCES = [
-  'Bonjour,',
-  'Je voudrais tester le Simulateur transport pendant l’accès anticipé.',
-  '1. Qui je suis (usager, étudiant, professionnel des transports, élu…) :\n',
-  '2. Le réseau que je veux construire (Lyon, Toulouse, Aix-Marseille-Provence, Nice ou Île-de-France) :\n',
-  '3. Pourquoi ce jeu m’intéresse, et ce que je compte en faire :\n',
-  '4. En échange de l’accès, je m’engage à vous envoyer mes retours dans les deux semaines : oui / non',
-  'Merci !',
-].join('\n\n')
-
-/**
- * Le mot de passe de l'accès anticipé, demandé au premier clic pour jouer. Celui qui ne l'a pas peut nous
- * écrire pour le demander, ou revenir à l'accueil.
- */
-function FormulaireAcces({ ouvrir, annuler }: { ouvrir: () => void; annuler: () => void }) {
-  const [mot, setMot] = useState('')
-  const [etat, setEtat] = useState<'saisie' | 'envoi' | 'faux' | 'erreur'>('saisie')
-  const [adresse, setAdresse] = useState<string | null>(null)
-  const demander = () => setAdresse(ouvrirMessagerie('demande d’accès anticipé', DEMANDE_ACCES))
-  const envoyer = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!mot.trim() || etat === 'envoi') return
-    setEtat('envoi')
-    const resultat = await essayerMotDePasse(mot)
-    if (resultat === 'ok') ouvrir()
-    else setEtat(resultat)
-  }
-  return (
-    <form onSubmit={envoyer} aria-labelledby="acces-titre" className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <p id="acces-titre" className="text-[16px] font-black">
-          Le jeu est en accès anticipé
-        </p>
-        <p className="text-[14px] leading-snug font-semibold opacity-90">
-          Entrez le mot de passe pour jouer. Ce navigateur s’en souviendra ensuite.
-        </p>
-      </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          type="password"
-          value={mot}
-          onChange={(e) => {
-            setMot(e.target.value)
-            if (etat === 'faux' || etat === 'erreur') setEtat('saisie')
-          }}
-          aria-label="Mot de passe de l’accès anticipé"
-          aria-invalid={etat === 'faux'}
-          aria-describedby="acces-erreur"
-          autoComplete="off"
-          autoFocus
-          placeholder="Mot de passe"
-          className="min-h-14 flex-1 rounded-full bg-white px-5 text-[16px] font-bold text-encre outline-none placeholder:font-semibold placeholder:text-muet focus-visible:ring-4 focus-visible:ring-white/40"
-        />
-        <Bouton genre="blanc" icone="fleche" taille="grand" type="submit" disabled={etat === 'envoi'} className="sm:w-auto">
-          {etat === 'envoi' ? 'Vérification' : 'Entrer dans le jeu'}
-        </Bouton>
-      </div>
-      <p id="acces-erreur" aria-live="polite" className="text-[14px] leading-snug font-extrabold empty:hidden">
-        {etat === 'faux'
-          ? 'Ce n’est pas le bon mot de passe.'
-          : etat === 'erreur'
-            ? 'Nous n’avons pas pu vérifier le mot de passe. Réessayez dans un instant.'
-            : ''}
-      </p>
-      <div className="flex flex-col gap-3 rounded-2xl bg-white/15 p-4">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-rouge">
-            <Icone nom="lettre" taille={20} epaisseur={2.2} />
-          </span>
-          <span className="flex flex-col gap-0.5">
-            <span className="text-[15.5px] leading-tight font-black">Pas encore de mot de passe ?</span>
-            <span className="text-[13.5px] leading-snug font-semibold opacity-90">
-              Les places sont limitées : nous les ouvrons aux joueurs prêts à nous envoyer leurs retours. Votre messagerie s’ouvre avec un
-              message à compléter en quatre points, et seules les demandes complètes sont étudiées.
-            </span>
-          </span>
-        </div>
-        <Bouton genre="contourBlanc" iconeAGauche="lettre" onClick={demander} className="w-full sm:w-auto sm:self-start">
-          Demander mon accès anticipé
-        </Bouton>
-        {adresse ? (
-          <p className="text-[13px] leading-snug opacity-90" aria-live="polite">
-            Si votre messagerie ne s’ouvre pas, écrivez à <span className="font-extrabold select-all">{adresse}</span> en disant qui vous
-            êtes, le réseau que vous voulez construire, pourquoi le jeu vous intéresse, et si vous vous engagez à nous envoyer vos retours
-            dans les deux semaines.
-          </p>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        onClick={annuler}
-        className="min-h-10 self-center text-[14px] font-extrabold underline decoration-white/50 underline-offset-3 hover:decoration-white lg:self-start"
-      >
-        Revenir
-      </button>
-    </form>
-  )
-}
-
 /** Le bouton qui ouvre le dévoilement de tout ce que le jeu permet. */
 function BoutonDevoilement({ ouvrir }: { ouvrir: () => void }) {
   return (
@@ -393,10 +289,10 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
   const ici = enregistree?.ville === choix
   const reseauEnregistre = enregistree ? VILLES[enregistree.ville] : null
   const choisirMode = (libre: boolean) => (enregistree ? setEtape({ ville: choix, libre }) : commencer(choix, libre))
-  // Tant que le jeu est en accès anticipé, toute action qui mène à une partie passe d'abord par le mot de passe.
+  // Tant que le jeu est en accès anticipé, toute action qui mène à une partie passe d'abord, une fois, par l'écran
+  // d'entrée : l'adresse du joueur et son engagement à signaler bugs et améliorations.
   const acces = useAcces()
-  const [enAttente, setEnAttente] = useState<(() => void) | null>(null)
-  const avecAcces = (action: () => void) => (acces ? action() : setEnAttente(() => action))
+  const avecAcces = (action: () => void) => exigerAcces(action, choix)
   const [devoilement, setDevoilement] = useState(false)
 
   // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
@@ -486,15 +382,7 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
           variants={cascade.enfant}
           className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-4 bg-rouge px-6 pt-2 pb-[max(12px,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-linear-to-t before:from-rouge before:to-transparent lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:before:hidden"
         >
-          {enAttente && !acces ? (
-            <FormulaireAcces
-              ouvrir={() => {
-                enAttente()
-                setEnAttente(null)
-              }}
-              annuler={() => setEnAttente(null)}
-            />
-          ) : choixMode ? (
+          {choixMode ? (
             <ChoixMode pourLignes={t.pourLignes} choisir={choisirMode} annuler={() => setEtape(null)} />
           ) : confirmer && enregistree && reseauEnregistre ? (
             <div role="group" aria-labelledby="remplacer-partie" className="flex flex-col gap-3 rounded-2xl bg-white/12 p-4">
@@ -555,24 +443,18 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
                   Sans compte : votre partie reste dans ce navigateur.
                 </p>
               ) : (
-                <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] leading-snug font-semibold lg:justify-start">
+                <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[13px] leading-snug font-semibold lg:justify-start lg:text-left">
                   <span className="rounded-full bg-white/20 px-2.5 py-1 text-[12px] font-black tracking-wide uppercase">
                     Accès anticipé
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setEnAttente(() => () => setEtape({ ville: choix }))}
-                    className="min-h-8 font-extrabold underline decoration-white/50 underline-offset-3 hover:decoration-white"
-                  >
-                    Obtenir le mot de passe
-                  </button>
+                  Ouvert à tous : en échange, signalez-nous les bugs et les améliorations.
                 </p>
               )}
             </div>
           )}
         </motion.div>
 
-        {choixMode || confirmer || enAttente ? null : (
+        {choixMode || confirmer ? null : (
           <motion.nav
             variants={cascade.enfant}
             aria-label="Pour aller plus loin"

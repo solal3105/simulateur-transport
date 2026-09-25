@@ -71,22 +71,34 @@ export default function Page() {
         <Section id="hebergement" titre="Où il est hébergé">
           <p>Le site est hébergé par Netlify, Inc., 101 2nd Street, San Francisco, CA 94105, États-Unis.</p>
           <p>
-            Les réseaux publiés par les joueurs sont enregistrés dans une base de données Supabase, hébergée à Paris. Supabase est une
-            société de Singapour : Supabase Pte. Ltd., 65 Chulia Street #38-02/03, OCBC Centre, Singapore 049513.
+            Les adresses électroniques des joueurs, leurs signalements et les réseaux qu’ils publient sont enregistrés dans une base de
+            données Supabase, hébergée à Paris. Supabase est une société de Singapour : Supabase Pte. Ltd., 65 Chulia Street #38-02/03, OCBC
+            Centre, Singapore 049513.
           </p>
         </Section>
 
         <Section id="donnees" titre="Ce que nous gardons">
           <p>
-            Vous jouez sans compte. Votre partie et votre accès anticipé sont enregistrés dans votre navigateur seulement : ils ne nous
-            parviennent pas, et vous les effacez en effaçant les données du site dans votre navigateur.
+            Vous jouez sans compte ni mot de passe. Votre partie reste dans votre navigateur : elle ne nous parvient que si vous nous
+            signalez un bug ou une amélioration, et vous l’effacez en effaçant les données du site dans votre navigateur.
+          </p>
+          <p>
+            Pendant l’accès anticipé, avant votre première partie, nous vous demandons votre adresse électronique et, si vous le voulez, ce
+            que vous faites : usager, étudiant, professionnel, élu ou journaliste. Nous la gardons avec la date et le réseau que vous
+            regardiez, pour revenir vers vous sur un signalement et vous prévenir des nouvelles versions du jeu. Elle n’est jamais publiée
+            ni partagée, et nous l’effaçons à la fin de l’accès anticipé, ou avant si vous nous le demandez.
+          </p>
+          <p>
+            Quand vous nous signalez un bug ou une amélioration, nous gardons votre message avec l’écran où vous étiez, votre partie en
+            cours, la taille de votre fenêtre et le nom de votre navigateur, pour voir ce que vous avez vu. Le signalement est rattaché à
+            votre adresse.
           </p>
           <p>
             Quand vous publiez un réseau, nous gardons ce que vous choisissez de publier : le réseau, son titre, sa phrase de présentation
             et votre pseudo, avec la date. Votre navigateur reçoit une clé secrète tirée au hasard, dont nous ne gardons qu’une empreinte :
-            elle sert à reconnaître l’auteur d’un réseau et à compter une seule fois un soutien, une reprise ou un signalement. Nous ne
-            demandons ni adresse électronique, ni nom, ni mot de passe. Un réseau reste en ligne jusqu’à ce que son auteur le retire, depuis
-            sa page. Un réseau signalé trois fois est masqué.
+            elle sert à reconnaître l’auteur d’un réseau, à compter une seule fois un soutien, une reprise ou un signalement de réseau, et à
+            rattacher vos signalements de bugs à votre adresse. Un réseau reste en ligne jusqu’à ce que son auteur le retire, depuis sa
+            page. Un réseau signalé trois fois est masqué.
           </p>
           <p>
             Un lien de partage contient votre réseau dans l’adresse elle-même : quand quelqu’un l’ouvre, nous recalculons son image
@@ -109,9 +121,9 @@ export default function Page() {
 
         <Section id="droits" titre="Vos droits">
           <p>
-            Vous pouvez nous demander ce que nous gardons à votre sujet, le faire corriger ou supprimer, par exemple un réseau publié depuis
-            un navigateur que vous n’avez plus. Écrivez-nous avec le bouton plus haut. Si notre réponse ne vous convient pas, vous pouvez
-            vous adresser à la CNIL, sur cnil.fr.
+            Vous pouvez nous demander ce que nous gardons à votre sujet, le faire corriger ou supprimer, par exemple votre adresse
+            électronique ou un réseau publié depuis un navigateur que vous n’avez plus. Écrivez-nous avec le bouton plus haut. Si notre
+            réponse ne vous convient pas, vous pouvez vous adresser à la CNIL, sur cnil.fr.
           </p>
         </Section>
 

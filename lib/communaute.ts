@@ -177,6 +177,22 @@ export const compterReprise = (reseau: string) => appeler<{ ok: true }>('reprend
 export const signaler = (reseau: string, motif: Motif) => appeler<{ ok: true }>('signaler', { reseau, motif })
 export const retirer = (reseau: string) => appeler<{ ok: true }>('retirer', { reseau })
 
+/** Inscrit ce navigateur à l'accès anticipé : l'adresse du joueur part dans notre base, rattachée à sa clé. */
+export const inscrireAcces = (donnees: { email: string; profil?: string; ville: IdVille }) => appeler<{ ok: true }>('inscrire', donnees)
+
+/** Un bug ou une amélioration signalés depuis le jeu, avec de quoi les reproduire. */
+export interface Retour {
+  type: 'bug' | 'amelioration'
+  texte: string
+  /** Où en était le joueur : l'écran, le panneau ouvert, le réseau, la taille de la fenêtre. */
+  contexte: Record<string, unknown>
+  partie: PartieCompacte | null
+  navigateur: string
+}
+
+/** Envoie un bug ou une amélioration ; le serveur répond par son numéro. */
+export const envoyerRetour = (retour: Retour) => appeler<{ id: number }>('retour', { ...retour })
+
 /**
  * Les chiffres d'en-tête des réseaux publiés d'une ville : combien il y en a, et celui qui gagne le plus de
  * voyageurs, pour montrer le record à battre.

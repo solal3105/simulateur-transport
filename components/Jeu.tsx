@@ -10,8 +10,10 @@ import { adresseAccueil, VILLES, type IdVille } from '@/lib/villes'
 
 import { Accueil } from './ecrans/Accueil'
 import { Bilan } from './ecrans/Bilan'
+import { EntreeAcces } from './ecrans/EntreeAcces'
 import { FinMandat } from './ecrans/FinMandat'
 import { Partie } from './partie/Partie'
+import { Retour } from './partie/Retour'
 
 const abonnerAdresse = (changer: () => void) => {
   window.addEventListener('hashchange', changer)
@@ -44,8 +46,8 @@ export function Jeu({ ville }: { ville?: IdVille }) {
     const code = new URLSearchParams(window.location.hash.slice(1)).get('r')
     const lecture = code ? decoderPartie(code).then(setPartage) : Promise.resolve()
     Promise.all([Promise.resolve(useJeu.persist.rehydrate()), lecture]).then(() => {
-      // Sans l'accès anticipé, une partie enregistrée ne s'ouvre pas : l'accueil passe devant, et demande
-      // le mot de passe avant de la reprendre.
+      // Sans l'entrée dans l'accès anticipé, une partie enregistrée ne s'ouvre pas : l'accueil passe devant, et
+      // demande l'adresse du joueur avant de la reprendre.
       if (!aAcces() && useJeu.getState().ecran !== 'accueil') useJeu.getState().allerAccueil()
       setPret(true)
     })
@@ -95,32 +97,44 @@ export function Jeu({ ville }: { ville?: IdVille }) {
     setPartage(null)
   }
 
-  if (pret && partage) return <Bilan partage={partage} quitter={quitter} />
-  if (!pret && lienPartage) {
-    return (
-      <main className="grid min-h-dvh place-items-center bg-sable">
-        <p className="text-sm font-bold text-muet" aria-live="polite">
-          Ouverture du réseau partagé
-        </p>
-      </main>
-    )
-  }
-  // Sans ville dans l'adresse, l'accueil propose celle de la dernière partie, Lyon pour une première visite.
-  if (!pret || ecran === 'accueil') return <Accueil villeInitiale={ville ?? (pret ? villePartie : 'lyon')} />
-  if (autreVille || pause) {
-    const reprendre = () => {
-      if (window.location.pathname !== adresseAccueil(villePartie)) window.history.replaceState(null, '', adresseAccueil(villePartie))
-      setReprise(true)
-      useJeu.getState().quitterAccueil()
+  return (
+    <>
+      {ecranAffiche()}
+      {/* L'écran d'entrée dans l'accès anticipé et le signalement d'un bug ou d'une amélioration s'ouvrent par-dessus
+          n'importe quel écran. */}
+      <EntreeAcces />
+      <Retour />
+    </>
+  )
+
+  function ecranAffiche() {
+    if (pret && partage) return <Bilan partage={partage} quitter={quitter} />
+    if (!pret && lienPartage) {
+      return (
+        <main className="grid min-h-dvh place-items-center bg-sable">
+          <p className="text-sm font-bold text-muet" aria-live="polite">
+            Ouverture du réseau partagé
+          </p>
+        </main>
+      )
     }
-    return (
-      <Accueil
-        villeInitiale={pause ? villePartie : ville}
-        partieEnCours={{ ville: villePartie, terminee: ecran === 'bilan', publiee: publie !== null, reprendre }}
-      />
-    )
+    // Sans ville dans l'adresse, l'accueil propose celle de la dernière partie, Lyon pour une première visite.
+    if (!pret || ecran === 'accueil') return <Accueil villeInitiale={ville ?? (pret ? villePartie : 'lyon')} />
+    if (autreVille || pause) {
+      const reprendre = () => {
+        if (window.location.pathname !== adresseAccueil(villePartie)) window.history.replaceState(null, '', adresseAccueil(villePartie))
+        setReprise(true)
+        useJeu.getState().quitterAccueil()
+      }
+      return (
+        <Accueil
+          villeInitiale={pause ? villePartie : ville}
+          partieEnCours={{ ville: villePartie, terminee: ecran === 'bilan', publiee: publie !== null, reprendre }}
+        />
+      )
+    }
+    if (ecran === 'fin-mandat') return <FinMandat />
+    if (ecran === 'bilan') return <Bilan />
+    return <Partie />
   }
-  if (ecran === 'fin-mandat') return <FinMandat />
-  if (ecran === 'bilan') return <Bilan />
-  return <Partie />
 }

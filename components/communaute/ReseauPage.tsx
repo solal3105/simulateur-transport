@@ -8,6 +8,7 @@ import { lirePartie, type PartiePartagee } from '@/lib/lien'
 import { useJeu } from '@/lib/store'
 
 import { Bilan } from '../ecrans/Bilan'
+import { EntreeAcces } from '../ecrans/EntreeAcces'
 import { BoutonLien } from '../ui'
 import { EnteteCommunaute } from './Communaute'
 import type { Publication } from './EnTetePublication'
@@ -53,7 +54,12 @@ export function ReseauPage({ id }: { id: string }) {
   }, [id])
 
   if (etat && typeof etat === 'object') {
-    return <Bilan partage={etat.partie} publication={etat.publication} quitter={() => router.push('/')} />
+    return (
+      <>
+        <Bilan partage={etat.partie} publication={etat.publication} quitter={() => router.push('/')} />
+        <EntreeAcces />
+      </>
+    )
   }
   return (
     <div className="min-h-dvh bg-[#faf9f7]">

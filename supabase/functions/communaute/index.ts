@@ -1,9 +1,10 @@
 // La fonction « communaute » : la seule porte d'écriture de la communauté.
 //
 // Le site lit directement les réseaux publiés, mais tout ce qui écrit passe ici : publier, soutenir,
-// reprendre, signaler, retirer. Chaque navigateur se présente avec sa clé secrète, dont la base ne
-// garde que l'empreinte. Avant d'enregistrer un réseau, la fonction recalcule ses lignes, son score,
-// son coût et l'équilibre de son budget avec le code même du jeu (copié dans ./lib).
+// reprendre, signaler, retirer, s'inscrire à l'accès anticipé et envoyer un bug ou une amélioration.
+// Chaque navigateur se présente avec sa clé secrète, dont la base ne garde que l'empreinte. Avant
+// d'enregistrer un réseau, la fonction recalcule ses lignes, son score, son coût et l'équilibre de son
+// budget avec le code même du jeu (copié dans ./lib).
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 import { PROJETS } from './lib/catalogue.ts'
@@ -124,6 +125,16 @@ function convenable(texte: string) {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const texte = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '')
+
+// Une adresse électronique plausible : on ne vérifie pas qu'elle existe, seulement qu'elle en a la forme.
+const ADRESSE = /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[a-z]{2,}$/i
+const PROFILS_JOUEUR = ['usager', 'etudiant', 'professionnel', 'elu', 'journaliste', 'autre']
+
+/** Un objet JSON gardé tel quel s'il n'est pas trop gros, sinon rien. */
+function jsonBorne(v: unknown, max: number) {
+  if (!v || typeof v !== 'object') return null
+  return JSON.stringify(v).length <= max ? v : null
+}
 
 async function profilDe(cle: string) {
   const { data } = await base.from('cles').select('profil, profils(id, pseudo)').eq('empreinte', cle).maybeSingle()
@@ -301,6 +312,54 @@ Deno.serve(async (req) => {
         if (!reseau || !profil || reseau.auteur !== profil.id) return refuser('Seul l’auteur d’un réseau peut le retirer.', 403)
         await base.from('reseaux').delete().eq('id', reseau.id)
         return repondre({ ok: true })
+      }
+
+      // L'entrée dans l'accès anticipé : l'adresse du joueur, et ce navigateur rattaché à elle.
+      case 'inscrire': {
+        const email = texte(corps.email, 254).toLowerCase()
+        if (!ADRESSE.test(email)) return refuser('Cette adresse électronique ne semble pas complète.')
+        // Au-delà de 120 inscriptions en une minute, c'est un robot plutôt qu'une foule.
+        const ilYaUneMinute = new Date(Date.now() - 60_000).toISOString()
+        const { count } = await base.from('inscriptions').select('id', { count: 'exact', head: true }).gte('cree_le', ilYaUneMinute)
+        if ((count ?? 0) >= 120) return refuser('Beaucoup de monde arrive en même temps. Réessayez dans une minute.', 429)
+        const profil = PROFILS_JOUEUR.includes(corps.profil) ? corps.profil : undefined
+        const ville = estVille(corps.ville) ? corps.ville : undefined
+        const { data, error } = await base
+          .from('inscriptions')
+          .upsert({ email, ...(profil ? { profil } : {}), ...(ville ? { ville } : {}) }, { onConflict: 'email' })
+          .select('id')
+          .single()
+        if (error) throw error
+        await base.from('cles').update({ inscription: data.id }).eq('empreinte', cle)
+        return repondre({ ok: true })
+      }
+
+      // Un bug ou une amélioration, avec l'écran et la partie du joueur pour les reproduire.
+      case 'retour': {
+        const type = corps.type === 'bug' || corps.type === 'amelioration' ? corps.type : null
+        if (!type) return refuser('Dites-nous s’il s’agit d’un bug ou d’une amélioration.')
+        const message = typeof corps.texte === 'string' ? corps.texte.replace(/\r\n?/g, '\n').trim().slice(0, 2000) : ''
+        if (message.length < 10) return refuser('Décrivez-le en quelques mots de plus.')
+        // Pas plus de trente signalements par jour et par navigateur.
+        const hier = new Date(Date.now() - 86_400_000).toISOString()
+        const { count } = await base.from('retours').select('id', { count: 'exact', head: true }).eq('empreinte', cle).gte('cree_le', hier)
+        if ((count ?? 0) >= 30) return refuser('Vous avez déjà envoyé trente signalements aujourd’hui. Merci, et revenez demain.', 429)
+        const { data: lien } = await base.from('cles').select('inscription').eq('empreinte', cle).maybeSingle()
+        const { data, error } = await base
+          .from('retours')
+          .insert({
+            type,
+            texte: message,
+            contexte: jsonBorne(corps.contexte, 4000),
+            partie: jsonBorne(corps.partie, 200_000),
+            navigateur: texte(corps.navigateur, 300) || null,
+            empreinte: cle,
+            inscription: lien?.inscription ?? null,
+          })
+          .select('id')
+          .single()
+        if (error) throw error
+        return repondre({ id: data.id })
       }
 
       default:

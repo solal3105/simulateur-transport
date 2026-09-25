@@ -11,6 +11,7 @@ import { useJeu, useVille } from '@/lib/store'
 import { useCompteur } from '../anim'
 import { EtapesMandat, Icone, Jauge, Logo } from '../ui'
 import { segmentsBudget, segmentsLibre, useBilan, useDepenses, useScore } from './budget'
+import { BoutonRetour } from './Retour'
 
 function libelleReste(reste: number, apercu: number) {
   if (reste < 0) return { valeur: n(-reste), texte: 'M€ de déficit', manque: true }
@@ -47,7 +48,9 @@ function BoutonsPartie({ className }: { className?: string }) {
 
 /** Le budget du mandat et le score, toujours visibles pendant la partie. */
 export function Entete({ attenue }: { attenue?: boolean }) {
-  const { mandat, apercu, libre } = useJeu()
+  const { mandat, apercu, libre, ecran } = useJeu()
+  // Le signalement d'un bug ou d'une amélioration reste possible pendant le tracé d'une ligne, pas pendant le tutoriel.
+  const retour = ecran !== 'tuto'
   const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
@@ -77,7 +80,10 @@ export function Entete({ attenue }: { attenue?: boolean }) {
             <span className="truncate text-[13px] font-extrabold">{etape}</span>
             <span className="chiffres shrink-0 text-xs font-semibold opacity-80">{annees}</span>
           </div>
-          <BoutonsPartie className="-my-2 -mr-1.5" />
+          <div className="-my-2 -mr-1.5 flex shrink-0 items-center gap-2">
+            {retour ? <BoutonRetour forme="rond" /> : null}
+            <BoutonsPartie />
+          </div>
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="flex flex-col gap-0.5">
@@ -189,6 +195,12 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           </motion.div>
           <span className="text-[12.5px] font-semibold opacity-90">voyageurs gagnés par jour</span>
         </div>
+        {retour ? (
+          <div className="flex shrink-0 items-center">
+            <BoutonRetour forme="rond" className="xl:hidden" />
+            <BoutonRetour forme="pastille" className="hidden xl:flex" />
+          </div>
+        ) : null}
         <BoutonsPartie />
       </div>
     </header>
