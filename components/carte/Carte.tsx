@@ -1,6 +1,6 @@
 'use client'
 
-import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geojson'
+import type { Feature, FeatureCollection, LineString, MultiLineString, Point, Polygon } from 'geojson'
 import {
   Map as CarteMaplibre,
   Marker,
@@ -15,7 +15,7 @@ import {
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CATALOGUE, MANDATS, mots } from '@/lib/catalogue'
+import { CATALOGUES, MANDATS, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
@@ -46,14 +46,49 @@ const COULEURS = {
   // pour qu'on voie tout de suite où passent déjà le tram et le métro.
   tram: '#9a9288',
   metroActuel: '#5d5852',
+  // Le RER presque comme le métro, les trains Transilien plus discrets.
+  rer: '#6f6860',
+  train: '#aaa298',
+  gare: '#3f3a35',
 }
 
 /** En deçà de ce zoom, les noms de quartiers restent cachés. */
 const ZOOM_QUARTIERS = 13
+/** À partir de ce zoom, les gares montrent leur nom. */
+const ZOOM_GARES = 12
 /** En deçà de ce zoom, les repères des lignes existantes se cachent pour laisser la vue d'ensemble lisible. */
 const ZOOM_REPERES = 11
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
+
+/**
+ * Des noms qui n'apparaissent qu'en zoomant, ceux des quartiers et des gares : la carte ne porte que ceux des environs
+ * de la vue, remis à jour à la fin de chaque déplacement. L'Île-de-France en compte plus de deux mille, et les poser
+ * tous ralentit chaque glissement sur un téléphone.
+ */
+function poserProches(m: CarteMaplibre, reperes: { pos: [number, number]; marker: Marker }[], zoomMin: number) {
+  const poses = new Set<Marker>()
+  const actualiser = () => {
+    const b = m.getBounds()
+    // Une demi-vue de marge de chaque côté : un glissement ne découvre pas de noms manquants.
+    const dx = (b.getEast() - b.getWest()) / 2
+    const dy = (b.getNorth() - b.getSouth()) / 2
+    const proche = m.getZoom() >= zoomMin
+    for (const { pos, marker } of reperes) {
+      const garder =
+        proche && pos[0] > b.getWest() - dx && pos[0] < b.getEast() + dx && pos[1] > b.getSouth() - dy && pos[1] < b.getNorth() + dy
+      if (garder && !poses.has(marker)) {
+        marker.addTo(m)
+        poses.add(marker)
+      } else if (!garder && poses.has(marker)) {
+        marker.remove()
+        poses.delete(marker)
+      }
+    }
+  }
+  actualiser()
+  m.on('moveend', actualiser)
+}
 
 const largeur = (base: number) =>
   ['interpolate', ['exponential', 1.5], ['zoom'], 10, base * 0.6, 13, base * 1.4, 15, base * 3] as unknown as number
@@ -104,13 +139,31 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
             // Les lignes en service d'un côté, celles en chantier de l'autre, avec leur date d'ouverture.
             lignes: direLignes(s.lignes.filter((l) => !l.ouverture)),
             ouvertures: direOuvertures(s.lignes),
-            metro: s.lignes.some((l) => l.mode === 'metro'),
+            // Une station de métro, de RER ou de train, dessinée plus grande qu'un arrêt de tram.
+            grande: s.lignes.some((l) => l.mode === 'metro' || l.mode === 'rer' || l.mode === 'train'),
+            // Une gare ferroviaire, qui a son propre symbole.
+            gare: Boolean(s.gare),
           },
           geometry: { type: 'Point', coordinates: s.pos },
         }))
       : donnees.arrets
           .filter((a) => a[2] === 1)
-          .map((a) => ({ type: 'Feature', properties: { metro: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+          .map((a) => ({ type: 'Feature', properties: { grande: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+  }
+  // Le RER et les trains Transilien, que le fond de carte ne dessine pas : leur tracé vient des lignes existantes.
+  const trains: FeatureCollection<MultiLineString> = {
+    type: 'FeatureCollection',
+    features: (donnees.reseau?.lignes ?? []).flatMap((l) =>
+      l.trace
+        ? [
+            {
+              type: 'Feature' as const,
+              properties: { rer: l.mode === 'rer' },
+              geometry: { type: 'MultiLineString' as const, coordinates: l.trace },
+            },
+          ]
+        : [],
+    ),
   }
   // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
@@ -121,6 +174,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
+      trains: { type: 'geojson', data: trains },
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
       joueur: { type: 'geojson', data: vide() },
@@ -202,6 +256,38 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         },
       },
       {
+        id: 'train-bord',
+        type: 'line',
+        source: 'trains',
+        filter: ['!', ['get', 'rer']],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
+      },
+      {
+        id: 'train-actuel',
+        type: 'line',
+        source: 'trains',
+        filter: ['!', ['get', 'rer']],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.train, 'line-width': largeur(1.8) },
+      },
+      {
+        id: 'rer-bord',
+        type: 'line',
+        source: 'trains',
+        filter: ['get', 'rer'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#fff', 'line-width': largeur(5.6) },
+      },
+      {
+        id: 'rer-actuel',
+        type: 'line',
+        source: 'trains',
+        filter: ['get', 'rer'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.rer, 'line-width': largeur(3) },
+      },
+      {
         id: 'tram-bord',
         type: 'line',
         source: 'fond',
@@ -240,6 +326,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         id: 'stations',
         type: 'circle',
         source: 'stations',
+        filter: ['!=', ['get', 'gare'], true],
         minzoom: 10.5,
         paint: {
           'circle-radius': [
@@ -247,13 +334,38 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
             ['linear'],
             ['zoom'],
             10.5,
-            ['case', ['get', 'metro'], 2.4, 1.6],
+            ['case', ['get', 'grande'], 2.4, 1.6],
             14,
-            ['case', ['get', 'metro'], 5.5, 4],
+            ['case', ['get', 'grande'], 5.5, 4],
           ],
           'circle-color': '#fff',
-          'circle-stroke-color': ['case', ['get', 'metro'], COULEURS.metroActuel, COULEURS.tram],
+          'circle-stroke-color': ['case', ['get', 'grande'], COULEURS.metroActuel, COULEURS.tram],
           'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10.5, 1.2, 14, 2],
+        },
+      },
+      // Les gares, visibles dès la vue d'ensemble pour qu'on s'y repère : un rond cerclé de noir, pointé au centre.
+      {
+        id: 'gares',
+        type: 'circle',
+        source: 'stations',
+        filter: ['==', ['get', 'gare'], true],
+        minzoom: 9,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 3.2, 12, 5.2, 15, 8],
+          'circle-color': '#fff',
+          'circle-stroke-color': COULEURS.gare,
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1.5, 12, 2.2, 15, 3],
+        },
+      },
+      {
+        id: 'gares-centre',
+        type: 'circle',
+        source: 'stations',
+        filter: ['==', ['get', 'gare'], true],
+        minzoom: 9,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 1.1, 12, 1.9, 15, 3],
+          'circle-color': COULEURS.gare,
         },
       },
       {
@@ -483,6 +595,7 @@ export function Carte({
   const villePartie = useJeu((s) => s.ville)
   const ville = VILLES[villeImposee ?? villePartie]
   const donnees = useDonnees(ville.id)
+  const catalogue = CATALOGUES[ville.id]
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
   const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
@@ -501,7 +614,7 @@ export function Carte({
   const etats = useMemo(() => {
     const etat = new Map<string, EtatProjet>()
     const faits = new Map(chantiers.map((c) => [c.id, c]))
-    for (const p of CATALOGUE) {
+    for (const p of catalogue.projets) {
       if (!p.trace) continue
       const c = faits.get(p.id)
       let e: EtatProjet = 'etude'
@@ -512,11 +625,11 @@ export function Carte({
         else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
       } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
-      if (ecran === 'tuto' && tuto === 0 && p.id === 't8') e = 'choisi'
+      if (ecran === 'tuto' && tuto === 0 && p.id === catalogue.tutoriel?.projet) e = 'choisi'
       etat.set(p.trace, e)
     }
     return etat
-  }, [chantiers, panneau, ecran, tuto, anneeMax])
+  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax])
 
   // Création de la carte.
   useEffect(() => {
@@ -547,13 +660,24 @@ export function Carte({
     }
     // Les quartiers n'apparaissent qu'en zoomant, pour ne pas charger la vue d'ensemble.
     const [[ouest, sud], [est, nord]] = ville.zoneQuartiers
-    for (const [lon, lat, nom] of donnees.lieux.quartiers) {
-      if (lon < ouest || lon > est || lat < sud || lat > nord) continue
+    const quartiers = donnees.lieux.quartiers.flatMap(([lon, lat, nom]) => {
+      if (lon < ouest || lon > est || lat < sud || lat > nord) return []
       const el = document.createElement('div')
       el.className = 'lieu quartier'
       el.textContent = nom
-      new Marker({ element: el }).setLngLat([lon, lat]).addTo(m)
-    }
+      return [{ pos: [lon, lat] as [number, number], marker: new Marker({ element: el }).setLngLat([lon, lat]) }]
+    })
+    poserProches(m, quartiers, ZOOM_QUARTIERS)
+    // Le nom des gares, en zoomant, pour se repérer.
+    const gares = donnees.stations.flatMap((s) => {
+      if (!s.gare || !s.nom) return []
+      const el = document.createElement('div')
+      el.className = 'nom-gare'
+      el.setAttribute('aria-hidden', 'true')
+      el.textContent = s.nom
+      return [{ pos: s.pos, marker: new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(s.pos) }]
+    })
+    poserProches(m, gares, ZOOM_GARES)
     // Le nom de chaque ligne du réseau actuel, à ses deux terminus, comme sur un plan de réseau. Deux lignes qui
     // finissent à la même station partagent un seul repère.
     const terminus = new Map<string, { pos: [number, number]; lignes: { ref: string; mode: string; nom: string }[] }>()
@@ -582,13 +706,14 @@ export function Carte({
 
     const majZoom = () => {
       boite.dataset.proche = m.getZoom() >= ZOOM_QUARTIERS ? '1' : '0'
+      boite.dataset.gares = m.getZoom() >= ZOOM_GARES ? '1' : '0'
       boite.dataset.loin = m.getZoom() < ZOOM_REPERES ? '1' : '0'
     }
     majZoom()
     m.on('zoom', majZoom)
 
     for (const f of donnees.projets.features) {
-      const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
+      const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
       if (!projet) continue
       const el = document.createElement('button')
       el.type = 'button'
@@ -680,10 +805,10 @@ export function Carte({
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
       const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
       // Sans tracé touché, aucun projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
-      const projet = trace ? CATALOGUE.find((p) => p.trace === trace) : undefined
+      const projet = trace ? catalogue.projets.find((p) => p.trace === trace) : undefined
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
-      const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['stations'] })[0]
+      const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['gares', 'stations'] })[0]
       if (station) montrerStation(station)
     })
 
@@ -701,8 +826,16 @@ export function Carte({
         lignesEl.textContent = String(f.properties.lignes).replace(/^./, (c) => c.toUpperCase())
         el.appendChild(lignesEl)
       }
+      // Une gare sans RER ni train affiché le dit : on y prend les trains régionaux.
+      if (f.properties.gare && !/RER|train/.test(String(f.properties.lignes ?? ''))) {
+        const gareEl = document.createElement('span')
+        gareEl.textContent = 'Gare'
+        el.appendChild(gareEl)
+      }
       // Une ligne en chantier que la carte montre déjà : on dit quand elle ouvre.
-      for (const texte of String(f.properties.ouvertures ?? '').split('\n').filter(Boolean)) {
+      for (const texte of String(f.properties.ouvertures ?? '')
+        .split('\n')
+        .filter(Boolean)) {
         const ouverture = document.createElement('span')
         ouverture.textContent = texte
         el.appendChild(ouverture)
@@ -710,11 +843,13 @@ export function Carte({
       const [lon, lat] = (f.geometry as Point).coordinates as [number, number]
       bulle.setLngLat([lon, lat]).setDOMContent(el).addTo(m)
     }
-    m.on('mouseenter', 'stations', (e: MapLayerMouseEvent) => {
-      const f = e.features?.[0]
-      if (f && glisse === null) montrerStation(f)
-    })
-    m.on('mouseleave', 'stations', () => bulle.remove())
+    for (const couche of ['stations', 'gares']) {
+      m.on('mouseenter', couche, (e: MapLayerMouseEvent) => {
+        const f = e.features?.[0]
+        if (f && glisse === null) montrerStation(f)
+      })
+      m.on('mouseleave', couche, () => bulle.remove())
+    }
 
     /** Un petit carré autour d'un point de l'écran, pour toucher une station sans viser au pixel près. */
     const zoneAutour = (p: { x: number; y: number }, r: number): [[number, number], [number, number]] => [
@@ -725,7 +860,7 @@ export function Carte({
     function accrocher(point: { x: number; y: number }, lngLat: { lng: number; lat: number }): [number, number] {
       let meilleure: [number, number] | null = null
       let distance = Infinity
-      for (const f of m.queryRenderedFeatures(zoneAutour(point, 14), { layers: ['stations'] })) {
+      for (const f of m.queryRenderedFeatures(zoneAutour(point, 14), { layers: ['gares', 'stations'] })) {
         const c = (f.geometry as Point).coordinates as [number, number]
         const q = m.project(c)
         const d = Math.hypot(q.x - point.x, q.y - point.y)
@@ -757,7 +892,7 @@ export function Carte({
       pret.current = false
       etiquettes.clear()
     }
-  }, [donnees, decor, etiquettes, ville])
+  }, [catalogue, donnees, decor, etiquettes, ville])
 
   // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {
@@ -768,7 +903,7 @@ export function Carte({
       ;(m.getSource('projets') as GeoJSONSource).setData({
         ...donnees.projets,
         features: donnees.projets.features.map((f) => {
-          const projet = CATALOGUE.find((p) => p.trace === f.properties.id)
+          const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
           const choix = projet && chantiers.find((x) => x.id === projet.id)
           return {
             ...f,
@@ -791,7 +926,7 @@ export function Carte({
           const brille = anneeMax === undefined ? estFait && !etaitFait : etat === 'construit' && avant.get(nomTrace) !== 'construit'
           if (!brille) continue
           const f = donnees.projets.features.find((x) => x.properties.id === nomTrace)
-          const projet = CATALOGUE.find((p) => p.trace === nomTrace)
+          const projet = catalogue.projets.find((p) => p.trace === nomTrace)
           const c = projet && chantiers.find((x) => x.id === projet.id)
           if (!f) continue
           eclat(m, f.geometry.coordinates, projet ? couleurProjet(projet.id, c) : ville.couleurs.principale)
@@ -804,7 +939,7 @@ export function Carte({
         const el = etiquettes.get(nomTrace)
         if (!el) continue
         el.dataset.etat = etat
-        const projet = CATALOGUE.find((p) => p.trace === nomTrace)
+        const projet = catalogue.projets.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
         if (projet) el.style.setProperty('--mode', couleurProjet(projet.id, c))
         el.textContent =
@@ -878,14 +1013,15 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
+  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
 
-  // Pendant la première étape du tutoriel, la carte montre le T8.
+  // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {
     const m = carte.current
-    const t8 = donnees?.projets.features.find((f) => f.properties.id === 't8')
-    if (!m || !t8 || ecran !== 'tuto' || tuto !== 0) return
-    const points = t8.geometry.coordinates.flat()
+    const nomTrace = catalogue.projets.find((p) => p.id === catalogue.tutoriel?.projet)?.trace
+    const projet = donnees?.projets.features.find((f) => f.properties.id === nomTrace)
+    if (!m || !projet || ecran !== 'tuto' || tuto !== 0) return
+    const points = projet.geometry.coordinates.flat()
     const lons = points.map((p) => p[0]!)
     const lats = points.map((p) => p[1]!)
     const grand = window.innerWidth >= 1024
@@ -903,7 +1039,7 @@ export function Carte({
       )
     if (pret.current) cadrer()
     else m.once('load', cadrer)
-  }, [donnees, ecran, tuto])
+  }, [catalogue, donnees, ecran, tuto])
 
   // À la sortie du tutoriel, la carte revient sur toute la Métropole.
   const ecranPrecedent = useRef(ecran)

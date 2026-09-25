@@ -7,6 +7,7 @@ import type { Lieux } from './lieux'
 import { stationsExistantes, type ReseauActuel, type StationExistante } from './reseau'
 import { preparerCarreaux, type Carreaux } from './modele'
 import { fleuvesDe, preparerTerrain, type ReliefBrut } from './terrain'
+import { tracesProjets } from './traces'
 import { VILLES, type IdVille } from './villes'
 
 export interface Donnees {
@@ -57,7 +58,7 @@ function memoriser<T>(cache: Map<IdVille, Promise<T>>, ville: IdVille, charger: 
 export function chargerTraces(ville: IdVille) {
   return memoriser(promessesTraces, ville, async () => {
     const [fond, projets] = await Promise.all([lire<Donnees['fond']>(ville, 'fond'), lire<Donnees['projets']>(ville, 'projets')])
-    return { fond, projets }
+    return { fond, projets: tracesProjets(ville, projets) }
   })
 }
 

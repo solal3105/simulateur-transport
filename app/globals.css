@@ -109,6 +109,22 @@
 [data-proche='0'] .quartier {
   display: none;
 }
+/* Le nom d'une gare, à côté de son symbole, quand on zoome. */
+.nom-gare {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.9);
+  color: #3f3a35;
+  font:
+    800 10.5px/1.1 var(--font-figtree),
+    sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+[data-gares='0'] .nom-gare {
+  display: none;
+}
 /* Nom d'un arrêt posé par le joueur. */
 .reperes-ligne {
   display: flex;
@@ -133,6 +149,18 @@
 .repere-ligne[data-mode='tram'] {
   border-radius: 999px;
   background: #8a8278;
+}
+/* Le RER et les trains Transilien en lettres foncées sur blanc, comme sur les plans du réseau francilien. */
+.repere-ligne[data-mode='rer'] {
+  border-color: #6f6860;
+  background: #fff;
+  color: #4a4540;
+}
+.repere-ligne[data-mode='train'] {
+  border-color: #aaa298;
+  border-radius: 999px;
+  background: #fff;
+  color: #6f6860;
 }
 [data-loin='1'] .reperes-ligne {
   display: none;

@@ -3,21 +3,23 @@
 import { clsx } from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
 
-import { PROJETS } from '@/lib/catalogue'
+import { CATALOGUES, PROJETS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 
 import { Bouton, Icone } from '../ui'
 import { useBilan } from './budget'
 
 /**
  * Le tutoriel suit les gestes du joueur plutôt que de les décrire.
- * Étape 0 : toucher le T8 sur la carte. Étape 1 : la fiche guide depuis l'intérieur (voir FicheProjet).
+ * Étape 0 : toucher sur la carte le projet choisi pour le tutoriel de chaque réseau, le T8 à Lyon. Étape 1 : la
+ * fiche guide depuis l'intérieur (voir FicheProjet).
  * Étape 2 : ce que la décision vient de changer, et la suite de la partie.
  */
 export function Tutoriel() {
   const { tuto, finirTuto, chantiers } = useJeu()
+  const guide = CATALOGUES[useVille().id].tutoriel
   const bilan = useBilan()
   const dernier = chantiers.at(-1)
   const projet = dernier ? PROJETS.get(dernier.id) : undefined
@@ -25,18 +27,16 @@ export function Tutoriel() {
 
   return (
     <AnimatePresence mode="wait">
-      {tuto === 0 ? (
+      {tuto === 0 && guide ? (
         <Bulle key="0" position="bas">
           <Entete etape={1} onPasser={finirTuto} />
           <div className="flex items-start gap-3">
             <Pastille />
             <div className="flex flex-col gap-1">
               <h2 id="titre-tuto" className="text-lg leading-tight font-black lg:text-xl">
-                Touchez le tramway T8, en noir sur la carte.
+                {guide.consigne}
               </h2>
-              <p className="text-[14.5px] leading-relaxed text-gris">
-                Chaque pointillé est un projet réel, avec son prix écrit dessus. Le T8 relierait Vaulx-en-Velin à Vénissieux pour 245 M€.
-              </p>
+              <p className="text-[14.5px] leading-relaxed text-gris">{guide.detail}</p>
             </div>
           </div>
         </Bulle>

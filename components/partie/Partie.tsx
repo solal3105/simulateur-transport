@@ -93,6 +93,12 @@ function Legende() {
         </span>
         Réseau actuel et ses stations
       </span>
+      <span className="hidden items-center gap-1.5 text-gris lg:flex">
+        <span className="grid size-3.5 place-items-center rounded-full border-2 border-[#3f3a35] bg-white">
+          <span className="size-1 rounded-full bg-[#3f3a35]" />
+        </span>
+        Gare
+      </span>
     </div>
   )
 }

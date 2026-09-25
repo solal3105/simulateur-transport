@@ -1,4 +1,4 @@
-import { PROJETS } from './catalogue'
+import { PROJETS, projetDe } from './catalogue'
 import { leviersPossibles } from './leviers'
 import { estimer, prolongementPossible, type Carreaux } from './modele'
 import { LEVIERS_NEUTRES } from './regles'
@@ -90,7 +90,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   for (const entree of catalogue ? b.c : []) {
     if (!Array.isArray(entree)) continue
     const [id, mandat, etale, varianteId, option] = entree
-    const projet = typeof id === 'string' ? PROJETS.get(id) : undefined
+    // Seuls les projets du catalogue de la ville : une partie de Toulouse ne peut pas décider d'un projet lyonnais.
+    const projet = projetDe(ville, id)
     if (!projet || vus.has(projet.id)) continue
     vus.add(projet.id)
     chantiers.push({

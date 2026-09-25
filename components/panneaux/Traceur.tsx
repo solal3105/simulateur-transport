@@ -8,7 +8,7 @@ import { approx, km, n } from '@/lib/format'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { correspondances, nommerTrace, stationProche, terminusDe, type LigneExistante } from '@/lib/reseau'
+import { correspondances, direLignes, nommerTrace, prolongeable, stationProche, terminusDe, type LigneExistante } from '@/lib/reseau'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
@@ -93,7 +93,7 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
           ? { ...c, station: { ...c.station, lignes: c.station.lignes.filter((l) => l.id !== trace.prolonge) } }
           : c,
       )
-      .filter((c) => c.station.lignes.length)
+      .filter((c) => c.station.lignes.length || c.station.gare)
     const depart = trace.arrets[0]
     const terminus = depart && !trace.prolonge ? stationProche(donnees.stations, depart, mx, 60) : null
     const aProlonger = terminus?.terminus
@@ -125,9 +125,8 @@ function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
 /** Les correspondances d'un tracé en une phrase : « métro A et D à Bellecour, tram T1 à Perrache ». */
 function PhraseCorrespondances({ liste }: { liste: NonNullable<ReturnType<typeof useReseauDuTrace>>['liste'] }) {
   if (!liste.length) return null
-  const morceaux = liste.map(
-    (c) =>
-      `${c.station.lignes.map((l) => (l.mode === 'metro' ? `métro ${l.ref}` : l.mode === 'tram' ? `tram ${l.ref}` : l.ref)).join(', ')} à ${c.station.nom}`,
+  const morceaux = liste.map((c) =>
+    c.station.lignes.length ? `${direLignes(c.station.lignes)} à ${c.station.nom}` : `la gare de ${c.station.nom}`,
   )
   return (
     <p className="flex items-start gap-2 rounded-2xl bg-sable px-3.5 py-2.5 text-[13.5px] leading-snug">
@@ -684,12 +683,9 @@ function Prolonger({ lignes }: { lignes: LigneExistante[] }) {
   // Sur téléphone, la liste reste repliée pour laisser la carte visible.
   const [ouvert, setOuvert] = useState(false)
   // Seules les lignes de métro et de tram se prolongent, et seulement depuis une station que nous connaissons.
-  const possibles = lignes.filter(
-    (l) =>
-      (l.mode === 'metro' || l.mode === 'tram') &&
-      donnees &&
-      terminusDe(l).some((s) => prolongementPossible(l.mode, s.pos, donnees.carreaux)),
-  )
+  const possibles = lignes
+    .filter(prolongeable)
+    .filter((l) => donnees && terminusDe(l).some((s) => prolongementPossible(l.mode, s.pos, donnees.carreaux)))
   if (!possibles.length || !donnees) return null
   const ligne = possibles.find((l) => l.id === choisie)
   return (

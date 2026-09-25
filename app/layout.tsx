@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Figtree } from 'next/font/google'
 
 import { enveloppe } from '@/lib/budget'
-import { CATALOGUE } from '@/lib/catalogue'
+import { nombreProjets } from '@/lib/catalogue'
 import { enLettres } from '@/lib/format'
 import { VILLES } from '@/lib/villes'
 
@@ -15,7 +15,7 @@ const figtree = Figtree({ subsets: ['latin'], variable: '--font-figtree', weight
 // L'accueil lyonnais, à la racine du site, décrit son budget et son catalogue tels que le jeu les calcule.
 const LYON = VILLES.lyon.budget
 const MONTANT = `${enLettres(enveloppe(LYON, 1) + enveloppe(LYON, 2))} d’euros`
-const PROJETS = `${CATALOGUE.filter((p) => p.trace).length} projets réels`
+const PROJETS = `${nombreProjets('lyon')} projets réels`
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tcl-2040.com'),

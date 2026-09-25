@@ -1,3 +1,5 @@
+import type { Source } from './budget'
+
 export type Mode = 'metro' | 'renovation' | 'tram' | 'bus' | 'cable' | 'fluvial'
 
 /** Les deux mandats de la partie. */
@@ -14,6 +16,15 @@ export interface Variante {
   duree: number
 }
 
+/** Ce qu'on fait d'un projet, pour le bouton et la carte : « Moderniser pour 522 M€ », « Modernisée ». */
+export type Action = 'construire' | 'moderniser' | 'achever' | 'renforcer' | 'electrifier'
+
+/** Un point du tracé d'un projet : une station, ou un point de passage quand il n'a pas de nom. */
+export interface PointProjet {
+  nom?: string
+  pos: [number, number]
+}
+
 export interface Projet {
   id: string
   nom: string
@@ -23,7 +34,7 @@ export interface Projet {
   mode: Mode
   /** Investissement en millions d'euros. */
   cout: number
-  /** Voyageurs gagnés par jour de semaine, d'après les études publiques. */
+  /** Voyageurs par jour de semaine, d'après les études publiques, ou notre estimation quand `estime.voyageurs`. */
   voyageurs: number
   /** Durée du chantier en années. */
   duree: number
@@ -31,8 +42,33 @@ export interface Projet {
   option?: { nom: string; detail: string; surcout: number; duree: number }
   /** Projet sans lequel celui-ci ne peut pas être construit. */
   requiert?: string
-  /** Nom du tracé dans public/data/projets.json. Absent pour les projets sans tracé propre. */
+  /**
+   * Le nom de son tracé sur la carte : dans public/data/projets.json pour Lyon, et ailleurs le tracé dessiné par
+   * `parcours`. Absent pour les projets sans tracé propre.
+   */
   trace?: string
+  /** Le tracé, branche par branche, quand il n'a pas de fichier : les stations dans l'ordre et quelques points de passage. */
+  parcours?: PointProjet[][]
+  /** La ligne existante que le projet prolonge depuis son terminus, premier point de son parcours : « metro-M2 ». */
+  prolonge?: string
+  /** Construire par défaut. */
+  action?: Action
+  /** Le nom appelle un accord au féminin : « La ligne 5, construite ». */
+  feminin?: boolean
+  /** Où en est le projet dans la réalité, en une phrase : « Déclaré d'utilité publique en juillet 2026. » */
+  statut?: string
+  /** Ce qu'il faut savoir de ses chiffres : leur date, ce qu'ils comptent, ce qui reste incertain. Une phrase par point. */
+  precisions?: string[]
+  /** Les chiffres que nous estimons nous-mêmes, faute d'étude publiée, avec la méthode des lignes que vous tracez. */
+  estime?: { voyageurs?: boolean; duree?: boolean }
+  sources?: Source[]
+}
+
+/** Le catalogue d'un réseau : ses projets réels, et celui que le tutoriel fait lancer. */
+export interface Catalogue {
+  projets: Projet[]
+  /** Le projet que le tutoriel fait toucher sur la carte, la consigne, et ce qu'on en dit. */
+  tutoriel?: { projet: string; consigne: string; detail: string }
 }
 
 /** Un projet du catalogue que le joueur a décidé de construire. */

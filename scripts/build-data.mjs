@@ -177,7 +177,9 @@ function fondToulouse() {
 const FONDS = {
   marseille: { fleuves: /Huveaune|Durance|^Arc$|Touloubre/, cote: [43.1, 4.65, 43.82, 5.9] },
   nice: { fleuves: /^(Le )?(Var|Paillon)$|^(La )?(Tinée|Vésubie)$/, cote: [43.55, 6.7, 43.85, 7.55] },
-  idf: { fleuves: /^(La |L'|L’)?(Seine|Marne|Oise)$/ },
+  // En Île-de-France, seul le Grand Paris Express est déjà payé dans le budget : les trams en chantier (T1 vers Val
+  // de Fontenay, T13 vers Achères) restent au joueur, qui les décide dans le catalogue. On ne dessine que le métro.
+  idf: { fleuves: /^(La |L'|L’)?(Seine|Marne|Oise)$/, tramsEnChantier: false },
 }
 
 /**
@@ -342,7 +344,7 @@ function fondVille() {
   const chantiers = lire('chantiers').filter((e) => e.geometry)
   const trams = [
     ...lire('tram').filter((e) => e.geometry),
-    ...chantiers.filter((e) => /tram|light_rail/.test(e.tags?.construction ?? '')),
+    ...(reglage.tramsEnChantier === false ? [] : chantiers.filter((e) => /tram|light_rail/.test(e.tags?.construction ?? ''))),
     ...lire('cable').filter((e) => e.geometry),
   ]
   const metros = [...lire('metro').filter((e) => e.geometry), ...chantiers.filter((e) => e.tags?.construction === 'subway')]

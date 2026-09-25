@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 import { useMemo, useState } from 'react'
 
-import { CATALOGUE, mots } from '@/lib/catalogue'
+import { catalogueDe, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
@@ -13,23 +13,24 @@ import { Icone, ICONE_MODE } from '../ui'
 import { Panneau } from './Panneau'
 
 type Tri = 'rendement' | 'prix' | 'ouverture'
-const MEILLEUR = totauxCatalogue(CATALOGUE).meilleur
 
 export function Liste() {
   const { chantiers, lignes, mandat, ouvrir, retirer, changerPaiement } = useJeu()
   const ville = useVille()
   const [tri, setTri] = useState<Tri>('rendement')
+  const catalogue = catalogueDe(ville.id)
+  const meilleur = useMemo(() => totauxCatalogue(catalogue).meilleur, [catalogue])
 
   const lignesTableau = useMemo(() => {
     const faits = new Map(chantiers.map((c) => [c.id, c]))
-    const rows = CATALOGUE.map((p) => {
+    const rows = catalogue.map((p) => {
       const c = faits.get(p.id)
       const r = resoudre(p, c)
       return { p, r, c, rendement: r.cout > 0 ? r.voyageurs / r.cout : 0, annee: ouverture(c?.mandat ?? mandat, r.duree) }
     })
     rows.sort((a, b) => (tri === 'rendement' ? b.rendement - a.rendement : tri === 'prix' ? a.r.cout - b.r.cout : a.annee - b.annee))
     return rows
-  }, [chantiers, mandat, tri])
+  }, [catalogue, chantiers, mandat, tri])
 
   const tris: { id: Tri; texte: string }[] = [
     { id: 'rendement', texte: 'Voyageurs par euro' },
@@ -38,7 +39,7 @@ export function Liste() {
   ]
 
   return (
-    <Panneau titre={ville.catalogue ? `${CATALOGUE.length} projets` : 'Vos lignes'} largeur="pleine" hauteurTelephone="pleine">
+    <Panneau titre={ville.catalogue ? `${catalogue.length} projets` : 'Vos lignes'} largeur="pleine" hauteurTelephone="pleine">
       {/* Sans catalogue, le panneau ne montre que les lignes tracées. */}
       {ville.catalogue ? (
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Trier les projets">
@@ -140,7 +141,7 @@ export function Liste() {
                 <span className="flex min-w-0 flex-col">
                   <span className="leading-tight font-extrabold">{p.nom}</span>
                   <span className="chiffres text-[12.5px] font-semibold text-gris lg:hidden">
-                    +{n(r.voyageurs)} voy./jour · {n(rendement)} par M€ · {annee}
+                    +{n(r.voyageurs)} voy./jour{p.estime?.voyageurs ? ' selon notre estimation' : ''} · {n(rendement)} par M€ · {annee}
                   </span>
                 </span>
               </span>
@@ -149,10 +150,12 @@ export function Liste() {
               </span>
               <span role="cell" className="chiffres hidden font-extrabold text-rouge lg:block">
                 +{n(r.voyageurs)}
+                {/* Faute d'étude publiée, ce chiffre est le nôtre : on le dit dans la liste comme dans la fiche. */}
+                {p.estime?.voyageurs ? <span className="block text-[11.5px] font-bold text-gris">notre estimation</span> : null}
               </span>
               <span role="cell" className="hidden items-center gap-2.5 lg:flex">
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-sable">
-                  <span className="block h-full bg-encre" style={{ width: `${Math.min(100, (rendement / MEILLEUR) * 100)}%` }} />
+                  <span className="block h-full bg-encre" style={{ width: `${Math.min(100, (rendement / meilleur) * 100)}%` }} />
                 </span>
                 <span className="chiffres w-9 text-right font-extrabold">{n(rendement)}</span>
               </span>

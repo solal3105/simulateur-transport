@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import type { ReactElement, ReactNode } from 'react'
 
 import { libre } from './budget'
-import { CATALOGUE } from './catalogue'
+import { catalogueDe, nombreProjets } from './catalogue'
 import { couleurLigne } from './couleurs'
 import { enLettres, n } from './format'
 import { FORMULE } from './formule'
@@ -10,6 +10,7 @@ import { cadreMiniature, cheminsFond, cheminsReseau } from './miniature'
 import { stationsDuTrace } from './modele'
 import { polices } from './og'
 import type { PartieCompacte } from './partie'
+import { tracesProjets, type TracesProjets } from './traces'
 import type { ModeLigne } from './types'
 import { MARQUE, VILLES, type IdVille, type Ville } from './villes'
 import fondLyon from '@/public/data/fond.json'
@@ -35,12 +36,15 @@ export const TAILLE = { width: 1200, height: 630 }
 type Fond = Parameters<typeof cheminsFond>[0]
 type Projets = Parameters<typeof cheminsReseau>[0]
 
+// Les tracés des projets : le fichier de chaque réseau, et ceux que dessinent les stations de son catalogue.
+const projets = (ville: IdVille, fichier: unknown) => tracesProjets(ville, fichier as TracesProjets) as unknown as Projets
+
 const DONNEES: Record<IdVille, { fond: Fond; projets: Projets }> = {
-  lyon: { fond: fondLyon as unknown as Fond, projets: projetsLyon as unknown as Projets },
-  toulouse: { fond: fondToulouse as unknown as Fond, projets: projetsToulouse as unknown as Projets },
-  marseille: { fond: fondMarseille as unknown as Fond, projets: projetsMarseille as unknown as Projets },
-  nice: { fond: fondNice as unknown as Fond, projets: projetsNice as unknown as Projets },
-  idf: { fond: fondIdf as unknown as Fond, projets: projetsIdf as unknown as Projets },
+  lyon: { fond: fondLyon as unknown as Fond, projets: projets('lyon', projetsLyon) },
+  toulouse: { fond: fondToulouse as unknown as Fond, projets: projets('toulouse', projetsToulouse) },
+  marseille: { fond: fondMarseille as unknown as Fond, projets: projets('marseille', projetsMarseille) },
+  nice: { fond: fondNice as unknown as Fond, projets: projets('nice', projetsNice) },
+  idf: { fond: fondIdf as unknown as Fond, projets: projets('idf', projetsIdf) },
 }
 
 /** La police n'a pas l'espace fine insécable que le français met entre les milliers. */
@@ -236,12 +240,14 @@ const rendre = async (contenu: ReactElement) => new ImageResponse(contenu, { ...
 /** Ce qui revient au joueur sur les deux mandats, une fois payés les projets décidés, les bus et les lignes existantes. */
 const pourVosLignes = (ville: Ville) => `${enLettres(libre(ville.budget, 1) + libre(ville.budget, 2))} d’euros pour vos lignes`
 
-/** Les tracés des projets du catalogue lyonnais, pour montrer ce qu'on peut y décider. */
+/** Les tracés des projets du catalogue d'un réseau, pour montrer ce qu'on peut y décider. */
 function tracesCatalogue(ville: Ville): Trace[] {
   if (!ville.catalogue) return []
   const partie: PartieCompacte = {
     v: 1,
-    c: CATALOGUE.filter((p) => p.trace).map((p) => [p.id, 1, 0, '', 0]),
+    c: catalogueDe(ville.id)
+      .filter((p) => p.trace)
+      .map((p) => [p.id, 1, 0, '', 0]),
     l: [],
     f: {} as PartieCompacte['f'],
   }
@@ -250,9 +256,9 @@ function tracesCatalogue(ville: Ville): Trace[] {
 
 /** L'image de l'accueil d'un réseau : ce qu'on y fait, avec l'argent disponible et le réseau actuel. */
 export function imageAccueil(ville: Ville) {
-  const projets = CATALOGUE.filter((p) => p.trace).length
+  const projets = nombreProjets(ville.id)
   return rendre(
-    <Affiche ville={ville} traces={[]}>
+    <Affiche ville={ville} traces={tracesCatalogue(ville)}>
       <Surtitre>{`${MARQUE}, ${ville.nom}`}</Surtitre>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <Titre marge={0}>{`Construisez le réseau ${ville.reseau} de 2038.`}</Titre>
@@ -273,7 +279,7 @@ export function imageAccueil(ville: Ville) {
 /** L'accueil lyonnais montre en plus les projets du catalogue sur sa carte. */
 export function imageAccueilLyon() {
   const ville = VILLES.lyon
-  const projets = CATALOGUE.filter((p) => p.trace).length
+  const projets = nombreProjets('lyon')
   return rendre(
     <Affiche ville={ville} traces={tracesCatalogue(ville)}>
       <Surtitre>{`${MARQUE}, ${ville.nom}`}</Surtitre>

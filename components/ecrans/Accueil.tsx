@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 
 import { essayerMotDePasse, useAcces } from '@/lib/acces'
 import { libre } from '@/lib/budget'
-import { CATALOGUE } from '@/lib/catalogue'
+import { nombreProjets } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
 import { enLettres } from '@/lib/format'
 import { NOM_COURT } from '@/lib/noms'
@@ -21,7 +21,6 @@ import { ouvrirMessagerie } from '../explications/Ecrire'
 import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
 import { Devoilement } from './Devoilement'
 
-const NOMBRE_PROJETS = CATALOGUE.filter((p) => p.trace).length
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
 const RESEAU_ACTUEL = { chantiers: [], lignes: [] }
@@ -41,7 +40,7 @@ function textes(ville: Ville) {
           quand: 'Départ',
           annee: '2026',
           titre: 'Choisissez vos projets',
-          texte: `${NOMBRE_PROJETS} projets réels, ou vos propres lignes.`,
+          texte: `${nombreProjets(ville.id)} projets réels, ou vos propres lignes.`,
         }
       : {
           quand: 'Départ',
@@ -128,13 +127,13 @@ function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number })
       <div className="flex flex-col gap-2">
         <span className="text-[12px] font-black tracking-[0.08em] text-gris uppercase">Le réseau aujourd’hui</span>
         <span className="flex items-center gap-2.5 text-[14px] font-bold">
-          <span className="h-[5px] w-7 rounded-full bg-[#8d877e]" />
+          <span className="h-[5px] w-7 rounded-full bg-[#5d5852]" />
           Métro et tram en service
         </span>
         {ville.catalogue ? (
           <span className="flex items-center gap-2.5 text-[14px] font-bold">
             <span className="h-[5px] w-7 rounded-full bg-[repeating-linear-gradient(90deg,var(--color-rouge)_0_6px,transparent_6px_10px)]" />
-            {NOMBRE_PROJETS} projets sur la table
+            {nombreProjets(ville.id)} projets sur la table
           </span>
         ) : null}
       </div>

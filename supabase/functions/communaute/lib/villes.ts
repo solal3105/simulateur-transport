@@ -156,7 +156,7 @@ export const VILLES: Record<IdVille, Ville> = {
     latitude: 43.604,
     centre: [1.444, 43.6045],
     budget: toulouse,
-    catalogue: false,
+    catalogue: true,
     emprise: [
       [1.33, 43.535],
       [1.54, 43.675],
@@ -210,7 +210,7 @@ export const VILLES: Record<IdVille, Ville> = {
     latitude: 43.3,
     centre: [5.3698, 43.2965],
     budget: marseille,
-    catalogue: false,
+    catalogue: true,
     emprise: [
       [5.27, 43.2],
       [5.57, 43.4],
@@ -263,7 +263,7 @@ export const VILLES: Record<IdVille, Ville> = {
     latitude: 43.7,
     centre: [7.27, 43.6975],
     budget: nice,
-    catalogue: false,
+    catalogue: true,
     emprise: [
       [7.14, 43.64],
       [7.36, 43.76],
@@ -313,7 +313,7 @@ export const VILLES: Record<IdVille, Ville> = {
     latitude: 48.86,
     centre: [2.3522, 48.8566],
     budget: idf,
-    catalogue: false,
+    catalogue: true,
     emprise: [
       [2.2, 48.79],
       [2.5, 48.93],
