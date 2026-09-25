@@ -1,18 +1,19 @@
 /**
  * Les lignes de métro, de tram et de téléphérique du réseau actuel, une par une, avec leurs stations dans
- * l'ordre, tirées des relations « route » d'OpenStreetMap. S'y ajoutent les lignes en chantier que la carte
- * dessine déjà comme existantes, parce qu'elles ouvrent avant celles du joueur (la ligne C à Toulouse, le
- * Grand Paris Express) : leurs gares viennent de data/<ville>/stations-futures.json.
+ * l'ordre, tirées des relations « route » d'OpenStreetMap ; en Île-de-France, aussi les RER et les trains
+ * Transilien, avec le tracé de leurs voies. S'y ajoutent les lignes en chantier que la carte dessine déjà
+ * comme existantes, parce qu'elles ouvrent avant celles du joueur (la ligne C à Toulouse, le Grand Paris
+ * Express) : leurs gares viennent de data/<ville>/stations-futures.json.
  *
  * Le fichier sert à montrer les stations du réseau et le nom de chaque ligne, à accrocher une nouvelle station
  * sur une correspondance et à prolonger une ligne depuis son terminus. Il ne touche pas aux données du modèle
- * de fréquentation.
+ * de fréquentation : le RER n'y compte pas comme une desserte existante.
  *
  *   node scripts/lignes-osm.mjs            toutes les villes
  *   node scripts/lignes-osm.mjs toulouse   une seule ville
  *
- * Les réponses brutes vont dans data/osm/<ville>/lignes.json (non versionné), le résultat dans
- * public/data/<dossier>/lignes.json.
+ * Les réponses brutes vont dans data/osm/<ville>/lignes.json, et pour l'Île-de-France trains.json et
+ * quais.json (non versionnés) ; le résultat dans public/data/<dossier>/lignes.json.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -71,8 +72,8 @@ const cleNom = (nom) =>
 
 /**
  * Le nom d'une station tel qu'on le montre. Le quai d'un sens porte parfois sa direction, « Grand Arénas (dir
- * aéroport) », qui n'est pas le nom de la station ; les tirets longs deviennent des tirets simples, comme partout
- * sur la carte.
+ * aéroport) », ou sa voie, et une gare son réseau entre parenthèses : ce n'est pas le nom de la station. Les
+ * tirets longs deviennent des tirets simples, comme partout sur la carte.
  */
 const nomStation = (nom) => {
   const propre = (nom ?? '')
