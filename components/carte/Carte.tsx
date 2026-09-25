@@ -702,7 +702,9 @@ export function Carte({
         el.appendChild(lignesEl)
       }
       // Une ligne en chantier que la carte montre déjà : on dit quand elle ouvre.
-      for (const texte of String(f.properties.ouvertures ?? '').split('\n').filter(Boolean)) {
+      for (const texte of String(f.properties.ouvertures ?? '')
+        .split('\n')
+        .filter(Boolean)) {
         const ouverture = document.createElement('span')
         ouverture.textContent = texte
         el.appendChild(ouverture)

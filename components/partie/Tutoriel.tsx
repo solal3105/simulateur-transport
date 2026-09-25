@@ -36,9 +36,7 @@ export function Tutoriel() {
               <h2 id="titre-tuto" className="text-lg leading-tight font-black lg:text-xl">
                 {guide.consigne}
               </h2>
-              <p className="text-[14.5px] leading-relaxed text-gris">
-                {guide.detail}
-              </p>
+              <p className="text-[14.5px] leading-relaxed text-gris">{guide.detail}</p>
             </div>
           </div>
         </Bulle>
