@@ -36,6 +36,20 @@ export function useDefilement(debut: number, fin: number, duree: number) {
   const [tour, setTour] = useState(0)
   const reduit = useReducedMotion()
   useEffect(() => {
+    // Avec les animations réduites, les années s'affichent finies d'emblée. Quand on demande à revoir la
+    // construction, elles avancent une à une, sans mouvement : sinon le bouton ne ferait rien.
+    if (reduit && tour > 0) {
+      let a = debut - 1
+      const minuteur = setInterval(
+        () => {
+          a += 1
+          setAnnee(a)
+          if (a >= fin) clearInterval(minuteur)
+        },
+        Math.max(250, (duree * 1000) / Math.max(1, fin - debut)),
+      )
+      return () => clearInterval(minuteur)
+    }
     const controle = animate(debut, fin, {
       duration: reduit ? 0.001 : duree,
       ease: 'linear',

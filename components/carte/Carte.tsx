@@ -679,7 +679,8 @@ export function Carte({
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
       const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
-      const projet = CATALOGUE.find((p) => p.trace === trace)
+      // Sans tracé touché, aucun projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
+      const projet = trace ? CATALOGUE.find((p) => p.trace === trace) : undefined
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
       const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['stations'] })[0]
