@@ -7,7 +7,7 @@ import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
-import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace } from '@/lib/modele'
+import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace, suiteDe } from '@/lib/modele'
 import {
   correspondances,
   direLignes,
@@ -22,7 +22,7 @@ import {
 import { NOM_ARRET_MAX } from '@/lib/partie'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
-import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
+import type { Estimation, LigneJoueur, Mandat, ModeLigne } from '@/lib/types'
 
 import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
@@ -71,15 +71,21 @@ const distanceBassin = (mode: ModeLigne) => {
 export function useEstimation(): Estimation | null {
   const donnees = useDonnees(useVille().id)
   const brouillon = useJeu((s) => s.brouillon)
+  const lignes = useJeu((s) => s.lignes)
+  const mandat = useJeu((s) => s.mandat)
   return useMemo(
     () =>
       donnees && brouillon
         ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux, {
             passages: brouillon.passages,
             prolonge: Boolean(brouillon.prolonge),
+            // Partir du terminus d'une de vos lignes d'un mandat précédent, c'est la continuer : sa station est déjà là.
+            suite:
+              !brouillon.prolonge &&
+              Boolean(suiteDe({ mode: brouillon.mode, arrets: brouillon.arrets, mandat }, lignes, donnees.carreaux.mx)),
           })
         : null,
-    [donnees, brouillon],
+    [donnees, brouillon, lignes, mandat],
   )
 }
 
@@ -96,14 +102,34 @@ const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice
  * Ce qu'un tracé sait du réseau actuel : lesquels de ses points sont des stations, leurs noms, leurs
  * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
  */
-function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms'> | null) {
+function useReseauDuTrace(trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms'> & { mandat?: Mandat }) | null) {
   const donnees = useDonnees(useVille().id)
+  const lignes = useJeu((s) => s.lignes)
+  const mandatCourant = useJeu((s) => s.mandat)
   return useMemo(() => {
     if (!donnees || !trace) return null
     const { mx } = donnees.carreaux
     const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
     const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx, trace.noms)
     const prolongee = trace.prolonge ? donnees.reseau?.lignes.find((l) => l.id === trace.prolonge) : undefined
+    // Une de vos lignes d'un mandat précédent que ce tracé continue depuis son terminus, dont il reprend la station.
+    const suite = trace.prolonge
+      ? undefined
+      : suiteDe({ mode: trace.mode, arrets: trace.arrets, mandat: trace.mandat ?? mandatCourant }, lignes, mx)
+    if (suite && estStation[0] && !trace.noms?.[0]) {
+      const nomsSuite = nommerTrace(
+        suite.arrets,
+        stationsDuTrace(suite.arrets.length, suite.passages),
+        donnees.lieux,
+        donnees.stations,
+        mx,
+        suite.noms,
+      )
+      const [debut, fin] = [suite.arrets[0]!, suite.arrets.at(-1)!]
+      const depart = trace.arrets[0]!
+      const proche = (p: [number, number]) => Math.hypot(p[0] - depart[0], p[1] - depart[1])
+      noms[0] = (proche(debut) <= proche(fin) ? nomsSuite[0] : nomsSuite.at(-1)) ?? noms[0] ?? null
+    }
     // Le terminus d'un prolongement est sur la ligne prolongée : ce n'est pas une correspondance avec elle.
     const liste = correspondances(trace.arrets, estStation, donnees.stations, mx)
       .map((c) =>
@@ -126,8 +152,8 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
     const depuis = prolongee && depart ? terminusProche(prolongee, depart, mx) : undefined
     if (depuis && estStation[0] && !trace.noms?.[0]) noms[0] = depuis.nom
     const stationsNommees = noms.filter((x): x is string => Boolean(x))
-    return { estStation, noms, stationsNommees, liste, prolongee, aProlonger, donnees }
-  }, [donnees, trace])
+    return { estStation, noms, stationsNommees, liste, prolongee, suite, aProlonger, donnees }
+  }, [donnees, trace, lignes, mandatCourant])
 }
 
 /** Les stations d'une ligne, dans l'ordre, reliées par un trait. */
@@ -536,7 +562,9 @@ export function Traceur() {
           ? `Modifier ${modifiee.nom}`
           : r?.prolongee
             ? `Prolonger le ${minuscule(r.prolongee.nom)}`
-            : `Tracer un ${NOM_MODE[brouillon.mode]}`
+            : r?.suite
+              ? `Prolonger ${r.suite.nom}`
+              : `Tracer un ${NOM_MODE[brouillon.mode]}`
       }
       onFermer={fermer}
       pied={
@@ -575,19 +603,24 @@ export function Traceur() {
         </div>
       ) : null}
       {r?.prolongee ? (
-        <div className="flex flex-col gap-1.5 rounded-2xl bg-rouge-pale px-4 py-3">
-          <p className="text-[14px] leading-snug font-semibold">
+        <div className="flex flex-col gap-1 rounded-xl bg-rouge-pale px-3 py-2.5">
+          <p className="text-[13px] leading-snug font-semibold">
             Vous prolongez le {minuscule(r.prolongee.nom)} depuis {noms[0] ?? 'son terminus'}. Cette station existe déjà : vous ne payez que
             les nouvelles.
           </p>
           <button
             type="button"
             onClick={detacher}
-            className="min-h-9 self-start text-[13px] font-extrabold text-rouge-fonce underline underline-offset-3"
+            className="min-h-8 self-start text-[12.5px] font-extrabold text-rouge-fonce underline underline-offset-3"
           >
             En faire une ligne à part
           </button>
         </div>
+      ) : r?.suite ? (
+        <p className="rounded-xl bg-rouge-pale px-3 py-2.5 text-[13px] leading-snug font-semibold">
+          Vous prolongez votre ligne {r.suite.nom}, décidée au mandat {r.suite.mandat}, depuis {noms[0] ?? 'son terminus'}. Cette station
+          existe déjà : vous ne payez que les nouvelles.
+        </p>
       ) : null}
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">Type de ligne</legend>
@@ -780,9 +813,9 @@ export function Traceur() {
             <Surtitre>Ce que coûte la ligne</Surtitre>
             <DetailCout
               e={e}
-              arrets={stations - (brouillon.prolonge ? 1 : 0)}
+              arrets={stations - (brouillon.prolonge || r?.suite ? 1 : 0)}
               mode={brouillon.mode}
-              prolonge={Boolean(brouillon.prolonge)}
+              prolonge={Boolean(brouillon.prolonge) || Boolean(r?.suite)}
             />
           </div>
           <div className="hidden flex-col gap-0.5 lg:flex">
@@ -924,9 +957,11 @@ export function MaLigne() {
     nomSaisi ??
     (r?.prolongee
       ? `Prolongement du ${minuscule(r.prolongee.nom)}`
-      : noms.length >= 2
-        ? `${noms[0]} - ${noms.at(-1)}`
-        : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+      : r?.suite
+        ? `Prolongement de ${r.suite.nom}`
+        : noms.length >= 2
+          ? `${noms[0]} - ${noms.at(-1)}`
+          : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
   // La part payée sur ce mandat ; en modification, l'ancienne version libère la sienne.
@@ -944,7 +979,9 @@ export function MaLigne() {
             ? 'Modification de votre ligne'
             : r?.prolongee
               ? `Prolongement du ${minuscule(r.prolongee.nom)}`
-              : `Votre ligne de ${NOM_MODE[brouillon.mode]}`}
+              : r?.suite
+                ? `Prolongement de ${r.suite.nom}`
+                : `Votre ligne de ${NOM_MODE[brouillon.mode]}`}
         </Pastille>
       }
       titre={
@@ -1000,9 +1037,9 @@ export function MaLigne() {
         <Surtitre>Ce que coûte la ligne</Surtitre>
         <DetailCout
           e={e}
-          arrets={noms.length - (brouillon.prolonge ? 1 : 0)}
+          arrets={noms.length - (brouillon.prolonge || r?.suite ? 1 : 0)}
           mode={brouillon.mode}
-          prolonge={Boolean(brouillon.prolonge)}
+          prolonge={Boolean(brouillon.prolonge) || Boolean(r?.suite)}
         />
       </div>
       <div className="flex flex-col gap-0.5">
@@ -1102,7 +1139,11 @@ export function FicheLigne({ id }: { id: string }) {
     <Panneau
       surtitre={
         <Pastille icone="trace">
-          {r?.prolongee ? `Prolongement du ${minuscule(r.prolongee.nom)}` : `Votre ligne de ${NOM_MODE[l.mode]}`}
+          {r?.prolongee
+            ? `Prolongement du ${minuscule(r.prolongee.nom)}`
+            : r?.suite
+              ? `Prolongement de ${r.suite.nom}`
+              : `Votre ligne de ${NOM_MODE[l.mode]}`}
         </Pastille>
       }
       titre={l.nom}
@@ -1122,7 +1163,12 @@ export function FicheLigne({ id }: { id: string }) {
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>Ce que coûte la ligne</Surtitre>
-        <DetailCout e={e} arrets={noms.length - (l.prolonge ? 1 : 0)} mode={l.mode} prolonge={Boolean(l.prolonge)} />
+        <DetailCout
+          e={e}
+          arrets={noms.length - (l.prolonge || r?.suite ? 1 : 0)}
+          mode={l.mode}
+          prolonge={Boolean(l.prolonge) || Boolean(r?.suite)}
+        />
       </div>
       <div className="flex flex-col gap-0.5">
         <Surtitre>

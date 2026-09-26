@@ -932,15 +932,29 @@ export function Carte({
       [p.x - r, p.y - r],
       [p.x + r, p.y + r],
     ]
-    /** La position d'une station posée : celle de la station existante la plus proche à l'écran, sinon le point touché. */
+    /**
+     * La position d'une station posée : celle de la station existante la plus proche à l'écran, ou le terminus d'une de
+     * vos lignes, qu'on peut ainsi prolonger au mandat suivant ; sinon le point touché.
+     */
     function accrocher(point: { x: number; y: number }, lngLat: { lng: number; lat: number }): [number, number] {
       let meilleure: [number, number] | null = null
       let distance = Infinity
-      for (const f of m.queryRenderedFeatures(zoneAutour(point, 14), { layers: ['gares', 'stations'] })) {
-        const c = (f.geometry as Point).coordinates as [number, number]
+      const garder = (c: [number, number]) => {
         const q = m.project(c)
         const d = Math.hypot(q.x - point.x, q.y - point.y)
         if (d < distance) [distance, meilleure] = [d, c]
+      }
+      for (const f of m.queryRenderedFeatures(zoneAutour(point, 14), { layers: ['gares', 'stations'] })) {
+        garder((f.geometry as Point).coordinates as [number, number])
+      }
+      const jeu = useJeu.getState()
+      for (const l of jeu.lignes) {
+        if (l.id === jeu.brouillon?.edition) continue
+        for (const t of [l.arrets[0], l.arrets.at(-1)]) {
+          if (!t) continue
+          const q = m.project(t)
+          if (Math.hypot(q.x - point.x, q.y - point.y) <= 16) garder(t)
+        }
       }
       return meilleure ?? [lngLat.lng, lngLat.lat]
     }

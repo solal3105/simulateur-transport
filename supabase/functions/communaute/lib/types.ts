@@ -111,6 +111,11 @@ export interface OptionsLigne {
   passages?: number[]
   /** Le premier point est le terminus d'une ligne existante : sa station est déjà construite. */
   prolonge?: boolean
+  /**
+   * Le premier point est le terminus d'une ligne du joueur décidée à un mandat précédent, que celle-ci continue : sa
+   * station est déjà construite. Celui qui appelle l'a vérifié (`suiteDe`).
+   */
+  suite?: boolean
 }
 
 export interface Estimation {
