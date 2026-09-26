@@ -23,14 +23,17 @@ function libelleReste(reste: number, apercu: number) {
  * Les deux boutons de la partie, cachés pendant le tutoriel et pendant le tracé d'une ligne : la maison
  * ramène à l'accueil, où la partie enregistrée attend, et le menu regroupe tout le reste.
  */
-function BoutonsPartie({ className }: { className?: string }) {
+function BoutonsPartie({ className, petit = false }: { className?: string; petit?: boolean }) {
   const { ouvrir, allerAccueil, ecran, brouillon, panneau } = useJeu()
   if (ecran === 'tuto' || brouillon) return null
-  const rond = 'grid size-10 shrink-0 place-items-center rounded-full bg-white/18 transition-colors hover:bg-white/28'
+  const rond = clsx(
+    'grid shrink-0 place-items-center rounded-full bg-white/18 transition-colors hover:bg-white/28',
+    petit ? 'size-8' : 'size-10',
+  )
   return (
-    <div className={clsx('flex shrink-0 items-center gap-2', className)}>
+    <div className={clsx('flex shrink-0 items-center', petit ? 'gap-1.5' : 'gap-2', className)}>
       <button type="button" aria-label="Retour à l’accueil" title="Retour à l’accueil" onClick={allerAccueil} className={rond}>
-        <Icone nom="maison" taille={20} epaisseur={2.4} />
+        <Icone nom="maison" taille={petit ? 16 : 20} epaisseur={2.4} />
       </button>
       <button
         type="button"
@@ -40,7 +43,7 @@ function BoutonsPartie({ className }: { className?: string }) {
         onClick={() => ouvrir({ type: 'menu' })}
         className={rond}
       >
-        <Icone nom="burger" taille={20} epaisseur={2.4} />
+        <Icone nom="burger" taille={petit ? 16 : 20} epaisseur={2.4} />
       </button>
     </div>
   )
@@ -72,41 +75,36 @@ export function Entete({ attenue }: { attenue?: boolean }) {
 
   return (
     <header className={clsx('absolute inset-x-0 top-0 z-20 bg-rouge text-white transition-opacity', attenue && 'opacity-60')}>
-      {/* Téléphone */}
-      <div className="flex flex-col gap-2.5 rounded-b-[22px] px-4 pt-3.5 pb-3.5 lg:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="truncate text-[13px] font-extrabold">{etape}</span>
-            <span className="chiffres shrink-0 text-xs font-semibold opacity-80">{annees}</span>
+      {/* Téléphone : deux lignes serrées, pour laisser la carte visible. */}
+      <div className="flex flex-col gap-1.5 rounded-b-[16px] px-3 pt-2 pb-2.5 lg:hidden">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate text-[12.5px] font-extrabold">{etape}</span>
+            <span className="chiffres shrink-0 text-[11px] font-semibold opacity-80">{annees}</span>
           </div>
-          <div className="-my-2 -mr-1.5 flex shrink-0 items-center gap-2">
-            {retour ? <BoutonRetour forme="rond" /> : null}
-            <BoutonsPartie />
+          <div className="-my-1 flex shrink-0 items-center gap-1.5">
+            {retour ? <BoutonRetour forme="rond" className="size-8!" /> : null}
+            <BoutonsPartie petit />
           </div>
         </div>
-        <div className="flex items-end justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
-            <div className={clsx('flex items-baseline gap-1.5', reste.manque && 'text-encre')}>
-              <span className="chiffres text-[32px] leading-none font-black tracking-tight">{reste.valeur}</span>
-              <span className="text-sm font-extrabold">M€</span>
-            </div>
-            <div className="text-[12.5px] font-semibold opacity-90">
-              {libre ? `investis, pour ${n(depenses.budgetReel)} M€ de budget réel` : reste.texte.replace('M€ ', '')}
-            </div>
+        <div className="flex items-center justify-between gap-3">
+          <div className={clsx('flex min-w-0 items-baseline gap-1', reste.manque && 'text-encre')}>
+            <span className="chiffres text-[22px] leading-none font-black tracking-tight">{reste.valeur}</span>
+            <span className="text-[12px] font-extrabold">M€</span>
+            <span className="truncate text-[11.5px] font-semibold opacity-90">{libre ? 'investis' : reste.texte.replace('M€ ', '')}</span>
           </div>
-          <div className="flex flex-col items-end gap-0.5">
-            <motion.div
-              key={voyageurs}
-              initial={{ scale: 1.25 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 12 }}
-              className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-rouge"
-            >
-              <Icone nom="voyageurs" taille={15} epaisseur={2.3} />
-              <span className="chiffres text-sm font-black">+{n(voyageursAnimes)}</span>
-            </motion.div>
-            <div className="text-[11.5px] font-semibold opacity-90">voyageurs par jour</div>
-          </div>
+          <motion.div
+            key={voyageurs}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+            className="flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-0.5 text-rouge"
+            aria-label={`${n(voyageurs)} voyageurs gagnés par jour`}
+          >
+            <Icone nom="voyageurs" taille={13} epaisseur={2.4} />
+            <span className="chiffres text-[12.5px] font-black">+{n(voyageursAnimes)}</span>
+            <span className="text-[10.5px] font-bold">/ jour</span>
+          </motion.div>
         </div>
         <Jauge segments={segments} total={total} surRouge label={labelJauge} />
       </div>
