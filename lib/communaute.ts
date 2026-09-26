@@ -101,7 +101,9 @@ async function appeler<T>(action: string, donnees: Record<string, unknown> = {})
 
 /** Les réseaux publiés d'une ville : ceux qui tiennent le budget, ou ceux du jeu libre, jamais mêlés. */
 export function listerReseaux(tri: Tri, ville: IdVille = 'lyon', libre = false, limite = 30) {
-  const ordre = tri === 'populaires' ? 'soutiens.desc,cree_le.desc' : 'cree_le.desc'
+  // À égalité de soutiens, le réseau dont d'autres joueurs sont le plus souvent partis, puis celui qui gagne le plus de
+  // voyageurs : sans soutien, les plus soutenus ne doivent pas ressembler aux plus récents.
+  const ordre = tri === 'populaires' ? 'soutiens.desc,reprises.desc,voyageurs.desc,cree_le.desc' : 'cree_le.desc'
   return lire<ReseauPublie[]>(
     `reseaux?select=${COLONNES}&ville=eq.${ville}&libre=eq.${libre}&visibilite=eq.publique&order=${ordre}&limit=${limite}`,
   )
