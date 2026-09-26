@@ -125,7 +125,7 @@ interface Etat {
    * de base ; depuis le bilan, c'est continuer la partie au-delà.
    */
   mandatSuivant: () => void
-  /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
+  /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux des suivants à leur mandat. */
   reprendre: (p: PartiePartagee, inspire?: Inspiration) => void
   marquerPublie: (id: string) => void
   /** Montre l'accueil sans rien effacer : la partie, finie ou non, attend qu'on la reprenne ou qu'on en commence une autre. */

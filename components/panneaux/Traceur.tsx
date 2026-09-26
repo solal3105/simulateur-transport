@@ -1048,7 +1048,7 @@ export function FicheLigne({ id }: { id: string }) {
   if (!l) return null
   const e = l.estimation
   const annee = ouverture(l.mandat, e.duree)
-  // Comme un projet du catalogue, une ligne décidée au premier mandat est lancée : on ne la supprime plus au second.
+  // Comme un projet du catalogue, une ligne décidée à un mandat précédent est lancée : on ne la supprime plus.
   const modifiable = l.mandat === mandat
   const moitie = Math.round(e.cout / 2)
   const supprimer = () => {
@@ -1058,7 +1058,12 @@ export function FicheLigne({ id }: { id: string }) {
 
   let pied: React.ReactNode
   if (!modifiable) {
-    pied = <p className="text-sm leading-relaxed text-gris">Décidée pendant le premier mandat, cette ligne ne peut plus être supprimée.</p>
+    pied = (
+      <p className="text-sm leading-relaxed text-gris">
+        {l.mandat === 1 ? 'Décidée pendant le premier mandat' : `Décidée pendant le mandat ${l.mandat}`}, cette ligne ne peut plus être
+        supprimée.
+      </p>
+    )
   } else if (confirmer) {
     pied = (
       <div role="group" aria-labelledby="supprimer-ligne" className="flex flex-col gap-3">
