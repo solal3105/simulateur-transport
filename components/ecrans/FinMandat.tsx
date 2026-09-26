@@ -3,34 +3,35 @@
 import { motion } from 'motion/react'
 
 import { nomReserve } from '@/lib/budget'
-import { MANDATS } from '@/lib/catalogue'
+import { debutMandat, finMandat } from '@/lib/catalogue'
 import { n } from '@/lib/format'
-import { bilanMandat, ouvertures } from '@/lib/regles'
+import { bilanMandat, leviersDu, ouvertures } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 
 import { cascade, useCompteur, useDefilement } from '../anim'
 import { Carte } from '../carte/Carte'
 import { useCouleursReseau } from '../couleurs'
 import { segmentsBudget, useBilan } from '../partie/budget'
-import { Bouton, EtapesMandat, Icone, Jauge, Surtitre } from '../ui'
+import { Bouton, Icone, Jauge, Surtitre } from '../ui'
 
 const MARGES_CARTE = { top: 20, left: 20, right: 20, bottom: 20 }
 
 export function FinMandat() {
-  const { chantiers, lignes, leviers, commencerMandat2, aVenir } = useJeu()
+  const { chantiers, lignes, leviers, mandatSuivant, aVenir } = useJeu()
   const ville = useVille()
   useCouleursReseau(ville.id)
-  const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
+  // Les choix du réseau repris qui arrivent au second mandat ; ceux des mandats d'après attendent leur tour.
+  const nombreAVenir = aVenir ? [...aVenir.chantiers, ...aVenir.lignes].filter((x) => x.mandat === 2).length : 0
   const bilan1 = useBilan(1)
   const liste = ouvertures(chantiers, lignes)
-  const ouverts = liste.filter((o) => o.annee <= MANDATS[1].fin)
-  const enChantier = liste.filter((o) => o.annee > MANDATS[1].fin)
+  const ouverts = liste.filter((o) => o.annee <= finMandat(1))
+  const enChantier = liste.filter((o) => o.annee > finMandat(1))
   const reportes = [...chantiers, ...lignes].filter((x) => x.mandat === 1 && x.etale)
   // Le second mandat démarre avec les mêmes leviers que le premier.
-  const bilan2 = bilanMandat(2, chantiers, lignes, { 1: leviers[1], 2: leviers[1] }, ville)
+  const bilan2 = bilanMandat(2, chantiers, lignes, { 1: leviersDu(leviers, 1), 2: leviersDu(leviers, 1) }, ville)
   const { segments, total } = segmentsBudget(bilan2)
   // Les six ans du mandat défilent : l'année, et sur la carte les chantiers qui ouvrent.
-  const { annee, termine, relancer } = useDefilement(MANDATS[1].debut, MANDATS[1].fin, 2.6)
+  const { annee, termine, relancer } = useDefilement(debutMandat(1), finMandat(1), 2.6)
   const libres = useCompteur(bilan2.reste, 1.4, 0)
 
   return (
@@ -42,10 +43,10 @@ export function FinMandat() {
         className="mx-auto grid min-h-dvh max-w-[1300px] gap-8 px-6 pt-6 pb-8 lg:grid-cols-2 lg:gap-18 lg:px-18 lg:py-12"
       >
         <motion.div variants={cascade.parent} className="flex flex-col gap-5 lg:gap-7">
-          <EtapesMandat mandat={1} />
+          <Surtitre className="text-white/85">Fin du premier mandat</Surtitre>
           <div
             className="chiffres text-[84px] leading-[0.85] font-black tracking-[-0.05em] lg:text-[180px]"
-            aria-label={String(MANDATS[1].fin)}
+            aria-label={String(finMandat(1))}
           >
             {Math.round(annee)}
           </div>
@@ -131,13 +132,7 @@ export function FinMandat() {
             </p>
           </section>
 
-          <Bouton
-            genre="blanc"
-            icone="fleche"
-            taille="grand"
-            onClick={commencerMandat2}
-            className="mt-auto w-full lg:w-[360px] lg:self-end"
-          >
+          <Bouton genre="blanc" icone="fleche" taille="grand" onClick={mandatSuivant} className="mt-auto w-full lg:w-[360px] lg:self-end">
             Commencer le second mandat
           </Bouton>
         </motion.div>

@@ -308,17 +308,6 @@ export function Logo({ taille = 36, inverse }: { taille?: number; inverse?: bool
   )
 }
 
-export function EtapesMandat({ mandat, surRouge = true }: { mandat: 1 | 2; surRouge?: boolean }) {
-  const actif = surRouge ? 'bg-white' : 'bg-rouge'
-  const inactif = surRouge ? 'bg-white/35' : 'bg-trait'
-  return (
-    <div className="flex gap-1" aria-hidden="true">
-      <div className={clsx('h-1.5 w-5.5 rounded-full', actif)} />
-      <div className={clsx('h-1.5 w-5.5 rounded-full', mandat === 2 ? actif : inactif)} />
-    </div>
-  )
-}
-
 /**
  * Une rangée qui défile sur téléphone garde son élément choisi en vue, sans faire bouger la page : à
  * poser sur la rangée, avec ce qui change le choix.

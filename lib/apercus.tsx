@@ -2,14 +2,14 @@ import { ImageResponse } from 'next/og'
 import type { ReactElement, ReactNode } from 'react'
 
 import { libre } from './budget'
-import { catalogueDe, nombreProjets } from './catalogue'
+import { catalogueDe, horizon, nombreProjets } from './catalogue'
 import { couleurLigne } from './couleurs'
 import { enLettres, n } from './format'
 import { FORMULE } from './formule'
 import { cadreMiniature, cheminsFond, cheminsReseau } from './miniature'
 import { stationsDuTrace } from './modele'
 import { polices } from './og'
-import type { PartieCompacte } from './partie'
+import { mandatsDe, type PartieCompacte } from './partie'
 import { tracesProjets, type TracesProjets } from './traces'
 import type { ModeLigne } from './types'
 import { MARQUE, VILLES, type IdVille, type Ville } from './villes'
@@ -340,7 +340,7 @@ export interface ReseauApercu {
   voyageurs: number
   investi: number
   libre: boolean
-  /** Le budget des deux mandats est tenu ; absent quand on ne le sait pas. */
+  /** Le budget de chaque mandat est tenu ; absent quand on ne le sait pas. */
   equilibre?: boolean
 }
 
@@ -366,7 +366,7 @@ export function imageReseau(ville: Ville, r: ReseauApercu) {
   return rendre(
     <Affiche ville={ville} traces={traces}>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <Surtitre>{`${MARQUE}, ${ville.nom} en 2038${r.libre ? ', jeu libre' : ''}`}</Surtitre>
+        <Surtitre>{`${MARQUE}, ${ville.nom} en ${horizon(mandatsDe(r.partie))}${r.libre ? ', jeu libre' : ''}`}</Surtitre>
         <Titre>{r.titre}</Titre>
         {r.auteur ? (
           <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, marginTop: 14, color: 'rgba(255,255,255,0.9)' }}>{r.auteur}</div>

@@ -4,7 +4,7 @@ import { lyon } from './catalogues/lyon.ts'
 import { marseille } from './catalogues/marseille.ts'
 import { nice } from './catalogues/nice.ts'
 import { toulouse } from './catalogues/toulouse.ts'
-import type { Action, Catalogue, Projet } from './types.ts'
+import type { Action, Catalogue, Mandat, Projet } from './types.ts'
 import type { IdVille } from './villes.ts'
 
 /**
@@ -45,7 +45,19 @@ export function mots(id: string) {
   return { verbe, participe: projet?.feminin ? `${participe}e` : participe }
 }
 
-export const MANDATS = {
-  1: { debut: 2026, fin: 2032 },
-  2: { debut: 2032, fin: 2038 },
-} as const
+/** Un mandat dure six ans, et le premier commence en 2026. */
+const PREMIERE_ANNEE = 2026
+const DUREE_MANDAT = 6
+export const debutMandat = (m: Mandat) => PREMIERE_ANNEE + DUREE_MANDAT * (m - 1)
+export const finMandat = (m: Mandat) => debutMandat(m) + DUREE_MANDAT
+
+/** La partie de base compte deux mandats, jusqu'en 2038 ; le jeu libre couvre les mêmes douze ans d'un coup. */
+export const MANDATS_DE_BASE = 2
+/** Au-delà, une partie ne vient pas du jeu : cent mandats mènent en 2626. */
+export const MANDATS_MAX = 100
+
+/** Le nombre de mandats d'une partie arrivée à ce mandat : au moins les deux de la partie de base. */
+export const mandatsJoues = (mandat: Mandat) => Math.max(MANDATS_DE_BASE, mandat)
+
+/** L'année où l'on regarde le réseau d'une partie de tant de mandats : la fin du dernier, et jamais avant 2038. */
+export const horizon = (mandats: Mandat) => finMandat(Math.max(MANDATS_DE_BASE, mandats))

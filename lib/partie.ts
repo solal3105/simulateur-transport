@@ -1,7 +1,7 @@
-import { PROJETS, projetDe } from './catalogue'
+import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue'
 import { leviersPossibles } from './leviers'
 import { estimer, prolongementPossible, type Carreaux } from './modele'
-import { LEVIERS_NEUTRES } from './regles'
+import { LEVIERS_NEUTRES, leviersDu } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -14,9 +14,12 @@ export interface PartiePartagee {
   ville: IdVille
   /** Jeu libre : sans budget à tenir ni mandats, et signalé comme tel partout où le réseau se montre. */
   libre: boolean
+  /** Le nombre de mandats joués : deux dans la partie de base et en jeu libre, davantage quand on l'a continuée. */
+  mandats: number
   chantiers: Chantier[]
   lignes: LigneJoueur[]
-  leviers: Record<1 | 2, Leviers>
+  /** Les leviers de chaque mandat joué. */
+  leviers: Record<number, Leviers>
 }
 
 export const VERSION_PARTIE = 1
@@ -37,13 +40,15 @@ export interface PartieCompacte {
   w?: IdVille
   /** 1 pour une partie en jeu libre, absent sinon. */
   x?: 1
+  /** Le nombre de mandats joués, absent pour la partie de base en deux mandats. */
+  k?: number
   c: [string, number, number, string, number][]
   /**
    * Les lignes : nom, mode, mandat, paiement étalé, points, et au besoin les rangs des points de passage, la ligne prolongée
    * et les stations renommées par le joueur, chacune avec son rang.
    */
   l: { n: string; m: string; d: number; e: number; a: [number, number][]; p?: number[]; o?: string; s?: [number, string][] }[]
-  f: Record<1 | 2, Leviers>
+  f: Record<number, Leviers>
 }
 
 /** Les stations renommées d'une ligne, avec leur rang : un point de passage n'a pas de nom à garder. */
@@ -55,6 +60,7 @@ export function compacter(p: PartiePartagee): PartieCompacte {
     v: VERSION_PARTIE,
     ...(p.ville === 'lyon' ? {} : { w: p.ville }),
     ...(p.libre ? { x: 1 as const } : {}),
+    ...(p.mandats > MANDATS_DE_BASE ? { k: p.mandats } : {}),
     c: p.chantiers.map((c) => [c.id, c.mandat, c.etale ? 1 : 0, c.varianteId ?? '', c.option ? 1 : 0]),
     l: p.lignes.map((l) => ({
       n: l.nom,
@@ -66,7 +72,7 @@ export function compacter(p: PartiePartagee): PartieCompacte {
       ...(l.prolonge ? { o: l.prolonge } : {}),
       ...(nomsChoisis(l).length ? { s: nomsChoisis(l) } : {}),
     })),
-    f: p.leviers,
+    f: Object.fromEntries(Array.from({ length: Math.max(MANDATS_DE_BASE, p.mandats) }, (_, i) => [i + 1, leviersDu(p.leviers, i + 1)])),
   }
 }
 
@@ -85,6 +91,13 @@ function lireNoms(brut: unknown, nombre: number, passages: number[]) {
     noms[k] = nomArret(nom) || null
   }
   return noms.some(Boolean) ? noms : undefined
+}
+
+/** Le nombre de mandats d'une partie compacte : deux dans la partie de base et en jeu libre, jusqu'à cent quand on l'a continuée. */
+export function mandatsDe(brut: unknown) {
+  if (!brut || typeof brut !== 'object') return MANDATS_DE_BASE
+  const { k, x } = brut as Partial<PartieCompacte>
+  return x !== 1 && typeof k === 'number' && Number.isInteger(k) && k > MANDATS_DE_BASE && k <= MANDATS_MAX ? k : MANDATS_DE_BASE
 }
 
 /** La ville d'une partie compacte, avant même de la vérifier : il faut charger ses données pour la relire. */
@@ -111,6 +124,9 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   const catalogue = VILLES[ville].catalogue
   // Le jeu libre n'a qu'une étape : tout y est décidé d'un coup, payé en une fois, sans leviers.
   const libre = b.x === 1
+  const mandats = mandatsDe(brut)
+  // Un mandat hors de la partie ramène la décision au premier, comme en jeu libre.
+  const mandatDe = (m: unknown) => (!libre && typeof m === 'number' && Number.isInteger(m) && m >= 1 && m <= mandats ? m : 1)
 
   const vus = new Set<string>()
   const chantiers: Chantier[] = []
@@ -123,9 +139,9 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     vus.add(projet.id)
     chantiers.push({
       id: projet.id,
-      mandat: mandat === 2 && !libre ? 2 : 1,
+      mandat: mandatDe(mandat),
       // Seul un projet décidé au premier mandat peut être payé en deux fois.
-      etale: etale === 1 && mandat !== 2 && !libre,
+      etale: etale === 1 && mandatDe(mandat) === 1 && !libre,
       varianteId: projet.variantes?.some((v) => v.id === varianteId) ? (varianteId as string) : undefined,
       option: option === 1 && Boolean(projet.option),
     })
@@ -160,8 +176,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       ...(passages.length ? { passages } : {}),
       ...(prolonge ? { prolonge } : {}),
       ...(noms ? { noms } : {}),
-      mandat: l.d === 2 && !libre ? 2 : 1,
-      etale: l.e === 1 && l.d !== 2 && !libre,
+      mandat: mandatDe(l.d),
+      etale: l.e === 1 && mandatDe(l.d) === 1 && !libre,
       arrets: l.a,
       estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
     })
@@ -181,11 +197,9 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     metroNuit: l?.metroNuit === true,
     tva: l?.tva === true,
   })
-  const f = (b.f ?? {}) as Partial<Record<1 | 2, Partial<Leviers>>>
+  const f = (b.f ?? {}) as Partial<Record<number, Partial<Leviers>>>
   const parametres = VILLES[ville].budget.leviers
-  const leviers =
-    parametres && !libre
-      ? { 1: leviersPossibles(lire(f[1]), parametres), 2: leviersPossibles(lire(f[2]), parametres) }
-      : { 1: LEVIERS_NEUTRES, 2: LEVIERS_NEUTRES }
-  return { ville, libre, chantiers: chantiersValides, lignes, leviers }
+  const leviers: Record<number, Leviers> = {}
+  for (let m = 1; m <= mandats; m += 1) leviers[m] = parametres && !libre ? leviersPossibles(lire(f[m]), parametres) : LEVIERS_NEUTRES
+  return { ville, libre, mandats, chantiers: chantiersValides, lignes, leviers }
 }

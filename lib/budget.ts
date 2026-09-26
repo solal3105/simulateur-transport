@@ -22,8 +22,11 @@ export interface Source {
 
 /** Un poste du budget : son montant à chaque mandat, comment nous l'avons établi, et d'où viennent les chiffres. */
 export interface Poste {
-  /** En millions d'euros, pour chacun des deux mandats. */
-  montants: Record<Mandat, number>
+  /**
+   * En millions d'euros, pour chacun des deux mandats de la partie de base. Au-delà de 2038, personne ne publie ses
+   * investissements : un mandat de plus reprend les montants du second (voir `montant`).
+   */
+  montants: Record<1 | 2, number>
   /** Ce que couvre ce poste, en une phrase courte que tout le monde comprend, avec un ou deux chiffres. */
   simple: string
   /** Le détail du calcul, pour qui veut vérifier. */
@@ -53,11 +56,14 @@ export interface BudgetVille {
 export const POSTES = ['total', 'decides', 'bus', 'lignes'] as const
 export type NomPoste = (typeof POSTES)[number]
 
+/** Le montant d'un poste pour un mandat : chaque mandat après le second reprend les montants du second. */
+export const montant = (p: Poste, m: Mandat) => p.montants[m <= 1 ? 1 : 2]
+
 /** L'enveloppe d'un mandat pour le jeu : tout l'investissement, moins les projets décidés déjà sur la carte. */
-export const enveloppe = (b: BudgetVille, m: Mandat) => b.total.montants[m] - b.decides.montants[m]
+export const enveloppe = (b: BudgetVille, m: Mandat) => montant(b.total, m) - montant(b.decides, m)
 
 /** Ce qui est réservé d'office sur un mandat : les bus et les lignes existantes. */
-export const reserve = (b: BudgetVille, m: Mandat) => b.bus.montants[m] + b.lignes.montants[m]
+export const reserve = (b: BudgetVille, m: Mandat) => montant(b.bus, m) + montant(b.lignes, m)
 
 /** Ce qui revient au joueur sur un mandat, avant ses leviers de financement. */
 export const libre = (b: BudgetVille, m: Mandat) => enveloppe(b, m) - reserve(b, m)

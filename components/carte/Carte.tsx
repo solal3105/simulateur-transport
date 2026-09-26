@@ -16,7 +16,7 @@ import {
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CATALOGUES, MANDATS, mots } from '@/lib/catalogue'
+import { CATALOGUES, debutMandat, horizon, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
@@ -639,8 +639,8 @@ export function Carte({
   decor?: boolean
   /** Pour le bilan : n'affiche en rouge que ce qui a ouvert à cette date. */
   anneeMax?: number
-  /** Un réseau partagé par lien, affiché à la place de la partie en cours. */
-  partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'>
+  /** Un réseau partagé par lien, affiché à la place de la partie en cours, avec le nombre de mandats qu'il a joués. */
+  partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'> & { mandats?: number }
   /** La ville à montrer, si ce n'est pas celle de la partie en cours : l'accueil, un réseau reçu. */
   ville?: IdVille
 }) {
@@ -661,6 +661,8 @@ export function Carte({
   const chantiers = partie?.chantiers ?? jeu.chantiers
   const lignes = partie?.lignes ?? jeu.lignes
   const trace = brouillon !== null
+  // Ce qui ouvre après la fin de la partie, en 2038 ou à la fin du dernier mandat joué, reste en chantier sur la carte.
+  const fin = horizon(partie ? (partie.mandats ?? 2) : jeu.mandat)
 
   // Une carte de récapitulatif (bilan, fin de mandat, comparaison) cadre tout le réseau montré : la vue de départ,
   // élargie aux projets retenus et aux lignes tracées, qui vont parfois jusqu'au Val d'Europe.
@@ -691,15 +693,15 @@ export function Carte({
       if (c) {
         const annee = ouverture(c.mandat, resoudre(p, c).duree)
         // Dans un récapitulatif, un projet apparaît en chantier l'année de sa décision, puis s'allume à son ouverture.
-        if (anneeMax !== undefined) e = anneeMax < MANDATS[c.mandat].debut ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
-        else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
+        if (anneeMax !== undefined) e = anneeMax < debutMandat(c.mandat) ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
+        else e = annee > fin ? 'chantier' : 'construit'
       } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
       if (ecran === 'tuto' && tuto === 0 && p.id === catalogue.tutoriel?.projet) e = 'choisi'
       etat.set(p.trace, e)
     }
     return etat
-  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax])
+  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax, fin])
 
   // Création de la carte.
   useEffect(() => {
@@ -1041,7 +1043,7 @@ export function Carte({
             type: 'Feature',
             properties: {
               id: l.id,
-              chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin,
+              chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > fin,
               couleur: couleurLigne(l.mode),
               choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
@@ -1101,7 +1103,7 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
+  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau, fin])
 
   // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {

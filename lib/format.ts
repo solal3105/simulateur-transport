@@ -8,6 +8,14 @@ export const km = (v: number) => decimal.format(v)
 export const approx = (v: number) => nombre.format(Math.round(v / 100) * 100)
 export const signe = (v: number) => (v > 0 ? `+${n(v)}` : v < 0 ? `-${n(-v)}` : '0')
 
+const ORDINAUX = ['premier', 'second', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième', 'neuvième', 'dixième']
+/** Le rang en toutes lettres jusqu'à dix, en chiffres au-delà : « premier », « troisième », « 12e ». */
+export const ordinal = (rang: number) => ORDINAUX[rang - 1] ?? `${rang}e`
+
+const NOMBRES = ['un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix']
+/** Un petit nombre en toutes lettres jusqu'à dix, en chiffres au-delà : « trois mandats », « 12 mandats ». */
+export const nombreEnLettres = (v: number) => NOMBRES[v - 1] ?? n(v)
+
 /** « de Camille », mais « d’Inès » : la préposition devant un nom, avec l'élision du français. */
 export const de = (nom: string) => (/^[aeiouyàâäéèêëîïôöûüœ]/i.test(nom) ? `d’${nom}` : `de ${nom}`)
 

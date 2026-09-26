@@ -4,7 +4,7 @@ import { clsx } from 'clsx'
 import { motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-import { PROJETS } from '@/lib/catalogue'
+import { horizon, PROJETS } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { resumer } from '@/lib/regles'
 import type { Chantier, Leviers, LigneJoueur, Mandat } from '@/lib/types'
@@ -21,6 +21,8 @@ export interface Reseau {
   ville: IdVille
   /** Un réseau fait en jeu libre n'a pas de budget à tenir. */
   libre: boolean
+  /** Le nombre de mandats joués : deux, ou davantage quand la partie a été continuée. */
+  mandats: number
   chantiers: Chantier[]
   lignes: LigneJoueur[]
   leviers: Record<Mandat, Leviers>
@@ -73,8 +75,10 @@ function Ligne({ label, a, b, meilleur }: { label: string; a: string; b: string;
  * S'ouvre par-dessus le bilan ; Échap ou le bouton de fermeture y ramènent.
  */
 export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: () => void }) {
-  const ra = resumer(a.chantiers, a.lignes, a.leviers, VILLES[a.ville])
-  const rb = resumer(b.chantiers, b.lignes, b.leviers, VILLES[b.ville])
+  const ra = resumer(a.chantiers, a.lignes, a.leviers, VILLES[a.ville], a.mandats)
+  const rb = resumer(b.chantiers, b.lignes, b.leviers, VILLES[b.ville], b.mandats)
+  // Deux réseaux qui ne s'arrêtent pas la même année le disent : l'un a eu plus de mandats, donc plus d'argent.
+  const [finA, finB] = [horizon(a.mandats), horizon(b.mandats)]
   const catalogue = VILLES[a.ville].catalogue
   const rendement = (r: Resume) => (r.investi > 0 ? Math.round(r.voyageurs / r.investi) : 0)
   const mieux = (va: number, vb: number, plusGrandGagne = true) =>
@@ -139,8 +143,9 @@ export function Comparaison({ a, b, fermer }: { a: Reseau; b: Reseau; fermer: ()
             b={`+${n(rb.voyageurs)}`}
             meilleur={mieux(ra.voyageurs, rb.voyageurs)}
           />
+          {finA !== finB ? <Ligne label="Réseau regardé en" a={String(finA)} b={String(finB)} /> : null}
           <Ligne
-            label="Investi de 2026 à 2038"
+            label={finA === finB ? `Investi de 2026 à ${finA}` : 'Investi'}
             a={`${n(ra.investi)} M€`}
             b={`${n(rb.investi)} M€`}
             meilleur={mieux(ra.investi, rb.investi, false)}

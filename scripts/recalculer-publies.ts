@@ -37,7 +37,7 @@ for (const r of reseaux) {
     console.log(`-- ${r.id} : partie illisible avec les données actuelles, laissée telle quelle`)
     continue
   }
-  const s = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[ville])
+  const s = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[ville], partie.mandats)
   console.log(
     `update public.reseaux set voyageurs = ${s.voyageurs}, investi = ${Math.round(s.investi)}, retenus = ${s.retenus}, libre = ${partie.libre} where id = '${r.id}';`,
   )

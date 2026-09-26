@@ -9,7 +9,8 @@ import { useEffect, useState } from 'react'
 import { chiffresCommunaute, communauteActive, listerReseaux, reseauxDe, useProfilLocal, type ReseauPublie } from '@/lib/communaute'
 import { n } from '@/lib/format'
 import { NOM_COURT } from '@/lib/noms'
-import { villeDePartie } from '@/lib/partie'
+import { horizon } from '@/lib/catalogue'
+import { mandatsDe, villeDePartie } from '@/lib/partie'
 import { useJeu } from '@/lib/store'
 import { adresseAccueil, adresseMethode, adresseReseaux, estVille, ID_VILLES, MARQUE, VILLES, type IdVille } from '@/lib/villes'
 
@@ -129,6 +130,11 @@ export function CarteReseau({ reseau, rang, avecVille }: { reseau: ReseauPublie;
             <span className="absolute top-3 right-3 rounded-full bg-encre px-2.5 py-1 text-[11.5px] font-extrabold text-white">
               Jeu libre
             </span>
+          ) : mandatsDe(reseau.partie) > 2 ? (
+            // Une partie continuée a eu plus de mandats, donc plus d'argent : elle le dit.
+            <span className="absolute top-3 right-3 rounded-full bg-encre px-2.5 py-1 text-[11.5px] font-extrabold text-white">
+              {mandatsDe(reseau.partie)} mandats, jusqu’en {horizon(mandatsDe(reseau.partie))}
+            </span>
           ) : null}
         </div>
         <div className="flex flex-1 flex-col gap-2.5 p-4.5">
@@ -181,7 +187,7 @@ function ALaUne({ reseau }: { reseau: ReseauPublie }) {
           <div className="mt-auto flex flex-col gap-3">
             <div className="flex flex-col">
               <span className="chiffres text-[48px] leading-none font-black tracking-tight">+{n(reseau.voyageurs)}</span>
-              <span className="text-[14px] font-extrabold text-white/85">voyageurs par jour en 2038</span>
+              <span className="text-[14px] font-extrabold text-white/85">voyageurs par jour en {horizon(mandatsDe(reseau.partie))}</span>
             </div>
             <Etiquettes reseau={reseau} clair />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-3">

@@ -3,13 +3,13 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { PROJETS } from './catalogue'
-import { approx } from './format'
+import { finMandat, PROJETS } from './catalogue'
+import { approx, n } from './format'
 import { mesurer } from './mesure'
 import { estimer, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
-import { LEVIERS_NEUTRES } from './regles'
+import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -69,7 +69,7 @@ function nomsGardes(b: Brouillon) {
   return noms.some(Boolean) ? noms : undefined
 }
 
-/** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
+/** Les choix des mandats suivants d'un réseau repris, qui s'ajoutent chacun quand son mandat commence. */
 export interface AVenir {
   chantiers: Chantier[]
   lignes: LigneJoueur[]
@@ -120,7 +120,11 @@ interface Etat {
   changerPaiement: (id: string, etale: boolean) => void
   levier: <K extends keyof Leviers>(cle: K, valeur: Leviers[K]) => void
   finirMandat: () => void
-  commencerMandat2: () => void
+  /**
+   * Commence le mandat suivant, avec les leviers du précédent : après le premier, c'est le second mandat de la partie
+   * de base ; depuis le bilan, c'est continuer la partie au-delà.
+   */
+  mandatSuivant: () => void
   /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
   reprendre: (p: PartiePartagee, inspire?: Inspiration) => void
   marquerPublie: (id: string) => void
@@ -220,43 +224,65 @@ export const useJeu = create<Etat>()(
           chantiers: s.chantiers.map((c) => (c.id === id && c.mandat === s.mandat && s.mandat === 1 ? { ...c, etale } : c)),
           lignes: s.lignes.map((l) => (l.id === id && l.mandat === s.mandat && s.mandat === 1 ? { ...l, etale } : l)),
         })),
-      levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
+      levier: (cle, valeur) =>
+        set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...leviersDu(s.leviers, s.mandat), [cle]: valeur } } })),
       // Le jeu libre n'a qu'une étape : il passe directement au bilan.
       finirMandat: () => {
-        mesurer(get().mandat === 1 && !get().libre ? 'premier mandat fini' : 'partie finie', { reseau: get().ville })
+        mesurer(get().mandat === 1 && !get().libre ? 'premier mandat fini' : 'partie finie', { reseau: get().ville, mandat: get().mandat })
         set({ ecran: get().mandat === 1 && !get().libre ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null })
       },
-      commencerMandat2: () =>
+      mandatSuivant: () => {
+        // En jeu libre, il n'y a pas de mandat : continuer, c'est revenir à la carte pour ajouter des lignes.
+        if (get().libre) {
+          mesurer('partie continuée', { reseau: get().ville, libre: true })
+          return set({ ecran: 'jeu', panneau: null, brouillon: null, publie: null })
+        }
+        if (get().mandat >= 2) mesurer('partie continuée', { reseau: get().ville, mandat: get().mandat + 1 })
         set((s) => {
-          const suite = {
-            ecran: 'jeu' as Ecran,
-            mandat: 2 as Mandat,
-            leviers: { ...s.leviers, 2: { ...s.leviers[1] } },
-            panneau: null,
-            aVenir: null,
-          }
-          if (!s.aVenir) return suite
-          // Les choix repris s'ajoutent, sauf un projet déjà décidé ou un projet qui dépend d'un projet retiré.
+          const mandat = s.mandat + 1
+          const leviers = { ...s.leviers, [mandat]: { ...leviersDu(s.leviers, s.mandat) } }
+          // Un réseau continué change : il pourra être publié à nouveau.
+          const suite = { ecran: 'jeu' as Ecran, mandat, leviers, panneau: null, brouillon: null, publie: null }
+          // Au-delà de la partie de base, un mot dit ce que le nouveau mandat apporte.
+          const annonce = (reste: number) =>
+            mandat > 2
+              ? {
+                  titre: `Mandat ${mandat}, de ${finMandat(s.mandat)} à ${finMandat(mandat)}.`,
+                  texte: `Vous disposez de ${n(reste)} M€. Faute de budget publié au-delà de 2038, chaque mandat reprend celui du second.`,
+                }
+              : null
+          // Les choix repris pour ce mandat s'ajoutent, sauf un projet déjà décidé ou un projet qui dépend d'un projet retiré.
           const decides = new Set(s.chantiers.map((c) => c.id))
-          const repris = s.aVenir.chantiers.filter((c) => !decides.has(c.id))
+          const repris = (s.aVenir?.chantiers ?? []).filter((c) => c.mandat === mandat && !decides.has(c.id))
           const tous = new Set([...decides, ...repris.map((c) => c.id)])
-          const chantiers = repris.filter((c) => {
-            const requis = PROJETS.get(c.id)?.requiert
-            return !requis || tous.has(requis)
-          })
-          const nombre = chantiers.length + s.aVenir.lignes.length
+          const chantiers = [
+            ...s.chantiers,
+            ...repris.filter((c) => {
+              const requis = PROJETS.get(c.id)?.requiert
+              return !requis || tous.has(requis)
+            }),
+          ]
+          const lignes = [...s.lignes, ...(s.aVenir?.lignes ?? []).filter((l) => l.mandat === mandat)]
+          const nombre = chantiers.length - s.chantiers.length + lignes.length - s.lignes.length
+          const plusTard = {
+            chantiers: (s.aVenir?.chantiers ?? []).filter((c) => c.mandat > mandat),
+            lignes: (s.aVenir?.lignes ?? []).filter((l) => l.mandat > mandat),
+          }
+          const reste = bilanMandat(mandat, chantiers, lignes, leviers, VILLES[s.ville]).reste
           return {
             ...suite,
-            chantiers: [...s.chantiers, ...chantiers],
-            lignes: [...s.lignes, ...s.aVenir.lignes],
+            chantiers,
+            lignes,
+            aVenir: plusTard.chantiers.length + plusTard.lignes.length ? plusTard : null,
             message: nombre
               ? {
                   titre: `${nombre} choix du réseau repris ${nombre > 1 ? 'sont ajoutés' : 'est ajouté'}.`,
-                  texte: 'Vous pouvez les garder ou les retirer avant de finir la partie.',
+                  texte: `Vous pouvez ${nombre > 1 ? 'les garder ou les retirer' : 'le garder ou le retirer'} avant de finir le mandat.`,
                 }
-              : null,
+              : annonce(reste),
           }
-        }),
+        })
+      },
       reprendre: (p, inspire) => {
         const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
         const lignes = p.lignes.map(renommer)
@@ -267,14 +293,14 @@ export const useJeu = create<Etat>()(
           ecran: 'jeu',
           chantiers: p.chantiers.filter((c) => c.mandat === 1),
           lignes: lignes.filter((l) => l.mandat === 1),
-          leviers: { 1: { ...p.leviers[1] }, 2: { ...p.leviers[1] } },
-          aVenir: { chantiers: p.chantiers.filter((c) => c.mandat === 2), lignes: lignes.filter((l) => l.mandat === 2) },
+          leviers: { 1: { ...leviersDu(p.leviers, 1) } },
+          aVenir: { chantiers: p.chantiers.filter((c) => c.mandat > 1), lignes: lignes.filter((l) => l.mandat > 1) },
           inspire: inspire ?? null,
           message: {
             titre: 'Vous partez de ce réseau.',
             texte: p.libre
               ? 'C’est un réseau fait en jeu libre : vous continuez sans budget à tenir. Vous pouvez tout modifier.'
-              : 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
+              : 'Ses choix du premier mandat sont en place, ceux des suivants s’ajouteront au fil des mandats. Vous pouvez tout modifier.',
           },
         })
       },

@@ -6,6 +6,8 @@ import { MARQUE, type Ville } from './villes'
 
 interface Contenu {
   ville: Ville
+  /** L'année du réseau montré : 2038, ou la fin du dernier mandat quand la partie a été continuée. */
+  annee: number
   voyageurs: number
   /** Ce que contient le réseau : « 14 projets sur 22 », « 3 lignes tracées ». */
   contenu: string
@@ -148,7 +150,7 @@ export async function dessinerPartage(c: Contenu, format: 'story' | 'paysage'): 
   // Le titre et la phrase du contenu passent à la ligne dans la place qui leur revient : « d'Aix-Marseille-Provence »
   // ne mord plus sur la carte. Le titre finit toujours sur la même ligne de base et remonte d'autant qu'il a de lignes.
   // Le nom du réseau ne se coupe pas : « Lignes d'Azur » reste sur une ligne.
-  const titre = `Mon réseau ${c.ville.reseau.replaceAll(' ', '\u00a0')} en\u00a02038`
+  const titre = `Mon réseau ${c.ville.reseau.replaceAll(' ', '\u00a0')} en\u00a0${c.annee}`
   const phrase = `${c.contenu}${c.libre ? ', en jeu\u00a0libre.' : c.equilibre ? ' et un budget\u00a0tenu.' : '.'}`
   const bloc = (lignes: string[], x: number, y: number, taille: number, graisse: number, interligne: number) =>
     lignes.forEach((l, i) => texte(l, x, y + i * taille * interligne, taille, graisse))

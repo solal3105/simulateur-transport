@@ -6,14 +6,14 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { exigerAcces } from '@/lib/acces'
 import { libre as libreDuMandat } from '@/lib/budget'
-import { catalogueDe, MANDATS, PROJETS } from '@/lib/catalogue'
+import { catalogueDe, debutMandat, finMandat, horizon, MANDATS_MAX, mandatsJoues, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurOuverture, couleurProjet } from '@/lib/couleurs'
-import { enLettres, n } from '@/lib/format'
-import { ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
+import { enLettres, n, nombreEnLettres, ordinal } from '@/lib/format'
+import { bilanMandat, leviersDu, ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
 import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
 import { dessinerPartage } from '@/lib/partage'
-import { useJeu } from '@/lib/store'
+import { useJeu, useVille } from '@/lib/store'
 import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type Ville } from '@/lib/villes'
 
 import { useCompteur, useDefilement } from '../anim'
@@ -46,6 +46,9 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const leviers = partage?.leviers ?? jeu.leviers
   // Le jeu libre n'a pas de budget à tenir : le bilan compare son coût au budget réel des deux mandats.
   const libre = partage?.libre ?? jeu.libre
+  // Deux mandats dans la partie de base, davantage quand on l'a continuée : le réseau se regarde à la fin du dernier.
+  const mandats = partage?.mandats ?? mandatsJoues(jeu.mandat)
+  const fin = horizon(mandats)
   const budgetReel = libreDuMandat(ville.budget, 1) + libreDuMandat(ville.budget, 2)
   // Le visiteur d'un lien a peut-être déjà une partie enregistrée dans ce navigateur.
   const aUnePartie = jeu.chantiers.length + jeu.lignes.length > 0
@@ -85,7 +88,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     const laisses = ville.catalogue ? avecTrace.filter((p) => !faits.has(p.id)) : []
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
-      ...resumer(chantiers, lignes, leviers, ville),
+      ...resumer(chantiers, lignes, leviers, ville, mandats),
       // Les projets du catalogue retenus, sans les lignes tracées par le joueur, comptées à part.
       projetsRetenus: avecTrace.filter((p) => faits.has(p.id)).length,
       laisses,
@@ -93,7 +96,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       plusGros,
       ouvertures: ouvertures(chantiers, lignes),
     }
-  }, [avecTrace, chantiers, lignes, leviers, ville])
+  }, [avecTrace, chantiers, lignes, leviers, ville, mandats])
 
   // Le lien contient toute la partie : qui l'ouvre voit ce réseau se construire, sans compte ni serveur.
   const copierLien = async () => {
@@ -101,10 +104,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       ? `${window.location.origin}/reseau/${publication.id}`
       : partage
         ? window.location.href
-        : await lienDePartage({ ville: ville.id, libre, chantiers, lignes, leviers })
+        : await lienDePartage({ ville: ville.id, libre, mandats, chantiers, lignes, leviers })
     if (navigator.share && window.innerWidth < 1024) {
       try {
-        await navigator.share({ url, title: 'Mon réseau de transport en 2038' })
+        await navigator.share({ url, title: `Mon réseau de transport en ${fin}` })
         return
       } catch {
         // Partage annulé : on copie le lien.
@@ -129,6 +132,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     const blob = await dessinerPartage(
       {
         ville,
+        annee: fin,
         voyageurs: resultat.voyageurs,
         contenu: ville.catalogue
           ? [projetsSur(resultat.projetsRetenus, avecTrace.length), lignes.length ? lignesTracees(lignes.length) : null]
@@ -143,10 +147,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       },
       format,
     )
-    const fichier = new File([blob], `mon-reseau-${ville.id}-2038-${format}.png`, { type: 'image/png' })
+    const fichier = new File([blob], `mon-reseau-${ville.id}-${fin}-${format}.png`, { type: 'image/png' })
     if (navigator.canShare?.({ files: [fichier] })) {
       try {
-        await navigator.share({ files: [fichier], title: `Mon réseau ${ville.reseau} en 2038` })
+        await navigator.share({ files: [fichier], title: `Mon réseau ${ville.reseau} en ${fin}` })
         setEnvoi(null)
         return
       } catch {
@@ -163,8 +167,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   }
 
   // Le réseau se construit sous les yeux du joueur, de 2026 à la dernière ouverture.
-  const derniere = Math.max(MANDATS[2].fin, ...resultat.ouvertures.map((o) => o.annee))
-  const { annee, termine, relancer } = useDefilement(MANDATS[1].debut, derniere, Math.min(6, (derniere - MANDATS[1].debut) * 0.3))
+  const derniere = Math.max(fin, ...resultat.ouvertures.map((o) => o.annee))
+  const { annee, termine, relancer } = useDefilement(debutMandat(1), derniere, Math.min(6, (derniere - debutMandat(1)) * 0.3))
   // Le score monte au rythme des ouvertures.
   const cumul = termine ? resultat.voyageurs : resultat.ouvertures.filter((o) => o.annee <= annee).reduce((t, o) => t + o.voyageurs, 0)
   const voyageursAnimes = useCompteur(cumul, 0.6, 0)
@@ -174,8 +178,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   // Sans catalogue, il n'y a rien à quoi rapporter le réseau : seule la remarque sur les ouvertures tardives reste.
   const explication = [
     ville.catalogue ? `C’est ${partCatalogue} % de ce que le catalogue entier apporterait, pour ${partCout} % de son coût.` : '',
-    resultat.ouvertures.some((o) => o.annee > MANDATS[2].fin)
-      ? 'Certains de ces voyageurs n’arriveront qu’après 2038, quand les derniers chantiers seront terminés.'
+    resultat.ouvertures.some((o) => o.annee > fin)
+      ? `Certains de ces voyageurs n’arriveront qu’après ${fin}, quand les derniers chantiers seront terminés.`
       : '',
   ]
     .filter(Boolean)
@@ -247,16 +251,16 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             className={`flex items-center gap-2 self-start rounded-full px-3.5 py-1.5 text-[13.5px] font-extrabold ${resultat.equilibre ? 'bg-rouge text-white' : 'bg-encre text-white'}`}
           >
             <Icone nom={resultat.equilibre ? 'valider' : 'info'} taille={16} epaisseur={2.8} />
-            {resultat.equilibre ? 'Budget tenu sur les deux mandats' : `Déficit de ${n(-resultat.deficit)} M€`}
+            {resultat.equilibre ? `Budget tenu sur les ${nombreEnLettres(mandats)} mandats` : `Déficit de ${n(-resultat.deficit)} M€`}
           </span>
         )}
 
         <div className="flex flex-col gap-2">
           {publication ? (
-            <h2 className="text-[15px] font-semibold text-gris lg:text-base">Ce réseau transporte chaque jour en 2038</h2>
+            <h2 className="text-[15px] font-semibold text-gris lg:text-base">Ce réseau transporte chaque jour en {fin}</h2>
           ) : (
             <h1 className="text-[15px] font-semibold text-gris lg:text-base">
-              {partage ? 'Ce réseau, partagé avec vous, transporte chaque jour en 2038' : 'Votre réseau en 2038 transporte chaque jour'}
+              {partage ? `Ce réseau, partagé avec vous, transporte chaque jour en ${fin}` : `Votre réseau en ${fin} transporte chaque jour`}
             </h1>
           )}
           <div className="flex items-baseline gap-2.5">
@@ -290,7 +294,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             <Surtitre>{partage ? 'Les ouvertures' : 'Vos ouvertures'}</Surtitre>
             <ol className="flex flex-col gap-2.5">
               {resultat.ouvertures.map((o) => {
-                const tard = o.annee > MANDATS[2].fin
+                const tard = o.annee > fin
                 const ouverte = o.annee <= annee
                 return (
                   <motion.li
@@ -324,8 +328,9 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
         {!libre && resultat.nonDepense > 0 ? (
           <p className="text-[14.5px] leading-relaxed text-gris">
-            {partage ? 'Il reste' : 'Il vous reste'} {n(resultat.nonDepense)} M€ non dépensés à la fin du second mandat : de quoi lancer{' '}
-            {ville.catalogue ? 'un projet de plus' : 'une ligne de plus'}, ou un premier chantier pour le mandat suivant.
+            {partage
+              ? `Il reste ${n(resultat.nonDepense)} M€ non dépensés à la fin du ${ordinal(mandats)} mandat : de quoi lancer ${ville.catalogue ? 'un projet de plus' : 'une ligne de plus'}, ou un premier chantier pour le mandat suivant.`
+              : `Il vous reste ${n(resultat.nonDepense)} M€ non dépensés à la fin du ${ordinal(mandats)} mandat : ils passeront au mandat suivant si vous continuez la partie.`}
           </p>
         ) : null}
 
@@ -396,6 +401,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               <Bouton genre="contour" iconeAGauche="bug" onClick={ouvrirRetour} className="justify-start">
                 Signaler un bug ou proposer une amélioration
               </Bouton>
+              <Continuer libre={libre} mandats={mandats} />
               <Suite ville={ville} libre={libre} publie={jeu.publie !== null} />
             </>
           )}
@@ -407,7 +413,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       <AnimatePresence>
         {!partage && publier ? (
           <Publier
-            partie={{ ville: ville.id, libre, chantiers, lignes, leviers }}
+            partie={{ ville: ville.id, libre, mandats, chantiers, lignes, leviers }}
             voyageurs={resultat.voyageurs}
             investi={resultat.investi}
             inspire={jeu.inspire}
@@ -427,6 +433,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
               sujet: 'votre réseau',
               ville: jeu.ville,
               libre: jeu.libre,
+              mandats: mandatsJoues(jeu.mandat),
               chantiers: jeu.chantiers,
               lignes: jeu.lignes,
               leviers: jeu.leviers,
@@ -436,6 +443,33 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         ) : null}
       </AnimatePresence>
     </main>
+  )
+}
+
+/**
+ * Continuer la partie : un mandat de plus, de six ans, avec le budget du second faute de chiffres publiés au-delà de
+ * 2038, et l'argent non dépensé. En jeu libre, il n'y a pas de mandat : on revient à la carte pour ajouter des lignes.
+ */
+function Continuer({ libre, mandats }: { libre: boolean; mandats: number }) {
+  const { mandatSuivant, chantiers, lignes, leviers } = useJeu()
+  const ville = useVille()
+  if (!libre && mandats >= MANDATS_MAX) return null
+  const suivant = mandats + 1
+  const budget = libre ? 0 : bilanMandat(suivant, chantiers, lignes, { ...leviers, [suivant]: leviersDu(leviers, mandats) }, ville).reste
+  return (
+    <section aria-labelledby="continuer" className="mt-3 flex flex-col gap-3 border-t border-trait pt-5">
+      <h2 id="continuer" className="text-[17px] font-black">
+        Continuer la partie
+      </h2>
+      <p className="text-[14px] leading-relaxed text-gris">
+        {libre
+          ? 'En jeu libre, vous pouvez revenir à la carte et ajouter d’autres lignes : votre réseau reste tel quel.'
+          : `Un ${ordinal(suivant)} mandat, de ${finMandat(mandats)} à ${finMandat(suivant)}, avec ${n(budget)}\u00a0M€ à investir. Votre réseau reste tel quel. Faute de budget publié au-delà de 2038, chaque nouveau mandat reprend celui du second, plus ce que vous n’avez pas dépensé.`}
+      </p>
+      <Bouton genre="encre" icone="fleche" onClick={mandatSuivant}>
+        {libre ? 'Revenir à la carte' : `Jouer le mandat ${suivant}, ${finMandat(mandats)}-${finMandat(suivant)}`}
+      </Bouton>
+    </section>
   )
 }
 

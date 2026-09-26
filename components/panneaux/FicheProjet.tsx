@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
-import { MANDATS, mots, PROJETS } from '@/lib/catalogue'
+import { horizon, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
@@ -57,7 +57,9 @@ export function FicheProjet({ id }: { id: string }) {
   // En jeu libre, il n'y a pas de budget à tenir : rien n'est trop cher, et tout se paie en une fois.
   const reste = libre ? Infinity : bilan.reste
   const annee = ouverture(existant?.mandat ?? mandat, r.duree)
-  const apresFin = annee > MANDATS[2].fin
+  // La fin de la partie : 2038, ou la fin du mandat en cours quand on l'a continuée.
+  const fin = horizon(mandat)
+  const apresFin = annee > fin
   const peutEtaler = mandat === 1 && !libre
   const moitie = Math.round(r.cout / 2)
 
@@ -89,7 +91,10 @@ export function FicheProjet({ id }: { id: string }) {
           Retirer ce projet
         </Bouton>
       ) : (
-        <p className="text-sm leading-relaxed text-gris">Décidé pendant le premier mandat, ce projet ne peut plus être retiré.</p>
+        <p className="text-sm leading-relaxed text-gris">
+          {existant.mandat === 1 ? 'Décidé pendant le premier mandat' : `Décidé pendant le mandat ${existant.mandat}`}, ce projet ne peut
+          plus être retiré.
+        </p>
       )
   } else if (bloque) {
     pied = (
@@ -334,7 +339,7 @@ export function FicheProjet({ id }: { id: string }) {
 
       {apresFin ? (
         <p className="text-sm leading-relaxed text-gris">
-          Ce projet ouvrira après la fin de votre second mandat : vous le payez, un autre l’inaugurera.
+          Ce projet ouvrira après {fin} : vous le payez, et vous ne l’inaugurerez que si vous continuez la partie.
         </p>
       ) : null}
 

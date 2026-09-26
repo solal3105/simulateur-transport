@@ -1,4 +1,6 @@
 import { imageAccueilLyon, imageReseau, TAILLE } from '@/lib/apercus'
+import { horizon } from '@/lib/catalogue'
+import { mandatsDe } from '@/lib/partie'
 import { resumerCode } from '@/lib/partieServeur'
 
 /**
@@ -13,5 +15,5 @@ export default async function Image({ params }: { params: Promise<{ code: string
   const { code } = await params
   const r = await resumerCode(code)
   if (!r) return imageAccueilLyon()
-  return imageReseau(r.ville, { ...r, titre: `Mon réseau ${r.ville.reseau} de 2038` })
+  return imageReseau(r.ville, { ...r, titre: `Mon réseau ${r.ville.reseau} de ${horizon(mandatsDe(r.partie))}` })
 }

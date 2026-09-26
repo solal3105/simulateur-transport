@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 
 import { lireCode } from '@/lib/partieServeur'
-import { villeDePartie } from '@/lib/partie'
+import { horizon } from '@/lib/catalogue'
+import { mandatsDe, villeDePartie } from '@/lib/partie'
 import { MARQUE, VILLES } from '@/lib/villes'
 
 import { Ouverture } from './Ouverture'
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ]
     .filter(Boolean)
     .join(' et ')
-  const titre = `Mon réseau ${ville.reseau} de 2038`
+  const titre = `Mon réseau ${ville.reseau} de ${horizon(mandatsDe(partie))}`
   const description = `${contenu ? `${contenu[0]!.toUpperCase()}${contenu.slice(1)}. ` : ''}Ouvrez-le pour voir ses voyageurs, son coût, et le reprendre pour votre partie.`
   return {
     title: `${titre} | ${MARQUE}`,
