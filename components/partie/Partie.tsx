@@ -33,7 +33,7 @@ function Message() {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none absolute inset-x-3 top-44 z-20 flex justify-center lg:top-auto lg:right-auto lg:bottom-24 lg:left-[358px] lg:justify-start"
+      className="pointer-events-none absolute inset-x-3 top-[104px] z-20 flex justify-center lg:top-auto lg:right-auto lg:bottom-24 lg:left-[358px] lg:justify-start"
     >
       <AnimatePresence>
         {message ? (
@@ -65,11 +65,11 @@ function Legende() {
   return (
     <div
       aria-label="Légende de la carte"
-      className="absolute top-[166px] left-3 z-10 flex max-w-[calc(100%-24px)] flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl bg-white/95 px-3 py-2 text-[11.5px] font-bold shadow-flotte lg:top-auto lg:bottom-6 lg:left-[358px] lg:gap-x-4 lg:px-4 lg:py-3 lg:text-[12.5px]"
+      className="absolute top-[100px] left-2 z-10 flex max-w-[calc(100%-16px)] flex-wrap items-center gap-x-2.5 gap-y-1 rounded-xl bg-white/90 px-2 py-1 text-[10.5px] font-bold shadow-flotte lg:top-auto lg:bottom-6 lg:left-[358px] lg:gap-x-4 lg:rounded-2xl lg:px-4 lg:py-3 lg:text-[12.5px]"
     >
       {LEGENDE_MODES.filter((m) => catalogue || m.nom !== 'Bateau').map((m) => (
-        <span key={m.nom} className="flex items-center gap-1.5">
-          <span className="h-1.5 w-4 rounded-full" style={{ background: m.couleur }} />
+        <span key={m.nom} className="flex items-center gap-1 lg:gap-1.5">
+          <span className="h-1 w-3 rounded-full lg:h-1.5 lg:w-4" style={{ background: m.couleur }} />
           {m.nom}
         </span>
       ))}
@@ -111,7 +111,7 @@ export function Partie() {
     () =>
       grand
         ? { top: 96 + 20, left: 340 + 20, right: Math.min(largeurPanneau, 700) + 20, bottom: 80 }
-        : { top: 170, left: 10, right: 10, bottom: panneau ? hauteurFeuilleOuverte(fenetre, barre) + 12 : 100 },
+        : { top: 120, left: 10, right: 10, bottom: panneau ? hauteurFeuilleOuverte(fenetre, barre) + 12 : 110 },
     [grand, largeurPanneau, panneau, fenetre, barre],
   )
 
@@ -126,8 +126,14 @@ export function Partie() {
 
       {!tuto && !panneau && !brouillon ? (
         <>
-          <div className="absolute right-3 bottom-28 z-10 flex flex-col items-end gap-2 lg:top-[114px] lg:right-auto lg:bottom-auto lg:left-[358px] lg:flex-row">
-            <Bouton genre="encre" iconeAGauche="trace" taille="petit" onClick={() => tracer('tram')} className="shadow-flotte">
+          <div className="absolute right-2 bottom-[68px] z-10 flex flex-row items-end gap-1.5 lg:top-[114px] lg:right-auto lg:bottom-auto lg:left-[358px] lg:gap-2">
+            <Bouton
+              genre="encre"
+              iconeAGauche="trace"
+              taille="petit"
+              onClick={() => tracer('tram')}
+              className="min-h-9! px-3! text-[12.5px]! shadow-flotte lg:min-h-11! lg:px-4! lg:text-sm!"
+            >
               Créer ma ligne
             </Bouton>
             {/* Sans catalogue, la liste ne montre que les lignes tracées. */}
@@ -137,7 +143,7 @@ export function Partie() {
                 iconeAGauche="liste"
                 taille="petit"
                 onClick={() => ouvrir({ type: 'liste' })}
-                className="shadow-flotte"
+                className="min-h-9! px-3! text-[12.5px]! shadow-flotte lg:min-h-11! lg:px-4! lg:text-sm!"
               >
                 {ville.catalogue ? 'Voir en liste' : 'Voir mes lignes'}
               </Bouton>

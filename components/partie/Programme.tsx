@@ -171,8 +171,8 @@ export function BarreBas() {
   const bilan = useBilan()
   if (libre) {
     return (
-      <div className="absolute inset-x-0 bottom-0 z-20 grid border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden">
-        <Bouton genre="rouge" icone="drapeau" taille="petit" className="min-h-13 text-[13.5px]! whitespace-nowrap" onClick={finirMandat}>
+      <div className="absolute inset-x-0 bottom-0 z-20 grid border-t border-trait bg-white px-3 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden">
+        <Bouton genre="rouge" icone="drapeau" taille="petit" className="min-h-11 text-[13px]! whitespace-nowrap" onClick={finirMandat}>
           Voir mon réseau en 2038
         </Bouton>
       </div>
@@ -183,7 +183,7 @@ export function BarreBas() {
   return (
     <div
       className={clsx(
-        'absolute inset-x-0 bottom-0 z-20 grid gap-2 border-t border-trait bg-white px-4 pt-3 pb-6 lg:hidden',
+        'absolute inset-x-0 bottom-0 z-20 grid gap-2 border-t border-trait bg-white px-3 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden',
         ville.budget.leviers ? 'grid-cols-2' : 'grid-cols-1',
       )}
     >
@@ -192,7 +192,7 @@ export function BarreBas() {
           genre="sable"
           iconeAGauche="pieces"
           taille="petit"
-          className="min-h-13 justify-start px-3.5! text-[13.5px]! whitespace-nowrap"
+          className="min-h-11 justify-start px-3.5! text-[13px]! whitespace-nowrap"
           onClick={() => ouvrir({ type: 'leviers' })}
         >
           Trouver de l’argent
@@ -202,7 +202,7 @@ export function BarreBas() {
         genre="rouge"
         icone="drapeau"
         taille="petit"
-        className="min-h-13 text-[13.5px]! whitespace-nowrap"
+        className="min-h-11 text-[13px]! whitespace-nowrap"
         data-guide={guide ? '' : undefined}
         onClick={() => (bilan.reste < 0 ? combler() : finirMandat())}
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}

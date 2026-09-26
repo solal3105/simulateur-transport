@@ -94,7 +94,7 @@ export function BoutonRetour({ forme, className }: { forme: 'rond' | 'pastille';
           className,
         )}
       >
-        <Icone nom="bug" taille={21} epaisseur={2.2} />
+        <Icone nom="bug" taille={18} epaisseur={2.2} />
       </button>
     )
   }

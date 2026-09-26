@@ -14,8 +14,8 @@ export type Largeur = 'normale' | 'large' | 'pleine'
 type Position = 'repliee' | 'ouverte' | 'depliee'
 
 /** Ce que l'en-tête de la partie occupe en haut de l'écran du téléphone, et la barre du bas quand elle reste visible. */
-const HAUT_ENTETE = 150
-const HAUT_BARRE = 88
+const HAUT_ENTETE = 100
+const HAUT_BARRE = 60
 /** Ouverte, la feuille prend au plus cette part de l'écran : la carte reste visible au-dessus. */
 const PART_OUVERTE = 0.45
 /** En deçà de ce déplacement, en pixels, le doigt a touché la poignée sans la tirer. */
@@ -173,7 +173,7 @@ export function Panneau({
         // Le panneau rogne son contenu sans jamais défiler lui-même : un champ qui prend le focus fait défiler sa
         // liste, pas le panneau entier, qui laisserait sinon un grand vide blanc.
         'fixed inset-x-0 z-30 flex flex-col overflow-hidden supports-[overflow:clip]:overflow-clip rounded-t-[26px] bg-white shadow-panneau',
-        barreVisible ? 'bottom-[88px]' : 'bottom-0',
+        barreVisible ? 'bottom-[60px]' : 'bottom-0',
         hauteurTelephone === 'pleine' && 'top-0 rounded-t-none',
         // La hauteur suit le doigt sans retard, puis glisse jusqu'à sa position au lâcher.
         feuille && tiree === null && 'transition-[max-height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
