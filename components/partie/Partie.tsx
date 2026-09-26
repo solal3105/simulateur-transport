@@ -15,6 +15,7 @@ import { Leviers } from '../panneaux/Leviers'
 import { Liste } from '../panneaux/Liste'
 import { Menu } from '../panneaux/Menu'
 import { Methode } from '../panneaux/Methode'
+import { hauteurFeuilleOuverte, useHauteurFenetre } from '../panneaux/Panneau'
 import { FicheLigne, MaLigne, Traceur } from '../panneaux/Traceur'
 import { Bouton, Icone } from '../ui'
 import { Entete } from './Entete'
@@ -111,12 +112,15 @@ export function Partie() {
   const tuto = ecran === 'tuto'
 
   const largeurPanneau = !panneau ? 0 : panneau.type === 'leviers' ? 1100 : panneau.type === 'liste' ? 2000 : 440
+  // Sur téléphone, la carte cadre au-dessus de la feuille ouverte et de la barre du bas quand elle reste visible.
+  const fenetre = useHauteurFenetre()
+  const barre = !brouillon && !(tuto && etapeTuto < 2)
   const marges = useMemo(
     () =>
       grand
         ? { top: 96 + 20, left: 340 + 20, right: Math.min(largeurPanneau, 700) + 20, bottom: 80 }
-        : { top: 170, left: 10, right: 10, bottom: panneau ? 380 : 100 },
-    [grand, largeurPanneau, panneau],
+        : { top: 170, left: 10, right: 10, bottom: panneau ? hauteurFeuilleOuverte(fenetre, barre) + 12 : 100 },
+    [grand, largeurPanneau, panneau, fenetre, barre],
   )
 
   return (
