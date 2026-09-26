@@ -280,45 +280,74 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
   )
 }
 
-/** Poser un arrêt en tapant le nom d'un quartier ou d'une commune : l'alternative au toucher sur la carte. */
+/** Un nom réduit à ses lettres : « Châtelet » et « chatelet », « Saint-Lazare » et « saint lazare », « L’Ariane » et « L'Ariane » se retrouvent. */
+const cleRecherche = (nom: string) =>
+  nom
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+/** Un lieu où poser un arrêt : une station ou une gare du réseau actuel, un arrondissement, une commune ou un quartier. */
+type LieuCherche = { nom: string; cle: string; pos: [number, number]; station: boolean }
+
+/**
+ * Poser un arrêt en tapant le nom d'une station, d'une commune ou d'un quartier : l'alternative au toucher sur la carte.
+ * Le nom exact passe avant un début de nom, puis un mot du nom, puis un morceau. À égalité, une station passe avant un
+ * quartier du même nom, et un lieu proche du dernier arrêt posé avant un homonyme lointain : « Saint-Lazare » mène à
+ * la gare parisienne, pas au quartier de Saint-Mammès. Une station choisie ainsi est posée sur la station elle-même.
+ */
 function AjoutParNom() {
   const ville = useVille()
   const donnees = useDonnees(ville.id)
   const ajouterArret = useJeu((s) => s.ajouterArret)
+  const dernierArret = useJeu((s) => s.brouillon?.arrets.at(-1))
   const [texte, setTexte] = useState('')
   const [erreur, setErreur] = useState('')
   // Sur téléphone, le champ reste replié pour laisser la carte visible.
   const [ouvert, setOuvert] = useState(false)
-  const lieux = useMemo(() => {
+  const lieux = useMemo<LieuCherche[]>(() => {
     if (!donnees) return []
     const [[ouest, sud], [est, nord]] = ville.zoneRecherche
     const dansLaZone = ([lon, lat]: [number, number]) => lon > ouest && lon < est && lat > sud && lat < nord
-    const quartiers = donnees.lieux.quartiers
-      .filter(([lon, lat]) => dansLaZone([lon, lat]))
-      .map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
+    const lieu = (nom: string, pos: [number, number], station = false): LieuCherche => ({ nom, cle: cleRecherche(nom), pos, station })
+    const stations = donnees.stations.filter((s) => s.nom && dansLaZone(s.pos)).map((s) => lieu(s.nom, s.pos, true))
+    const quartiers = donnees.lieux.quartiers.filter(([lon, lat]) => dansLaZone([lon, lat])).map(([lon, lat, nom]) => lieu(nom, [lon, lat]))
     const communes = donnees.lieux.communes
       .map((c) => {
         const anneau = c.anneaux[0] ?? []
         const lon = anneau.reduce((t, p) => t + p[0], 0) / Math.max(1, anneau.length)
         const lat = anneau.reduce((t, p) => t + p[1], 0) / Math.max(1, anneau.length)
-        return { nom: c.nom, pos: [lon, lat] as [number, number] }
+        return lieu(c.nom, [lon, lat])
       })
       // Lyon se cherche par arrondissement.
       .filter((c) => dansLaZone(c.pos) && c.nom !== 'Lyon')
-    const arrondissements = donnees.lieux.arrondissements.map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
-    const vus = new Set<string>()
-    return [...arrondissements, ...communes, ...quartiers]
-      .filter((l) => (vus.has(l.nom) ? false : (vus.add(l.nom), true)))
-      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    const arrondissements = donnees.lieux.arrondissements.map(([lon, lat, nom]) => lieu(nom, [lon, lat]))
+    return [...stations, ...arrondissements, ...communes, ...quartiers]
   }, [donnees, ville])
+  // Les suggestions du champ : chaque nom une fois, dans l'ordre alphabétique.
+  const suggestions = useMemo(() => [...new Set(lieux.map((l) => l.nom))].sort((a, b) => a.localeCompare(b, 'fr')), [lieux])
+
+  const chercher = (demande: string) => {
+    const q = cleRecherche(demande)
+    if (!q) return undefined
+    const rang = (l: LieuCherche) =>
+      l.cle === q ? 0 : l.cle.startsWith(q) ? 1 : ` ${l.cle}`.includes(` ${q}`) ? 2 : l.cle.includes(q) ? 3 : Infinity
+    const [lon0, lat0] = dernierArret ?? ville.centre
+    const kx = Math.cos((lat0 * Math.PI) / 180)
+    const eloignement = (l: LieuCherche) => Math.hypot((l.pos[0] - lon0) * kx, l.pos[1] - lat0)
+    return lieux
+      .map((l) => ({ l, r: rang(l) }))
+      .filter((x) => x.r < Infinity)
+      .sort((a, b) => a.r - b.r || Number(b.l.station) - Number(a.l.station) || eloignement(a.l) - eloignement(b.l))[0]?.l
+  }
 
   const ajouter = (ev: React.FormEvent) => {
     ev.preventDefault()
-    const cherche = texte.trim().toLocaleLowerCase('fr')
-    const trouve =
-      lieux.find((l) => l.nom.toLocaleLowerCase('fr') === cherche) ?? lieux.find((l) => l.nom.toLocaleLowerCase('fr').startsWith(cherche))
-    if (!cherche || !trouve) {
-      setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de commune ou de quartier ${ville.territoire}.`)
+    const trouve = chercher(texte)
+    if (!trouve) {
+      setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de station, de commune ou de quartier ${ville.territoire}.`)
       return
     }
     ajouterArret(trouve.pos)
@@ -354,8 +383,8 @@ function AjoutParNom() {
           </button>
         </div>
         <datalist id="lieux-arrets">
-          {lieux.map((l) => (
-            <option key={l.nom} value={l.nom} />
+          {suggestions.map((nom) => (
+            <option key={nom} value={nom} />
           ))}
         </datalist>
         {erreur ? (
