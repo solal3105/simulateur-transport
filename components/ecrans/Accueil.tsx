@@ -128,7 +128,7 @@ function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number })
         <span className="text-[12px] font-black tracking-[0.08em] text-gris uppercase">Le réseau aujourd’hui</span>
         <span className="flex items-center gap-2.5 text-[14px] font-bold">
           <TraitReseau ville={ville.id} className="h-[5px] w-7" />
-          Métro et tram en service
+          Lignes en service
         </span>
         {ville.catalogue ? (
           <span className="flex items-center gap-2.5 text-[14px] font-bold">
