@@ -30,11 +30,21 @@ const VERSIONS: Version[] = [
         titre: 'Nouveau',
         points: [
           'Les lignes de métro, de tram, de RER et de train sont dessinées dans leurs couleurs, et leur nom est répété le long du tracé.',
+          'La partie ne s’arrête plus forcément en 2038 : au bilan, vous pouvez la continuer, mandat après mandat. Faute de budget publié au-delà, chaque nouveau mandat reprend celui du second.',
+          'Vous renommez une station de votre tracé en la touchant, sur la carte ou dans la liste de vos arrêts, et son nom la suit jusque dans le lien que vous partagez.',
+        ],
+      },
+      {
+        titre: 'Amélioré',
+        points: [
+          'La liste des projets et des lignes se classe d’abord par voyageurs attendus, et montre à côté le prix de chacun et ses voyageurs par million investi.',
+          'Une ligne que vous tracez montre ses voyageurs par million investi, comparés au meilleur projet du catalogue, comme un projet.',
         ],
       },
       {
         titre: 'Corrigé',
         points: [
+          'Le T11 se prolonge aussi depuis Le Bourget et le T14 depuis Esbly, et Orlyval, le métro 13 aux Courtilles et le Rhônexpress à l’aéroport peuvent être prolongés : ces stations manquaient à notre calcul. Près de Pont de Neuilly ou de Créteil-Préfecture, une nouvelle ligne gagne donc moins de nouveaux voyageurs, puisque ces quartiers sont déjà desservis.',
           'Activer une mesure dans « Trouver de l’argent » ne fige plus l’écran sur téléphone et ne vide plus la moitié du panneau sur ordinateur.',
           'Partir du terminus d’une ligne, sur la carte ou par son nom, propose bien de la prolonger, comme le T3b à Porte Dauphine, et propose toutes les lignes quand plusieurs y finissent.',
           'La recherche d’un arrêt par son nom trouve les stations et les gares, comme Châtelet ou Nation, même sans accents ou abrégées en « St », et ne mène plus à une commune lointaine du même nom.',
