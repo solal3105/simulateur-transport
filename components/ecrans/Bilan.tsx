@@ -12,6 +12,7 @@ import { enLettres, n, nombreEnLettres, ordinal } from '@/lib/format'
 import { bilanMandat, leviersDu, ouvertures, resoudre, resumer, totauxCatalogue } from '@/lib/regles'
 import { communauteActive, compterReprise } from '@/lib/communaute'
 import { lienDePartage, type PartiePartagee } from '@/lib/lien'
+import { objectifs } from '@/lib/objectifs'
 import { dessinerPartage } from '@/lib/partage'
 import { useJeu, useVille } from '@/lib/store'
 import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type Ville } from '@/lib/villes'
@@ -21,6 +22,7 @@ import { Carte } from '../carte/Carte'
 import { useCouleursReseau } from '../couleurs'
 import { EnTetePublication, PiedPublication, type Publication } from '../communaute/EnTetePublication'
 import { Publier } from '../communaute/Publier'
+import { ListeObjectifs } from '../partie/Objectifs'
 import { ouvrirRetour } from '../partie/Retour'
 import { Bouton, Icone, Logo, Surtitre } from '../ui'
 import { Comparaison } from './Comparaison'
@@ -173,6 +175,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
   const cumul = termine ? resultat.voyageurs : resultat.ouvertures.filter((o) => o.annee <= annee).reduce((t, o) => t + o.voyageurs, 0)
   const voyageursAnimes = useCompteur(cumul, 0.6, 0)
 
+  const listeObjectifs = useMemo(
+    () => objectifs({ chantiers, lignes, leviers, mandats, libre }, ville),
+    [chantiers, lignes, leviers, mandats, libre, ville],
+  )
   const partCatalogue = total.voyageurs > 0 ? Math.round((resultat.voyageurs / total.voyageurs) * 100) : 0
   const partCout = total.cout > 0 ? Math.round((resultat.investi / total.cout) * 100) : 0
   // Sans catalogue, il n'y a rien à quoi rapporter le réseau : seule la remarque sur les ouvertures tardives reste.
@@ -288,6 +294,13 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
             </div>
           ))}
         </div>
+
+        {listeObjectifs.length ? (
+          <section className="flex flex-col gap-2.5">
+            <Surtitre>Objectifs</Surtitre>
+            <ListeObjectifs liste={listeObjectifs} />
+          </section>
+        ) : null}
 
         {resultat.ouvertures.length > 0 ? (
           <section className="flex flex-col gap-2.5">

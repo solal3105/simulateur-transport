@@ -72,6 +72,11 @@ export interface Catalogue {
   projets: Projet[]
   /** Le projet que le tutoriel fait toucher sur la carte, la consigne, et ce qu'on en dit. */
   tutoriel?: { projet: string; consigne: string; detail: string }
+  /**
+   * Le programme que l'autorité a réellement décidé pour les années du jeu : les projets du catalogue qu'il contient, et
+   * les documents qui le disent. Il sert de repère à l'objectif « faire mieux que le plan réel ».
+   */
+  planReel?: { nom: string; projets: string[]; sources: Source[] }
 }
 
 /** Un projet du catalogue que le joueur a décidé de construire. */
