@@ -659,6 +659,24 @@ export function Carte({
   const lignes = partie?.lignes ?? jeu.lignes
   const trace = brouillon !== null
 
+  // Une carte de récapitulatif (bilan, fin de mandat, comparaison) cadre tout le réseau montré : la vue de départ,
+  // élargie aux projets retenus et aux lignes tracées, qui vont parfois jusqu'au Val d'Europe.
+  const cadre = useMemo((): [[number, number], [number, number]] => {
+    if (!decor || !donnees) return ville.emprise
+    const traces = new Set(chantiers.flatMap((c) => catalogue.projets.find((p) => p.id === c.id)?.trace ?? []))
+    const points = [
+      ...donnees.projets.features.filter((f) => traces.has(f.properties.id)).flatMap((f) => f.geometry.coordinates.flat()),
+      ...lignes.flatMap((l) => l.arrets),
+    ]
+    if (!points.length) return ville.emprise
+    const [[o, s], [e, n]] = ville.emprise
+    const marge = 0.01
+    return [
+      [Math.min(o, ...points.map((p) => p[0]! - marge)), Math.min(s, ...points.map((p) => p[1]! - marge))],
+      [Math.max(e, ...points.map((p) => p[0]! + marge)), Math.max(n, ...points.map((p) => p[1]! + marge))],
+    ]
+  }, [catalogue, chantiers, decor, donnees, lignes, ville])
+
   // État de chaque projet du catalogue, par nom de tracé.
   const etats = useMemo(() => {
     const etat = new Map<string, EtatProjet>()
@@ -687,9 +705,10 @@ export function Carte({
     const m = new CarteMaplibre({
       container: boite,
       style: styleDeBase(donnees, ville),
-      bounds: ville.emprise,
+      bounds: cadre,
       fitBoundsOptions: { padding: 20 },
-      minZoom: 9.5,
+      // Un récapitulatif peut reculer davantage, pour montrer sur un téléphone un réseau qui s'étend loin.
+      minZoom: decor ? 8 : 9.5,
       maxZoom: 16,
       maxBounds: ville.limites,
       attributionControl: { compact: true, customAttribution: '© OpenStreetMap, INSEE' },
@@ -933,7 +952,7 @@ export function Carte({
       pret.current = false
       etiquettes.clear()
     }
-  }, [catalogue, donnees, decor, etiquettes, ville])
+  }, [cadre, catalogue, donnees, decor, etiquettes, ville])
 
   // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {

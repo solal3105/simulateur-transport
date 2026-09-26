@@ -125,13 +125,14 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           </div>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {/* La légende de la jauge passe à la ligne par éléments entiers au lieu de glisser sous le compteur de voyageurs. */}
           <div className="flex items-baseline justify-between gap-5">
             <div className={clsx('flex items-baseline gap-2 whitespace-nowrap', reste.manque && 'text-encre')}>
               <span className="chiffres text-[32px] leading-none font-black tracking-tight">{reste.valeur}</span>
               <span className="text-sm font-extrabold">{reste.texte}</span>
             </div>
             {libre ? (
-              <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
+              <div className="hidden min-w-0 flex-wrap justify-end gap-x-4 gap-y-0.5 text-[12.5px] leading-tight font-semibold *:whitespace-nowrap 2xl:flex">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3.5 rounded-sm bg-white" />
                   Dans le budget réel, {n(Math.min(depenses.investi, depenses.budgetReel))}
@@ -150,7 +151,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
                 ) : null}
               </div>
             ) : (
-              <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
+              <div className="hidden min-w-0 flex-wrap justify-end gap-x-4 gap-y-0.5 text-[12.5px] leading-tight font-semibold *:whitespace-nowrap 2xl:flex">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]" />
                   {part.court}, {n(bilan.reserve)}

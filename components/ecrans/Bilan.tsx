@@ -27,6 +27,8 @@ import { Comparaison } from './Comparaison'
 
 const MARGES_GRAND = { top: 40, left: 40, right: 40, bottom: 40 }
 const lignesTracees = (nombre: number) => `${nombre} ligne${nombre > 1 ? 's' : ''} tracée${nombre > 1 ? 's' : ''}`
+/** « 9 projets sur 13 », « 1 projet sur 13 ». */
+const projetsSur = (nombre: number, total: number) => `${nombre} projet${nombre > 1 ? 's' : ''} sur ${total}`
 
 /**
  * Le bilan de fin de partie. Avec `partage`, il montre un réseau reçu par un lien ou publié dans la
@@ -84,6 +86,8 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
     const plusGros = laisses.reduce<(typeof laisses)[number] | null>((m, p) => (!m || resoudre(p).cout > resoudre(m).cout ? p : m), null)
     return {
       ...resumer(chantiers, lignes, leviers, ville),
+      // Les projets du catalogue retenus, sans les lignes tracées par le joueur, comptées à part.
+      projetsRetenus: avecTrace.filter((p) => faits.has(p.id)).length,
       laisses,
       coutLaisse: laisses.reduce((t, p) => t + resoudre(p).cout, 0),
       plusGros,
@@ -126,7 +130,11 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
       {
         ville,
         voyageurs: resultat.voyageurs,
-        contenu: ville.catalogue ? `${resultat.retenus} projets sur ${avecTrace.length}` : lignesTracees(lignes.length),
+        contenu: ville.catalogue
+          ? [projetsSur(resultat.projetsRetenus, avecTrace.length), lignes.length ? lignesTracees(lignes.length) : null]
+              .filter(Boolean)
+              .join(', ')
+          : lignesTracees(lignes.length),
         equilibre: resultat.equilibre,
         libre,
         traces,
@@ -263,7 +271,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         <div className="grid grid-cols-3 gap-2">
           {[
             ville.catalogue
-              ? [`${resultat.retenus} sur ${avecTrace.length}`, 'projets retenus']
+              ? [`${resultat.projetsRetenus} sur ${avecTrace.length}`, resultat.projetsRetenus > 1 ? 'projets retenus' : 'projet retenu']
               : [String(lignes.length), lignes.length > 1 ? 'lignes tracées' : 'ligne tracée'],
             [n(resultat.investi), 'M€ investis'],
             libre
