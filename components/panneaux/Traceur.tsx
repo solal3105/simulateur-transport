@@ -26,6 +26,7 @@ import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
 import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
 import { Panneau } from './Panneau'
+import { Rendement } from './Rendement'
 
 // Les prix viennent de 53 chantiers français (lib/couts.ts, docs/couts.md) ; chaque repère dit ce qui fait monter le coût.
 const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; repere: string }[] = [
@@ -298,7 +299,8 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
       {cellule(km(e.km), 'km', 'de ligne')}
       {cellule(String(arrets), '', arrets > 1 ? 'stations' : 'station')}
       {cellule(n(e.cout), 'M€', 'de construction')}
-      {cellule(`~${approx(e.voyageurs)}`, '', 'voyageurs / jour', true)}
+      {/* Comme dans les fiches : les voyageurs qui comptent dans le score, les nouveaux sur le réseau. */}
+      {cellule(e.nouveaux > 0 ? `+${approx(e.nouveaux)}` : '0', '', 'nouveaux voyageurs / jour', true)}
     </div>
   )
 }
@@ -793,6 +795,46 @@ function Prolonger({ lignes }: { lignes: LigneExistante[] }) {
 }
 
 /** Le résultat d'une ligne terminée, avant de la construire. */
+/** La part du budget restant qu'une dépense prendrait, comme dans la fiche d'un projet. */
+const partDuBudget = (cout: number, reste: number) =>
+  reste === Infinity
+    ? 'sans budget à tenir, en jeu libre'
+    : reste > 0
+      ? `${Math.min(999, Math.round((cout / reste) * 100))} % de ce qui vous reste`
+      : 'votre budget est épuisé'
+
+/**
+ * Les trois chiffres d'une ligne tracée, présentés comme ceux d'un projet du catalogue : son coût, les voyageurs qu'elle
+ * ajoute à votre score (les nouveaux sur le réseau) et son année d'ouverture.
+ */
+function ChiffresLigne({ e, annee, legendeCout }: { e: Estimation; annee: number; legendeCout: string }) {
+  return (
+    <div className="grid grid-cols-3 gap-1.5">
+      <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={legendeCout} />
+      <CarteChiffre
+        icone="voyageurs"
+        valeur={e.nouveaux > 0 ? `+${approx(e.nouveaux)}` : '0'}
+        legende={`nouveaux voyageurs par jour, sur ${approx(e.voyageurs)} au total`}
+        accent
+      />
+      <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
+    </div>
+  )
+}
+
+/** D'où viennent les voyageurs d'une ligne : combien l'emprunteraient, et combien sont nouveaux, les seuls qui comptent. */
+function VoyageursLigne({ e, conditionnel = false }: { e: Estimation; conditionnel?: boolean }) {
+  const verbe = conditionnel ? 'emprunteraient' : 'empruntent'
+  return (
+    <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
+      Environ <b className="chiffres">{approx(e.voyageurs)}</b> voyageurs par jour {verbe} cette ligne, entre {approx(e.bas)} et{' '}
+      {approx(e.haut)} selon notre calcul. <b className="chiffres">{approx(e.nouveaux)}</b> d’entre eux {conditionnel ? 'seraient' : 'sont'}{' '}
+      nouveaux sur le réseau, les autres {conditionnel ? 'viendraient' : 'viennent'} d’une ligne voisine : seuls les nouveaux comptent dans
+      votre score.
+    </p>
+  )
+}
+
 export function MaLigne() {
   const { brouillon, mandat, construireLigne, ouvrir, libre, lignes } = useJeu()
   const ville = useVille()
@@ -868,16 +910,7 @@ export function MaLigne() {
         </>
       }
     >
-      <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
-        <CarteChiffre
-          icone="voyageurs"
-          valeur={`~${approx(e.voyageurs)}`}
-          legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`}
-          accent
-        />
-        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
-      </div>
+      <ChiffresLigne e={e} annee={annee} legendeCout={partDuBudget(e.cout, reste)} />
       {ancienne ? (
         <p className="text-[13.5px] leading-relaxed text-gris">
           Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
@@ -903,10 +936,8 @@ export function MaLigne() {
       </div>
       <ListeStations noms={noms} titre="Vos stations" />
       {r ? <PhraseCorrespondances liste={r.liste} /> : null}
-      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
-        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs seraient nouveaux sur le réseau, les autres viendraient
-        d’une ligne voisine. C’est ce chiffre qui s’ajoute à votre score.
-      </p>
+      <VoyageursLigne e={e} conditionnel />
+      <Rendement voyageurs={e.nouveaux} cout={e.cout} ligne />
       <p className="text-[13.5px] leading-relaxed text-gris">
         {ville.repere}{' '}
         <button
@@ -993,25 +1024,14 @@ export function FicheLigne({ id }: { id: string }) {
       titre={l.nom}
       pied={pied}
     >
-      <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
-        <CarteChiffre
-          icone="voyageurs"
-          valeur={`~${approx(e.voyageurs)}`}
-          legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`}
-          accent
-        />
-        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
-      </div>
+      <ChiffresLigne e={e} annee={annee} legendeCout="investis" />
       {l.etale && !libre ? (
         <p className="text-[13.5px] leading-relaxed text-gris">
           Payée en deux fois : {n(moitie)} M€ sur le premier mandat, {n(e.cout - moitie)} M€ sur le second.
         </p>
       ) : null}
-      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
-        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs sont nouveaux sur le réseau : c’est ce chiffre qui compte
-        dans votre score.
-      </p>
+      <VoyageursLigne e={e} />
+      <Rendement voyageurs={e.nouveaux} cout={e.cout} ligne />
       <div className="flex flex-col gap-1">
         <Surtitre>Le relief sous la ligne</Surtitre>
         <Profil mode={l.mode} arrets={l.arrets} passages={l.passages} />

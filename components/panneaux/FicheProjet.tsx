@@ -3,11 +3,11 @@
 import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
-import { catalogueDe, MANDATS, mots, PROJETS } from '@/lib/catalogue'
+import { MANDATS, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
-import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
-import { useJeu, useVille } from '@/lib/store'
+import { ouverture, resoudre } from '@/lib/regles'
+import { useJeu } from '@/lib/store'
 import type { PointProjet } from '@/lib/types'
 
 import { Deplier } from '../explications/Deplier'
@@ -15,6 +15,7 @@ import { Sources } from '../explications/Budget'
 import { useBilan } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, ICONE_MODE, Pastille, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
+import { Rendement } from './Rendement'
 
 function Voie({ titre, detail, onClick, possible }: { titre: string; detail: string; onClick: () => void; possible?: boolean }) {
   return (
@@ -50,9 +51,6 @@ export function FicheProjet({ id }: { id: string }) {
   const [varianteId, setVarianteId] = useState(existant?.varianteId ?? projet.variantes?.[0]?.id)
   const [option, setOption] = useState(existant?.option ?? false)
   const r = useMemo(() => resoudre(projet, { varianteId, option }), [projet, varianteId, option])
-  // Le meilleur rapport entre voyageurs et coût du catalogue de ce réseau, pour situer le projet.
-  const ville = useVille()
-  const meilleur = useMemo(() => totauxCatalogue(catalogueDe(ville.id)).meilleur, [ville])
 
   const dependance = projet.requiert ? PROJETS.get(projet.requiert) : undefined
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
@@ -340,22 +338,7 @@ export function FicheProjet({ id }: { id: string }) {
         </p>
       ) : null}
 
-      {r.voyageurs > 0 ? (
-        <div className="flex flex-col gap-2 rounded-2xl bg-sable p-4">
-          <div className="flex justify-between gap-3 text-sm">
-            <span className="font-semibold text-gris">Voyageurs gagnés par million investi</span>
-            <span className="chiffres font-black">{n(r.voyageurs / r.cout)}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white">
-            <div className="h-full rounded-full bg-rouge" style={{ width: `${Math.max(2, (r.voyageurs / r.cout / meilleur) * 100)}%` }} />
-          </div>
-          <div className="text-[13px] text-gris">
-            {r.voyageurs / r.cout >= meilleur * 0.99
-              ? 'C’est le meilleur rapport de tout le catalogue.'
-              : `Le meilleur projet du catalogue en apporte ${n(meilleur)}.`}
-          </div>
-        </div>
-      ) : null}
+      <Rendement voyageurs={r.voyageurs} cout={r.cout} />
 
       <StationsProjet parcours={projet.parcours} />
 
