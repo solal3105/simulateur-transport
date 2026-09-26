@@ -239,6 +239,9 @@ Deno.serve(async (req) => {
         const partie = normaliserPartie(corps.partie, await chargerCarreaux(ville))
         if (!partie) return refuser('Ce réseau est illisible.')
         if (partie.chantiers.length + partie.lignes.length === 0) return refuser('Ce réseau ne contient aucun projet.')
+        // Les noms des lignes et des stations se lisent sur la page du réseau : ils passent le même filtre que le titre.
+        const noms = partie.lignes.flatMap((l) => [l.nom, ...(l.noms ?? []).filter((x): x is string => Boolean(x))])
+        if (!noms.every(convenable)) return refuser('Le nom d’une ligne ou d’une station contient un mot que nous ne publions pas.')
         const r = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[ville])
         // Un réseau en jeu libre n'a pas de budget à tenir : il est publié à part, marqué comme tel.
         if (!r.equilibre && !partie.libre) return refuser('Ce réseau ne tient pas le budget des deux mandats : il ne peut pas être publié.')

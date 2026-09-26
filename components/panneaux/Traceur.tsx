@@ -1,7 +1,7 @@
 'use client'
 
 import { clsx } from 'clsx'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type MouseEvent } from 'react'
 
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
@@ -19,6 +19,7 @@ import {
   terminusProche,
   type LigneExistante,
 } from '@/lib/reseau'
+import { NOM_ARRET_MAX } from '@/lib/partie'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
@@ -95,13 +96,13 @@ const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice
  * Ce qu'un tracé sait du réseau actuel : lesquels de ses points sont des stations, leurs noms, leurs
  * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
  */
-function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge'> | null) {
+function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms'> | null) {
   const donnees = useDonnees(useVille().id)
   return useMemo(() => {
     if (!donnees || !trace) return null
     const { mx } = donnees.carreaux
     const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
-    const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx)
+    const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx, trace.noms)
     const prolongee = trace.prolonge ? donnees.reseau?.lignes.find((l) => l.id === trace.prolonge) : undefined
     // Le terminus d'un prolongement est sur la ligne prolongée : ce n'est pas une correspondance avec elle.
     const liste = correspondances(trace.arrets, estStation, donnees.stations, mx)
@@ -120,9 +121,10 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
             prolongementPossible(trace.mode, p, donnees.carreaux),
           )
         : []
-    // Un prolongement part du terminus de sa ligne et en porte le nom, même si une autre station est plus proche.
+    // Un prolongement part du terminus de sa ligne et en porte le nom, même si une autre station est plus proche, sauf
+    // si le joueur l'a renommé.
     const depuis = prolongee && depart ? terminusProche(prolongee, depart, mx) : undefined
-    if (depuis && estStation[0]) noms[0] = depuis.nom
+    if (depuis && estStation[0] && !trace.noms?.[0]) noms[0] = depuis.nom
     const stationsNommees = noms.filter((x): x is string => Boolean(x))
     return { estStation, noms, stationsNommees, liste, prolongee, aProlonger, donnees }
   }, [donnees, trace])
@@ -143,6 +145,80 @@ function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
         ))}
       </ol>
     </div>
+  )
+}
+
+/**
+ * Le champ où l'on donne son nom à une station du tracé, à la place de son nom dans la liste. Il s'ouvre quand on touche
+ * la station, ici ou sur la carte ; quitter le champ garde le nom tapé, Échap le referme sans rien changer.
+ */
+function ChampNom({ i, nom, milieu }: { i: number; nom: string; milieu: boolean }) {
+  const { nommerArret, renommer, basculerPassage } = useJeu()
+  const [valeur, setValeur] = useState(nom)
+  // Le champ disparaît dès qu'on a validé ou annulé : sa perte de focus ne doit rien enregistrer de plus.
+  const fini = useRef(false)
+  const valider = () => {
+    if (fini.current) return
+    fini.current = true
+    nommerArret(i, valeur)
+  }
+  // Au clavier, on retrouve la station dans la liste une fois le champ refermé.
+  const revenir = () => requestAnimationFrame(() => document.getElementById(`station-${i}`)?.focus())
+  // Un clic sur un bouton du champ ne doit pas lui faire perdre le focus avant d'agir : Safari ne le donne pas aux boutons.
+  const garderFocus = (e: MouseEvent) => e.preventDefault()
+  return (
+    <form
+      className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-sable p-2"
+      onSubmit={(e) => {
+        e.preventDefault()
+        valider()
+        revenir()
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) valider()
+      }}
+    >
+      <label htmlFor={`nom-station-${i}`} className="sr-only">
+        Nom de la station
+      </label>
+      <input
+        id={`nom-station-${i}`}
+        autoFocus
+        value={valeur}
+        maxLength={NOM_ARRET_MAX}
+        autoComplete="off"
+        enterKeyHint="done"
+        onChange={(e) => setValeur(e.target.value)}
+        onFocus={(e) => e.currentTarget.select()}
+        onKeyDown={(e) => {
+          if (e.key !== 'Escape') return
+          // Échap referme le champ, pas le panneau.
+          e.preventDefault()
+          e.stopPropagation()
+          fini.current = true
+          renommer()
+          revenir()
+        }}
+        className="min-h-10 min-w-0 flex-1 rounded-full bg-white px-3.5 text-[14px] font-bold outline-none focus-visible:ring-2 focus-visible:ring-encre"
+      />
+      <Bouton type="submit" genre="encre" taille="petit" onMouseDown={garderFocus}>
+        Valider
+      </Bouton>
+      {milieu ? (
+        <button
+          type="button"
+          onMouseDown={garderFocus}
+          onClick={() => {
+            fini.current = true
+            renommer()
+            basculerPassage(i)
+          }}
+          className="basis-full px-1.5 text-left text-[12.5px] font-bold text-gris underline underline-offset-3 hover:text-encre"
+        >
+          En faire un point de passage, où la ligne passe sans s’arrêter
+        </button>
+      ) : null}
+    </form>
   )
 }
 
@@ -431,6 +507,7 @@ function AjoutParNom() {
 export function Traceur() {
   const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes, basculerPassage, choisirOutil } =
     useJeu()
+  const renommer = useJeu((s) => s.renommer)
   const { detacher, rattacher } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
@@ -639,6 +716,13 @@ export function Traceur() {
               const passage = r ? !r.estStation[i] : false
               const milieu = i > 0 && i < arrets - 1
               const libelle = passage ? 'Point de passage' : (noms[i] ?? `Station ${i + 1}`)
+              // La station qu'on renomme prend toute la largeur de la liste, le temps de taper son nom.
+              if (!passage && brouillon.renomme === i)
+                return (
+                  <li key={i} className="flex basis-full">
+                    <ChampNom i={i} nom={libelle} milieu={milieu} />
+                  </li>
+                )
               return (
                 <li key={i} className="flex items-center gap-1">
                   <span
@@ -647,19 +731,17 @@ export function Traceur() {
                       passage ? 'bg-white text-gris shadow-[inset_0_0_0_1.5px_var(--color-trait)]' : 'bg-sable',
                     )}
                   >
-                    {milieu ? (
-                      <button
-                        type="button"
-                        onClick={() => basculerPassage(i)}
-                        title={passage ? 'En faire une station' : 'En faire un point de passage'}
-                        aria-label={passage ? `Faire de ce point de passage une station` : `Faire de ${libelle} un point de passage`}
-                        className="text-left underline decoration-transparent underline-offset-3 hover:decoration-current"
-                      >
-                        {libelle}
-                      </button>
-                    ) : (
-                      libelle
-                    )}
+                    {/* Toucher une station ouvre son nom ; toucher un point de passage en refait une station. */}
+                    <button
+                      id={`station-${i}`}
+                      type="button"
+                      onClick={() => (passage ? basculerPassage(i) : renommer(i))}
+                      title={passage ? 'En faire une station' : 'Renommer cette station'}
+                      aria-label={passage ? 'Faire de ce point de passage une station' : `Renommer ${libelle}`}
+                      className="text-left underline decoration-transparent underline-offset-3 hover:decoration-current"
+                    >
+                      {libelle}
+                    </button>
                     <button
                       type="button"
                       onClick={() => enleverArret(i)}
@@ -670,15 +752,15 @@ export function Traceur() {
                       <Icone nom="fermer" taille={13} epaisseur={2.6} />
                     </button>
                   </span>
-                  {i < arrets - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+                  {i < arrets - 1 && brouillon.renomme !== i + 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
                 </li>
               )
             })}
           </ol>
           {arrets >= 2 ? (
             <p className="text-[12.5px] leading-snug text-gris">
-              Faites glisser un point sur la carte pour le déplacer, ou touchez la ligne entre deux points pour en ajouter un. Touchez le
-              nom d’une station pour en faire un point de passage.
+              Faites glisser un point sur la carte pour le déplacer, ou touchez la ligne entre deux points pour en ajouter un. Touchez une
+              station, ici ou sur la carte, pour changer son nom ou en faire un point de passage.
             </p>
           ) : null}
           {r ? <PhraseCorrespondances liste={r.liste} /> : null}

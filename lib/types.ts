@@ -95,6 +95,8 @@ export interface LigneJoueur {
   passages?: number[]
   /** La ligne existante que celle-ci prolonge depuis son terminus, qui est alors son premier point : « metro-D ». */
   prolonge?: string
+  /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom de la station existante ou du quartier. */
+  noms?: (string | null)[]
   mandat: Mandat
   etale: boolean
   estimation: Estimation

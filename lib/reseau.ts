@@ -221,8 +221,8 @@ export function direCorrespondances(liste: ReturnType<typeof correspondances>) {
 }
 
 /**
- * Les noms des points d'un tracé : une station posée sur une station existante en prend le nom, les autres
- * prennent celui de leur quartier ; un point de passage n'a pas de nom.
+ * Les noms des points d'un tracé : celui que le joueur a choisi s'il en a donné un ; sinon une station posée sur une
+ * station existante en prend le nom, les autres prennent celui de leur quartier. Un point de passage n'a pas de nom.
  */
 export function nommerTrace(
   arrets: [number, number][],
@@ -230,6 +230,7 @@ export function nommerTrace(
   lieux: Lieux,
   stations: StationExistante[],
   mx: number,
+  choisis?: (string | null)[],
 ): (string | null)[] {
   const rangs = arrets.map((_, i) => i).filter((i) => estStation[i])
   const noms = nommerArrets(
@@ -239,7 +240,7 @@ export function nommerTrace(
   const resultat: (string | null)[] = arrets.map(() => null)
   rangs.forEach((i, k) => {
     const existante = stationProche(stations, arrets[i]!, mx, 60)
-    resultat[i] = existante?.nom || noms[k]!
+    resultat[i] = choisis?.[i] || existante?.nom || noms[k]!
   })
   return resultat
 }

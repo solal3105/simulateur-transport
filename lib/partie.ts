@@ -24,6 +24,12 @@ export const VERSION_PARTIE = 1
 /** Au-delà, un tracé ne vient pas du jeu : même avec des points de passage, une ligne en compte bien moins. */
 export const POINTS_MAX = 150
 
+/** La longueur d'un nom de station choisi par le joueur : « Hôpital Édouard Herriot » en compte 23. */
+export const NOM_ARRET_MAX = 40
+
+/** Un nom de station tel qu'on le garde : sans espaces en trop, coupé à la longueur permise ; vide, il rend le nom proposé. */
+export const nomArret = (texte: string) => texte.trim().replace(/\s+/g, ' ').slice(0, NOM_ARRET_MAX).trim()
+
 /** La forme compacte : choix du joueur seulement, sans aucun chiffre calculé. */
 export interface PartieCompacte {
   v: number
@@ -32,10 +38,17 @@ export interface PartieCompacte {
   /** 1 pour une partie en jeu libre, absent sinon. */
   x?: 1
   c: [string, number, number, string, number][]
-  /** Les lignes : nom, mode, mandat, paiement étalé, points, et au besoin les rangs des points de passage et la ligne prolongée. */
-  l: { n: string; m: string; d: number; e: number; a: [number, number][]; p?: number[]; o?: string }[]
+  /**
+   * Les lignes : nom, mode, mandat, paiement étalé, points, et au besoin les rangs des points de passage, la ligne prolongée
+   * et les stations renommées par le joueur, chacune avec son rang.
+   */
+  l: { n: string; m: string; d: number; e: number; a: [number, number][]; p?: number[]; o?: string; s?: [number, string][] }[]
   f: Record<1 | 2, Leviers>
 }
+
+/** Les stations renommées d'une ligne, avec leur rang : un point de passage n'a pas de nom à garder. */
+const nomsChoisis = (l: LigneJoueur) =>
+  (l.noms ?? []).flatMap((nom, k) => (nom && k < l.arrets.length && !l.passages?.includes(k) ? [[k, nom] as [number, string]] : []))
 
 export function compacter(p: PartiePartagee): PartieCompacte {
   return {
@@ -51,6 +64,7 @@ export function compacter(p: PartiePartagee): PartieCompacte {
       a: l.arrets.map(([lon, lat]) => [Math.round(lon * 1e5) / 1e5, Math.round(lat * 1e5) / 1e5] as [number, number]),
       ...(l.passages?.length ? { p: l.passages } : {}),
       ...(l.prolonge ? { o: l.prolonge } : {}),
+      ...(nomsChoisis(l).length ? { s: nomsChoisis(l) } : {}),
     })),
     f: p.leviers,
   }
@@ -59,6 +73,19 @@ export function compacter(p: PartiePartagee): PartieCompacte {
 const MODES: readonly ModeLigne[] = ['tram', 'bus', 'metro', 'cable']
 const estPoint = (p: unknown): p is [number, number] =>
   Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && Number.isFinite(x))
+
+/** Les noms de stations choisis par le joueur, rang par rang : jamais sur un point de passage ni hors du tracé. */
+function lireNoms(brut: unknown, nombre: number, passages: number[]) {
+  if (!Array.isArray(brut)) return undefined
+  const noms: (string | null)[] = Array.from({ length: nombre }, () => null)
+  for (const entree of brut) {
+    if (!Array.isArray(entree)) continue
+    const [k, nom] = entree
+    if (!Number.isInteger(k) || k < 0 || k >= nombre || passages.includes(k) || typeof nom !== 'string') continue
+    noms[k] = nomArret(nom) || null
+  }
+  return noms.some(Boolean) ? noms : undefined
+}
 
 /** La ville d'une partie compacte, avant même de la vérifier : il faut charger ses données pour la relire. */
 export function villeDePartie(brut: unknown): IdVille | null {
@@ -125,12 +152,14 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
         ? l.o
         : undefined
     const estimation = estimer(mode, l.a, carreaux, { passages, prolonge: Boolean(prolonge) })
+    const noms = lireNoms(l.s, l.a.length, passages)
     lignes.push({
       id: `partage-${i}`,
       nom: String(l.n ?? '').slice(0, 60) || `Ligne ${i + 1}`,
       mode,
       ...(passages.length ? { passages } : {}),
       ...(prolonge ? { prolonge } : {}),
+      ...(noms ? { noms } : {}),
       mandat: l.d === 2 && !libre ? 2 : 1,
       etale: l.e === 1 && l.d !== 2 && !libre,
       arrets: l.a,

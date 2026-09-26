@@ -795,10 +795,12 @@ export function Carte({
     }
 
     // Pendant le tracé, on fait glisser un arrêt pour le déplacer. Un glissement ne doit pas poser d'arrêt au
-    // clic qui le termine, et les mises à jour sont regroupées à chaque image pour garder le tracé fluide.
+    // clic qui le termine, et les mises à jour sont regroupées à chaque image pour garder le tracé fluide. En deçà de
+    // quelques pixels, ce n'est pas un glissement mais un toucher, qui ouvre le nom de la station.
     let glisse: number | null = null
     let vientDeGlisser = false
     let attente: [number, number] | null = null
+    let saisiA = { x: 0, y: 0 }
     const saisir = (e: MapMouseEvent | MapTouchEvent) => {
       if (!useJeu.getState().brouillon || decor) return
       const i = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties?.i
@@ -806,11 +808,13 @@ export function Carte({
       e.preventDefault()
       glisse = i
       vientDeGlisser = false
+      saisiA = e.point
       m.dragPan.disable()
       m.getCanvas().style.cursor = 'grabbing'
     }
     const bouger = (e: MapMouseEvent | MapTouchEvent) => {
       if (glisse === null) return
+      if (!vientDeGlisser && Math.hypot(e.point.x - saisiA.x, e.point.y - saisiA.y) < 5) return
       if (!attente) {
         requestAnimationFrame(() => {
           if (glisse !== null && attente) useJeu.getState().deplacerArret(glisse, attente)
@@ -848,7 +852,10 @@ export function Carte({
     m.on('click', (e: MapMouseEvent) => {
       const jeu = useJeu.getState()
       if (jeu.brouillon) {
-        if (vientDeGlisser || m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] }).length) return
+        if (vientDeGlisser) return
+        // Toucher une station du tracé ouvre son nom dans le panneau ; toucher un point de passage ne fait rien.
+        const arret = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties
+        if (arret) return typeof arret.i === 'number' && !arret.passage ? jeu.renommer(arret.i) : undefined
         // Une station posée tout près d'une station existante s'y accroche : c'est une correspondance.
         const p = jeu.brouillon.outil === 'passage' ? ([e.lngLat.lng, e.lngLat.lat] as [number, number]) : accrocher(e.point, e.lngLat)
         if (m.queryRenderedFeatures(e.point, { layers: ['brouillon-cible'] }).length) {
@@ -1068,17 +1075,26 @@ export function Carte({
 
       // Le nom de chaque station posée : celui de la station existante où elle s'accroche, sinon son quartier.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
-      const noms = nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx)
-      // Un prolongement part du terminus de sa ligne et en porte le nom.
+      const noms = nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx, brouillon?.noms)
+      // Un prolongement part du terminus de sa ligne et en porte le nom, sauf si le joueur l'a renommé.
       const prolongee = brouillon?.prolonge ? donnees.reseau?.lignes.find((l) => l.id === brouillon.prolonge) : undefined
       const depuis = prolongee && arrets[0] ? terminusProche(prolongee, arrets[0], donnees.carreaux.mx) : undefined
-      if (depuis && estStation[0]) noms[0] = depuis.nom
+      if (depuis && estStation[0] && !brouillon?.noms?.[0]) noms[0] = depuis.nom
+      // Toucher le nom ouvre le champ pour le changer, comme toucher la station.
       noms.forEach((nom, i) => {
         if (!nom) return
         const el = document.createElement('div')
-        const etiquette = document.createElement('span')
+        const etiquette = document.createElement('button')
+        etiquette.type = 'button'
         etiquette.className = 'nom-arret'
         etiquette.textContent = nom
+        etiquette.title = 'Renommer cette station'
+        etiquette.setAttribute('aria-label', `Renommer ${nom}`)
+        if (brouillon?.renomme === i) etiquette.dataset.actif = ''
+        etiquette.addEventListener('click', (ev) => {
+          ev.stopPropagation()
+          useJeu.getState().renommer(i)
+        })
         el.appendChild(etiquette)
         nomsArrets.push(new Marker({ element: el, anchor: 'left', offset: [10, -10] }).setLngLat(arrets[i]!).addTo(m))
       })

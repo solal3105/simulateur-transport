@@ -168,8 +168,14 @@
   border-radius: 6px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
   white-space: nowrap;
-  pointer-events: none;
+  cursor: pointer;
   animation: apparait 0.25s ease-out;
+}
+/* Le nom qu'on est en train de changer dans le panneau. */
+.nom-arret[data-actif] {
+  box-shadow:
+    0 0 0 2px var(--color-encre),
+    0 2px 8px rgb(0 0 0 / 0.14);
 }
 /* Le gain de voyageurs qui s'élève au-dessus d'un projet qu'on vient de lancer. */
 .gain-flottant {

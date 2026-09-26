@@ -8,6 +8,7 @@ import { approx } from './format'
 import { mesurer } from './mesure'
 import { estimer, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
+import { nomArret } from './partie'
 import { LEVIERS_NEUTRES } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
@@ -37,6 +38,10 @@ export interface Brouillon {
   prolonge?: string
   /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
   edition?: string
+  /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom que nous proposons. */
+  noms?: (string | null)[]
+  /** Le rang de la station dont on change le nom, touchée sur la carte ou dans la liste. */
+  renomme?: number
 }
 
 /** Les points de passage à garder : jamais un terminus, qui reste toujours une station. */
@@ -52,6 +57,17 @@ const avecPoint = (passages: number[] = [], i: number, passage: boolean) => [
   ...passages.map((k) => (k >= i ? k + 1 : k)),
   ...(passage ? [i] : []),
 ]
+
+/** Les noms choisis après avoir retiré le point i, ou inséré au rang i un point qui n'a pas encore de nom. */
+const nomsSans = (noms: Brouillon['noms'], i: number) => noms?.filter((_, k) => k !== i)
+const nomsAvec = (noms: Brouillon['noms'], i: number) => noms && [...noms.slice(0, i), null, ...noms.slice(i)]
+
+/** Les noms que garde la ligne construite : ceux de ses stations, et rien du tout si aucune n'est renommée. */
+function nomsGardes(b: Brouillon) {
+  const passages = nettoyer(b.passages, b.arrets.length) ?? []
+  const noms = b.arrets.map((_, k) => (passages.includes(k) ? null : (b.noms?.[k] ?? null)))
+  return noms.some(Boolean) ? noms : undefined
+}
 
 /** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
 export interface AVenir {
@@ -126,6 +142,10 @@ interface Etat {
   modifierLigne: (id: string) => void
   /** Fait d'un point une station, ou d'une station un point de passage. Les terminus restent des stations. */
   basculerPassage: (i: number) => void
+  /** Ouvre le champ du nom d'une station du tracé, ou le referme sans rien changer. */
+  renommer: (i?: number) => void
+  /** Donne son nom à une station du tracé et referme le champ ; un nom vide lui rend celui que nous proposons. */
+  nommerArret: (i: number, nom: string) => void
   /** Choisit ce que pose le prochain clic : une station ou un point de passage. */
   choisirOutil: (outil: 'station' | 'passage') => void
   /** Commence le prolongement d'une ligne existante depuis l'un de ses terminus. */
@@ -290,6 +310,7 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: b.arrets.slice(0, -1),
               passages: sansPoint(b.passages, dernier),
+              noms: b.noms?.slice(0, dernier),
               prolonge: dernier === 0 ? undefined : b.prolonge,
             },
           }
@@ -303,6 +324,8 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: b.arrets.filter((_, k) => k !== i),
               passages: sansPoint(b.passages, i),
+              noms: nomsSans(b.noms, i),
+              renomme: undefined,
               prolonge: i === 0 ? undefined : b.prolonge,
             },
           }
@@ -323,6 +346,8 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: [...b.arrets.slice(0, i), p, ...b.arrets.slice(i)],
               passages: avecPoint(b.passages, i, b.outil === 'passage'),
+              noms: nomsAvec(b.noms, i),
+              renomme: undefined,
             },
           }
         }),
@@ -336,6 +361,14 @@ export const useJeu = create<Etat>()(
           }
         }),
       choisirOutil: (outil) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, outil } } : {})),
+      renommer: (renomme) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, renomme } } : {})),
+      nommerArret: (i, nom) =>
+        set((s) => {
+          const b = s.brouillon
+          if (!b || i < 0 || i >= b.arrets.length) return {}
+          const noms = b.arrets.map((_, k) => (k === i ? nomArret(nom) || null : (b.noms?.[k] ?? null)))
+          return { brouillon: { ...b, noms: noms.some(Boolean) ? noms : undefined, renomme: undefined } }
+        }),
       prolonger: (ligne, mode, terminus) =>
         set((s) => ({
           brouillon: { mode, arrets: [terminus], passages: [], prolonge: ligne, outil: 'station', edition: s.brouillon?.edition },
@@ -351,6 +384,8 @@ export const useJeu = create<Etat>()(
                   ...s.brouillon,
                   prolonge: ligne,
                   arrets: terminus ? [terminus, ...s.brouillon.arrets.slice(1)] : s.brouillon.arrets,
+                  // Le premier point devient le terminus de la ligne prolongée : il en prend le nom.
+                  noms: terminus && s.brouillon.noms ? [null, ...s.brouillon.noms.slice(1)] : s.brouillon.noms,
                 },
               }
             : {},
@@ -360,7 +395,14 @@ export const useJeu = create<Etat>()(
           const l = s.lignes.find((x) => x.id === id && x.mandat === s.mandat)
           return l
             ? {
-                brouillon: { mode: l.mode, arrets: [...l.arrets], passages: [...(l.passages ?? [])], prolonge: l.prolonge, edition: l.id },
+                brouillon: {
+                  mode: l.mode,
+                  arrets: [...l.arrets],
+                  passages: [...(l.passages ?? [])],
+                  noms: l.noms ? [...l.noms] : undefined,
+                  prolonge: l.prolonge,
+                  edition: l.id,
+                },
                 panneau: { type: 'trace' },
                 apercu: 0,
               }
@@ -386,6 +428,7 @@ export const useJeu = create<Etat>()(
               mode: s.brouillon.mode,
               arrets: s.brouillon.arrets,
               passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+              noms: nomsGardes(s.brouillon),
               prolonge: s.brouillon.prolonge,
               estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
             }
@@ -406,6 +449,7 @@ export const useJeu = create<Etat>()(
             mode: s.brouillon.mode,
             arrets: s.brouillon.arrets,
             passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+            noms: nomsGardes(s.brouillon),
             prolonge: s.brouillon.prolonge,
             mandat: s.mandat,
             etale,
