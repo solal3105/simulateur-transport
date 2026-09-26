@@ -1,4 +1,5 @@
-import { CATALOGUES, PROJETS } from './catalogue'
+import { PROJETS } from './catalogue'
+import plans from './fiches/plans.json'
 import { n } from './format'
 import { leviersDu, resoudre, resumer } from './regles'
 import type { Chantier, Leviers, LigneJoueur, Mandat } from './types'
@@ -25,9 +26,13 @@ interface Partie {
   libre: boolean
 }
 
-/** Le programme réel du réseau, chiffré comme les projets du catalogue : ses voyageurs et son coût. */
+/**
+ * Le programme réel du réseau, chiffré comme les projets du catalogue : ses voyageurs et son coût. Ses projets sont ceux
+ * que l'autorité a inscrits avec un financement et un calendrier (lib/fiches/plans.json, relevé le 27 septembre 2026 ; le
+ * classement de chaque projet et ses sources sont dans lib/fiches/programmes-classement.json).
+ */
 export function planReel(ville: Ville) {
-  const plan = CATALOGUES[ville.id].planReel
+  const plan = (plans as Partial<Record<string, { nom: string; projets: string[]; sources: { titre: string; url: string }[] }>>)[ville.id]
   if (!plan?.projets.length) return null
   const projets = plan.projets.flatMap((id) => {
     const p = PROJETS.get(id)

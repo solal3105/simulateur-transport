@@ -50,7 +50,6 @@ const CHAMPS_CATALOGUE = {
   parcours: null,
   precisions: null,
   sources: null,
-  planReel: null,
 }
 const CHAMPS_BUDGET = { simple: "''", explication: "''", sources: '[]', limites: '[]', textes: null }
 
