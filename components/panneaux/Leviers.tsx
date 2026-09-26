@@ -73,9 +73,9 @@ function Pas({
   enPlus?: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
+    <div className="flex flex-col gap-2.5 rounded-xl bg-white p-3 shadow-[inset_0_0_0_1.5px_var(--color-trait)]">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-base font-extrabold">{titre}</span>
+        <span className="text-[15px] font-extrabold">{titre}</span>
         <span className={clsx('chiffres text-sm font-black whitespace-nowrap', gain > 0 ? 'text-rouge' : 'text-muet')}>
           {signe(gain)} M€
         </span>
@@ -128,7 +128,7 @@ function Interrupteur({
   return (
     <label
       className={clsx(
-        'relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
+        'relative flex cursor-pointer items-center gap-3 rounded-xl bg-white p-3',
         actif ? 'shadow-[inset_0_0_0_2px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
         desactive && 'cursor-not-allowed opacity-55',
       )}
@@ -187,7 +187,7 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
         {icone ? <Icone nom="loi" taille={17} /> : null}
         <Surtitre className="text-gris">{titre}</Surtitre>
       </div>
-      {intro ? <p className="text-sm leading-relaxed text-gris">{intro}</p> : null}
+      {intro ? <p className="text-sm leading-normal text-gris">{intro}</p> : null}
       {contenu}
     </section>
   )
@@ -202,12 +202,12 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
       largeur="large"
       hauteurTelephone="pleine"
       pied={
-        <Bouton genre="rouge" icone="fleche" taille="grand" onClick={fermer} className="lg:self-end lg:min-w-[360px]">
+        <Bouton genre="rouge" icone="fleche" onClick={fermer} className="lg:min-w-[320px] lg:self-end">
           {bilan.reste >= 0 ? `Revenir à la carte avec ${n(bilan.reste)} M€` : `Revenir à la carte, il manque ${n(-bilan.reste)} M€`}
         </Bouton>
       }
     >
-      <div className="flex flex-col gap-2 rounded-2xl bg-rouge p-4 text-white">
+      <div className="flex flex-col gap-2 rounded-xl bg-rouge p-3 text-white">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-semibold opacity-90">Disponible sur ce mandat</span>
           <span className="chiffres text-xl font-black">{bilan.reste >= 0 ? `${n(bilan.reste)} M€` : `-${n(-bilan.reste)} M€`}</span>
@@ -264,7 +264,7 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
               desactive={gratuit ? sansObjet : undefined}
               enPlus={<Repere hausse={l.tickets} />}
             />
-            <p className="text-[12.5px] leading-relaxed text-gris">
+            <p className="text-[12.5px] leading-normal text-gris">
               Nous comparons chaque hausse à une inflation de 2 % par an, l’objectif de la Banque centrale européenne : sur les six ans d’un
               mandat, les prix monteraient d’environ {(INFLATION_MANDAT * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %.
               Tout employeur rembourse au moins la moitié de l’abonnement de ses salariés.

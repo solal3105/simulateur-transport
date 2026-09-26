@@ -1,6 +1,6 @@
 import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue'
 import { leviersPossibles } from './leviers'
-import { estimer, prolongementPossible, type Carreaux } from './modele'
+import { estimer, prolongementPossible, suiteDe, type Carreaux } from './modele'
 import { LEVIERS_NEUTRES, leviersDu } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
@@ -153,7 +153,7 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     return !requis || decides.has(requis)
   })
 
-  const lignes: LigneJoueur[] = []
+  const lues: Omit<LigneJoueur, 'estimation'>[] = []
   b.l.forEach((l, i) => {
     if (!l || typeof l !== 'object') return
     const mode = MODES.find((m) => m === l.m)
@@ -167,9 +167,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       typeof l.o === 'string' && /^(metro|tram)-[\p{L}\p{N} .'-]{1,24}$/u.test(l.o) && prolongementPossible(mode, l.a[0], carreaux)
         ? l.o
         : undefined
-    const estimation = estimer(mode, l.a, carreaux, { passages, prolonge: Boolean(prolonge) })
     const noms = lireNoms(l.s, l.a.length, passages)
-    lignes.push({
+    lues.push({
       id: `partage-${i}`,
       nom: String(l.n ?? '').slice(0, 60) || `Ligne ${i + 1}`,
       mode,
@@ -179,8 +178,14 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       mandat: mandatDe(l.d),
       etale: l.e === 1 && mandatDe(l.d) === 1 && !libre,
       arrets: l.a,
-      estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
     })
+  })
+  // Une ligne qui part du terminus d'une ligne d'un mandat précédent la continue : sa première station est déjà payée.
+  // On le reconnaît au tracé, une fois toutes les lignes lues, sans rien lire de plus dans la partie.
+  const lignes: LigneJoueur[] = lues.map((l) => {
+    const suite = !l.prolonge && Boolean(suiteDe(l, lues, carreaux.mx))
+    const estimation = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
+    return { ...l, estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 } }
   })
 
   // Les leviers sont bornés aux valeurs que le jeu permet.

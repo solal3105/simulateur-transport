@@ -66,6 +66,12 @@ export interface Projet {
   /** Les chiffres que nous estimons nous-mêmes, faute d'étude publiée, avec la méthode des lignes que vous tracez. */
   estime?: { voyageurs?: boolean; duree?: boolean }
   sources?: Source[]
+  /** L'histoire du projet en quelques dates, « 2024-06 » ou « 2024 », chacune avec le document qui l'établit. */
+  histoire?: { date: string; texte: string; source: Source }[]
+  /** Ce qu'en ont dit les habitants pendant la concertation ou l'enquête publique, résumé, avec le document résumé. */
+  avis?: { texte: string; source: Source }
+  /** Des articles de presse sur le projet : leur titre, leur média, leur date et leur adresse, jamais leur texte. */
+  presse?: { titre: string; media: string; date: string; url: string }[]
 }
 
 /** Le catalogue d'un réseau : ses projets réels, et celui que le tutoriel fait lancer. */
@@ -73,6 +79,11 @@ export interface Catalogue {
   projets: Projet[]
   /** Le projet que le tutoriel fait toucher sur la carte, la consigne, et ce qu'on en dit. */
   tutoriel?: { projet: string; consigne: string; detail: string }
+  /**
+   * Le programme que l'autorité a réellement décidé pour les années du jeu : les projets du catalogue qu'il contient, et
+   * les documents qui le disent. Il sert de repère à l'objectif « faire mieux que le plan réel ».
+   */
+  planReel?: { nom: string; projets: string[]; sources: Source[] }
 }
 
 /** Un projet du catalogue que le joueur a décidé de construire. */
@@ -111,6 +122,11 @@ export interface OptionsLigne {
   passages?: number[]
   /** Le premier point est le terminus d'une ligne existante : sa station est déjà construite. */
   prolonge?: boolean
+  /**
+   * Le premier point est le terminus d'une ligne du joueur décidée à un mandat précédent, que celle-ci continue : sa
+   * station est déjà construite. Celui qui appelle l'a vérifié (`suiteDe`).
+   */
+  suite?: boolean
 }
 
 export interface Estimation {

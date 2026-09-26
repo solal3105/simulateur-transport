@@ -30,7 +30,7 @@ export function Rendement({ voyageurs, cout, ligne = false }: { voyageurs: numbe
         : 'C’est le meilleur rapport de tout le catalogue.'
       : `Le meilleur projet du catalogue en apporte ${n(meilleur)}.`
   return (
-    <div className="flex flex-col gap-2 rounded-2xl bg-sable p-4">
+    <div className="flex flex-col gap-2 rounded-xl bg-sable p-3">
       <div className="flex justify-between gap-3 text-sm">
         <span className="font-semibold text-gris">Voyageurs gagnés par million investi</span>
         <span className="chiffres font-black">{n(valeur)}</span>

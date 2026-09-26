@@ -21,6 +21,28 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  */
 const VERSIONS: Version[] = [
   {
+    iso: '2026-09-27',
+    date: '27 septembre 2026',
+    titre: 'Des panneaux plus compacts et des objectifs',
+    texte: 'Les panneaux laissent plus de place à la carte, et la partie gagne des objectifs et de quoi prolonger vos propres lignes.',
+    groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'Au mandat suivant, vous pouvez prolonger une ligne que vous avez tracée : partez de son terminus, et sa station n’est pas payée une seconde fois.',
+          'Des objectifs se consultent dans le menu et se jugent au bilan. Le premier consiste à tenir le budget sans augmenter le ticket ni l’abonnement.',
+          'La fiche d’une ligne que vous tracez dit quelles communes elle dessert, et la compare à un chantier réel du même mode et de longueur voisine.',
+        ],
+      },
+      {
+        titre: 'Amélioré',
+        points: [
+          'Les panneaux sont plus compacts. Pour tracer une ligne, on choisit le mode parmi quatre tuiles, la liste des lignes à prolonger reste repliée, et les chiffres tiennent sur une seule bande : la carte reste visible.',
+        ],
+      },
+    ],
+  },
+  {
     iso: '2026-09-26',
     date: '26 septembre 2026',
     titre: 'Le réseau en couleurs et vos premiers signalements',

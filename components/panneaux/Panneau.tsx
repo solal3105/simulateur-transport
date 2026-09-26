@@ -178,7 +178,7 @@ export function Panneau({
         // La hauteur suit le doigt sans retard, puis glisse jusqu'à sa position au lâcher.
         feuille && tiree === null && 'transition-[max-height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
         'lg:absolute lg:top-24 lg:right-0 lg:bottom-0 lg:left-auto lg:max-h-none lg:rounded-none lg:rounded-l-none lg:shadow-[-8px_0_30px_rgb(0_0_0/0.08)]',
-        largeur === 'normale' && 'lg:w-[440px]',
+        largeur === 'normale' && 'lg:w-[400px]',
         largeur === 'large' && 'lg:w-[min(1100px,calc(100vw-340px))]',
         largeur === 'pleine' && 'lg:left-[340px] lg:w-auto',
       )}
@@ -209,19 +209,19 @@ export function Panneau({
             <span className="h-1.5 w-11 rounded-full bg-trait" />
           </button>
         ) : null}
-        <div className="flex shrink-0 items-start justify-between gap-3 px-5 pt-2.5 pb-3 lg:px-7 lg:pt-6.5">
-          <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex shrink-0 items-start justify-between gap-3 px-4 pt-2 pb-2.5 lg:px-5 lg:pt-4 lg:pb-3">
+          <div className="flex min-w-0 flex-col gap-1">
             {surtitre}
             <h2
               id="titre-panneau"
               ref={refTitre}
               tabIndex={-1}
-              className="text-[23px] leading-[1.08] font-black tracking-tight outline-none lg:text-[28px]"
+              className="text-[20px] leading-[1.1] font-black tracking-tight outline-none lg:text-[22px]"
             >
               {titre}
             </h2>
           </div>
-          <BoutonRond label="Fermer" icone="fermer" onClick={quitter} className="-mr-1" />
+          <BoutonRond label="Fermer" icone="fermer" onClick={quitter} className="-mt-1 -mr-1 size-9!" />
         </div>
       </div>
       {/* La zone qui défile peut se réduire à rien quand la feuille est repliée : ses marges sont à l'intérieur. Elle
@@ -231,9 +231,9 @@ export function Panneau({
         inert={replieeVisible || undefined}
         className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
       >
-        <div className="flex grow flex-col gap-4 px-5 pb-5 lg:px-7">{children}</div>
+        <div className="flex grow flex-col gap-3 px-4 pb-4 lg:px-5">{children}</div>
       </div>
-      {pied ? <div className="flex shrink-0 flex-col gap-2 border-t border-trait px-5 pt-3 pb-6 lg:px-7 lg:pb-7">{pied}</div> : null}
+      {pied ? <div className="flex shrink-0 flex-col gap-2 border-t border-trait px-4 pt-2.5 pb-5 lg:px-5 lg:pb-4">{pied}</div> : null}
     </motion.section>
   )
 }

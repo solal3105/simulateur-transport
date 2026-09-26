@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { finMandat, PROJETS } from './catalogue'
 import { approx, n } from './format'
 import { mesurer } from './mesure'
-import { estimer, type Carreaux } from './modele'
+import { estimer, suiteDe, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
 import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
@@ -497,7 +497,8 @@ export const useJeu = create<Etat>()(
           if (carreaux.ville !== s.ville || s.lignes.length === 0) return {}
           let change = false
           const lignes = s.lignes.map((l) => {
-            const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge) })
+            const suite = !l.prolonge && Boolean(suiteDe(l, s.lignes, carreaux.mx))
+            const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
             const estimation = { ...e, nouveaux: Math.round(e.nouveaux / 100) * 100 }
             if (estimation.cout === l.estimation.cout && estimation.nouveaux === l.estimation.nouveaux && l.estimation.detail) return l
             change = true
