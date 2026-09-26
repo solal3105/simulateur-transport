@@ -18,22 +18,10 @@ import { Menu } from '../panneaux/Menu'
 import { Methode } from '../panneaux/Methode'
 import { hauteurFeuilleOuverte, useHauteurFenetre } from '../panneaux/Panneau'
 import { FicheLigne, MaLigne, Traceur } from '../panneaux/Traceur'
-import { Bouton, Icone } from '../ui'
+import { Bouton, Icone, useGrandEcran } from '../ui'
 import { Entete } from './Entete'
 import { BarreBas, Programme } from './Programme'
 import { Tutoriel } from './Tutoriel'
-
-function useGrandEcran() {
-  const [grand, setGrand] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const maj = () => setGrand(mq.matches)
-    maj()
-    mq.addEventListener('change', maj)
-    return () => mq.removeEventListener('change', maj)
-  }, [])
-  return grand
-}
 
 function Message() {
   const { message, effacerMessage } = useJeu()

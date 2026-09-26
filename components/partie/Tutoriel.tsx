@@ -8,7 +8,7 @@ import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 
-import { Bouton, Icone } from '../ui'
+import { Bouton, Icone, useGrandEcran } from '../ui'
 import { useBilan } from './budget'
 
 /**
@@ -21,6 +21,7 @@ export function Tutoriel() {
   const { tuto, finirTuto, chantiers } = useJeu()
   const guide = CATALOGUES[useVille().id].tutoriel
   const bilan = useBilan()
+  const grand = useGrandEcran()
   const dernier = chantiers.at(-1)
   const projet = dernier ? PROJETS.get(dernier.id) : undefined
   const r = projet && dernier ? resoudre(projet, dernier) : undefined
@@ -55,7 +56,10 @@ export function Tutoriel() {
               pour tracer votre propre ligne.
             </p>
             <p className="text-[14.5px] leading-relaxed text-gris">
-              Quand vous avez fini, terminez le mandat avec le bouton rouge : la partie passe alors à 2032.
+              {/* Le bouton prend la couleur du réseau, et son libellé change avec l'écran : on le nomme tel qu'il s'affiche. */}
+              Quand vous avez fini, terminez le mandat avec le bouton{' '}
+              {grand ? '« Finir le premier mandat », en bas à gauche' : '« Finir le mandat », en bas de l’écran'} : la partie passe alors à
+              2032.
             </p>
           </div>
           <Bouton genre="rouge" icone="fleche" onClick={finirTuto}>

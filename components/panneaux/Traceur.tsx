@@ -467,7 +467,7 @@ export function Traceur() {
             <label
               key={m.id}
               className={clsx(
-                'flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full text-[13px] font-extrabold',
+                'relative flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full text-[13px] font-extrabold',
                 brouillon.mode === m.id ? 'bg-encre text-white' : 'bg-sable',
               )}
             >
@@ -487,7 +487,7 @@ export function Traceur() {
           <label
             key={m.id}
             className={clsx(
-              'hidden cursor-pointer items-start gap-3 rounded-2xl bg-white px-3.5 py-3 lg:flex',
+              'relative hidden cursor-pointer items-start gap-3 rounded-2xl bg-white px-3.5 py-3 lg:flex',
               brouillon.mode === m.id ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
             )}
           >

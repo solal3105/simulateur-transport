@@ -127,7 +127,7 @@ function Interrupteur({
   return (
     <label
       className={clsx(
-        'flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
+        'relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
         actif ? 'shadow-[inset_0_0_0_2px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
         desactive && 'cursor-not-allowed opacity-55',
       )}

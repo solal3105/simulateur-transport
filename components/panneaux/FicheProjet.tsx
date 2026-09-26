@@ -179,7 +179,7 @@ export function FicheProjet({ id }: { id: string }) {
           <div className="flex flex-col gap-1.5 text-[14.5px] leading-relaxed">
             <span className="text-xs font-extrabold tracking-[0.08em] text-white/70 uppercase">Première décision, étape 2 sur 3</span>
             <span>
-              Il coûte {n(r.cout)} M€ : la partie noire de la jauge rouge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
+              Il coûte {n(r.cout)} M€ : la partie noire de la jauge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
               apporterait {n(r.voyageurs)} voyageurs par jour.
             </span>
             <span className="font-extrabold">

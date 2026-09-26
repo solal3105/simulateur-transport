@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx'
 import { motion } from 'motion/react'
-import { useEffect, useRef, useState, type PointerEvent as EvenementPointeur, type ReactNode } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type PointerEvent as EvenementPointeur, type ReactNode } from 'react'
 
 import { useJeu } from '@/lib/store'
 
@@ -90,12 +90,18 @@ export function Panneau({
   const ouverte = Math.min(maximum, Math.round(fenetre * PART_OUVERTE))
   const hauteurs: Record<Position, number> = { repliee, ouverte, depliee: maximum }
 
+  // Le titre reçoit le focus une seule fois, à l'ouverture : sinon chaque nouveau rendu du panneau, comme à chaque
+  // lettre tapée dans le nom d'une ligne, le lui reprendrait.
   useEffect(() => {
     refTitre.current?.focus({ preventScroll: true })
-    const clavier = (e: KeyboardEvent) => e.key === 'Escape' && quitter()
-    window.addEventListener('keydown', clavier)
-    return () => window.removeEventListener('keydown', clavier)
-  }, [quitter])
+  }, [])
+  const echap = useEffectEvent((e: KeyboardEvent) => {
+    if (e.key === 'Escape') quitter()
+  })
+  useEffect(() => {
+    window.addEventListener('keydown', echap)
+    return () => window.removeEventListener('keydown', echap)
+  }, [])
 
   // La partie fixe de la feuille, mesurée : sa hauteur moins celle de son contenu défilant.
   const mesurerFixe = () => {
@@ -164,7 +170,9 @@ export function Panneau({
       transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.9 }}
       style={hauteurMax !== undefined ? { maxHeight: hauteurMax } : undefined}
       className={clsx(
-        'fixed inset-x-0 z-30 flex flex-col overflow-hidden rounded-t-[26px] bg-white shadow-panneau',
+        // Le panneau rogne son contenu sans jamais défiler lui-même : un champ qui prend le focus fait défiler sa
+        // liste, pas le panneau entier, qui laisserait sinon un grand vide blanc.
+        'fixed inset-x-0 z-30 flex flex-col overflow-hidden supports-[overflow:clip]:overflow-clip rounded-t-[26px] bg-white shadow-panneau',
         barreVisible ? 'bottom-[88px]' : 'bottom-0',
         hauteurTelephone === 'pleine' && 'top-0 rounded-t-none',
         // La hauteur suit le doigt sans retard, puis glisse jusqu'à sa position au lâcher.
@@ -216,8 +224,13 @@ export function Panneau({
           <BoutonRond label="Fermer" icone="fermer" onClick={quitter} className="-mr-1" />
         </div>
       </div>
-      {/* La zone qui défile peut se réduire à rien quand la feuille est repliée : ses marges sont à l'intérieur. */}
-      <div ref={refContenu} inert={replieeVisible || undefined} className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+      {/* La zone qui défile peut se réduire à rien quand la feuille est repliée : ses marges sont à l'intérieur. Elle
+          sert de repère aux cases cachées derrière les interrupteurs, qui défilent ainsi avec elle. */}
+      <div
+        ref={refContenu}
+        inert={replieeVisible || undefined}
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
+      >
         <div className="flex grow flex-col gap-4 px-5 pb-5 lg:px-7">{children}</div>
       </div>
       {pied ? <div className="flex shrink-0 flex-col gap-2 border-t border-trait px-5 pt-3 pb-6 lg:px-7 lg:pb-7">{pied}</div> : null}

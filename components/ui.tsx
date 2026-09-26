@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx'
 import Link from 'next/link'
-import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react'
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react'
 
 const TRACES = {
   fleche: 'M5 12h14M13 6l6 6-6 6',
@@ -331,4 +331,17 @@ export function useChoixVisible<T extends HTMLElement>(choix: unknown) {
     if (r && choisi && r.scrollWidth > r.clientWidth) r.scrollLeft = choisi.offsetLeft - 24
   }, [choix])
   return rangee
+}
+
+/** Vrai sur un écran d'ordinateur, là où la partie passe à sa mise en page large (1024 pixels et plus). */
+export function useGrandEcran() {
+  const [grand, setGrand] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const maj = () => setGrand(mq.matches)
+    maj()
+    mq.addEventListener('change', maj)
+    return () => mq.removeEventListener('change', maj)
+  }, [])
+  return grand
 }
