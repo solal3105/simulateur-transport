@@ -91,7 +91,7 @@ export function FicheProjet({ id }: { id: string }) {
           Retirer ce projet
         </Bouton>
       ) : (
-        <p className="text-sm leading-relaxed text-gris">
+        <p className="text-sm leading-normal text-gris">
           {existant.mandat === 1 ? 'Décidé pendant le premier mandat' : `Décidé pendant le mandat ${existant.mandat}`}, ce projet ne peut
           plus être retiré.
         </p>
@@ -105,7 +105,7 @@ export function FicheProjet({ id }: { id: string }) {
   } else if (r.cout <= reste) {
     pied = (
       <>
-        <Bouton genre="rouge" icone="valider" taille="grand" onClick={() => bati(false)} data-guide={guide ? '' : undefined}>
+        <Bouton genre="rouge" icone="valider" onClick={() => bati(false)} data-guide={guide ? '' : undefined}>
           {verbe} pour {n(r.cout)} M€
         </Bouton>
         {peutEtaler ? (
@@ -126,7 +126,7 @@ export function FicheProjet({ id }: { id: string }) {
             Ce projet coûte {n(r.cout)} M€ et il vous en reste {n(Math.max(reste, 0))}.
           </div>
         </div>
-        <div className="text-[15px] font-extrabold">Vous pouvez quand même le construire :</div>
+        <div className="text-[14px] font-extrabold">Vous pouvez quand même le construire :</div>
         <div className="flex flex-col gap-2">
           {peutEtaler ? (
             <Voie
@@ -177,9 +177,9 @@ export function FicheProjet({ id }: { id: string }) {
       pied={pied}
     >
       {guide && !existant ? (
-        <div className="flex items-start gap-3 rounded-2xl bg-encre p-4 text-white">
+        <div className="flex items-start gap-3 rounded-xl bg-encre p-3 text-white">
           <Icone nom="main" taille={22} className="mt-0.5 shrink-0" />
-          <div className="flex flex-col gap-1.5 text-[14.5px] leading-relaxed">
+          <div className="flex flex-col gap-1.5 text-[13.5px] leading-normal">
             <span className="text-xs font-extrabold tracking-[0.08em] text-white/70 uppercase">Première décision, étape 2 sur 3</span>
             <span>
               Il coûte {n(r.cout)} M€ : la partie noire de la jauge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
@@ -192,7 +192,7 @@ export function FicheProjet({ id }: { id: string }) {
         </div>
       ) : null}
 
-      <p className="text-[15px] leading-relaxed text-gris">{projet.description}</p>
+      <p className="text-[14px] leading-normal text-gris">{projet.description}</p>
 
       {projet.statut ? (
         <div className="flex flex-col gap-1 rounded-2xl bg-sable px-4 py-3">
@@ -212,7 +212,7 @@ export function FicheProjet({ id }: { id: string }) {
 
       {existant && existant.mandat === mandat && mandat === 1 && !libre ? (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-[15px] font-extrabold">Comment le payer</legend>
+          <legend className="mb-2 text-[14px] font-extrabold">Comment le payer</legend>
           {[
             { etale: false, titre: 'En une fois', detail: `${n(r.cout)} M€ sur ce mandat.` },
             {
@@ -238,7 +238,7 @@ export function FicheProjet({ id }: { id: string }) {
                 className="mt-1 size-5 accent-rouge"
               />
               <span className="flex flex-col gap-0.5">
-                <span className="text-[15px] font-extrabold">{o.titre}</span>
+                <span className="text-[14px] font-extrabold">{o.titre}</span>
                 <span className="text-[13.5px] leading-snug text-gris">{o.detail}</span>
               </span>
             </label>
@@ -252,14 +252,14 @@ export function FicheProjet({ id }: { id: string }) {
       ) : null}
 
       {bloque ? (
-        <div className="rounded-2xl bg-sable px-4 py-3.5 text-sm leading-relaxed">
+        <div className="rounded-2xl bg-sable px-4 py-3.5 text-sm leading-normal">
           Ce projet prolonge {dependance!.nom}. Il faut d’abord construire celui-ci.
         </div>
       ) : null}
 
       {projet.variantes && !existant ? (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-[15px] font-extrabold">Choisissez une version</legend>
+          <legend className="mb-2 text-[14px] font-extrabold">Choisissez une version</legend>
           {projet.variantes.map((v) => {
             const choisi = v.id === varianteId
             const tropCher = v.cout > reste
@@ -280,7 +280,7 @@ export function FicheProjet({ id }: { id: string }) {
                   className="mt-1 size-5 accent-rouge"
                 />
                 <span className="flex flex-1 flex-col gap-1.5">
-                  <span className="text-base font-extrabold">{v.nom}</span>
+                  <span className="text-[15px] font-extrabold">{v.nom}</span>
                   <span className="text-[13.5px] leading-snug text-gris">{v.detail}</span>
                   <span className="chiffres flex flex-wrap gap-x-3.5 gap-y-1 text-[13px] font-extrabold">
                     <span>{n(v.cout)} M€</span>
@@ -301,7 +301,7 @@ export function FicheProjet({ id }: { id: string }) {
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-sable px-4 py-3.5">
           <input type="checkbox" checked={option} onChange={(e) => setOption(e.target.checked)} className="mt-1 size-5 accent-rouge" />
           <span className="flex flex-col gap-1">
-            <span className="text-[15px] font-extrabold">
+            <span className="text-[14px] font-extrabold">
               {projet.option.nom}, {n(projet.option.surcout)} M€ de plus
             </span>
             <span className="text-[13.5px] leading-snug text-gris">{projet.option.detail}</span>
@@ -338,7 +338,7 @@ export function FicheProjet({ id }: { id: string }) {
       </div>
 
       {apresFin ? (
-        <p className="text-sm leading-relaxed text-gris">
+        <p className="text-sm leading-normal text-gris">
           Ce projet ouvrira après {fin} : vous le payez, et vous ne l’inaugurerez que si vous continuez la partie.
         </p>
       ) : null}
@@ -350,7 +350,7 @@ export function FicheProjet({ id }: { id: string }) {
       {projet.precisions?.length || projet.sources?.length ? (
         <Deplier titre="D’où viennent ces chiffres">
           {projet.precisions?.length ? (
-            <ul className="flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-relaxed text-gris">
+            <ul className="flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-normal text-gris">
               {projet.precisions.map((p) => (
                 <li key={p}>{p}</li>
               ))}

@@ -231,13 +231,13 @@ export function CarteChiffre({
   accent?: boolean
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-2xl bg-sable p-3">
-      <Icone nom={icone} taille={17} className="text-muet" />
+    <div className="flex flex-col gap-0.5 rounded-xl bg-sable px-2.5 py-2">
+      <Icone nom={icone} taille={15} className="text-muet" />
       <div className={clsx('flex items-baseline gap-1 whitespace-nowrap', accent && 'text-rouge')}>
-        <span className="chiffres text-[19px] font-black tracking-tight">{valeur}</span>
-        {unite ? <span className="text-xs font-extrabold">{unite}</span> : null}
+        <span className="chiffres text-[17px] font-black tracking-tight">{valeur}</span>
+        {unite ? <span className="text-[11px] font-extrabold">{unite}</span> : null}
       </div>
-      <div className="text-xs leading-snug text-gris">{legende}</div>
+      <div className="text-[11.5px] leading-snug text-gris">{legende}</div>
     </div>
   )
 }

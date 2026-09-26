@@ -22,7 +22,7 @@ export function Menu() {
 
   return (
     <Panneau titre="Votre partie">
-      <p className="text-[15px] leading-relaxed">
+      <p className="text-[14px] leading-normal">
         {libre
           ? `Vous jouez ${ville.ou}, en jeu libre : il n’y a pas de budget à tenir.`
           : `Vous jouez ${ville.ou}, au ${ordinal(mandat)} mandat, de ${debutMandat(mandat)} à ${finMandat(mandat)}.`}{' '}
