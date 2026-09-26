@@ -20,12 +20,13 @@ export interface StationLigne {
 export type ModeExistant = ModeLigne | 'rer' | 'train'
 
 export interface LigneExistante {
-  /** « metro-A », « tram-T1 », « rer-B ». */
+  /** « metro-A », « tram-T1 », « rer-B », « bus-TVM ». */
   id: string
+  /** Un bus est un bus en site propre, comme le TVM : la carte le montre, mais il ne se prolonge pas. */
   mode: ModeExistant
   /** Le nom court de la ligne : « A », « T1 », « 14 ». */
   ref: string
-  /** « Métro A », « Tram T1 ». */
+  /** « Métro A », « Tram T1 », « Bus 393 », « TVM ». */
   nom: string
   /** La couleur de la ligne sur le plan du réseau, quand OpenStreetMap la connaît. */
   couleur: string | null
@@ -46,7 +47,10 @@ export interface ReseauActuel {
   gares?: { nom: string; pos: [number, number] }[]
 }
 
-/** Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train. */
+/**
+ * Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train, et le calcul des voyageurs ne
+ * connaît pas les arrêts des bus en site propre, que la carte montre sans qu'ils comptent comme une desserte.
+ */
 export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: 'metro' | 'tram' } => l.mode === 'metro' || l.mode === 'tram'
 
 /** Une station du réseau actuel, et les lignes qui s'y arrêtent. */
@@ -195,9 +199,9 @@ export function stationProche(stations: StationExistante[], p: [number, number],
 
 const MOTS: Record<ModeExistant, string> = { metro: 'métro', rer: 'RER', tram: 'tram', train: 'train', cable: 'téléphérique', bus: 'bus' }
 
-/** « métro A et D », « RER B », « tram T1 » : les lignes d'une station, dites dans une phrase. */
+/** « métro A et D », « RER B », « tram T1 », « bus TVM » : les lignes d'une station, dites dans une phrase. */
 export function direLignes(lignes: { mode: ModeExistant; ref: string }[]) {
-  const parMode = (['metro', 'rer', 'tram', 'train', 'cable'] as ModeExistant[])
+  const parMode = (['metro', 'rer', 'tram', 'train', 'cable', 'bus'] as ModeExistant[])
     .map((mode) => ({ mode, refs: lignes.filter((l) => l.mode === mode).map((l) => l.ref) }))
     .filter((g) => g.refs.length)
   return enumerer(parMode.map((g) => `${MOTS[g.mode]} ${enumerer(g.refs)}`))
