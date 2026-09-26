@@ -39,6 +39,16 @@ export function nommerArret(p: [number, number], lieux: Lieux): string {
   return commune?.nom ?? quartier?.nom ?? 'Arrêt'
 }
 
+/** Les communes où se trouvent des points, dans l'ordre du tracé, chacune une fois : « Villeurbanne, Bron et Vénissieux ». */
+export function communesDes(points: [number, number][], lieux: Lieux): string[] {
+  const noms: string[] = []
+  for (const p of points) {
+    const nom = lieux.communes.find((c) => c.anneaux.some((a) => dansAnneau(p, a)))?.nom
+    if (nom && !noms.includes(nom)) noms.push(nom)
+  }
+  return noms
+}
+
 /** Situe un point par rapport à un autre : « Est », « Nord »… */
 function direction(de: [number, number], vers: [number, number]) {
   const dx = (vers[0] - de[0]) * Math.cos((de[1] * Math.PI) / 180)

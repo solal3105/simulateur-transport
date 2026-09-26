@@ -9,6 +9,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { CHANTIERS_REELS } from '../lib/chantiers'
 import { COEFFICIENT_RESEAU, PRIX } from '../lib/couts'
 import { estimer, preparerCarreaux } from '../lib/modele'
 import { fleuvesDe, preparerTerrain, REGLAGES } from '../lib/terrain'
@@ -16,36 +17,8 @@ import type { ModeLigne } from '../lib/types'
 import { VILLES, type IdVille } from '../lib/villes'
 
 type Plat = [nom: string, mode: ModeLigne, reseau: IdVille | null, km: number, stations: number, reel: number, poids: number]
-// Coûts en M€ 2025 (docs/couts.md). Poids réduit pour les métros en partie aériens et le grand gabarit parisien.
-const PLATS: Plat[] = [
-  ['Lyon T6 nord', 'tram', 'lyon', 5.4, 10, 222, 1],
-  ['Lyon T9', 'tram', 'lyon', 8.8, 19, 346, 1],
-  ['Lyon T10', 'tram', 'lyon', 7.6, 14, 352, 1],
-  ['Nice T5', 'tram', 'nice', 7.5, 15, 382, 1],
-  ['IdF T9', 'tram', 'idf', 10, 19, 583, 1],
-  ['IdF T10', 'tram', 'idf', 8.2, 13, 443, 1],
-  ['IdF T1 Rueil', 'tram', 'idf', 7.5, 15, 537, 1],
-  ['IdF T3b', 'tram', 'idf', 3.2, 7, 249, 1],
-  ['Besançon', 'tram', null, 14.5, 31, 314, 1],
-  ['Tours A', 'tram', null, 14.8, 29, 531, 1],
-  ['Tours 2', 'tram', null, 12.5, 22, 502, 1],
-  ['Grenoble E', 'tram', null, 11.2, 18, 308, 1],
-  ['Reims', 'tram', null, 11.2, 23, 607, 1],
-  ['Angers', 'tram', null, 10, 19, 351, 1],
-  ['Montpellier L5', 'tram', null, 15.7, 25, 482, 1],
-  ['Dijon', 'tram', null, 18.9, 35, 550, 1],
-  ['Lyon TB12', 'bus', 'lyon', 8, 19, 171, 1],
-  ['Nantes Busway', 'bus', null, 7, 15, 115, 1],
-  ['Nîmes T2', 'bus', null, 11.5, 26, 150, 1],
-  ['Toulouse C', 'metro', 'toulouse', 27, 21, 3380, 0.5],
-  ['Rennes b', 'metro', null, 14, 15, 1576, 0.5],
-  ['IdF M11', 'metro', 'idf', 6, 6, 1331, 1],
-  ['IdF M4', 'metro', 'idf', 1.8, 2, 479, 1],
-  ['IdF M14 nord', 'metro', 'idf', 5.8, 4, 1691, 1],
-  ['IdF M14 sud', 'metro', 'idf', 14, 7, 2744, 1],
-  ['GPE L15 Sud', 'metro', 'idf', 33, 16, 9751, 0.5],
-  ['GPE L16', 'metro', 'idf', 28, 10, 6787, 0.5],
-]
+// Coûts en M€ 2025 (docs/couts.md), la même liste que celle qui sert de comparaison aux lignes du joueur.
+const PLATS: Plat[] = CHANTIERS_REELS.map((c) => [c.nom, c.mode, c.reseau, c.km, c.stations, c.cout, c.poids])
 const plat = (p: Plat) => (p[3] * PRIX[p[1]].km + p[4] * PRIX[p[1]].station) * (p[2] ? COEFFICIENT_RESEAU[p[2]] : 1)
 
 const racine = join(__dirname, '..')

@@ -3,8 +3,10 @@
 import { clsx } from 'clsx'
 import { useMemo, useRef, useState, type MouseEvent } from 'react'
 
+import { chantierComparable } from '@/lib/chantiers'
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
+import { communesDes } from '@/lib/lieux'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace, suiteDe } from '@/lib/modele'
@@ -245,6 +247,33 @@ function ChampNom({ i, nom, milieu }: { i: number; nom: string; milieu: boolean 
         </button>
       ) : null}
     </form>
+  )
+}
+
+/**
+ * Ce qui situe une ligne tracée, calculé sans rien inventer : les communes que ses stations desservent, et le chantier
+ * réel qui lui ressemble le plus parmi ceux qui calent nos prix.
+ */
+function EnBref({ trace, longueur }: { trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages'>; longueur: number }) {
+  const ville = useVille()
+  const donnees = useDonnees(ville.id)
+  const communes = useMemo(() => {
+    if (!donnees) return []
+    const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
+    return communesDes(
+      trace.arrets.filter((_, i) => estStation[i]),
+      donnees.lieux,
+    )
+  }, [donnees, trace])
+  const comparable = chantierComparable(trace.mode, longueur, ville.id)
+  if (!communes.length && !comparable) return null
+  return (
+    <p className="text-[13px] leading-normal text-gris">
+      {communes.length ? `Elle dessert ${enumerer(communes)}. ` : ''}
+      {comparable
+        ? `Pour comparer, ${comparable.nom} compte ${comparable.stations} stations sur ${km(comparable.km)} km et revient à ${n(comparable.cout)} M€.`
+        : ''}
+    </p>
   )
 }
 
@@ -1027,6 +1056,7 @@ export function MaLigne() {
       }
     >
       <ChiffresLigne e={e} annee={annee} legendeCout={partDuBudget(e.cout, reste)} />
+      <EnBref trace={brouillon} longueur={e.km} />
       {ancienne ? (
         <p className="text-[13.5px] leading-normal text-gris">
           Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
@@ -1150,6 +1180,7 @@ export function FicheLigne({ id }: { id: string }) {
       pied={pied}
     >
       <ChiffresLigne e={e} annee={annee} legendeCout="investis" />
+      <EnBref trace={l} longueur={e.km} />
       {l.etale && !libre ? (
         <p className="text-[13.5px] leading-normal text-gris">
           Payée en deux fois : {n(moitie)} M€ sur le premier mandat, {n(e.cout - moitie)} M€ sur le second.
