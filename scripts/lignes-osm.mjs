@@ -3,8 +3,9 @@
  * l'ordre, tirées des relations « route » d'OpenStreetMap ; en Île-de-France, aussi les RER et les trains
  * Transilien, avec le tracé de leurs voies. S'y ajoutent les lignes en chantier que la carte dessine déjà
  * comme existantes, parce qu'elles ouvrent avant celles du joueur (la ligne C à Toulouse, le Grand Paris
- * Express) : leurs gares viennent de data/<ville>/stations-futures.json. Et les bus en site propre, comme le
- * TVM ou les Tzen, choisis par la part de leur parcours sur une voie réservée (voir lignesEnSitePropre).
+ * Express) : leurs gares viennent de data/<ville>/stations-futures.json. Et les bus à haut niveau de service, comme
+ * le TVM, les Linéo ou les TramBus : ceux que leur réseau présente ainsi et ceux qui roulent surtout sur des voies
+ * réservées (voir BHNS_OFFICIELS et lignesEnSitePropre).
  *
  * Le fichier sert à montrer les stations du réseau et le nom de chaque ligne, à accrocher une nouvelle station
  * sur une correspondance et à prolonger une ligne depuis son terminus. Il ne touche pas aux données du modèle
@@ -416,30 +417,116 @@ function construire(brut) {
 }
 
 /**
- * OpenStreetMap ne dit pas qu'une ligne de bus est un bus à haut niveau de service. On retient les lignes dont plus
- * de la moitié du parcours, tous sens et toutes variantes confondus, emprunte une voie réservée aux bus
+ * OpenStreetMap ne dit pas qu'une ligne de bus est un bus à haut niveau de service. Une ligne de bus figure parmi les
+ * lignes existantes si son réseau, ou l'autorité qui l'organise, la présente comme telle (BHNS_OFFICIELS), ou si plus
+ * de la moitié de son parcours, tous sens et toutes variantes confondus, emprunte une voie réservée aux bus
  * (highway=busway). Les couloirs peints sur la chaussée ne comptent pas : OpenStreetMap ne dit pas toujours de
  * quel côté ils sont, et à Paris ils feraient passer des lignes ordinaires comme le 38 ou le 26 (voir docs/villes.md).
  */
 const PART_SITE_PROPRE = 0.5
 
 /**
- * La longueur de chaque parcours de bus qui emprunte au moins une voie réservée de la zone, et celle de ses voies
- * réservées. Les autres parcours de la même ligne, trouvés par sa relation route_master, comptent aussi : une
- * variante qui touche une voie réservée ne fait pas de toute la ligne un bus en site propre.
+ * Les lignes que leur réseau, ou l'autorité qui l'organise, présente comme des bus à haut niveau de service, avec la
+ * page qui le dit, relevées le 26 septembre 2026 ; les lignes de nuit et celles qui ne circulent pas encore n'y sont
+ * pas. On les reconnaît dans OpenStreetMap à leur réseau (tag network) et à leur nom court (tag ref, sans tenir compte
+ * des majuscules). Une ligne qu'OpenStreetMap ne décrit pas encore telle qu'elle circule n'y est pas trouvée : le
+ * script le signale, et elle apparaîtra quand la carte sera à jour. `nom` remplace le nom court d'OpenStreetMap quand
+ * la ligne est connue sous un autre : l'Aixpress est la ligne A d'Aix en bus.
  */
-const requeteMesures = (zone) => `[out:json][timeout:900];
+const BHNS_OFFICIELS = {
+  lyon: [
+    // Le TramBus est le mode de bus à haut niveau de service du réseau TCL ; la C3 y entre en septembre 2025 sous le
+    // nom TB11.
+    { reseau: 'TCL', refs: ['TB11'], source: 'https://magazine.sytral.fr/cest-tout-nouveau/' },
+    { reseau: 'TCL', refs: ['TB12'], source: 'https://sytral-mobilites.fr/fr/projets-mis-en-service/tb12-part-dieu-kimmerling_-r.html' },
+  ],
+  toulouse: [
+    // « Du L1 au L14, les Linéo sont des Bus à Haut Niveau de Service » ; il n'y a pas de L13.
+    {
+      reseau: 'Tisséo',
+      refs: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10', 'L11', 'L12', 'L14'],
+      source: 'https://metropole.toulouse.fr/mon-quotidien/deplacements-stationnement/se-deplacer/se-deplacer-avec-les-transports-en-commun',
+    },
+  ],
+  marseille: [
+    // Le rapport d'activité 2018 de la Métropole annonce la mise en service du bus à haut niveau de service entre
+    // Castellane et Luminy, la ligne B1 de la RTM.
+    { reseau: 'RTM', refs: ['B1'], source: 'https://ampmetropole.fr/wp-content/uploads/2022/08/rapport_activite_2018_ampmetropole.pdf' },
+    {
+      reseau: 'RTM',
+      refs: ['B2', 'B3', 'B4', 'B5'],
+      source: 'https://ampmetropole.fr/mobilite-transports/bhns/la-metropole-inaugure-le-bus-a-haut-niveau-de-service-b4-a-marseille/',
+    },
+    {
+      reseau: 'Aix-en-Bus',
+      refs: ['A'],
+      nom: 'Aixpress',
+      source: 'https://ampmetropole.fr/mobilite-transports/la-metropole-met-en-service-les-bus-articules-de-laixpress/',
+    },
+    // Le BAM de Miramas, dont le nom court dans OpenStreetMap est « BHNS ».
+    {
+      reseau: 'La Métropole Mobilité',
+      refs: ['BHNS'],
+      nom: 'BAM',
+      source: 'https://ampmetropole.fr/mobilite-transports/avec-le-bam-la-metropole-transforme-la-mobilite-a-miramas/',
+    },
+  ],
+  nice: [
+    // Les lignes 8 et 12 sont devenues les bus à haut niveau de service 8+ et 12+ le 26 octobre 2024. En septembre 2026,
+    // OpenStreetMap décrit encore les lignes 8 et 12 d'avant, avec d'autres terminus.
+    { reseau: "Lignes d'Azur", refs: ['8+', '12+'], source: 'https://www.nicecotedazur.org/projets/bus-a-haut-niveau-de-service/' },
+  ],
+  idf: [
+    // Les lignes qu'Île-de-France Mobilités range parmi les bus à haut niveau de service (highFrequencyBus) dans son
+    // référentiel des lignes.
+    { reseau: 'Pompadour', refs: ['TVM', '393'], source: 'https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/' },
+    { reseau: 'Sénart', refs: ['Tzen 1'], source: 'https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/' },
+    {
+      reseau: 'Évry Centre Essonne',
+      refs: ['Tzen 4'],
+      source: 'https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/',
+    },
+  ],
+}
+
+/** Une chaîne à mettre telle quelle dans une expression régulière d'une requête Overpass. */
+const echapper = (texte) => texte.replace(/[.*+?^${}()|[\]\\]/g, '\\\\$&')
+
+/**
+ * La liste officielle d'un réseau en une ligne de texte, que la réponse d'Overpass répète pour qu'on sache avec quelle
+ * liste elle a été faite.
+ */
+const marqueOfficiels = (officiels) =>
+  officiels
+    .map((o) => `${o.reseau}:${o.refs.join(',')}`)
+    .join(';')
+    .replace(/["\\]/g, '')
+
+/** Les relations d'une entrée de la liste officielle, dans la zone du réseau, rangées dans l'ensemble .o<rang>. */
+const requeteOfficielle = (o, rang, zone) =>
+  `rel["route"~"^(bus|trolleybus)$"]["network"="${o.reseau}"]["ref"~"^(${o.refs.map(echapper).join('|')})$",i](${zone})->.o${rang};`
+
+/**
+ * La longueur de chaque parcours de bus qui emprunte au moins une voie réservée de la zone, et celle de ses voies
+ * réservées ; de même pour les parcours des lignes officielles, où qu'ils passent. Les autres parcours de la même ligne,
+ * trouvés par sa relation route_master, comptent aussi : une variante qui touche une voie réservée ne fait pas de toute
+ * la ligne un bus en site propre.
+ */
+const requeteMesures = (zone, officiels) => `[out:json][timeout:900];
 way["highway"="busway"](${zone})->.v;
 rel(bw.v)["route"~"^(bus|trolleybus)$"]->.touchent;
+${officiels.map((o, i) => requeteOfficielle(o, i, zone)).join('\n')}
 rel(br.touchent)["type"="route_master"]->.maitres;
-(.touchent;rel(r.maitres)["route"~"^(bus|trolleybus)$"];)->.rs;
+(.touchent;${officiels.map((_, i) => `.o${i};`).join('')}rel(r.maitres)["route"~"^(bus|trolleybus)$"];)->.rs;
 foreach.rs->.r(
   (way(r.r:"");way(r.r:"forward");way(r.r:"backward");)->.w;
   way.w["highway"="busway"]->.b;
   make parcours relation=r.u(id()),longueur=w.sum(length()),voie_reservee=b.sum(length());
   out;
 );
-.rs out tags;`
+.rs out tags;
+make demande officiels="${marqueOfficiels(officiels)}";
+out;`
 
 /**
  * Ce qui n'est pas une ligne de bus régulière : les bus de nuit, les services scolaires, les navettes touristiques. Le
@@ -456,11 +543,16 @@ function busHorsReseau(t) {
   return /touris/i.test(service) || /city ?tour|open ?tour|big ?bus/i.test(nom)
 }
 
+/** L'entrée de la liste officielle qui désigne une relation, s'il y en a une. */
+const officielle = (officiels, t) =>
+  officiels.find((o) => o.reseau === t.network && o.refs.some((r) => r.toLowerCase() === (t.ref ?? '').trim().toLowerCase()))
+
 /**
- * Les lignes de bus en site propre d'un réseau, avec la part de leur parcours sur voie réservée et leurs relations.
- * Une ligne est l'ensemble des parcours qui portent le même réseau et le même nom (tag ref).
+ * Les bus à haut niveau de service d'un réseau, avec la part de leur parcours sur voie réservée, leurs relations et,
+ * pour ceux de la liste officielle, la page qui les présente ainsi. Une ligne est l'ensemble des parcours qui portent
+ * le même réseau et le même nom (tag ref).
  */
-function lignesEnSitePropre(mesures) {
+function lignesEnSitePropre(mesures, officiels) {
   const etiquettes = new Map(mesures.elements.filter((e) => e.type === 'relation').map((e) => [e.id, e.tags]))
   const lignes = new Map()
   for (const p of mesures.elements.filter((e) => e.type === 'parcours')) {
@@ -468,7 +560,15 @@ function lignesEnSitePropre(mesures) {
     const t = etiquettes.get(id)
     if (!t?.ref || busHorsReseau(t)) continue
     const cle = `${t.network ?? ''}|${t.ref}`
-    const ligne = lignes.get(cle) ?? { reseau: t.network ?? '', ref: t.ref.trim(), relations: [], longueur: 0, reservee: 0 }
+    const o = officielle(officiels, t)
+    const ligne = lignes.get(cle) ?? {
+      reseau: t.network ?? '',
+      ref: o?.nom ?? t.ref.trim(),
+      relations: [],
+      longueur: 0,
+      reservee: 0,
+      source: o?.source,
+    }
     ligne.relations.push(id)
     ligne.longueur += Number(p.tags.longueur)
     ligne.reservee += Number(p.tags.voie_reservee)
@@ -476,7 +576,7 @@ function lignesEnSitePropre(mesures) {
   }
   return [...lignes.values()]
     .map((l) => ({ ...l, part: l.longueur ? l.reservee / l.longueur : 0 }))
-    .filter((l) => l.part > PART_SITE_PROPRE)
+    .filter((l) => l.part > PART_SITE_PROPRE || l.source)
     .sort((a, b) => b.part - a.part)
 }
 
@@ -534,8 +634,8 @@ function nomDeStation(arret, reperes) {
 }
 
 /**
- * Les bus en site propre, une ligne par nom, comme le métro et le tram : leurs arrêts dans l'ordre et le tracé de
- * leurs voies. Une ligne qui porte un vrai nom (TVM, Tzen 1) le garde ; les autres s'appellent « Bus 393 ». `reperes`
+ * Les bus à haut niveau de service, une ligne par nom, comme le métro et le tram : leurs arrêts dans l'ordre et le tracé
+ * de leurs voies. Une ligne qui porte un vrai nom (TVM, Tzen 1, Aixpress) le garde ; les autres s'appellent « Bus 393 ». `reperes`
  * sont les stations et les gares du réseau, dont les arrêts de bus voisins prennent le nom.
  */
 function construireBus(brut, choisies, reperes) {
@@ -587,12 +687,27 @@ function construireBus(brut, choisies, reperes) {
   })
 }
 
-/** Les bus en site propre d'un réseau : on mesure d'abord la part de voie réservée, puis on ne télécharge que les lignes retenues. */
+/**
+ * Les bus à haut niveau de service d'un réseau : on mesure d'abord la part de voie réservée des lignes candidates, puis
+ * on ne télécharge que les lignes retenues. La réponse gardée des mesures doit avoir été faite avec la liste officielle
+ * d'aujourd'hui.
+ */
 async function busEnSitePropre(ville, zone, reperes) {
-  const choisies = lignesEnSitePropre(await lireOuInterroger(ville, 'bhns-mesures.json', requeteMesures(zone)))
-  console.log(
-    `${ville} : ${choisies.length ? choisies.map((l) => `${refBus(l.ref)} (${l.reseau}) ${Math.round(l.part * 100)} %`).join(', ') : 'aucun bus'} en site propre`,
+  const officiels = BHNS_OFFICIELS[ville] ?? []
+  const mesures = await lireOuInterroger(ville, 'bhns-mesures.json', requeteMesures(zone, officiels), (b) =>
+    b.elements.some((e) => e.type === 'demande' && e.tags?.officiels === marqueOfficiels(officiels)),
   )
+  const choisies = lignesEnSitePropre(mesures, officiels)
+  const liste = choisies.map(
+    (l) => `${refBus(l.ref)} (${l.reseau}, ${Math.round(l.part * 100)} % de voie réservée${l.source ? ', présenté comme tel' : ''})`,
+  )
+  console.log(`${ville} : ${liste.length ? `bus à haut niveau de service ${liste.join(', ')}` : 'aucun bus à haut niveau de service'}`)
+  for (const o of officiels) {
+    for (const ref of o.refs) {
+      const trouvee = mesures.elements.some((e) => e.type === 'relation' && officielle([{ ...o, refs: [ref] }], e.tags ?? {}))
+      if (!trouvee) console.log(`  ${ref} (${o.reseau}), présenté comme bus à haut niveau de service, introuvable dans OpenStreetMap`)
+    }
+  }
   if (!choisies.length) return []
   const ids = choisies.flatMap((l) => l.relations)
   const brut = await lireOuInterroger(

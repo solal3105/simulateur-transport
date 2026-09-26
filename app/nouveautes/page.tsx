@@ -32,6 +32,7 @@ const VERSIONS: Version[] = [
           'Au mandat suivant, vous pouvez prolonger une ligne que vous avez tracée : partez de son terminus, et sa station n’est pas payée une seconde fois.',
           'Des objectifs se consultent dans le menu et se jugent au bilan. Le premier consiste à tenir le budget sans augmenter le ticket ni l’abonnement.',
           'La fiche d’une ligne que vous tracez dit quelles communes elle dessert, et la compare à un chantier réel du même mode et de longueur voisine.',
+          'Tous les bus que leur réseau présente comme à haut niveau de service apparaissent sur la carte : les TramBus de Lyon, les Linéo de Toulouse, les lignes B1 à B5 de Marseille, l’Aixpress et le BAM de Miramas. Ils ne changent pas le calcul des voyageurs.',
         ],
       },
       {
