@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 
-import { MANDATS } from '@/lib/catalogue'
+import { debutMandat, finMandat } from '@/lib/catalogue'
 import { communauteActive } from '@/lib/communaute'
+import { ordinal } from '@/lib/format'
 import { useJeu, useVille } from '@/lib/store'
 import { adresseReseaux } from '@/lib/villes'
 
@@ -18,14 +19,13 @@ import { Panneau } from './Panneau'
 export function Menu() {
   const { mandat, fermer, ouvrir, libre } = useJeu()
   const ville = useVille()
-  const { debut, fin } = MANDATS[mandat]
 
   return (
     <Panneau titre="Votre partie">
       <p className="text-[15px] leading-relaxed">
         {libre
           ? `Vous jouez ${ville.ou}, en jeu libre : il n’y a pas de budget à tenir.`
-          : `Vous jouez ${ville.ou}, au ${mandat === 1 ? 'premier' : 'second'} mandat, de ${debut} à ${fin}.`}{' '}
+          : `Vous jouez ${ville.ou}, au ${ordinal(mandat)} mandat, de ${debutMandat(mandat)} à ${finMandat(mandat)}.`}{' '}
         La partie est enregistrée dans ce navigateur : la maison, en haut, vous ramène à l’accueil, où vous la retrouverez ou en commencerez
         une autre.
       </p>
@@ -56,12 +56,20 @@ export function Menu() {
           Signaler un bug ou proposer une amélioration
         </Bouton>
       </div>
-      <Link
-        href="/mentions-legales"
-        className="self-start text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
-      >
-        Mentions légales et confidentialité
-      </Link>
+      <div className="flex flex-wrap gap-x-5 gap-y-1">
+        <Link
+          href="/nouveautes"
+          className="text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
+        >
+          Nouveautés du jeu
+        </Link>
+        <Link
+          href="/mentions-legales"
+          className="text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
+        >
+          Mentions légales et confidentialité
+        </Link>
+      </div>
     </Panneau>
   )
 }

@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx'
 import Link from 'next/link'
-import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react'
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react'
 
 const TRACES = {
   fleche: 'M5 12h14M13 6l6 6-6 6',
@@ -308,17 +308,6 @@ export function Logo({ taille = 36, inverse }: { taille?: number; inverse?: bool
   )
 }
 
-export function EtapesMandat({ mandat, surRouge = true }: { mandat: 1 | 2; surRouge?: boolean }) {
-  const actif = surRouge ? 'bg-white' : 'bg-rouge'
-  const inactif = surRouge ? 'bg-white/35' : 'bg-trait'
-  return (
-    <div className="flex gap-1" aria-hidden="true">
-      <div className={clsx('h-1.5 w-5.5 rounded-full', actif)} />
-      <div className={clsx('h-1.5 w-5.5 rounded-full', mandat === 2 ? actif : inactif)} />
-    </div>
-  )
-}
-
 /**
  * Une rangée qui défile sur téléphone garde son élément choisi en vue, sans faire bouger la page : à
  * poser sur la rangée, avec ce qui change le choix.
@@ -331,4 +320,17 @@ export function useChoixVisible<T extends HTMLElement>(choix: unknown) {
     if (r && choisi && r.scrollWidth > r.clientWidth) r.scrollLeft = choisi.offsetLeft - 24
   }, [choix])
   return rangee
+}
+
+/** Vrai sur un écran d'ordinateur, là où la partie passe à sa mise en page large (1024 pixels et plus). */
+export function useGrandEcran() {
+  const [grand, setGrand] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const maj = () => setGrand(mq.matches)
+    maj()
+    mq.addEventListener('change', maj)
+    return () => mq.removeEventListener('change', maj)
+  }, [])
+  return grand
 }

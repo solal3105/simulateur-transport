@@ -1,7 +1,7 @@
 // Copie de lib/regles.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import { enveloppe, reserve as reserveDuMandat } from './budget.ts'
 import { effetLeviers } from './leviers.ts'
-import { MANDATS, PROJETS } from './catalogue.ts'
+import { debutMandat, MANDATS_DE_BASE, PROJETS } from './catalogue.ts'
 import type { Chantier, Leviers, LigneJoueur, Mandat, Mode, ModeLigne, Projet } from './types.ts'
 import type { Ville } from './villes.ts'
 
@@ -37,10 +37,19 @@ export const LEVIERS_NEUTRES: Leviers = {
   tva: false,
 }
 
-/** Part d'un coût payée sur un mandat donné. */
+/** Part d'un coût payée sur un mandat donné : tout au mandat de la décision, ou moitié-moitié avec le suivant. */
 function part(cout: number, decision: { mandat: Mandat; etale: boolean }, mandat: Mandat): number {
-  if (decision.etale) return decision.mandat === 1 ? cout / 2 : decision.mandat === mandat ? cout : 0
+  if (decision.etale) return mandat === decision.mandat || mandat === decision.mandat + 1 ? cout / 2 : 0
   return decision.mandat === mandat ? cout : 0
+}
+
+/** Les leviers d'un mandat : ceux qu'on y a réglés, sinon ceux du dernier mandat qui en a, qui restent en place. */
+export function leviersDu(leviers: Record<Mandat, Leviers>, mandat: Mandat): Leviers {
+  for (let m = mandat; m >= 1; m -= 1) {
+    const l = leviers[m]
+    if (l) return l
+  }
+  return LEVIERS_NEUTRES
 }
 
 export interface Bilan {
@@ -61,6 +70,22 @@ export interface Bilan {
 /** Ce que les règles demandent à un réseau : son budget, avec ses leviers de financement s'il en a. */
 export type Budget = Pick<Ville, 'budget'>
 
+/**
+ * Le budget de chaque mandat, du premier au dernier : ce qui n'a pas été dépensé à un mandat reste disponible au
+ * suivant, et un déficit n'est jamais reporté.
+ */
+export function bilansMandats(
+  mandats: Mandat,
+  chantiers: Chantier[],
+  lignes: LigneJoueur[],
+  leviers: Record<Mandat, Leviers>,
+  ville: Budget,
+): Bilan[] {
+  const liste: Bilan[] = []
+  for (let m = 1; m <= mandats; m += 1) liste.push(bilanSeul(m, Math.max(0, liste.at(-1)?.reste ?? 0), chantiers, lignes, leviers, ville))
+  return liste
+}
+
 export function bilanMandat(
   mandat: Mandat,
   chantiers: Chantier[],
@@ -68,8 +93,18 @@ export function bilanMandat(
   leviers: Record<Mandat, Leviers>,
   ville: Budget,
 ): Bilan {
-  // Ce qui n'a pas été dépensé au premier mandat reste disponible au second.
-  const reliquat = mandat === 2 ? Math.max(0, bilanMandat(1, chantiers, lignes, leviers, ville).reste) : 0
+  return bilansMandats(mandat, chantiers, lignes, leviers, ville).at(-1)!
+}
+
+/** Le budget d'un seul mandat, avec ce qui reste du précédent. */
+function bilanSeul(
+  mandat: Mandat,
+  reliquat: number,
+  chantiers: Chantier[],
+  lignes: LigneJoueur[],
+  leviers: Record<Mandat, Leviers>,
+  ville: Budget,
+): Bilan {
   let projets = 0
   let reports = 0
   const ajouter = (cout: number, d: { mandat: Mandat; etale: boolean }) => {
@@ -83,7 +118,7 @@ export function bilanMandat(
   }
   for (const l of lignes) ajouter(l.estimation.cout, l)
   // Là où les leviers ne sont pas calculés, ils ne changent rien au budget.
-  const effet = ville.budget.leviers ? effetLeviers(leviers[mandat], ville.budget.leviers) : 0
+  const effet = ville.budget.leviers ? effetLeviers(leviersDu(leviers, mandat), ville.budget.leviers) : 0
   const total = enveloppe(ville.budget, mandat)
   const reserve = reserveDuMandat(ville.budget, mandat)
   const reste = total + effet + reliquat - reserve - projets - reports
@@ -99,7 +134,7 @@ export function bilanMandat(
 }
 
 /** Année d'ouverture : début du mandat où la décision est prise, plus la durée du chantier. */
-export const ouverture = (mandat: Mandat, duree: number) => MANDATS[mandat].debut + duree
+export const ouverture = (mandat: Mandat, duree: number) => debutMandat(mandat) + duree
 
 export interface Ouverture {
   id: string
@@ -151,10 +186,18 @@ export function score(chantiers: Chantier[], lignes: LigneJoueur[]): number {
   return total
 }
 
-/** Les chiffres qui résument un réseau, pour le bilan comme pour la comparaison de deux réseaux. */
-export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: Record<Mandat, Leviers>, ville: Budget) {
-  const b1 = bilanMandat(1, chantiers, lignes, leviers, ville)
-  const b2 = bilanMandat(2, chantiers, lignes, leviers, ville)
+/**
+ * Les chiffres qui résument un réseau, pour le bilan comme pour la comparaison de deux réseaux, sur tous les mandats
+ * de la partie : deux dans la partie de base, davantage quand on l'a continuée.
+ */
+export function resumer(
+  chantiers: Chantier[],
+  lignes: LigneJoueur[],
+  leviers: Record<Mandat, Leviers>,
+  ville: Budget,
+  mandats: Mandat = MANDATS_DE_BASE,
+) {
+  const bilans = bilansMandats(Math.max(MANDATS_DE_BASE, mandats), chantiers, lignes, leviers, ville)
   const investi =
     chantiers.reduce((t, c) => {
       const p = PROJETS.get(c.id)
@@ -163,9 +206,9 @@ export function resumer(chantiers: Chantier[], lignes: LigneJoueur[], leviers: R
   return {
     voyageurs: score(chantiers, lignes),
     investi,
-    equilibre: b1.reste >= 0 && b2.reste >= 0,
-    nonDepense: Math.max(0, b2.reste),
-    deficit: Math.min(0, b1.reste) + Math.min(0, b2.reste),
+    equilibre: bilans.every((b) => b.reste >= 0),
+    nonDepense: Math.max(0, bilans.at(-1)!.reste),
+    deficit: bilans.reduce((t, b) => t + Math.min(0, b.reste), 0),
     /** Projets du catalogue qui ont un tracé, plus les lignes du joueur. */
     retenus: chantiers.filter((c) => PROJETS.get(c.id)?.trace).length + lignes.length,
   }

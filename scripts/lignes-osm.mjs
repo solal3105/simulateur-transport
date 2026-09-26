@@ -3,17 +3,18 @@
  * l'ordre, tirées des relations « route » d'OpenStreetMap ; en Île-de-France, aussi les RER et les trains
  * Transilien, avec le tracé de leurs voies. S'y ajoutent les lignes en chantier que la carte dessine déjà
  * comme existantes, parce qu'elles ouvrent avant celles du joueur (la ligne C à Toulouse, le Grand Paris
- * Express) : leurs gares viennent de data/<ville>/stations-futures.json.
+ * Express) : leurs gares viennent de data/<ville>/stations-futures.json. Et les bus en site propre, comme le
+ * TVM ou les Tzen, choisis par la part de leur parcours sur une voie réservée (voir lignesEnSitePropre).
  *
  * Le fichier sert à montrer les stations du réseau et le nom de chaque ligne, à accrocher une nouvelle station
  * sur une correspondance et à prolonger une ligne depuis son terminus. Il ne touche pas aux données du modèle
- * de fréquentation : le RER n'y compte pas comme une desserte existante.
+ * de fréquentation : ni le RER ni les bus n'y comptent comme une desserte existante.
  *
  *   node scripts/lignes-osm.mjs            toutes les villes
  *   node scripts/lignes-osm.mjs toulouse   une seule ville
  *
- * Les réponses brutes vont dans data/osm/<ville>/lignes.json, et pour l'Île-de-France trains.json et
- * quais.json (non versionnés) ; le résultat dans public/data/<dossier>/lignes.json.
+ * Les réponses brutes vont dans data/osm/<ville>/lignes.json, bhns-mesures.json et bhns.json, et pour
+ * l'Île-de-France trains.json et quais.json (non versionnés) ; le résultat dans public/data/<dossier>/lignes.json.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -37,20 +38,48 @@ const SERVEURS = [
   'https://overpass.private.coffee/api/interpreter',
 ]
 
+/**
+ * Certains serveurs de secours répondent avec une copie d'OpenStreetMap vieille de plusieurs mois (en septembre 2026,
+ * mai à juillet pour overpass.kumi.systems et overpass.private.coffee). Au-delà d'une semaine, on n'interroge plus ce
+ * serveur et on réessaie les autres ; on ne garde la réponse la moins ancienne que si aucun ne répond avec des données
+ * récentes.
+ */
+const FRAICHEUR = 7 * 24 * 3600 * 1000
+
 async function interroger(requete) {
+  let ancienne = null
+  const perimes = new Set()
+  const date = (brut) => Date.parse(brut.osm3s?.timestamp_osm_base ?? '') || 0
   for (let essai = 0; essai < 9; essai += 1) {
-    const serveur = SERVEURS[essai % SERVEURS.length]
+    const restants = SERVEURS.filter((s) => !perimes.has(s))
+    const liste = restants.length ? restants : SERVEURS
+    const serveur = liste[essai % liste.length]
     const r = await fetch(serveur, {
       method: 'POST',
       headers: { 'User-Agent': 'simulateur-transport-tcl', Accept: 'application/json' },
       body: new URLSearchParams({ data: requete }),
     }).catch((e) => ({ ok: false, status: e.cause?.code ?? e.message }))
+    let statut = r.status
     if (r.ok) {
-      const texte = await r.text()
-      if (texte.trim().startsWith('{')) return JSON.parse(texte)
+      const texte = await r.text().catch(() => '')
+      if (texte.trim().startsWith('{')) {
+        const brut = JSON.parse(texte)
+        // Une requête interrompue en route (trop longue, trop de mémoire) répond quand même, avec une partie des éléments.
+        if (/error/i.test(brut.remark ?? '')) statut = brut.remark
+        else if (Date.now() - date(brut) < FRAICHEUR) return brut
+        else {
+          if (!ancienne || date(brut) > date(ancienne)) ancienne = brut
+          perimes.add(serveur)
+          statut = `données du ${brut.osm3s?.timestamp_osm_base}, trop anciennes`
+        }
+      }
     }
-    console.log(`  ${serveur} : ${r.status}, nouvel essai`)
+    console.log(`  ${serveur} : ${statut}, nouvel essai`)
     await new Promise((f) => setTimeout(f, 8000 * (essai + 1)))
+  }
+  if (ancienne) {
+    console.log(`  faute de mieux, données du ${ancienne.osm3s?.timestamp_osm_base}`)
+    return ancienne
   }
   throw new Error('OpenStreetMap ne répond pas')
 }
@@ -358,8 +387,16 @@ function construire(brut) {
     if (stations.length < 2) continue
     const lieu = RESEAUX_SECONDAIRES[t.network] ?? null
     const cle = `${mode}:${ref}:${lieu}`
-    const groupe = groupes.get(cle) ?? { mode, ref, lieu, couleur: null, listes: [] }
+    const groupe = groupes.get(cle) ?? { mode, ref, lieu, couleur: null, listes: [], voies: new Map() }
     groupe.listes.push(stations)
+    for (const m of r.members) {
+      if (m.type === 'way' && m.geometry?.length > 1 && !/^(platform|stop)/.test(m.role)) {
+        groupe.voies.set(
+          m.ref,
+          m.geometry.map((g) => [arrondi(g.lon), arrondi(g.lat)]),
+        )
+      }
+    }
     if (!groupe.couleur && /^#[0-9a-f]{6}$/i.test(t.colour ?? '')) groupe.couleur = t.colour.toLowerCase()
     groupes.set(cle, groupe)
   }
@@ -373,7 +410,199 @@ function construire(brut) {
       (g.lieu ? ` d’${g.lieu}` : ''),
     couleur: g.couleur,
     branches: branchesDistinctes(g.listes),
+    // Le tracé des voies, pour dessiner la ligne dans sa couleur et écrire son nom le long.
+    trace: enchainer([...g.voies.values()]).map((c) => simplifier(c, 0.00005)),
   }))
+}
+
+/**
+ * OpenStreetMap ne dit pas qu'une ligne de bus est un bus à haut niveau de service. On retient les lignes dont plus
+ * de la moitié du parcours, tous sens et toutes variantes confondus, emprunte une voie réservée aux bus
+ * (highway=busway). Les couloirs peints sur la chaussée ne comptent pas : OpenStreetMap ne dit pas toujours de
+ * quel côté ils sont, et à Paris ils feraient passer des lignes ordinaires comme le 38 ou le 26 (voir docs/villes.md).
+ */
+const PART_SITE_PROPRE = 0.5
+
+/**
+ * La longueur de chaque parcours de bus qui emprunte au moins une voie réservée de la zone, et celle de ses voies
+ * réservées. Les autres parcours de la même ligne, trouvés par sa relation route_master, comptent aussi : une
+ * variante qui touche une voie réservée ne fait pas de toute la ligne un bus en site propre.
+ */
+const requeteMesures = (zone) => `[out:json][timeout:900];
+way["highway"="busway"](${zone})->.v;
+rel(bw.v)["route"~"^(bus|trolleybus)$"]->.touchent;
+rel(br.touchent)["type"="route_master"]->.maitres;
+(.touchent;rel(r.maitres)["route"~"^(bus|trolleybus)$"];)->.rs;
+foreach.rs->.r(
+  (way(r.r:"");way(r.r:"forward");way(r.r:"backward");)->.w;
+  way.w["highway"="busway"]->.b;
+  make parcours relation=r.u(id()),longueur=w.sum(length()),voie_reservee=b.sum(length());
+  out;
+);
+.rs out tags;`
+
+/**
+ * Ce qui n'est pas une ligne de bus régulière : les bus de nuit, les services scolaires, les navettes touristiques. Le
+ * nom d'un parcours cite ses terminus : une ligne qui finit à la « Cité scolaire » ou à l'« Office de tourisme » reste
+ * une ligne régulière.
+ */
+function busHorsReseau(t) {
+  if (horsReseau(t)) return true
+  const nom = `${t.name ?? ''} ${t.network ?? ''}`
+  if (t.by_night === 'only' || /noctilien|noctambus|bus de nuit/i.test(nom)) return true
+  const service = `${t.service ?? ''} ${t.bus ?? ''}`
+  if (t.school === 'yes' || /school|scolaire/i.test(service) || /^SCOL/i.test(t.ref ?? '') || /(service|circuit|ligne)s? scolaire/i.test(nom))
+    return true
+  return /touris/i.test(service) || /city ?tour|open ?tour|big ?bus/i.test(nom)
+}
+
+/**
+ * Les lignes de bus en site propre d'un réseau, avec la part de leur parcours sur voie réservée et leurs relations.
+ * Une ligne est l'ensemble des parcours qui portent le même réseau et le même nom (tag ref).
+ */
+function lignesEnSitePropre(mesures) {
+  const etiquettes = new Map(mesures.elements.filter((e) => e.type === 'relation').map((e) => [e.id, e.tags]))
+  const lignes = new Map()
+  for (const p of mesures.elements.filter((e) => e.type === 'parcours')) {
+    const id = Number(p.tags.relation)
+    const t = etiquettes.get(id)
+    if (!t?.ref || busHorsReseau(t)) continue
+    const cle = `${t.network ?? ''}|${t.ref}`
+    const ligne = lignes.get(cle) ?? { reseau: t.network ?? '', ref: t.ref.trim(), relations: [], longueur: 0, reservee: 0 }
+    ligne.relations.push(id)
+    ligne.longueur += Number(p.tags.longueur)
+    ligne.reservee += Number(p.tags.voie_reservee)
+    lignes.set(cle, ligne)
+  }
+  return [...lignes.values()]
+    .map((l) => ({ ...l, part: l.longueur ? l.reservee / l.longueur : 0 }))
+    .filter((l) => l.part > PART_SITE_PROPRE)
+    .sort((a, b) => b.part - a.part)
+}
+
+/** Le nom court d'un bus tel qu'on l'écrit : « TVM » plutôt que « Tvm », « Tzen 1 », « 393 ». */
+const refBus = (ref) => (/^\p{L}{2,3}$/u.test(ref) ? ref.toUpperCase() : ref)
+
+/** La distance en mètres entre deux points [lon, lat], à la latitude de l'Île-de-France, comme ailleurs dans ce script. */
+const metres = (a, b) => Math.hypot((a[0] - b[0]) * 73000, (a[1] - b[1]) * 111320)
+const longueur = (points) => points.reduce((total, p, i) => (i ? total + metres(points[i - 1], p) : 0), 0)
+
+/**
+ * Sur un parcours de bus, la position d'arrêt sur la chaussée n'a souvent pas de nom quand le quai à côté en a un,
+ * comme sur le Tzen 1 : elle prend celui du quai du même parcours le plus proche, à moins de 60 m.
+ */
+function nommerPositions(relation, noeuds) {
+  const quais = relation.members
+    .filter((m) => m.type === 'node' && m.role.startsWith('platform'))
+    .map((m) => noeuds.get(m.ref))
+    .filter((n) => n?.tags?.name)
+  const nommes = new Map(noeuds)
+  for (const m of relation.members) {
+    const n = noeuds.get(m.ref)
+    if (m.type !== 'node' || !m.role.startsWith('stop') || !n || n.tags?.name) continue
+    const proche = quais
+      .map((q) => ({ q, d: metres([q.lon, q.lat], [n.lon, n.lat]) }))
+      .filter((x) => x.d < 60)
+      .sort((a, b) => a.d - b.d)[0]
+    if (proche) nommes.set(n.id, { ...n, tags: { ...n.tags, name: proche.q.tags.name } })
+  }
+  return nommes
+}
+
+/**
+ * Un arrêt de bus porte souvent le nom de la gare ou de la station qu'il dessert, avec un mot de plus ou de moins :
+ * « Gare de Sucy-Bonneuil », « Choisy-le-Roi RER », « Métro La Rose », « Pompadour » pour « Créteil Pompadour ». À
+ * moins de 400 m d'une station ou d'une gare dont le nom recouvre le sien, il prend le nom de la station : la carte n'en
+ * montre qu'une, et la correspondance y apparaît. Un nom plus long que celui de la station ne compte que s'il la
+ * désigne (« Gare de Corbeil-Essonnes - Zola ») : « La Rose Le Clos » n'est pas la station La Rose. Une station du
+ * même nom passe avant une plus proche dont le nom ne fait que recouvrir celui de l'arrêt.
+ */
+function nomDeStation(arret, reperes) {
+  const cle = cleNom(arret.nom)
+  const noyau = cle.replace(/^(gare(de|du|des|d)?|metro)/, '').replace(/(garerer|garesncf|rer|sncf|gare)$/, '')
+  if (noyau.length < 5) return arret.nom
+  const designe = noyau !== cle
+  let [trouve, distance, exact] = [null, 400, false]
+  for (const r of reperes) {
+    const k = cleNom(r.nom)
+    const egal = k === noyau
+    if (k.length < 5 || !(egal || k.includes(noyau) || (designe && noyau.includes(k)))) continue
+    const d = metres(r.pos, arret.pos)
+    if (d < 400 && ((egal && !exact) || (egal === exact && d < distance))) [trouve, distance, exact] = [r, d, egal]
+  }
+  return trouve?.nom ?? arret.nom
+}
+
+/**
+ * Les bus en site propre, une ligne par nom, comme le métro et le tram : leurs arrêts dans l'ordre et le tracé de
+ * leurs voies. Une ligne qui porte un vrai nom (TVM, Tzen 1) le garde ; les autres s'appellent « Bus 393 ». `reperes`
+ * sont les stations et les gares du réseau, dont les arrêts de bus voisins prennent le nom.
+ */
+function construireBus(brut, choisies, reperes) {
+  const noeuds = new Map(brut.elements.filter((e) => e.type === 'node').map((e) => [e.id, e]))
+  const quais = new Map(brut.elements.filter((e) => e.type === 'way' && e.tags?.name).map((e) => [e.id, e.tags.name]))
+  const relations = new Map(brut.elements.filter((e) => e.type === 'relation').map((e) => [e.id, e]))
+  // Deux réseaux peuvent avoir chacun leur ligne 20 : leur identifiant porte alors le nom du réseau.
+  const refs = choisies.map((l) => refBus(l.ref))
+  return choisies.flatMap((l) => {
+    const ref = refBus(l.ref)
+    const listes = []
+    const voies = new Map()
+    let couleur = null
+    for (const id of l.relations) {
+      const r = relations.get(id)
+      if (!r) throw new Error(`bus ${ref} : relation ${id} absente de la réponse d'OpenStreetMap`)
+      // Deux arrêts de suite qui prennent le nom de la même station n'en font qu'un.
+      const stations = stationsDe(r, nommerPositions(r, noeuds), quais)
+        .map((s) => ({ ...s, nom: nomDeStation(s, reperes) }))
+        .filter((s, i, liste) => !i || !s.nom || cleNom(s.nom) !== cleNom(liste[i - 1].nom))
+      const sesVoies = r.members.filter((m) => m.type === 'way' && m.geometry?.length > 1 && !/^(platform|stop)/.test(m.role))
+      for (const m of sesVoies) {
+        voies.set(
+          m.ref,
+          m.geometry.map((g) => [arrondi(g.lon), arrondi(g.lat)]),
+        )
+      }
+      // Des arrêts rangés dans le désordre, comme sur un sens du Tzen 4, font un trajet d'arrêt en arrêt bien plus long
+      // que les voies du parcours.
+      const km = sesVoies.reduce((t, m) => t + longueur(m.geometry.map((g) => [g.lon, g.lat])), 0)
+      if (stations.length >= 2) listes.push({ stations, enOrdre: longueur(stations.map((s) => s.pos)) <= 1.5 * km })
+      if (!couleur && /^#[0-9a-f]{6}$/i.test(r.tags.colour ?? '')) couleur = r.tags.colour.toLowerCase()
+    }
+    if (!listes.length) return []
+    // Les parcours dans le désordre ne comptent que si la ligne n'en a pas d'autre.
+    const bonnes = listes.some((x) => x.enOrdre) ? listes.filter((x) => x.enOrdre) : listes
+    const doublon = refs.filter((x) => x === ref).length > 1
+    return [
+      {
+        id: `bus-${ref}${doublon ? `-${l.reseau}` : ''}`,
+        mode: 'bus',
+        ref,
+        nom: /\p{L}{3}/u.test(ref) ? ref : `Bus ${ref}`,
+        couleur,
+        branches: branchesDistinctes(bonnes.map((x) => x.stations)),
+        trace: enchainer([...voies.values()]).map((c) => simplifier(c, 0.00005)),
+      },
+    ]
+  })
+}
+
+/** Les bus en site propre d'un réseau : on mesure d'abord la part de voie réservée, puis on ne télécharge que les lignes retenues. */
+async function busEnSitePropre(ville, zone, reperes) {
+  const choisies = lignesEnSitePropre(await lireOuInterroger(ville, 'bhns-mesures.json', requeteMesures(zone)))
+  console.log(
+    `${ville} : ${choisies.length ? choisies.map((l) => `${refBus(l.ref)} (${l.reseau}) ${Math.round(l.part * 100)} %`).join(', ') : 'aucun bus'} en site propre`,
+  )
+  if (!choisies.length) return []
+  const ids = choisies.flatMap((l) => l.relations)
+  const brut = await lireOuInterroger(
+    ville,
+    'bhns.json',
+    `[out:json][timeout:240];rel(id:${ids.join(',')})->.r;.r out geom;node(r.r);out;way(r.r)["public_transport"="platform"];out tags;`,
+    // La réponse gardée doit contenir toutes les lignes retenues, qui changent quand on refait les mesures.
+    (b) => ids.every((id) => b.elements.some((e) => e.type === 'relation' && e.id === id)),
+  )
+  return construireBus(brut, choisies, reperes)
 }
 
 // Les listes de gares de data/idf/stations-futures.json omettent les gares déjà ouvertes sur une autre ligne, qui ne
@@ -447,10 +676,16 @@ function ajouterFutures(ville, lignes) {
 }
 
 const demandees = process.argv.slice(2)
-/** Les relations brutes d'OpenStreetMap, gardées dans data/osm pour ne pas interroger le serveur à chaque fois. */
-async function lireOuInterroger(ville, fichier, requete) {
+/**
+ * Les relations brutes d'OpenStreetMap, gardées dans data/osm pour ne pas interroger le serveur à chaque fois. `valide`
+ * dit si une réponse gardée convient encore ; sinon, on interroge de nouveau.
+ */
+async function lireOuInterroger(ville, fichier, requete, valide = () => true) {
   const chemin = join(racine, 'data', 'osm', ...(ville === 'lyon' ? [] : [ville]), fichier)
-  if (existsSync(chemin) && process.env.RAFRAICHIR !== '1') return JSON.parse(readFileSync(chemin, 'utf8'))
+  if (existsSync(chemin) && process.env.RAFRAICHIR !== '1') {
+    const garde = JSON.parse(readFileSync(chemin, 'utf8'))
+    if (valide(garde)) return garde
+  }
   console.log(`${ville} : interrogation d'OpenStreetMap`)
   const brut = await interroger(requete)
   mkdirSync(dirname(chemin), { recursive: true })
@@ -505,11 +740,18 @@ for (const [ville, { dossier, zone, trains }] of Object.entries(VILLES)) {
         ),
       )
     : []
-  const lignes = [...ajouterFutures(ville, construire(brut)), ...ferroviaires].sort(
-    (a, b) => a.mode.localeCompare(b.mode) || a.ref.localeCompare(b.ref, 'fr', { numeric: true }),
-  )
+  const autres = [...ajouterFutures(ville, construire(brut)), ...ferroviaires]
   const gares = construireGares(
     await lireOuInterroger(ville, 'gares.json', `[out:json][timeout:180];nwr["railway"~"^(station|halt)$"](${zone});out center;`),
+  )
+  const bus = await busEnSitePropre(ville, zone, [...autres.flatMap((l) => l.branches.flat()), ...gares])
+  // Les bus viennent en dernier : un arrêt de bus tout près d'une station de métro ou de tram s'y fond, et la station
+  // garde sa position et son nom.
+  const lignes = [...autres, ...bus].sort(
+    (a, b) =>
+      Number(a.mode === 'bus') - Number(b.mode === 'bus') ||
+      a.mode.localeCompare(b.mode) ||
+      a.ref.localeCompare(b.ref, 'fr', { numeric: true }),
   )
   const sortie = join(racine, 'public', 'data', ...(dossier ? [dossier] : []), 'lignes.json')
   writeFileSync(sortie, JSON.stringify({ lignes, gares }))

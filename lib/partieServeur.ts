@@ -91,7 +91,7 @@ export async function resumerCode(code: string) {
   if (!brut || !id) return null
   const partie = normaliserPartie(brut, await chargerCarreaux(id))
   if (!partie) return null
-  const r = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[id])
+  const r = resumer(partie.chantiers, partie.lignes, partie.leviers, VILLES[id], partie.mandats)
   return {
     ville: VILLES[id],
     partie: compacter(partie),

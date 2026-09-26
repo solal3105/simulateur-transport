@@ -2,8 +2,11 @@ import type { Source } from './budget'
 
 export type Mode = 'metro' | 'renovation' | 'tram' | 'bus' | 'cable' | 'fluvial'
 
-/** Les deux mandats de la partie. */
-export type Mandat = 1 | 2
+/**
+ * Le rang d'un mandat de six ans : le premier va de 2026 à 2032, le second de 2032 à 2038. La partie de base
+ * s'arrête là ; au bilan, on peut la continuer un mandat après l'autre, sans limite.
+ */
+export type Mandat = number
 
 export interface Variante {
   id: string
@@ -95,6 +98,8 @@ export interface LigneJoueur {
   passages?: number[]
   /** La ligne existante que celle-ci prolonge depuis son terminus, qui est alors son premier point : « metro-D ». */
   prolonge?: string
+  /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom de la station existante ou du quartier. */
+  noms?: (string | null)[]
   mandat: Mandat
   etale: boolean
   estimation: Estimation

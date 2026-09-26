@@ -3,8 +3,8 @@ import { resoudre } from './regles'
 import type { Chantier, Mode, ModeLigne } from './types'
 
 /**
- * Une couleur par mode de transport, pour les projets et les lignes du joueur.
- * Le réseau actuel reste en gris pour que les projets se lisent d'un coup d'œil.
+ * Une couleur par mode de transport, pour les projets et les lignes du joueur. Le réseau actuel garde les couleurs
+ * de ses propres lignes, en traits plus fins, pour que les projets se lisent d'abord.
  */
 export const COULEUR_MODE: Record<Exclude<Mode, 'renovation'>, string> = {
   metro: '#e3051b',

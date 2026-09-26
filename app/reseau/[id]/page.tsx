@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 
 import { ReseauPage } from '@/components/communaute/ReseauPage'
-import { villeDePartie } from '@/lib/partie'
+import { horizon } from '@/lib/catalogue'
+import { mandatsDe, villeDePartie } from '@/lib/partie'
 import { MARQUE, VILLES } from '@/lib/villes'
 
 import { lireApercu } from './apercu'
@@ -15,7 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const titre = `${reseau.titre}, par ${reseau.auteur?.pseudo ?? 'un joueur'}`
   const voyageurs = reseau.voyageurs.toLocaleString('fr-FR')
   const ville = VILLES[villeDePartie(reseau.partie) ?? 'lyon']
-  const description = reseau.intention ?? `Un réseau de transport imaginé ${ville.ou} pour 2038, qui gagne ${voyageurs} voyageurs par jour.`
+  const description =
+    reseau.intention ??
+    `Un réseau de transport imaginé ${ville.ou} pour ${horizon(mandatsDe(reseau.partie))}, qui gagne ${voyageurs} voyageurs par jour.`
   return {
     title: `${titre} | ${MARQUE}`,
     description,

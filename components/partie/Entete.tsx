@@ -4,12 +4,12 @@ import { clsx } from 'clsx'
 import { motion } from 'motion/react'
 
 import { nomReserve } from '@/lib/budget'
-import { MANDATS } from '@/lib/catalogue'
+import { debutMandat, finMandat } from '@/lib/catalogue'
 import { n } from '@/lib/format'
 import { useJeu, useVille } from '@/lib/store'
 
 import { useCompteur } from '../anim'
-import { EtapesMandat, Icone, Jauge, Logo } from '../ui'
+import { Icone, Jauge, Logo } from '../ui'
 import { segmentsBudget, segmentsLibre, useBilan, useDepenses, useScore } from './budget'
 import { BoutonRetour } from './Retour'
 
@@ -62,9 +62,9 @@ export function Entete({ attenue }: { attenue?: boolean }) {
   const reste = libre
     ? { valeur: n(Math.round(resteAnime)), texte: 'M€ investis', manque: false }
     : libelleReste(Math.round(resteAnime), apercu)
-  const { debut, fin } = MANDATS[mandat]
-  const annees = libre ? `${MANDATS[1].debut}-${MANDATS[2].fin}` : `${debut}-${fin}`
-  const etape = libre ? `${ville.nom}, jeu libre` : `${ville.nom}, mandat ${mandat} sur 2`
+  // La partie n'annonce pas de nombre de mandats : après le second, on peut la continuer autant qu'on veut.
+  const annees = libre ? `${debutMandat(1)}-${finMandat(2)}` : `${debutMandat(mandat)}-${finMandat(mandat)}`
+  const etape = libre ? `${ville.nom}, jeu libre` : `${ville.nom}, mandat ${mandat}`
   const part = nomReserve(ville.budget)
   const labelJauge = libre
     ? `Jeu libre : ${n(depenses.investi)} M€ investis, pour un budget réel de ${n(depenses.budgetReel)} M€ de 2026 à 2038.`
@@ -76,7 +76,6 @@ export function Entete({ attenue }: { attenue?: boolean }) {
       <div className="flex flex-col gap-2.5 rounded-b-[22px] px-4 pt-3.5 pb-3.5 lg:hidden">
         <div className="flex items-center justify-between">
           <div className="flex min-w-0 items-center gap-2.5">
-            {libre ? null : <EtapesMandat mandat={mandat} />}
             <span className="truncate text-[13px] font-extrabold">{etape}</span>
             <span className="chiffres shrink-0 text-xs font-semibold opacity-80">{annees}</span>
           </div>
@@ -118,20 +117,18 @@ export function Entete({ attenue }: { attenue?: boolean }) {
           <Logo taille={42} inverse />
           <div className="flex flex-col gap-1.5">
             <span className="text-base leading-tight font-black">{etape}</span>
-            <div className="flex items-center gap-2">
-              {libre ? null : <EtapesMandat mandat={mandat} />}
-              <span className="chiffres text-[12.5px] font-semibold opacity-85">{annees}</span>
-            </div>
+            <span className="chiffres text-[12.5px] font-semibold opacity-85">{annees}</span>
           </div>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {/* La légende de la jauge passe à la ligne par éléments entiers au lieu de glisser sous le compteur de voyageurs. */}
           <div className="flex items-baseline justify-between gap-5">
             <div className={clsx('flex items-baseline gap-2 whitespace-nowrap', reste.manque && 'text-encre')}>
               <span className="chiffres text-[32px] leading-none font-black tracking-tight">{reste.valeur}</span>
               <span className="text-sm font-extrabold">{reste.texte}</span>
             </div>
             {libre ? (
-              <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
+              <div className="hidden min-w-0 flex-wrap justify-end gap-x-4 gap-y-0.5 text-[12.5px] leading-tight font-semibold *:whitespace-nowrap 2xl:flex">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3.5 rounded-sm bg-white" />
                   Dans le budget réel, {n(Math.min(depenses.investi, depenses.budgetReel))}
@@ -150,7 +147,7 @@ export function Entete({ attenue }: { attenue?: boolean }) {
                 ) : null}
               </div>
             ) : (
-              <div className="hidden gap-4 text-[12.5px] font-semibold whitespace-nowrap xl:flex">
+              <div className="hidden min-w-0 flex-wrap justify-end gap-x-4 gap-y-0.5 text-[12.5px] leading-tight font-semibold *:whitespace-nowrap 2xl:flex">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.8)_0_3px,rgba(255,255,255,0.3)_3px_6px)]" />
                   {part.court}, {n(bilan.reserve)}
@@ -158,13 +155,13 @@ export function Entete({ attenue }: { attenue?: boolean }) {
                 {bilan.reliquat > 0 ? (
                   <span className="flex items-center gap-1.5">
                     <span className="h-2 w-3.5 rounded-sm shadow-[inset_0_0_0_1.5px_#fff]" />
-                    Report du mandat 1, +{n(bilan.reliquat)}
+                    Report du mandat {mandat - 1}, +{n(bilan.reliquat)}
                   </span>
                 ) : null}
                 {bilan.reports > 0 ? (
                   <span className="flex items-center gap-1.5">
                     <span className="h-2 w-3.5 rounded-sm bg-[repeating-linear-gradient(135deg,#fff_0_3px,rgba(255,255,255,0.45)_3px_6px)]" />
-                    Suite du mandat 1, {n(bilan.reports)}
+                    Suite du mandat {mandat - 1}, {n(bilan.reports)}
                   </span>
                 ) : null}
                 <span className="flex items-center gap-1.5">

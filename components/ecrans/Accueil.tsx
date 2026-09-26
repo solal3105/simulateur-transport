@@ -16,6 +16,7 @@ import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILL
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
+import { TraitReseau } from '../carte/TraitReseau'
 import { useCouleursReseau } from '../couleurs'
 import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
 import { Devoilement } from './Devoilement'
@@ -126,8 +127,8 @@ function FicheCarte({ ville, pourLignes }: { ville: Ville; pourLignes: number })
       <div className="flex flex-col gap-2">
         <span className="text-[12px] font-black tracking-[0.08em] text-gris uppercase">Le réseau aujourd’hui</span>
         <span className="flex items-center gap-2.5 text-[14px] font-bold">
-          <span className="h-[5px] w-7 rounded-full bg-[#5d5852]" />
-          Métro et tram en service
+          <TraitReseau ville={ville.id} className="h-[5px] w-7" />
+          Lignes en service
         </span>
         {ville.catalogue ? (
           <span className="flex items-center gap-2.5 text-[14px] font-bold">
@@ -474,6 +475,12 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
                 Les réseaux publiés
               </Link>
             ) : null}
+            <Link
+              href="/nouveautes"
+              className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
+            >
+              Nouveautés
+            </Link>
             <Link
               href="/mentions-legales"
               className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"

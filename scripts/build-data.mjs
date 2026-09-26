@@ -5,14 +5,14 @@
  *   node scripts/build-data.mjs toulouse      (ou marseille, nice, idf)
  *
  * Entrées :
- *   data/osm/*.json      extractions OpenStreetMap (voir scripts/fetch-osm.mjs)
+ *   data/osm/*.json      extractions OpenStreetMap (voir scripts/fetch-osm.mjs, et scripts/lignes-osm.mjs pour lignes.json)
  *   data/insee/*.csv     population et emplois par carreau de 200 m (voir data/insee/SOURCES.md)
  *   data/projets/*.geojson  tracés des projets du catalogue
  *
  * Sorties :
  *   public/data/fond.json      fleuves, métro et tram actuels
  *   public/data/projets.json   tracés des projets, un par identifiant
- *   public/data/arrets.json    arrêts de tram et stations de métro actuels
+ *   public/data/arrets.json    arrêts de tram et stations de métro actuels (voir scripts/arrets.mjs)
  *   public/data/carreaux.json  habitants et emplois par carreau de 200 m
  *   public/data/decor.json     parcs, eau, grands axes, voies ferrées et limites de communes
  *   public/data/lieux.json     quartiers et communes, pour nommer les arrêts des lignes tracées
@@ -27,6 +27,8 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { arretsExistants } from './arrets.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const ville = process.argv[2] ?? 'lyon'
@@ -555,23 +557,10 @@ const arrondissements =
     : []
 writeFileSync(join(out, 'lieux.json'), JSON.stringify({ communes, quartiers, arrondissements }))
 
-// Arrêts existants, pour savoir qui est déjà desservi. À Toulouse et en Île-de-France, les stations des lignes
-// de métro qui ouvrent avant celles du joueur (data/<ville>/stations-futures.json) comptent aussi.
-const futures = (() => {
-  try {
-    return readJson(src(ville, 'stations-futures.json')).lignes
-  } catch {
-    return []
-  }
-})()
-const stops = [
-  ...readJson(osm('stops.json')).elements.map((e) => [
-    round(e.lon),
-    round(e.lat),
-    e.tags?.subway === 'yes' || e.tags?.station === 'subway' ? 1 : 0,
-  ]),
-  ...(ville === 'lyon' ? [] : futures.flatMap((l) => l.stations.filter((s) => !s.existante).map((s) => [round(s.pos[0]), round(s.pos[1]), 1]))),
-]
+// Arrêts existants, pour savoir qui est déjà desservi et d'où une ligne peut se prolonger : les arrêts de la couche
+// « stops », les gares des lignes de métro en chantier qui ouvrent avant celles du joueur, et les arrêts des lignes
+// de métro et de tram en service (voir scripts/arrets.mjs, qui refait ce seul fichier).
+const { arrets: stops } = arretsExistants(ville)
 writeFileSync(join(out, 'arrets.json'), JSON.stringify(stops))
 
 // Tracés des projets du catalogue : seule Lyon en a un.

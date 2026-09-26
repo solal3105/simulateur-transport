@@ -3,12 +3,13 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { PROJETS } from './catalogue'
-import { approx } from './format'
+import { finMandat, PROJETS } from './catalogue'
+import { approx, n } from './format'
 import { mesurer } from './mesure'
 import { estimer, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
-import { LEVIERS_NEUTRES } from './regles'
+import { nomArret } from './partie'
+import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -37,6 +38,10 @@ export interface Brouillon {
   prolonge?: string
   /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
   edition?: string
+  /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom que nous proposons. */
+  noms?: (string | null)[]
+  /** Le rang de la station dont on change le nom, touchée sur la carte ou dans la liste. */
+  renomme?: number
 }
 
 /** Les points de passage à garder : jamais un terminus, qui reste toujours une station. */
@@ -53,7 +58,18 @@ const avecPoint = (passages: number[] = [], i: number, passage: boolean) => [
   ...(passage ? [i] : []),
 ]
 
-/** Les choix du second mandat d'un réseau repris, qui s'ajoutent quand ce mandat commence. */
+/** Les noms choisis après avoir retiré le point i, ou inséré au rang i un point qui n'a pas encore de nom. */
+const nomsSans = (noms: Brouillon['noms'], i: number) => noms?.filter((_, k) => k !== i)
+const nomsAvec = (noms: Brouillon['noms'], i: number) => noms && [...noms.slice(0, i), null, ...noms.slice(i)]
+
+/** Les noms que garde la ligne construite : ceux de ses stations, et rien du tout si aucune n'est renommée. */
+function nomsGardes(b: Brouillon) {
+  const passages = nettoyer(b.passages, b.arrets.length) ?? []
+  const noms = b.arrets.map((_, k) => (passages.includes(k) ? null : (b.noms?.[k] ?? null)))
+  return noms.some(Boolean) ? noms : undefined
+}
+
+/** Les choix des mandats suivants d'un réseau repris, qui s'ajoutent chacun quand son mandat commence. */
 export interface AVenir {
   chantiers: Chantier[]
   lignes: LigneJoueur[]
@@ -104,8 +120,12 @@ interface Etat {
   changerPaiement: (id: string, etale: boolean) => void
   levier: <K extends keyof Leviers>(cle: K, valeur: Leviers[K]) => void
   finirMandat: () => void
-  commencerMandat2: () => void
-  /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux du second plus tard. */
+  /**
+   * Commence le mandat suivant, avec les leviers du précédent : après le premier, c'est le second mandat de la partie
+   * de base ; depuis le bilan, c'est continuer la partie au-delà.
+   */
+  mandatSuivant: () => void
+  /** Remplace la partie par un réseau reçu : ses choix du premier mandat tout de suite, ceux des suivants à leur mandat. */
   reprendre: (p: PartiePartagee, inspire?: Inspiration) => void
   marquerPublie: (id: string) => void
   /** Montre l'accueil sans rien effacer : la partie, finie ou non, attend qu'on la reprenne ou qu'on en commence une autre. */
@@ -113,7 +133,8 @@ interface Etat {
   quitterAccueil: () => void
   tracer: (mode?: ModeLigne) => void
   changerMode: (mode: ModeLigne) => void
-  ajouterArret: (p: [number, number]) => void
+  /** Ajoute un point au bout du tracé ; un arrêt choisi par son nom est une station, même avec l'outil des points de passage. */
+  ajouterArret: (p: [number, number], options?: { station?: boolean }) => void
   retirerArret: () => void
   /** Retire un arrêt précis du tracé, où qu'il soit. */
   enleverArret: (i: number) => void
@@ -125,6 +146,10 @@ interface Etat {
   modifierLigne: (id: string) => void
   /** Fait d'un point une station, ou d'une station un point de passage. Les terminus restent des stations. */
   basculerPassage: (i: number) => void
+  /** Ouvre le champ du nom d'une station du tracé, ou le referme sans rien changer. */
+  renommer: (i?: number) => void
+  /** Donne son nom à une station du tracé et referme le champ ; un nom vide lui rend celui que nous proposons. */
+  nommerArret: (i: number, nom: string) => void
   /** Choisit ce que pose le prochain clic : une station ou un point de passage. */
   choisirOutil: (outil: 'station' | 'passage') => void
   /** Commence le prolongement d'une ligne existante depuis l'un de ses terminus. */
@@ -132,7 +157,8 @@ interface Etat {
   /** Fait du prolongement en cours une ligne à part entière, qui ne prolonge plus rien. */
   detacher: () => void
   /** Fait du tracé en cours, qui part déjà du terminus d'une ligne, le prolongement de cette ligne. */
-  rattacher: (ligne: string) => void
+  /** Fait d'un tracé le prolongement d'une ligne existante ; son premier point se pose alors sur le terminus. */
+  rattacher: (ligne: string, terminus?: [number, number]) => void
   abandonnerTrace: () => void
   construireLigne: (nom: string, estimation: Estimation, etale: boolean) => void
   /** Recalcule le coût et les voyageurs des lignes tracées avec le modèle actuel, quand il a changé. */
@@ -198,43 +224,65 @@ export const useJeu = create<Etat>()(
           chantiers: s.chantiers.map((c) => (c.id === id && c.mandat === s.mandat && s.mandat === 1 ? { ...c, etale } : c)),
           lignes: s.lignes.map((l) => (l.id === id && l.mandat === s.mandat && s.mandat === 1 ? { ...l, etale } : l)),
         })),
-      levier: (cle, valeur) => set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...s.leviers[s.mandat], [cle]: valeur } } })),
+      levier: (cle, valeur) =>
+        set((s) => ({ leviers: { ...s.leviers, [s.mandat]: { ...leviersDu(s.leviers, s.mandat), [cle]: valeur } } })),
       // Le jeu libre n'a qu'une étape : il passe directement au bilan.
       finirMandat: () => {
-        mesurer(get().mandat === 1 && !get().libre ? 'premier mandat fini' : 'partie finie', { reseau: get().ville })
+        mesurer(get().mandat === 1 && !get().libre ? 'premier mandat fini' : 'partie finie', { reseau: get().ville, mandat: get().mandat })
         set({ ecran: get().mandat === 1 && !get().libre ? 'fin-mandat' : 'bilan', panneau: null, brouillon: null, message: null })
       },
-      commencerMandat2: () =>
+      mandatSuivant: () => {
+        // En jeu libre, il n'y a pas de mandat : continuer, c'est revenir à la carte pour ajouter des lignes.
+        if (get().libre) {
+          mesurer('partie continuée', { reseau: get().ville, libre: true })
+          return set({ ecran: 'jeu', panneau: null, brouillon: null, publie: null })
+        }
+        if (get().mandat >= 2) mesurer('partie continuée', { reseau: get().ville, mandat: get().mandat + 1 })
         set((s) => {
-          const suite = {
-            ecran: 'jeu' as Ecran,
-            mandat: 2 as Mandat,
-            leviers: { ...s.leviers, 2: { ...s.leviers[1] } },
-            panneau: null,
-            aVenir: null,
-          }
-          if (!s.aVenir) return suite
-          // Les choix repris s'ajoutent, sauf un projet déjà décidé ou un projet qui dépend d'un projet retiré.
+          const mandat = s.mandat + 1
+          const leviers = { ...s.leviers, [mandat]: { ...leviersDu(s.leviers, s.mandat) } }
+          // Un réseau continué change : il pourra être publié à nouveau.
+          const suite = { ecran: 'jeu' as Ecran, mandat, leviers, panneau: null, brouillon: null, publie: null }
+          // Au-delà de la partie de base, un mot dit ce que le nouveau mandat apporte.
+          const annonce = (reste: number) =>
+            mandat > 2
+              ? {
+                  titre: `Mandat ${mandat}, de ${finMandat(s.mandat)} à ${finMandat(mandat)}.`,
+                  texte: `Vous disposez de ${n(reste)} M€. Faute de budget publié au-delà de 2038, chaque mandat reprend celui du second.`,
+                }
+              : null
+          // Les choix repris pour ce mandat s'ajoutent, sauf un projet déjà décidé ou un projet qui dépend d'un projet retiré.
           const decides = new Set(s.chantiers.map((c) => c.id))
-          const repris = s.aVenir.chantiers.filter((c) => !decides.has(c.id))
+          const repris = (s.aVenir?.chantiers ?? []).filter((c) => c.mandat === mandat && !decides.has(c.id))
           const tous = new Set([...decides, ...repris.map((c) => c.id)])
-          const chantiers = repris.filter((c) => {
-            const requis = PROJETS.get(c.id)?.requiert
-            return !requis || tous.has(requis)
-          })
-          const nombre = chantiers.length + s.aVenir.lignes.length
+          const chantiers = [
+            ...s.chantiers,
+            ...repris.filter((c) => {
+              const requis = PROJETS.get(c.id)?.requiert
+              return !requis || tous.has(requis)
+            }),
+          ]
+          const lignes = [...s.lignes, ...(s.aVenir?.lignes ?? []).filter((l) => l.mandat === mandat)]
+          const nombre = chantiers.length - s.chantiers.length + lignes.length - s.lignes.length
+          const plusTard = {
+            chantiers: (s.aVenir?.chantiers ?? []).filter((c) => c.mandat > mandat),
+            lignes: (s.aVenir?.lignes ?? []).filter((l) => l.mandat > mandat),
+          }
+          const reste = bilanMandat(mandat, chantiers, lignes, leviers, VILLES[s.ville]).reste
           return {
             ...suite,
-            chantiers: [...s.chantiers, ...chantiers],
-            lignes: [...s.lignes, ...s.aVenir.lignes],
+            chantiers,
+            lignes,
+            aVenir: plusTard.chantiers.length + plusTard.lignes.length ? plusTard : null,
             message: nombre
               ? {
                   titre: `${nombre} choix du réseau repris ${nombre > 1 ? 'sont ajoutés' : 'est ajouté'}.`,
-                  texte: 'Vous pouvez les garder ou les retirer avant de finir la partie.',
+                  texte: `Vous pouvez ${nombre > 1 ? 'les garder ou les retirer' : 'le garder ou le retirer'} avant de finir le mandat.`,
                 }
-              : null,
+              : annonce(reste),
           }
-        }),
+        })
+      },
       reprendre: (p, inspire) => {
         const renommer = (l: LigneJoueur, i: number): LigneJoueur => ({ ...l, id: `ligne-${Date.now().toString(36)}-${i}` })
         const lignes = p.lignes.map(renommer)
@@ -245,14 +293,14 @@ export const useJeu = create<Etat>()(
           ecran: 'jeu',
           chantiers: p.chantiers.filter((c) => c.mandat === 1),
           lignes: lignes.filter((l) => l.mandat === 1),
-          leviers: { 1: { ...p.leviers[1] }, 2: { ...p.leviers[1] } },
-          aVenir: { chantiers: p.chantiers.filter((c) => c.mandat === 2), lignes: lignes.filter((l) => l.mandat === 2) },
+          leviers: { 1: { ...leviersDu(p.leviers, 1) } },
+          aVenir: { chantiers: p.chantiers.filter((c) => c.mandat > 1), lignes: lignes.filter((l) => l.mandat > 1) },
           inspire: inspire ?? null,
           message: {
             titre: 'Vous partez de ce réseau.',
             texte: p.libre
               ? 'C’est un réseau fait en jeu libre : vous continuez sans budget à tenir. Vous pouvez tout modifier.'
-              : 'Ses choix du premier mandat sont en place, ceux du second s’ajouteront au mandat suivant. Vous pouvez tout modifier.',
+              : 'Ses choix du premier mandat sont en place, ceux des suivants s’ajouteront au fil des mandats. Vous pouvez tout modifier.',
           },
         })
       },
@@ -270,11 +318,11 @@ export const useJeu = create<Etat>()(
             ? { ...s.brouillon, mode, prolonge: s.brouillon.mode === mode ? s.brouillon.prolonge : undefined }
             : { mode, arrets: [] },
         })),
-      ajouterArret: (p) =>
+      ajouterArret: (p, options) =>
         set((s) => {
           const b = s.brouillon
           if (!b) return {}
-          const passage = b.outil === 'passage' && b.arrets.length > 0
+          const passage = !options?.station && b.outil === 'passage' && b.arrets.length > 0
           return { brouillon: { ...b, arrets: [...b.arrets, p], passages: avecPoint(b.passages, b.arrets.length, passage) } }
         }),
       retirerArret: () =>
@@ -288,6 +336,7 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: b.arrets.slice(0, -1),
               passages: sansPoint(b.passages, dernier),
+              noms: b.noms?.slice(0, dernier),
               prolonge: dernier === 0 ? undefined : b.prolonge,
             },
           }
@@ -301,6 +350,8 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: b.arrets.filter((_, k) => k !== i),
               passages: sansPoint(b.passages, i),
+              noms: nomsSans(b.noms, i),
+              renomme: undefined,
               prolonge: i === 0 ? undefined : b.prolonge,
             },
           }
@@ -321,6 +372,8 @@ export const useJeu = create<Etat>()(
               ...b,
               arrets: [...b.arrets.slice(0, i), p, ...b.arrets.slice(i)],
               passages: avecPoint(b.passages, i, b.outil === 'passage'),
+              noms: nomsAvec(b.noms, i),
+              renomme: undefined,
             },
           }
         }),
@@ -334,6 +387,14 @@ export const useJeu = create<Etat>()(
           }
         }),
       choisirOutil: (outil) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, outil } } : {})),
+      renommer: (renomme) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, renomme } } : {})),
+      nommerArret: (i, nom) =>
+        set((s) => {
+          const b = s.brouillon
+          if (!b || i < 0 || i >= b.arrets.length) return {}
+          const noms = b.arrets.map((_, k) => (k === i ? nomArret(nom) || null : (b.noms?.[k] ?? null)))
+          return { brouillon: { ...b, noms: noms.some(Boolean) ? noms : undefined, renomme: undefined } }
+        }),
       prolonger: (ligne, mode, terminus) =>
         set((s) => ({
           brouillon: { mode, arrets: [terminus], passages: [], prolonge: ligne, outil: 'station', edition: s.brouillon?.edition },
@@ -341,13 +402,33 @@ export const useJeu = create<Etat>()(
           apercu: 0,
         })),
       detacher: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: undefined } } : {})),
-      rattacher: (ligne) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: ligne } } : {})),
+      rattacher: (ligne, terminus) =>
+        set((s) =>
+          s.brouillon
+            ? {
+                brouillon: {
+                  ...s.brouillon,
+                  prolonge: ligne,
+                  arrets: terminus ? [terminus, ...s.brouillon.arrets.slice(1)] : s.brouillon.arrets,
+                  // Le premier point devient le terminus de la ligne prolongée : il en prend le nom.
+                  noms: terminus && s.brouillon.noms ? [null, ...s.brouillon.noms.slice(1)] : s.brouillon.noms,
+                },
+              }
+            : {},
+        ),
       modifierLigne: (id) =>
         set((s) => {
           const l = s.lignes.find((x) => x.id === id && x.mandat === s.mandat)
           return l
             ? {
-                brouillon: { mode: l.mode, arrets: [...l.arrets], passages: [...(l.passages ?? [])], prolonge: l.prolonge, edition: l.id },
+                brouillon: {
+                  mode: l.mode,
+                  arrets: [...l.arrets],
+                  passages: [...(l.passages ?? [])],
+                  noms: l.noms ? [...l.noms] : undefined,
+                  prolonge: l.prolonge,
+                  edition: l.id,
+                },
                 panneau: { type: 'trace' },
                 apercu: 0,
               }
@@ -373,6 +454,7 @@ export const useJeu = create<Etat>()(
               mode: s.brouillon.mode,
               arrets: s.brouillon.arrets,
               passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+              noms: nomsGardes(s.brouillon),
               prolonge: s.brouillon.prolonge,
               estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
             }
@@ -393,6 +475,7 @@ export const useJeu = create<Etat>()(
             mode: s.brouillon.mode,
             arrets: s.brouillon.arrets,
             passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
+            noms: nomsGardes(s.brouillon),
             prolonge: s.brouillon.prolonge,
             mandat: s.mandat,
             etale,

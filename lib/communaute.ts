@@ -195,7 +195,8 @@ export const envoyerRetour = (retour: Retour) => appeler<{ id: number }>('retour
 
 /**
  * Les chiffres d'en-tête des réseaux publiés d'une ville : combien il y en a, et celui qui gagne le plus de
- * voyageurs, pour montrer le record à battre.
+ * voyageurs, pour montrer le record à battre. Le record ne compte que les parties en deux mandats : une partie
+ * continuée a eu plus d'argent (sa forme compacte porte alors le nombre de ses mandats).
  */
 export async function chiffresCommunaute(ville: IdVille, libre: boolean) {
   const filtre = `ville=eq.${ville}&libre=eq.${libre}&visibilite=eq.publique`
@@ -204,6 +205,6 @@ export async function chiffresCommunaute(ville: IdVille, libre: boolean) {
   })
   if (!r.ok) throw new Error('Nous n’arrivons pas à charger les réseaux publiés pour l’instant.')
   const total = Number(r.headers.get('content-range')?.split('/')[1]) || 0
-  const [record] = await lire<ReseauPublie[]>(`reseaux?select=${COLONNES}&${filtre}&order=voyageurs.desc&limit=1`)
+  const [record] = await lire<ReseauPublie[]>(`reseaux?select=${COLONNES}&${filtre}&partie->>k=is.null&order=voyageurs.desc&limit=1`)
   return { total, record: record ?? null }
 }

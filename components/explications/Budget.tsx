@@ -3,10 +3,9 @@
 import { clsx } from 'clsx'
 
 import { estSource, libre, POSTES, type BudgetVille, type NomPoste, type Source } from '@/lib/budget'
-import { MANDATS } from '@/lib/catalogue'
+import { debutMandat, finMandat } from '@/lib/catalogue'
 import { de, enLettres, n } from '@/lib/format'
 import { MESURES, titreMesure } from '@/lib/leviers'
-import type { Mandat } from '@/lib/types'
 import type { Ville } from '@/lib/villes'
 
 import { Deplier } from './Deplier'
@@ -47,7 +46,7 @@ export function phraseLibre(b: BudgetVille) {
 /** Deux mandats aux montants identiques se montrent en un seul calcul. */
 const memesMontants = (b: BudgetVille) => POSTES.every((p) => b[p].montants[1] === b[p].montants[2])
 
-function Calcul({ b, m, titre }: { b: BudgetVille; m: Mandat; titre: string }) {
+function Calcul({ b, m, titre }: { b: BudgetVille; m: 1 | 2; titre: string }) {
   const total = b.total.montants[m]
   const parts = PARTS.filter((p) => b[p.poste].montants[m] > 0)
   const reste = libre(b, m)
@@ -138,14 +137,18 @@ export function ExplicationBudget({ ville }: { ville: Ville }) {
       <div className="grid gap-3 lg:grid-cols-2">
         {memesMontants(b) ? (
           <div className="lg:col-span-2">
-            <Calcul b={b} m={1} titre={`À chaque mandat, de ${MANDATS[1].debut} à ${MANDATS[2].fin}`} />
+            <Calcul b={b} m={1} titre={`À chaque mandat, de ${debutMandat(1)} à ${finMandat(2)}`} />
           </div>
         ) : (
           ([1, 2] as const).map((m) => (
-            <Calcul key={m} b={b} m={m} titre={`${m === 1 ? 'Premier' : 'Second'} mandat, ${MANDATS[m].debut}-${MANDATS[m].fin}`} />
+            <Calcul key={m} b={b} m={m} titre={`${m === 1 ? 'Premier' : 'Second'} mandat, ${debutMandat(m)}-${finMandat(m)}`} />
           ))
         )}
       </div>
+      <p className="text-[14px] leading-relaxed text-gris">
+        Si vous continuez la partie après {finMandat(2)}, chaque nouveau mandat reprend le budget du second : aucune collectivité n’a publié
+        ses investissements aussi loin.
+      </p>
       {source ? (
         <ul className="flex flex-col gap-2.5">
           {POSTES.filter((p) => b[p].simple).map((p) => (

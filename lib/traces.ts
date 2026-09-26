@@ -11,13 +11,17 @@ export type TracesProjets = FeatureCollection<MultiLineString, { id: string }>
  * par branche.
  */
 export function tracesProjets(ville: IdVille, fichier: TracesProjets): TracesProjets {
-  const dessines = new Set(fichier.features.map((f) => f.properties.id))
-  const parcourus = catalogueDe(ville)
-    .filter((p) => p.trace && p.parcours && !dessines.has(p.trace))
+  const projets = catalogueDe(ville)
+  // Un tracé qu'aucun projet ne porte ne se dessine pas : sans prix ni fiche, on ne pourrait rien en faire.
+  const portes = new Set(projets.flatMap((p) => (p.trace ? [p.trace] : [])))
+  const dessines = fichier.features.filter((f) => portes.has(f.properties.id))
+  const deja = new Set(dessines.map((f) => f.properties.id))
+  const parcourus = projets
+    .filter((p) => p.trace && p.parcours && !deja.has(p.trace))
     .map((p) => ({
       type: 'Feature' as const,
       properties: { id: p.trace! },
       geometry: { type: 'MultiLineString' as const, coordinates: p.parcours!.map((b) => b.map((s) => s.pos)) },
     }))
-  return { ...fichier, features: [...fichier.features, ...parcourus] }
+  return { ...fichier, features: [...dessines, ...parcourus] }
 }

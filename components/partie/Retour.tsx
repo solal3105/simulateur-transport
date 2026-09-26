@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
 
 import { useAdresseInscrite } from '@/lib/acces'
+import { mandatsJoues } from '@/lib/catalogue'
 import { communauteActive, envoyerRetour } from '@/lib/communaute'
 import { compacter } from '@/lib/partie'
 import { useJeu } from '@/lib/store'
@@ -68,7 +69,14 @@ function etatDuJeu() {
       page: window.location.pathname,
       fenetre: `${window.innerWidth}×${window.innerHeight}`,
     },
-    partie: compacter({ ville: s.ville, libre: s.libre, chantiers: s.chantiers, lignes: s.lignes, leviers: s.leviers }),
+    partie: compacter({
+      ville: s.ville,
+      libre: s.libre,
+      mandats: mandatsJoues(s.mandat),
+      chantiers: s.chantiers,
+      lignes: s.lignes,
+      leviers: s.leviers,
+    }),
   }
 }
 

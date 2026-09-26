@@ -2,33 +2,14 @@
 
 import { clsx } from 'clsx'
 
-import { PROJETS } from '@/lib/catalogue'
+import { finMandat, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
-import { n } from '@/lib/format'
+import { n, ordinal } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 
-import { Bouton, Icone, Surtitre } from '../ui'
+import { Bouton, Icone } from '../ui'
 import { useBilan } from './budget'
-
-function Etape({ numero, texte, etat }: { numero: number; texte: string; etat: 'fait' | 'encours' | 'avenir' }) {
-  return (
-    <li className={clsx('flex items-center gap-2.5 text-sm font-extrabold', etat === 'avenir' ? 'text-muet' : 'text-encre')}>
-      <span
-        className={clsx(
-          'chiffres grid size-6.5 place-items-center rounded-full text-xs font-black',
-          etat === 'fait' && 'bg-rouge text-white',
-          etat === 'encours' && 'bg-white text-rouge shadow-[inset_0_0_0_2.5px_var(--color-rouge)]',
-          etat === 'avenir' && 'bg-sable text-muet',
-        )}
-      >
-        {etat === 'fait' ? <Icone nom="valider" taille={14} epaisseur={3} /> : numero}
-      </span>
-      {texte}
-      {etat === 'encours' ? <span className="sr-only">(en cours)</span> : null}
-    </li>
-  )
-}
 
 /** Ce que le joueur a décidé, mandat par mandat, avec une ligne par projet. */
 export function useProgramme() {
@@ -69,7 +50,8 @@ export function Programme() {
   const ville = useVille()
   // Sans catalogue, le programme ne compte que des lignes tracées.
   const mot = ville.catalogue ? 'projet' : 'ligne'
-  const nombreAVenir = aVenir ? aVenir.chantiers.length + aVenir.lignes.length : 0
+  // Les choix du réseau repris qui arriveront au mandat suivant.
+  const nombreAVenir = aVenir ? [...aVenir.chantiers, ...aVenir.lignes].filter((x) => x.mandat === mandat + 1).length : 0
   const guide = ecran === 'tuto' && tuto === 2
   const { lignesProgramme } = useProgramme()
   const bilan = useBilan()
@@ -79,22 +61,6 @@ export function Programme() {
   return (
     <aside className="absolute top-24 bottom-0 left-0 z-10 hidden w-[340px] flex-col border-r border-trait bg-white lg:flex">
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6.5 pt-6.5 pb-6">
-        <div className="flex flex-col gap-3">
-          <Surtitre>Où vous en êtes</Surtitre>
-          {libre ? (
-            <ol className="flex flex-col gap-3">
-              <Etape numero={1} texte="Jeu libre, 2026-2038" etat="encours" />
-              <Etape numero={2} texte="Votre réseau en 2038" etat="avenir" />
-            </ol>
-          ) : (
-            <ol className="flex flex-col gap-3">
-              <Etape numero={1} texte="Premier mandat, 2026-2032" etat={mandat === 1 ? 'encours' : 'fait'} />
-              <Etape numero={2} texte="Second mandat, 2032-2038" etat={mandat === 2 ? 'encours' : 'avenir'} />
-              <Etape numero={3} texte="Votre réseau en 2038" etat="avenir" />
-            </ol>
-          )}
-        </div>
-
         <section className="flex flex-col">
           <div className="flex items-baseline justify-between border-b border-trait pb-2">
             <h2 className="text-[17px] font-black">Votre programme</h2>
@@ -144,13 +110,15 @@ export function Programme() {
           )}
           {precedent.length > 0 ? (
             <p className="pt-3 text-[13px] leading-relaxed text-gris">
-              Décidés au premier mandat : {precedent.map((l) => l.nom).join(', ')}.
+              {mandat === 2 ? 'Décidés au premier mandat' : 'Décidés aux mandats précédents'} : {precedent.map((l) => l.nom).join(', ')}.
             </p>
           ) : null}
           {nombreAVenir > 0 ? (
             <p className="pt-3 text-[13px] leading-relaxed text-gris">
-              Au second mandat, {nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du réseau que vous avez repris{' '}
-              {nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme. Vous pourrez les garder ou les retirer.
+              {mandat === 1 ? 'Au second mandat' : `Si vous continuez la partie après ${finMandat(mandat)}`},{' '}
+              {nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du réseau que vous avez repris{' '}
+              {nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme. Vous pourrez{' '}
+              {nombreAVenir > 1 ? 'les garder ou les retirer' : 'le garder ou le retirer'}.
             </p>
           ) : null}
         </section>
@@ -162,7 +130,7 @@ export function Programme() {
             : `Quand vous avez fini, terminez le mandat. ${
                 mandat === 1
                   ? 'L’argent que vous n’aurez pas dépensé passera au second mandat.'
-                  : 'L’argent non dépensé restera disponible pour la suite.'
+                  : `Vous verrez votre réseau en ${finMandat(mandat)}, et vous pourrez continuer la partie : l’argent non dépensé passera au mandat suivant.`
               }`}
         </p>
       </div>
@@ -181,7 +149,7 @@ export function Programme() {
           disabled={!libre && bilan.reste < 0}
           data-guide={guide ? '' : undefined}
         >
-          {libre ? 'Voir mon réseau en 2038' : mandat === 1 ? 'Finir le premier mandat' : 'Finir le second mandat'}
+          {libre ? 'Voir mon réseau en 2038' : `Finir le ${ordinal(mandat)} mandat`}
         </Bouton>
         {!libre && bilan.reste < 0 ? (
           <p className="text-[13px] leading-snug font-semibold text-rouge-fonce">
@@ -197,7 +165,7 @@ export function Programme() {
 }
 
 export function BarreBas() {
-  const { ouvrir, finirMandat, mandat, ecran, tuto, libre } = useJeu()
+  const { ouvrir, finirMandat, ecran, tuto, libre } = useJeu()
   const ville = useVille()
   const guide = ecran === 'tuto' && tuto === 2
   const bilan = useBilan()
@@ -239,13 +207,7 @@ export function BarreBas() {
         onClick={() => (bilan.reste < 0 ? combler() : finirMandat())}
         aria-describedby={bilan.reste < 0 ? 'deficit' : undefined}
       >
-        {bilan.reste < 0
-          ? ville.budget.leviers
-            ? 'Combler le déficit'
-            : 'Retirer une ligne'
-          : mandat === 1
-            ? 'Finir le mandat'
-            : 'Finir la partie'}
+        {bilan.reste < 0 ? (ville.budget.leviers ? 'Combler le déficit' : 'Retirer une ligne') : 'Finir le mandat'}
       </Bouton>
       {bilan.reste < 0 ? (
         <span id="deficit" className="sr-only">

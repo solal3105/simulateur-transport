@@ -3,11 +3,11 @@
 import { clsx } from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 
-import { catalogueDe, MANDATS, mots, PROJETS } from '@/lib/catalogue'
+import { horizon, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
-import { ouverture, resoudre, totauxCatalogue } from '@/lib/regles'
-import { useJeu, useVille } from '@/lib/store'
+import { ouverture, resoudre } from '@/lib/regles'
+import { useJeu } from '@/lib/store'
 import type { PointProjet } from '@/lib/types'
 
 import { Deplier } from '../explications/Deplier'
@@ -15,6 +15,7 @@ import { Sources } from '../explications/Budget'
 import { useBilan } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, ICONE_MODE, Pastille, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
+import { Rendement } from './Rendement'
 
 function Voie({ titre, detail, onClick, possible }: { titre: string; detail: string; onClick: () => void; possible?: boolean }) {
   return (
@@ -50,16 +51,15 @@ export function FicheProjet({ id }: { id: string }) {
   const [varianteId, setVarianteId] = useState(existant?.varianteId ?? projet.variantes?.[0]?.id)
   const [option, setOption] = useState(existant?.option ?? false)
   const r = useMemo(() => resoudre(projet, { varianteId, option }), [projet, varianteId, option])
-  // Le meilleur rapport entre voyageurs et coût du catalogue de ce réseau, pour situer le projet.
-  const ville = useVille()
-  const meilleur = useMemo(() => totauxCatalogue(catalogueDe(ville.id)).meilleur, [ville])
 
   const dependance = projet.requiert ? PROJETS.get(projet.requiert) : undefined
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
   // En jeu libre, il n'y a pas de budget à tenir : rien n'est trop cher, et tout se paie en une fois.
   const reste = libre ? Infinity : bilan.reste
   const annee = ouverture(existant?.mandat ?? mandat, r.duree)
-  const apresFin = annee > MANDATS[2].fin
+  // La fin de la partie : 2038, ou la fin du mandat en cours quand on l'a continuée.
+  const fin = horizon(mandat)
+  const apresFin = annee > fin
   const peutEtaler = mandat === 1 && !libre
   const moitie = Math.round(r.cout / 2)
 
@@ -91,7 +91,10 @@ export function FicheProjet({ id }: { id: string }) {
           Retirer ce projet
         </Bouton>
       ) : (
-        <p className="text-sm leading-relaxed text-gris">Décidé pendant le premier mandat, ce projet ne peut plus être retiré.</p>
+        <p className="text-sm leading-relaxed text-gris">
+          {existant.mandat === 1 ? 'Décidé pendant le premier mandat' : `Décidé pendant le mandat ${existant.mandat}`}, ce projet ne peut
+          plus être retiré.
+        </p>
       )
   } else if (bloque) {
     pied = (
@@ -179,7 +182,7 @@ export function FicheProjet({ id }: { id: string }) {
           <div className="flex flex-col gap-1.5 text-[14.5px] leading-relaxed">
             <span className="text-xs font-extrabold tracking-[0.08em] text-white/70 uppercase">Première décision, étape 2 sur 3</span>
             <span>
-              Il coûte {n(r.cout)} M€ : la partie noire de la jauge rouge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
+              Il coûte {n(r.cout)} M€ : la partie noire de la jauge, tout en haut, montre ce qu’il prendrait sur votre budget. Il
               apporterait {n(r.voyageurs)} voyageurs par jour.
             </span>
             <span className="font-extrabold">
@@ -336,26 +339,11 @@ export function FicheProjet({ id }: { id: string }) {
 
       {apresFin ? (
         <p className="text-sm leading-relaxed text-gris">
-          Ce projet ouvrira après la fin de votre second mandat : vous le payez, un autre l’inaugurera.
+          Ce projet ouvrira après {fin} : vous le payez, et vous ne l’inaugurerez que si vous continuez la partie.
         </p>
       ) : null}
 
-      {r.voyageurs > 0 ? (
-        <div className="flex flex-col gap-2 rounded-2xl bg-sable p-4">
-          <div className="flex justify-between gap-3 text-sm">
-            <span className="font-semibold text-gris">Voyageurs gagnés par million investi</span>
-            <span className="chiffres font-black">{n(r.voyageurs / r.cout)}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white">
-            <div className="h-full rounded-full bg-rouge" style={{ width: `${Math.max(2, (r.voyageurs / r.cout / meilleur) * 100)}%` }} />
-          </div>
-          <div className="text-[13px] text-gris">
-            {r.voyageurs / r.cout >= meilleur * 0.99
-              ? 'C’est le meilleur rapport de tout le catalogue.'
-              : `Le meilleur projet du catalogue en apporte ${n(meilleur)}.`}
-          </div>
-        </div>
-      ) : null}
+      <Rendement voyageurs={r.voyageurs} cout={r.cout} />
 
       <StationsProjet parcours={projet.parcours} />
 

@@ -8,6 +8,7 @@ import { useJeu, useVille } from '@/lib/store'
 import { MARQUE } from '@/lib/villes'
 
 import { Carte } from '../carte/Carte'
+import { TraitReseau } from '../carte/TraitReseau'
 import { useCouleursReseau } from '../couleurs'
 import { Budget } from '../panneaux/Budget'
 import { FicheProjet } from '../panneaux/FicheProjet'
@@ -17,22 +18,10 @@ import { Menu } from '../panneaux/Menu'
 import { Methode } from '../panneaux/Methode'
 import { hauteurFeuilleOuverte, useHauteurFenetre } from '../panneaux/Panneau'
 import { FicheLigne, MaLigne, Traceur } from '../panneaux/Traceur'
-import { Bouton, Icone } from '../ui'
+import { Bouton, Icone, useGrandEcran } from '../ui'
 import { Entete } from './Entete'
 import { BarreBas, Programme } from './Programme'
 import { Tutoriel } from './Tutoriel'
-
-function useGrandEcran() {
-  const [grand, setGrand] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const maj = () => setGrand(mq.matches)
-    maj()
-    mq.addEventListener('change', maj)
-    return () => mq.removeEventListener('change', maj)
-  }, [])
-  return grand
-}
 
 function Message() {
   const { message, effacerMessage } = useJeu()
@@ -67,9 +56,12 @@ function Message() {
   )
 }
 
-/** Les couleurs des projets par mode, et le réseau actuel en gris. Sans catalogue, ni bateau ni projet à décider. */
+/**
+ * Les couleurs des projets par mode, et le réseau actuel dans les couleurs de ses lignes. Sans catalogue, ni bateau
+ * ni projet à décider.
+ */
 function Legende() {
-  const { catalogue } = useVille()
+  const { catalogue, id } = useVille()
   return (
     <div
       aria-label="Légende de la carte"
@@ -88,9 +80,9 @@ function Legende() {
         </span>
       ) : null}
       <span className="hidden items-center gap-1.5 text-gris lg:flex">
-        <span className="relative flex h-3 w-5 items-center">
-          <span className="h-1 w-5 rounded-full bg-[#5d5852]" />
-          <span className="absolute left-1.5 size-2.5 rounded-full border-2 border-[#5d5852] bg-white" />
+        <span className="relative flex h-3 w-6 items-center">
+          <TraitReseau ville={id} className="h-1 w-6" />
+          <span className="absolute left-2 size-2.5 rounded-full border-2 border-[#5d5852] bg-white" />
         </span>
         Réseau actuel et ses stations
       </span>

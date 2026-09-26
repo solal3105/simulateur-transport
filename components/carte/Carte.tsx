@@ -12,21 +12,23 @@ import {
   type MapMouseEvent,
   type MapTouchEvent,
   type StyleSpecification,
+  type SymbolLayerSpecification,
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { CATALOGUES, MANDATS, mots } from '@/lib/catalogue'
+import { CATALOGUES, debutMandat, horizon, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
-import { carreau, cercle, milieu } from '@/lib/geo'
+import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
 import { rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { direLignes, direOuvertures, nommerTrace, terminusDe } from '@/lib/reseau'
+import { direLignes, direOuvertures, nommerTrace, terminusProche, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
+import { imagePastille } from './pastilles'
 import { imageRelief } from './relief'
 
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
@@ -42,13 +44,10 @@ const COULEURS = {
   bordRoute: '#e3ddd4',
   rail: '#bdb6ac',
   limite: '#cfc8bd',
-  // Le réseau actuel reste neutre pour que les projets et vos lignes se lisent d'abord, mais assez sombre
-  // pour qu'on voie tout de suite où passent déjà le tram et le métro.
+  // Chaque ligne du réseau actuel a sa couleur. Le gris reste pour les voies qu'aucune ligne en service n'emprunte
+  // encore, comme celles des lignes en chantier, et pour une ligne dont on ne connaît pas la couleur.
   tram: '#9a9288',
   metroActuel: '#5d5852',
-  // Le RER presque comme le métro, les trains Transilien plus discrets.
-  rer: '#6f6860',
-  train: '#aaa298',
   gare: '#3f3a35',
 }
 
@@ -56,8 +55,11 @@ const COULEURS = {
 const ZOOM_QUARTIERS = 13
 /** À partir de ce zoom, les gares montrent leur nom. */
 const ZOOM_GARES = 12
-/** En deçà de ce zoom, les repères des lignes existantes se cachent pour laisser la vue d'ensemble lisible. */
-const ZOOM_REPERES = 11
+/** En deçà de ce zoom, les lignes existantes ne portent pas leur nom, pour laisser la vue d'ensemble lisible. */
+const ZOOM_NOMS_LIGNES = 10.5
+
+/** L'ordre de dessin des lignes existantes, du train régional au métro, qui passe dessus. */
+const RANG_MODE: Record<ModeExistant, number> = { train: 0, rer: 1, bus: 2, tram: 2, cable: 3, metro: 4 }
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
 
@@ -105,6 +107,35 @@ const largeurRang = (grande: number, moyenne: number) =>
     }),
   ] as unknown as number
 
+/** Une largeur par mode pour les lignes existantes ; comme ailleurs, le zoom reste l'expression la plus externe. */
+const largeurMode = (base: Record<ModeExistant, number>) =>
+  [
+    'interpolate',
+    ['exponential', 1.5],
+    ['zoom'],
+    ...[10, 13, 15].flatMap((z, i) => {
+      const k = [0.6, 1.4, 3][i]!
+      return [z, ['match', ['get', 'mode'], ...Object.entries(base).flatMap(([mode, b]) => [mode, b * k]), base.tram * k]]
+    }),
+  ] as unknown as number
+
+/** Les pastilles des lignes existantes, espacées d'autant plus qu'on voit loin. */
+const nomsLignes = {
+  type: 'symbol',
+  source: 'lignes',
+  minzoom: ZOOM_NOMS_LIGNES,
+  layout: {
+    'symbol-placement': 'line',
+    'symbol-spacing': ['interpolate', ['linear'], ['zoom'], ZOOM_NOMS_LIGNES, 300, 14, 380],
+    'symbol-sort-key': ['get', 'priorite'],
+    'symbol-avoid-edges': true,
+    'icon-image': ['get', 'pastille'],
+    'icon-rotation-alignment': 'viewport',
+    'icon-size': ['interpolate', ['linear'], ['zoom'], ZOOM_NOMS_LIGNES, 0.85, 13, 1],
+    'icon-padding': 6,
+  },
+} as const satisfies Omit<SymbolLayerSpecification, 'id'>
+
 const vide = () => ({ type: 'FeatureCollection', features: [] }) as FeatureCollection
 const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kind]
 const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
@@ -150,20 +181,26 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           .filter((a) => a[2] === 1)
           .map((a) => ({ type: 'Feature', properties: { grande: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
   }
-  // Le RER et les trains Transilien, que le fond de carte ne dessine pas : leur tracé vient des lignes existantes.
-  const trains: FeatureCollection<MultiLineString> = {
+  // Chaque ligne du réseau actuel, dans sa couleur. Une ligne en chantier n'a pas encore de tracé : le fil de ses
+  // gares ne sert qu'à poser son nom, le long du trait gris que le fond de carte dessine pour elle.
+  const lignes: FeatureCollection<MultiLineString> = {
     type: 'FeatureCollection',
-    features: (donnees.reseau?.lignes ?? []).flatMap((l) =>
-      l.trace
-        ? [
-            {
-              type: 'Feature' as const,
-              properties: { rer: l.mode === 'rer' },
-              geometry: { type: 'MultiLineString' as const, coordinates: l.trace },
-            },
-          ]
-        : [],
-    ),
+    features: (donnees.reseau?.lignes ?? []).map((l) => ({
+      type: 'Feature' as const,
+      properties: {
+        mode: l.mode,
+        couleur: l.couleur ?? COULEURS.metroActuel,
+        pastille: `ligne-${l.id}`,
+        rang: RANG_MODE[l.mode],
+        // Quand la place manque, le nom du métro passe avant celui du tram, puis des trains.
+        priorite: RANG_MODE.metro - RANG_MODE[l.mode],
+        dessinee: Boolean(l.trace?.length),
+      },
+      geometry: {
+        type: 'MultiLineString' as const,
+        coordinates: l.trace?.length ? l.trace : l.branches.map((b) => b.map((s) => s.pos)),
+      },
+    })),
   }
   // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
@@ -174,7 +211,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
-      trains: { type: 'geojson', data: trains },
+      lignes: { type: 'geojson', data: lignes },
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
       joueur: { type: 'geojson', data: vide() },
@@ -255,45 +292,15 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           'fill-opacity': ['interpolate', ['linear'], ['get', 'poids'], d1, 0.06, d2, 0.18, d3, 0.34, d4, 0.55],
         },
       },
-      {
-        id: 'train-bord',
-        type: 'line',
-        source: 'trains',
-        filter: ['!', ['get', 'rer']],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
-      },
-      {
-        id: 'train-actuel',
-        type: 'line',
-        source: 'trains',
-        filter: ['!', ['get', 'rer']],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.train, 'line-width': largeur(1.8) },
-      },
-      {
-        id: 'rer-bord',
-        type: 'line',
-        source: 'trains',
-        filter: ['get', 'rer'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(5.6) },
-      },
-      {
-        id: 'rer-actuel',
-        type: 'line',
-        source: 'trains',
-        filter: ['get', 'rer'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.rer, 'line-width': largeur(3) },
-      },
+      // Les voies de métro et de tram du fond de carte, en gris et plus fines que les lignes en couleur qui les
+      // recouvrent : on ne les voit que là où aucune ligne en service ne passe encore, sur les lignes en chantier.
       {
         id: 'tram-bord',
         type: 'line',
         source: 'fond',
         filter: genre('tram'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(4) },
+        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
       },
       {
         id: 'tram-actuel',
@@ -301,7 +308,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('tram'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(2.2) },
+        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(1.6) },
       },
       {
         id: 'metro-bord',
@@ -309,7 +316,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('metro'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(6.2) },
+        paint: { 'line-color': '#fff', 'line-width': largeur(5) },
       },
       {
         id: 'metro-actuel',
@@ -317,9 +324,26 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('metro'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.metroActuel, 'line-width': largeur(2.6) },
+      },
+      // Les lignes en service, chacune dans sa couleur, cerclées de blanc ; le métro passe sur le tram et les trains.
+      {
+        id: 'lignes-bord',
+        type: 'line',
+        source: 'lignes',
+        filter: ['get', 'dessinee'],
+        layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'rang'] },
+        paint: { 'line-color': '#fff', 'line-width': largeurMode({ metro: 7, rer: 6.2, tram: 4.6, bus: 4.6, cable: 4.6, train: 3.8 }) },
+      },
+      {
+        id: 'lignes-actuelles',
+        type: 'line',
+        source: 'lignes',
+        filter: ['get', 'dessinee'],
+        layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'rang'] },
         paint: {
-          'line-color': COULEURS.metroActuel,
-          'line-width': largeur(3.4),
+          'line-color': ['get', 'couleur'],
+          'line-width': largeurMode({ metro: 3.4, rer: 3, tram: 2.2, bus: 2.2, cable: 2.2, train: 1.8 }),
         },
       },
       {
@@ -368,6 +392,11 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           'circle-color': COULEURS.gare,
         },
       },
+      // Le nom de chaque ligne, répété le long de son tracé. La carte n'en garde que ce qui tient sans se chevaucher,
+      // le métro d'abord, et ceux des trains Transilien n'apparaissent qu'en zoomant ; les pastilles sont dessinées
+      // à la demande (voir pastilles.ts).
+      { ...nomsLignes, id: 'lignes-noms-trains', filter: ['==', ['get', 'mode'], 'train'], minzoom: ZOOM_GARES },
+      { ...nomsLignes, id: 'lignes-noms', filter: ['!=', ['get', 'mode'], 'train'] },
       {
         id: 'projets-etude',
         type: 'line',
@@ -540,25 +569,48 @@ function eclat(m: CarteMaplibre, coordonnees: number[][][], couleur: string) {
 
 const PRIORITE: Record<string, number> = { choisi: 0, construit: 1, chantier: 1, etude: 2, indisponible: 3 }
 
+/** Les places essayées pour l'étiquette d'un projet, en fractions de son tracé : le milieu, puis de part et d'autre. */
+const PLACES = [0.5, 0.35, 0.65, 0.2, 0.8, 0.1, 0.9]
+
+/** L'étiquette de prix d'un projet, son marqueur sur la carte et les places qu'elle peut prendre le long de son tracé. */
+type Etiquette = { el: HTMLButtonElement; marqueur: Marker; places: [number, number][] }
+
 /**
- * Masque les étiquettes qui se chevauchent : le projet choisi et les projets décidés passent
- * d'abord, puis les plus chers. Les tracés restent cliquables, et la liste donne accès à tout.
+ * Place les étiquettes sans qu'elles se chevauchent : le projet choisi et les projets décidés passent d'abord, puis les
+ * plus chers. Une étiquette dont le milieu est pris glisse le long de son tracé ; si aucune place n'est libre, elle devient
+ * un point de la couleur du projet, qui s'ouvre au toucher comme l'étiquette.
  */
-function eviterChevauchements(etiquettes: Map<string, HTMLButtonElement>) {
-  const visibles: DOMRect[] = []
+function eviterChevauchements(m: CarteMaplibre, etiquettes: Map<string, Etiquette>) {
+  const prises: { left: number; right: number; top: number; bottom: number }[] = []
+  const libre = (r: (typeof prises)[number]) =>
+    !prises.some((v) => r.left < v.right + 4 && r.right > v.left - 4 && r.top < v.bottom + 2 && r.bottom > v.top - 2)
   const ordre = [...etiquettes.values()]
-    .filter((el) => el.style.display !== 'none')
+    .filter((e) => e.el.style.display !== 'none')
     .sort(
       (a, b) =>
-        (PRIORITE[a.dataset.etat ?? 'etude'] ?? 2) - (PRIORITE[b.dataset.etat ?? 'etude'] ?? 2) ||
-        Number(b.dataset.cout ?? 0) - Number(a.dataset.cout ?? 0),
+        (PRIORITE[a.el.dataset.etat ?? 'etude'] ?? 2) - (PRIORITE[b.el.dataset.etat ?? 'etude'] ?? 2) ||
+        Number(b.el.dataset.cout ?? 0) - Number(a.el.dataset.cout ?? 0),
     )
-  for (const el of ordre) {
-    el.classList.remove('etiquette-masquee')
-    const r = el.getBoundingClientRect()
-    const gene = visibles.some((v) => r.left < v.right + 4 && r.right > v.left - 4 && r.top < v.bottom + 2 && r.bottom > v.top - 2)
-    if (gene) el.classList.add('etiquette-masquee')
-    else visibles.push(r)
+  for (const e of ordre) {
+    // L'étiquette se mesure dépliée, même si elle était un point au passage précédent.
+    delete e.el.dataset.forme
+    const r = e.el.getBoundingClientRect()
+    const ici = m.project(e.marqueur.getLngLat())
+    // Le rectangle qu'occuperait l'étiquette à chaque place : le sien, décalé de l'écart à l'écran.
+    const essais = e.places.map((p) => {
+      const q = m.project(p)
+      const [dx, dy] = [q.x - ici.x, q.y - ici.y]
+      return { p, r: { left: r.left + dx, right: r.right + dx, top: r.top + dy, bottom: r.bottom + dy } }
+    })
+    const choisie = essais.find((x) => libre(x.r))
+    if (!choisie) {
+      // Faute de place, un point de la couleur du projet au milieu de son tracé, qu'on voit et qu'on touche encore.
+      e.el.dataset.forme = 'point'
+      e.marqueur.setLngLat(e.places[0]!)
+      continue
+    }
+    prises.push(choisie.r)
+    e.marqueur.setLngLat(choisie.p)
   }
 }
 
@@ -587,8 +639,8 @@ export function Carte({
   decor?: boolean
   /** Pour le bilan : n'affiche en rouge que ce qui a ouvert à cette date. */
   anneeMax?: number
-  /** Un réseau partagé par lien, affiché à la place de la partie en cours. */
-  partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'>
+  /** Un réseau partagé par lien, affiché à la place de la partie en cours, avec le nombre de mandats qu'il a joués. */
+  partie?: Pick<ReturnType<typeof useJeu.getState>, 'chantiers' | 'lignes'> & { mandats?: number }
   /** La ville à montrer, si ce n'est pas celle de la partie en cours : l'accueil, un réseau reçu. */
   ville?: IdVille
 }) {
@@ -598,7 +650,7 @@ export function Carte({
   const catalogue = CATALOGUES[ville.id]
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
-  const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
+  const [etiquettes] = useState(() => new Map<string, Etiquette>())
   const [nomsArrets] = useState<Marker[]>(() => [])
   const pret = useRef(false)
   const appliquerEtat = useRef<() => void>(() => {})
@@ -609,6 +661,26 @@ export function Carte({
   const chantiers = partie?.chantiers ?? jeu.chantiers
   const lignes = partie?.lignes ?? jeu.lignes
   const trace = brouillon !== null
+  // Ce qui ouvre après la fin de la partie, en 2038 ou à la fin du dernier mandat joué, reste en chantier sur la carte.
+  const fin = horizon(partie ? (partie.mandats ?? 2) : jeu.mandat)
+
+  // Une carte de récapitulatif (bilan, fin de mandat, comparaison) cadre tout le réseau montré : la vue de départ,
+  // élargie aux projets retenus et aux lignes tracées, qui vont parfois jusqu'au Val d'Europe.
+  const cadre = useMemo((): [[number, number], [number, number]] => {
+    if (!decor || !donnees) return ville.emprise
+    const traces = new Set(chantiers.flatMap((c) => catalogue.projets.find((p) => p.id === c.id)?.trace ?? []))
+    const points = [
+      ...donnees.projets.features.filter((f) => traces.has(f.properties.id)).flatMap((f) => f.geometry.coordinates.flat()),
+      ...lignes.flatMap((l) => l.arrets),
+    ]
+    if (!points.length) return ville.emprise
+    const [[o, s], [e, n]] = ville.emprise
+    const marge = 0.01
+    return [
+      [Math.min(o, ...points.map((p) => p[0]! - marge)), Math.min(s, ...points.map((p) => p[1]! - marge))],
+      [Math.max(e, ...points.map((p) => p[0]! + marge)), Math.max(n, ...points.map((p) => p[1]! + marge))],
+    ]
+  }, [catalogue, chantiers, decor, donnees, lignes, ville])
 
   // État de chaque projet du catalogue, par nom de tracé.
   const etats = useMemo(() => {
@@ -621,15 +693,15 @@ export function Carte({
       if (c) {
         const annee = ouverture(c.mandat, resoudre(p, c).duree)
         // Dans un récapitulatif, un projet apparaît en chantier l'année de sa décision, puis s'allume à son ouverture.
-        if (anneeMax !== undefined) e = anneeMax < MANDATS[c.mandat].debut ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
-        else e = annee > MANDATS[2].fin ? 'chantier' : 'construit'
+        if (anneeMax !== undefined) e = anneeMax < debutMandat(c.mandat) ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
+        else e = annee > fin ? 'chantier' : 'construit'
       } else if (p.requiert && !faits.has(p.requiert)) e = 'indisponible'
       if (panneau?.type === 'projet' && panneau.id === p.id) e = 'choisi'
       if (ecran === 'tuto' && tuto === 0 && p.id === catalogue.tutoriel?.projet) e = 'choisi'
       etat.set(p.trace, e)
     }
     return etat
-  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax])
+  }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax, fin])
 
   // Création de la carte.
   useEffect(() => {
@@ -638,9 +710,10 @@ export function Carte({
     const m = new CarteMaplibre({
       container: boite,
       style: styleDeBase(donnees, ville),
-      bounds: ville.emprise,
+      bounds: cadre,
       fitBoundsOptions: { padding: 20 },
-      minZoom: 9.5,
+      // Un récapitulatif peut reculer davantage, pour montrer sur un téléphone un réseau qui s'étend loin.
+      minZoom: decor ? 8 : 9.5,
       maxZoom: 16,
       maxBounds: ville.limites,
       attributionControl: { compact: true, customAttribution: '© OpenStreetMap, INSEE' },
@@ -678,36 +751,27 @@ export function Carte({
       return [{ pos: s.pos, marker: new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(s.pos) }]
     })
     poserProches(m, gares, ZOOM_GARES)
-    // Le nom de chaque ligne du réseau actuel, à ses deux terminus, comme sur un plan de réseau. Deux lignes qui
-    // finissent à la même station partagent un seul repère.
-    const terminus = new Map<string, { pos: [number, number]; lignes: { ref: string; mode: string; nom: string }[] }>()
-    for (const l of donnees.reseau?.lignes ?? []) {
-      for (const s of terminusDe(l)) {
-        const cle = s.nom || s.pos.join(',')
-        const t = terminus.get(cle) ?? { pos: s.pos, lignes: [] }
-        if (!t.lignes.some((x) => x.ref === l.ref && x.mode === l.mode)) t.lignes.push({ ref: l.ref, mode: l.mode, nom: l.nom })
-        terminus.set(cle, t)
-      }
+    // La pastille de chaque ligne existante se dessine quand la carte en a besoin pour la première fois. Celles
+    // dessinées avant l'arrivée de la police du site sont refaites avec elle.
+    const pastilles = new Map((donnees.reseau?.lignes ?? []).map((l) => [`ligne-${l.id}`, l]))
+    const poserPastille = (id: string) => {
+      const l = pastilles.get(id)
+      if (!l) return
+      const { image, ratio } = imagePastille(l.ref, l.couleur ?? COULEURS.metroActuel, l.mode)
+      if (m.hasImage(id)) m.removeImage(id)
+      m.addImage(id, image, { pixelRatio: ratio })
     }
-    for (const t of terminus.values()) {
-      const el = document.createElement('div')
-      el.className = 'reperes-ligne'
-      el.setAttribute('aria-hidden', 'true')
-      for (const l of t.lignes) {
-        const pastille = document.createElement('span')
-        pastille.className = 'repere-ligne'
-        pastille.dataset.mode = l.mode
-        pastille.textContent = l.ref
-        pastille.title = l.nom
-        el.appendChild(pastille)
-      }
-      new Marker({ element: el, anchor: 'bottom', offset: [0, -7] }).setLngLat(t.pos).addTo(m)
+    m.setMissingStyleImageResolver(poserPastille)
+    if (document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(() => {
+        if (carte.current !== m) return
+        for (const id of pastilles.keys()) if (m.hasImage(id)) poserPastille(id)
+      })
     }
 
     const majZoom = () => {
       boite.dataset.proche = m.getZoom() >= ZOOM_QUARTIERS ? '1' : '0'
       boite.dataset.gares = m.getZoom() >= ZOOM_GARES ? '1' : '0'
-      boite.dataset.loin = m.getZoom() < ZOOM_REPERES ? '1' : '0'
     }
     majZoom()
     m.on('zoom', majZoom)
@@ -727,15 +791,18 @@ export function Carte({
         if (useJeu.getState().brouillon) return
         useJeu.getState().ouvrir({ type: 'projet', id: projet.id })
       })
-      new Marker({ element: el }).setLngLat(milieu(f.geometry)).addTo(m)
-      etiquettes.set(f.properties.id, el)
+      const places = pointsLeLong(f.geometry, PLACES)
+      const marqueur = new Marker({ element: el }).setLngLat(places[0] ?? milieu(f.geometry)).addTo(m)
+      etiquettes.set(f.properties.id, { el, marqueur, places })
     }
 
     // Pendant le tracé, on fait glisser un arrêt pour le déplacer. Un glissement ne doit pas poser d'arrêt au
-    // clic qui le termine, et les mises à jour sont regroupées à chaque image pour garder le tracé fluide.
+    // clic qui le termine, et les mises à jour sont regroupées à chaque image pour garder le tracé fluide. En deçà de
+    // quelques pixels, ce n'est pas un glissement mais un toucher, qui ouvre le nom de la station.
     let glisse: number | null = null
     let vientDeGlisser = false
     let attente: [number, number] | null = null
+    let saisiA = { x: 0, y: 0 }
     const saisir = (e: MapMouseEvent | MapTouchEvent) => {
       if (!useJeu.getState().brouillon || decor) return
       const i = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties?.i
@@ -743,11 +810,13 @@ export function Carte({
       e.preventDefault()
       glisse = i
       vientDeGlisser = false
+      saisiA = e.point
       m.dragPan.disable()
       m.getCanvas().style.cursor = 'grabbing'
     }
     const bouger = (e: MapMouseEvent | MapTouchEvent) => {
       if (glisse === null) return
+      if (!vientDeGlisser && Math.hypot(e.point.x - saisiA.x, e.point.y - saisiA.y) < 5) return
       if (!attente) {
         requestAnimationFrame(() => {
           if (glisse !== null && attente) useJeu.getState().deplacerArret(glisse, attente)
@@ -785,7 +854,10 @@ export function Carte({
     m.on('click', (e: MapMouseEvent) => {
       const jeu = useJeu.getState()
       if (jeu.brouillon) {
-        if (vientDeGlisser || m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] }).length) return
+        if (vientDeGlisser) return
+        // Toucher une station du tracé ouvre son nom dans le panneau ; toucher un point de passage ne fait rien.
+        const arret = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties
+        if (arret) return typeof arret.i === 'number' && !arret.passage ? jeu.renommer(arret.i) : undefined
         // Une station posée tout près d'une station existante s'y accroche : c'est une correspondance.
         const p = jeu.brouillon.outil === 'passage' ? ([e.lngLat.lng, e.lngLat.lat] as [number, number]) : accrocher(e.point, e.lngLat)
         if (m.queryRenderedFeatures(e.point, { layers: ['brouillon-cible'] }).length) {
@@ -803,9 +875,13 @@ export function Carte({
       if (decor) return
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
-      const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
-      // Sans tracé touché, aucun projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
-      const projet = trace ? catalogue.projets.find((p) => p.trace === trace) : undefined
+      // Le premier tracé touché qui porte un projet : un tracé voisin ne doit pas avaler le clic. Sans tracé touché, aucun
+      // projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
+      const projet = m
+        .queryRenderedFeatures(e.point, { layers: ['projets-cible'] })
+        .map((f) => f.properties?.id as string | undefined)
+        .map((id) => (id ? catalogue.projets.find((p) => p.trace === id) : undefined))
+        .find((p) => p !== undefined)
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
       const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['gares', 'stations'] })[0]
@@ -876,7 +952,7 @@ export function Carte({
         m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
       })
     }
-    m.on('moveend', () => eviterChevauchements(etiquettes))
+    m.on('moveend', () => eviterChevauchements(m, etiquettes))
     m.on('load', () => {
       pret.current = true
       appliquerEtat.current()
@@ -892,7 +968,7 @@ export function Carte({
       pret.current = false
       etiquettes.clear()
     }
-  }, [catalogue, donnees, decor, etiquettes, ville])
+  }, [cadre, catalogue, donnees, decor, etiquettes, ville])
 
   // Mise à jour des états, des étiquettes, des lignes du joueur et du tracé en cours.
   useEffect(() => {
@@ -936,7 +1012,7 @@ export function Carte({
       precedents.current = new Map(etats)
 
       for (const [nomTrace, etat] of etats) {
-        const el = etiquettes.get(nomTrace)
+        const el = etiquettes.get(nomTrace)?.el
         if (!el) continue
         el.dataset.etat = etat
         const projet = catalogue.projets.find((p) => p.trace === nomTrace)
@@ -951,8 +1027,8 @@ export function Carte({
                 ? n(resoudre(projet, c).cout)
                 : ''
       }
-      for (const el of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
-      requestAnimationFrame(() => eviterChevauchements(etiquettes))
+      for (const { el } of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
+      requestAnimationFrame(() => eviterChevauchements(m, etiquettes))
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
       if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace ? 'visible' : 'none')
       m.getCanvas().style.cursor = trace ? 'crosshair' : ''
@@ -967,7 +1043,7 @@ export function Carte({
             type: 'Feature',
             properties: {
               id: l.id,
-              chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > MANDATS[2].fin,
+              chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > fin,
               couleur: couleurLigne(l.mode),
               choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
@@ -1001,19 +1077,33 @@ export function Carte({
 
       // Le nom de chaque station posée : celui de la station existante où elle s'accroche, sinon son quartier.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
-      nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx).forEach((nom, i) => {
+      const noms = nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx, brouillon?.noms)
+      // Un prolongement part du terminus de sa ligne et en porte le nom, sauf si le joueur l'a renommé.
+      const prolongee = brouillon?.prolonge ? donnees.reseau?.lignes.find((l) => l.id === brouillon.prolonge) : undefined
+      const depuis = prolongee && arrets[0] ? terminusProche(prolongee, arrets[0], donnees.carreaux.mx) : undefined
+      if (depuis && estStation[0] && !brouillon?.noms?.[0]) noms[0] = depuis.nom
+      // Toucher le nom ouvre le champ pour le changer, comme toucher la station.
+      noms.forEach((nom, i) => {
         if (!nom) return
         const el = document.createElement('div')
-        const etiquette = document.createElement('span')
+        const etiquette = document.createElement('button')
+        etiquette.type = 'button'
         etiquette.className = 'nom-arret'
         etiquette.textContent = nom
+        etiquette.title = 'Renommer cette station'
+        etiquette.setAttribute('aria-label', `Renommer ${nom}`)
+        if (brouillon?.renomme === i) etiquette.dataset.actif = ''
+        etiquette.addEventListener('click', (ev) => {
+          ev.stopPropagation()
+          useJeu.getState().renommer(i)
+        })
         el.appendChild(etiquette)
         nomsArrets.push(new Marker({ element: el, anchor: 'left', offset: [10, -10] }).setLngLat(arrets[i]!).addTo(m))
       })
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau])
+  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau, fin])
 
   // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {

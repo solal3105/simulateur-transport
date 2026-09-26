@@ -4,6 +4,7 @@ import { clsx } from 'clsx'
 
 import { n, signe } from '@/lib/format'
 import { detailMesure, MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
+import { leviersDu } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Leviers as TLeviers } from '@/lib/types'
 import type { Ville } from '@/lib/villes'
@@ -127,7 +128,7 @@ function Interrupteur({
   return (
     <label
       className={clsx(
-        'flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
+        'relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white p-4',
         actif ? 'shadow-[inset_0_0_0_2px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
         desactive && 'cursor-not-allowed opacity-55',
       )}
@@ -172,7 +173,7 @@ export function Leviers() {
 
 function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
   const { leviers, mandat, levier, fermer } = useJeu()
-  const l = leviers[mandat]
+  const l = leviersDu(leviers, mandat)
   const bilan = useBilan()
   const { segments, total } = segmentsBudget(bilan)
   const gratuit = l.gratuiteTotale && p.fixes.gratuiteTotale !== undefined
@@ -214,8 +215,10 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
         <Jauge segments={segments} total={total} surRouge label={`Il reste ${n(bilan.reste)} millions d’euros sur ce mandat.`} />
         <div className="text-[13px] font-semibold opacity-90">
           Vos choix changent l’argent disponible sur ce mandat
-          {mandat === 1 ? ' et restent en place au suivant, où vous pourrez les revoir' : ''}. Au total, ils{' '}
-          {bilan.leviers >= 0 ? 'rapportent' : 'coûtent'} {n(Math.abs(bilan.leviers))} M€.
+          {mandat === 1
+            ? ' et restent en place au suivant, où vous pourrez les revoir'
+            : ' et restent en place si vous continuez la partie'}
+          . Au total, ils {bilan.leviers >= 0 ? 'rapportent' : 'coûtent'} {n(Math.abs(bilan.leviers))} M€.
         </div>
       </div>
 

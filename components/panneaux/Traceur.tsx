@@ -1,14 +1,25 @@
 'use client'
 
 import { clsx } from 'clsx'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type MouseEvent } from 'react'
 
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { correspondances, direLignes, nommerTrace, prolongeable, stationProche, terminusDe, type LigneExistante } from '@/lib/reseau'
+import {
+  correspondances,
+  direLignes,
+  nommerTrace,
+  prolongeable,
+  prolongementsDepuis,
+  stationProche,
+  terminusDe,
+  terminusProche,
+  type LigneExistante,
+} from '@/lib/reseau'
+import { NOM_ARRET_MAX } from '@/lib/partie'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
@@ -16,6 +27,7 @@ import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
 import { useBilan, useDepenses } from '../partie/budget'
 import { Bouton, CarteChiffre, Icone, Pastille, Surtitre, type NomIcone } from '../ui'
 import { Panneau } from './Panneau'
+import { Rendement } from './Rendement'
 
 // Les prix viennent de 53 chantiers français (lib/couts.ts, docs/couts.md) ; chaque repère dit ce qui fait monter le coût.
 const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; repere: string }[] = [
@@ -71,6 +83,12 @@ export function useEstimation(): Estimation | null {
   )
 }
 
+/** Ce qui identifie une proposition de prolongement, pour ne plus la montrer une fois écartée. */
+const cleProposition = (liste: { ligne: { id: string } }[]) => liste.map((c) => c.ligne.id).join(',')
+
+/** « a, b et c » : une énumération dans une phrase. */
+const enumerer = (mots: string[]) => (mots.length <= 1 ? (mots[0] ?? '') : `${mots.slice(0, -1).join(', ')} et ${mots.at(-1)}`)
+
 /** « Métro D » devient « métro D », pour le glisser dans une phrase. */
 const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice(1)
 
@@ -78,13 +96,13 @@ const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice
  * Ce qu'un tracé sait du réseau actuel : lesquels de ses points sont des stations, leurs noms, leurs
  * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
  */
-function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge'> | null) {
+function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms'> | null) {
   const donnees = useDonnees(useVille().id)
   return useMemo(() => {
     if (!donnees || !trace) return null
     const { mx } = donnees.carreaux
     const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
-    const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx)
+    const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx, trace.noms)
     const prolongee = trace.prolonge ? donnees.reseau?.lignes.find((l) => l.id === trace.prolonge) : undefined
     // Le terminus d'un prolongement est sur la ligne prolongée : ce n'est pas une correspondance avec elle.
     const liste = correspondances(trace.arrets, estStation, donnees.stations, mx)
@@ -94,11 +112,19 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
           : c,
       )
       .filter((c) => c.station.lignes.length || c.station.gare)
+    // Les lignes que le tracé pourrait prolonger, s'il part tout près d'un de leurs terminus : toutes, et pas seulement
+    // la première, quand deux lignes finissent au même endroit.
     const depart = trace.arrets[0]
-    const terminus = depart && !trace.prolonge ? stationProche(donnees.stations, depart, mx, 60) : null
-    const aProlonger = terminus?.terminus
-      .map((id) => donnees.reseau?.lignes.find((l) => l.id === id))
-      .find((l): l is LigneExistante => Boolean(l && l.mode === trace.mode && prolongementPossible(l.mode, depart!, donnees.carreaux)))
+    const aProlonger =
+      depart && !trace.prolonge
+        ? prolongementsDepuis(donnees.reseau, trace.mode, depart, stationProche(donnees.stations, depart, mx, 60), mx, (p) =>
+            prolongementPossible(trace.mode, p, donnees.carreaux),
+          )
+        : []
+    // Un prolongement part du terminus de sa ligne et en porte le nom, même si une autre station est plus proche, sauf
+    // si le joueur l'a renommé.
+    const depuis = prolongee && depart ? terminusProche(prolongee, depart, mx) : undefined
+    if (depuis && estStation[0] && !trace.noms?.[0]) noms[0] = depuis.nom
     const stationsNommees = noms.filter((x): x is string => Boolean(x))
     return { estStation, noms, stationsNommees, liste, prolongee, aProlonger, donnees }
   }, [donnees, trace])
@@ -119,6 +145,80 @@ function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
         ))}
       </ol>
     </div>
+  )
+}
+
+/**
+ * Le champ où l'on donne son nom à une station du tracé, à la place de son nom dans la liste. Il s'ouvre quand on touche
+ * la station, ici ou sur la carte ; quitter le champ garde le nom tapé, Échap le referme sans rien changer.
+ */
+function ChampNom({ i, nom, milieu }: { i: number; nom: string; milieu: boolean }) {
+  const { nommerArret, renommer, basculerPassage } = useJeu()
+  const [valeur, setValeur] = useState(nom)
+  // Le champ disparaît dès qu'on a validé ou annulé : sa perte de focus ne doit rien enregistrer de plus.
+  const fini = useRef(false)
+  const valider = () => {
+    if (fini.current) return
+    fini.current = true
+    nommerArret(i, valeur)
+  }
+  // Au clavier, on retrouve la station dans la liste une fois le champ refermé.
+  const revenir = () => requestAnimationFrame(() => document.getElementById(`station-${i}`)?.focus())
+  // Un clic sur un bouton du champ ne doit pas lui faire perdre le focus avant d'agir : Safari ne le donne pas aux boutons.
+  const garderFocus = (e: MouseEvent) => e.preventDefault()
+  return (
+    <form
+      className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-sable p-2"
+      onSubmit={(e) => {
+        e.preventDefault()
+        valider()
+        revenir()
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) valider()
+      }}
+    >
+      <label htmlFor={`nom-station-${i}`} className="sr-only">
+        Nom de la station
+      </label>
+      <input
+        id={`nom-station-${i}`}
+        autoFocus
+        value={valeur}
+        maxLength={NOM_ARRET_MAX}
+        autoComplete="off"
+        enterKeyHint="done"
+        onChange={(e) => setValeur(e.target.value)}
+        onFocus={(e) => e.currentTarget.select()}
+        onKeyDown={(e) => {
+          if (e.key !== 'Escape') return
+          // Échap referme le champ, pas le panneau.
+          e.preventDefault()
+          e.stopPropagation()
+          fini.current = true
+          renommer()
+          revenir()
+        }}
+        className="min-h-10 min-w-0 flex-1 rounded-full bg-white px-3.5 text-[14px] font-bold outline-none focus-visible:ring-2 focus-visible:ring-encre"
+      />
+      <Bouton type="submit" genre="encre" taille="petit" onMouseDown={garderFocus}>
+        Valider
+      </Bouton>
+      {milieu ? (
+        <button
+          type="button"
+          onMouseDown={garderFocus}
+          onClick={() => {
+            fini.current = true
+            renommer()
+            basculerPassage(i)
+          }}
+          className="basis-full px-1.5 text-left text-[12.5px] font-bold text-gris underline underline-offset-3 hover:text-encre"
+        >
+          En faire un point de passage, où la ligne passe sans s’arrêter
+        </button>
+      ) : null}
+    </form>
   )
 }
 
@@ -275,53 +375,88 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
       {cellule(km(e.km), 'km', 'de ligne')}
       {cellule(String(arrets), '', arrets > 1 ? 'stations' : 'station')}
       {cellule(n(e.cout), 'M€', 'de construction')}
-      {cellule(`~${approx(e.voyageurs)}`, '', 'voyageurs / jour', true)}
+      {/* Comme dans les fiches : les voyageurs qui comptent dans le score, les nouveaux sur le réseau. */}
+      {cellule(e.nouveaux > 0 ? `+${approx(e.nouveaux)}` : '0', '', 'nouveaux voyageurs / jour', true)}
     </div>
   )
 }
 
-/** Poser un arrêt en tapant le nom d'un quartier ou d'une commune : l'alternative au toucher sur la carte. */
+/** Un nom réduit à ses lettres : « Châtelet » et « chatelet », « L’Ariane » et « l'ariane », « St-Priest » et « Saint Priest » se retrouvent. */
+const cleRecherche = (nom: string) =>
+  nom
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    // « Cœur d'Orly » s'écrit aussi « Coeur d'Orly ».
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    // « St Priest », « Ste-Foy » : les abréviations de saint et de sainte.
+    .replace(/\bste?\b/g, (m) => (m === 'st' ? 'saint' : 'sainte'))
+
+/** Un lieu où poser un arrêt : une station ou une gare du réseau actuel, un arrondissement, une commune ou un quartier. */
+type LieuCherche = { nom: string; cle: string; pos: [number, number]; station: boolean }
+
+/**
+ * Poser un arrêt en tapant le nom d'une station, d'une commune ou d'un quartier : l'alternative au toucher sur la carte.
+ * Le nom exact passe avant un début de nom, puis un mot du nom, puis un morceau. À égalité, une station passe avant un
+ * quartier du même nom, et un lieu proche du dernier arrêt posé avant un homonyme lointain : « Saint-Lazare » mène à
+ * la gare parisienne, pas au quartier de Saint-Mammès. Une station choisie ainsi est posée sur la station elle-même.
+ */
 function AjoutParNom() {
   const ville = useVille()
   const donnees = useDonnees(ville.id)
   const ajouterArret = useJeu((s) => s.ajouterArret)
+  const dernierArret = useJeu((s) => s.brouillon?.arrets.at(-1))
   const [texte, setTexte] = useState('')
   const [erreur, setErreur] = useState('')
   // Sur téléphone, le champ reste replié pour laisser la carte visible.
   const [ouvert, setOuvert] = useState(false)
-  const lieux = useMemo(() => {
+  const lieux = useMemo<LieuCherche[]>(() => {
     if (!donnees) return []
     const [[ouest, sud], [est, nord]] = ville.zoneRecherche
     const dansLaZone = ([lon, lat]: [number, number]) => lon > ouest && lon < est && lat > sud && lat < nord
-    const quartiers = donnees.lieux.quartiers
-      .filter(([lon, lat]) => dansLaZone([lon, lat]))
-      .map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
+    const lieu = (nom: string, pos: [number, number], station = false): LieuCherche => ({ nom, cle: cleRecherche(nom), pos, station })
+    const stations = donnees.stations.filter((s) => s.nom && dansLaZone(s.pos)).map((s) => lieu(s.nom, s.pos, true))
+    const quartiers = donnees.lieux.quartiers.filter(([lon, lat]) => dansLaZone([lon, lat])).map(([lon, lat, nom]) => lieu(nom, [lon, lat]))
     const communes = donnees.lieux.communes
       .map((c) => {
         const anneau = c.anneaux[0] ?? []
         const lon = anneau.reduce((t, p) => t + p[0], 0) / Math.max(1, anneau.length)
         const lat = anneau.reduce((t, p) => t + p[1], 0) / Math.max(1, anneau.length)
-        return { nom: c.nom, pos: [lon, lat] as [number, number] }
+        return lieu(c.nom, [lon, lat])
       })
       // Lyon se cherche par arrondissement.
       .filter((c) => dansLaZone(c.pos) && c.nom !== 'Lyon')
-    const arrondissements = donnees.lieux.arrondissements.map(([lon, lat, nom]) => ({ nom, pos: [lon, lat] as [number, number] }))
-    const vus = new Set<string>()
-    return [...arrondissements, ...communes, ...quartiers]
-      .filter((l) => (vus.has(l.nom) ? false : (vus.add(l.nom), true)))
-      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    const arrondissements = donnees.lieux.arrondissements.map(([lon, lat, nom]) => lieu(nom, [lon, lat]))
+    return [...stations, ...arrondissements, ...communes, ...quartiers]
   }, [donnees, ville])
+  // Les suggestions du champ : chaque nom une fois, dans l'ordre alphabétique.
+  const suggestions = useMemo(() => [...new Set(lieux.map((l) => l.nom))].sort((a, b) => a.localeCompare(b, 'fr')), [lieux])
+
+  const chercher = (demande: string) => {
+    const q = cleRecherche(demande)
+    if (!q) return undefined
+    const rang = (l: LieuCherche) =>
+      l.cle === q ? 0 : l.cle.startsWith(q) ? 1 : ` ${l.cle}`.includes(` ${q}`) ? 2 : l.cle.includes(q) ? 3 : Infinity
+    const [lon0, lat0] = dernierArret ?? ville.centre
+    const kx = Math.cos((lat0 * Math.PI) / 180)
+    const eloignement = (l: LieuCherche) => Math.hypot((l.pos[0] - lon0) * kx, l.pos[1] - lat0)
+    return lieux
+      .map((l) => ({ l, r: rang(l) }))
+      .filter((x) => x.r < Infinity)
+      .sort((a, b) => a.r - b.r || Number(b.l.station) - Number(a.l.station) || eloignement(a.l) - eloignement(b.l))[0]?.l
+  }
 
   const ajouter = (ev: React.FormEvent) => {
     ev.preventDefault()
-    const cherche = texte.trim().toLocaleLowerCase('fr')
-    const trouve =
-      lieux.find((l) => l.nom.toLocaleLowerCase('fr') === cherche) ?? lieux.find((l) => l.nom.toLocaleLowerCase('fr').startsWith(cherche))
-    if (!cherche || !trouve) {
-      setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de commune ou de quartier ${ville.territoire}.`)
+    const trouve = chercher(texte)
+    if (!trouve) {
+      setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de station, de commune ou de quartier ${ville.territoire}.`)
       return
     }
-    ajouterArret(trouve.pos)
+    ajouterArret(trouve.pos, { station: true })
     setTexte('')
     setErreur('')
   }
@@ -354,8 +489,8 @@ function AjoutParNom() {
           </button>
         </div>
         <datalist id="lieux-arrets">
-          {lieux.map((l) => (
-            <option key={l.nom} value={l.nom} />
+          {suggestions.map((nom) => (
+            <option key={nom} value={nom} />
           ))}
         </datalist>
         {erreur ? (
@@ -372,6 +507,7 @@ function AjoutParNom() {
 export function Traceur() {
   const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes, basculerPassage, choisirOutil } =
     useJeu()
+  const renommer = useJeu((s) => s.renommer)
   const { detacher, rattacher } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
@@ -467,7 +603,7 @@ export function Traceur() {
             <label
               key={m.id}
               className={clsx(
-                'flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full text-[13px] font-extrabold',
+                'relative flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full text-[13px] font-extrabold',
                 brouillon.mode === m.id ? 'bg-encre text-white' : 'bg-sable',
               )}
             >
@@ -487,7 +623,7 @@ export function Traceur() {
           <label
             key={m.id}
             className={clsx(
-              'hidden cursor-pointer items-start gap-3 rounded-2xl bg-white px-3.5 py-3 lg:flex',
+              'relative hidden cursor-pointer items-start gap-3 rounded-2xl bg-white px-3.5 py-3 lg:flex',
               brouillon.mode === m.id ? 'shadow-[inset_0_0_0_2.5px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
             )}
           >
@@ -552,16 +688,20 @@ export function Traceur() {
 
       {arrets === 0 && !modifiee && r?.donnees.reseau ? <Prolonger lignes={r.donnees.reseau.lignes} /> : null}
 
-      {r?.aProlonger && ecartee !== r.aProlonger.id ? (
+      {r?.aProlonger.length && ecartee !== cleProposition(r.aProlonger) ? (
         <div role="group" aria-labelledby="proposer-prolongement" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
           <p id="proposer-prolongement" className="text-[14.5px] leading-relaxed">
-            Votre ligne part du terminus du {minuscule(r.aProlonger.nom)}. Voulez-vous la prolonger ? Sa première station existe déjà.
+            {r.aProlonger.length === 1
+              ? `Votre ligne part du terminus du ${minuscule(r.aProlonger[0]!.ligne.nom)}, à ${r.aProlonger[0]!.terminus.nom}. Voulez-vous la prolonger ? Sa première station existe déjà.`
+              : `Votre ligne part d’un terminus ${enumerer(r.aProlonger.map((c) => `du ${minuscule(c.ligne.nom)}`))}. Voulez-vous prolonger l’une de ces lignes ? Sa première station existe déjà.`}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <Bouton genre="rouge" taille="petit" onClick={() => rattacher(r.aProlonger!.id)}>
-              Prolonger le {minuscule(r.aProlonger.nom)}
-            </Bouton>
-            <Bouton genre="contour" taille="petit" onClick={() => setEcartee(r.aProlonger!.id)}>
+            {r.aProlonger.map((c) => (
+              <Bouton key={c.ligne.id} genre="rouge" taille="petit" onClick={() => rattacher(c.ligne.id, c.terminus.pos)}>
+                Prolonger le {minuscule(c.ligne.nom)}
+              </Bouton>
+            ))}
+            <Bouton genre="contour" taille="petit" onClick={() => setEcartee(cleProposition(r.aProlonger))}>
               Garder une ligne à part
             </Bouton>
           </div>
@@ -576,6 +716,13 @@ export function Traceur() {
               const passage = r ? !r.estStation[i] : false
               const milieu = i > 0 && i < arrets - 1
               const libelle = passage ? 'Point de passage' : (noms[i] ?? `Station ${i + 1}`)
+              // La station qu'on renomme prend toute la largeur de la liste, le temps de taper son nom.
+              if (!passage && brouillon.renomme === i)
+                return (
+                  <li key={i} className="flex basis-full">
+                    <ChampNom i={i} nom={libelle} milieu={milieu} />
+                  </li>
+                )
               return (
                 <li key={i} className="flex items-center gap-1">
                   <span
@@ -584,19 +731,17 @@ export function Traceur() {
                       passage ? 'bg-white text-gris shadow-[inset_0_0_0_1.5px_var(--color-trait)]' : 'bg-sable',
                     )}
                   >
-                    {milieu ? (
-                      <button
-                        type="button"
-                        onClick={() => basculerPassage(i)}
-                        title={passage ? 'En faire une station' : 'En faire un point de passage'}
-                        aria-label={passage ? `Faire de ce point de passage une station` : `Faire de ${libelle} un point de passage`}
-                        className="text-left underline decoration-transparent underline-offset-3 hover:decoration-current"
-                      >
-                        {libelle}
-                      </button>
-                    ) : (
-                      libelle
-                    )}
+                    {/* Toucher une station ouvre son nom ; toucher un point de passage en refait une station. */}
+                    <button
+                      id={`station-${i}`}
+                      type="button"
+                      onClick={() => (passage ? basculerPassage(i) : renommer(i))}
+                      title={passage ? 'En faire une station' : 'Renommer cette station'}
+                      aria-label={passage ? 'Faire de ce point de passage une station' : `Renommer ${libelle}`}
+                      className="text-left underline decoration-transparent underline-offset-3 hover:decoration-current"
+                    >
+                      {libelle}
+                    </button>
                     <button
                       type="button"
                       onClick={() => enleverArret(i)}
@@ -607,15 +752,15 @@ export function Traceur() {
                       <Icone nom="fermer" taille={13} epaisseur={2.6} />
                     </button>
                   </span>
-                  {i < arrets - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
+                  {i < arrets - 1 && brouillon.renomme !== i + 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
                 </li>
               )
             })}
           </ol>
           {arrets >= 2 ? (
             <p className="text-[12.5px] leading-snug text-gris">
-              Faites glisser un point sur la carte pour le déplacer, ou touchez la ligne entre deux points pour en ajouter un. Touchez le
-              nom d’une station pour en faire un point de passage.
+              Faites glisser un point sur la carte pour le déplacer, ou touchez la ligne entre deux points pour en ajouter un. Touchez une
+              station, ici ou sur la carte, pour changer son nom ou en faire un point de passage.
             </p>
           ) : null}
           {r ? <PhraseCorrespondances liste={r.liste} /> : null}
@@ -732,6 +877,46 @@ function Prolonger({ lignes }: { lignes: LigneExistante[] }) {
 }
 
 /** Le résultat d'une ligne terminée, avant de la construire. */
+/** La part du budget restant qu'une dépense prendrait, comme dans la fiche d'un projet. */
+const partDuBudget = (cout: number, reste: number) =>
+  reste === Infinity
+    ? 'sans budget à tenir, en jeu libre'
+    : reste > 0
+      ? `${Math.min(999, Math.round((cout / reste) * 100))} % de ce qui vous reste`
+      : 'votre budget est épuisé'
+
+/**
+ * Les trois chiffres d'une ligne tracée, présentés comme ceux d'un projet du catalogue : son coût, les voyageurs qu'elle
+ * ajoute à votre score (les nouveaux sur le réseau) et son année d'ouverture.
+ */
+function ChiffresLigne({ e, annee, legendeCout }: { e: Estimation; annee: number; legendeCout: string }) {
+  return (
+    <div className="grid grid-cols-3 gap-1.5">
+      <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={legendeCout} />
+      <CarteChiffre
+        icone="voyageurs"
+        valeur={e.nouveaux > 0 ? `+${approx(e.nouveaux)}` : '0'}
+        legende={`nouveaux voyageurs par jour, sur ${approx(e.voyageurs)} au total`}
+        accent
+      />
+      <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
+    </div>
+  )
+}
+
+/** D'où viennent les voyageurs d'une ligne : combien l'emprunteraient, et combien sont nouveaux, les seuls qui comptent. */
+function VoyageursLigne({ e, conditionnel = false }: { e: Estimation; conditionnel?: boolean }) {
+  const verbe = conditionnel ? 'emprunteraient' : 'empruntent'
+  return (
+    <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
+      Environ <b className="chiffres">{approx(e.voyageurs)}</b> voyageurs par jour {verbe} cette ligne, entre {approx(e.bas)} et{' '}
+      {approx(e.haut)} selon notre calcul. <b className="chiffres">{approx(e.nouveaux)}</b> d’entre eux {conditionnel ? 'seraient' : 'sont'}{' '}
+      nouveaux sur le réseau, les autres {conditionnel ? 'viendraient' : 'viennent'} d’une ligne voisine : seuls les nouveaux comptent dans
+      votre score.
+    </p>
+  )
+}
+
 export function MaLigne() {
   const { brouillon, mandat, construireLigne, ouvrir, libre, lignes } = useJeu()
   const ville = useVille()
@@ -807,16 +992,7 @@ export function MaLigne() {
         </>
       }
     >
-      <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
-        <CarteChiffre
-          icone="voyageurs"
-          valeur={`~${approx(e.voyageurs)}`}
-          legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`}
-          accent
-        />
-        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
-      </div>
+      <ChiffresLigne e={e} annee={annee} legendeCout={partDuBudget(e.cout, reste)} />
       {ancienne ? (
         <p className="text-[13.5px] leading-relaxed text-gris">
           Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
@@ -842,10 +1018,8 @@ export function MaLigne() {
       </div>
       <ListeStations noms={noms} titre="Vos stations" />
       {r ? <PhraseCorrespondances liste={r.liste} /> : null}
-      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
-        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs seraient nouveaux sur le réseau, les autres viendraient
-        d’une ligne voisine. C’est ce chiffre qui s’ajoute à votre score.
-      </p>
+      <VoyageursLigne e={e} conditionnel />
+      <Rendement voyageurs={e.nouveaux} cout={e.cout} ligne />
       <p className="text-[13.5px] leading-relaxed text-gris">
         {ville.repere}{' '}
         <button
@@ -874,7 +1048,7 @@ export function FicheLigne({ id }: { id: string }) {
   if (!l) return null
   const e = l.estimation
   const annee = ouverture(l.mandat, e.duree)
-  // Comme un projet du catalogue, une ligne décidée au premier mandat est lancée : on ne la supprime plus au second.
+  // Comme un projet du catalogue, une ligne décidée à un mandat précédent est lancée : on ne la supprime plus.
   const modifiable = l.mandat === mandat
   const moitie = Math.round(e.cout / 2)
   const supprimer = () => {
@@ -884,7 +1058,12 @@ export function FicheLigne({ id }: { id: string }) {
 
   let pied: React.ReactNode
   if (!modifiable) {
-    pied = <p className="text-sm leading-relaxed text-gris">Décidée pendant le premier mandat, cette ligne ne peut plus être supprimée.</p>
+    pied = (
+      <p className="text-sm leading-relaxed text-gris">
+        {l.mandat === 1 ? 'Décidée pendant le premier mandat' : `Décidée pendant le mandat ${l.mandat}`}, cette ligne ne peut plus être
+        supprimée.
+      </p>
+    )
   } else if (confirmer) {
     pied = (
       <div role="group" aria-labelledby="supprimer-ligne" className="flex flex-col gap-3">
@@ -932,25 +1111,14 @@ export function FicheLigne({ id }: { id: string }) {
       titre={l.nom}
       pied={pied}
     >
-      <div className="grid grid-cols-3 gap-1.5">
-        <CarteChiffre icone="pieces" valeur={n(e.cout)} unite="M€" legende={`pour ${km(e.km)} km et ${noms.length} stations`} />
-        <CarteChiffre
-          icone="voyageurs"
-          valeur={`~${approx(e.voyageurs)}`}
-          legende={`voyageurs par jour, entre ${approx(e.bas)} et ${approx(e.haut)}`}
-          accent
-        />
-        <CarteChiffre icone="horloge" valeur={String(annee)} legende={`après ${e.duree} ans de chantier`} />
-      </div>
+      <ChiffresLigne e={e} annee={annee} legendeCout="investis" />
       {l.etale && !libre ? (
         <p className="text-[13.5px] leading-relaxed text-gris">
           Payée en deux fois : {n(moitie)} M€ sur le premier mandat, {n(e.cout - moitie)} M€ sur le second.
         </p>
       ) : null}
-      <p className="rounded-2xl bg-rouge-pale px-4 py-3.5 text-sm leading-relaxed">
-        Environ <b className="chiffres">{approx(e.nouveaux)}</b> de ces voyageurs sont nouveaux sur le réseau : c’est ce chiffre qui compte
-        dans votre score.
-      </p>
+      <VoyageursLigne e={e} />
+      <Rendement voyageurs={e.nouveaux} cout={e.cout} ligne />
       <div className="flex flex-col gap-1">
         <Surtitre>Le relief sous la ligne</Surtitre>
         <Profil mode={l.mode} arrets={l.arrets} passages={l.passages} />

@@ -20,12 +20,13 @@ export interface StationLigne {
 export type ModeExistant = ModeLigne | 'rer' | 'train'
 
 export interface LigneExistante {
-  /** « metro-A », « tram-T1 », « rer-B ». */
+  /** « metro-A », « tram-T1 », « rer-B », « bus-TVM ». */
   id: string
+  /** Un bus est un bus en site propre, comme le TVM : la carte le montre, mais il ne se prolonge pas. */
   mode: ModeExistant
   /** Le nom court de la ligne : « A », « T1 », « 14 ». */
   ref: string
-  /** « Métro A », « Tram T1 ». */
+  /** « Métro A », « Tram T1 », « Bus 393 », « TVM ». */
   nom: string
   /** La couleur de la ligne sur le plan du réseau, quand OpenStreetMap la connaît. */
   couleur: string | null
@@ -33,7 +34,10 @@ export interface LigneExistante {
   branches: StationLigne[][]
   /** Ses terminus, quand le script les établit lui-même : les RER, dont OpenStreetMap coupe parfois les parcours. */
   terminus?: string[]
-  /** Le tracé de ses voies, pour les lignes que le fond de carte ne dessine pas : le RER et les trains Transilien. */
+  /**
+   * Le tracé de ses voies, pour dessiner la ligne dans sa couleur et écrire son nom le long. Les lignes en chantier
+   * n'en ont pas : OpenStreetMap ne les compte pas encore comme des lignes, et le fond de carte les dessine en gris.
+   */
   trace?: [number, number][][]
 }
 
@@ -43,7 +47,10 @@ export interface ReseauActuel {
   gares?: { nom: string; pos: [number, number] }[]
 }
 
-/** Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train. */
+/**
+ * Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train, et le calcul des voyageurs ne
+ * connaît pas les arrêts des bus en site propre, que la carte montre sans qu'ils comptent comme une desserte.
+ */
 export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: 'metro' | 'tram' } => l.mode === 'metro' || l.mode === 'tram'
 
 /** Une station du réseau actuel, et les lignes qui s'y arrêtent. */
@@ -93,6 +100,41 @@ export function terminusDe(ligne: LigneExistante): StationLigne[] {
     }
   }
   return [...bouts.values()]
+}
+
+/** Distance, en mètres, jusqu'à laquelle un tracé qui part près d'un terminus peut prolonger sa ligne. */
+export const ECART_PROLONGEMENT = 150
+
+/**
+ * Les lignes qu'un tracé peut prolonger depuis son premier point, de la plus proche à la plus lointaine : celles du même
+ * mode dont un terminus est tout près, et celles dont la station touchée est le terminus. Une station fusionnée garde la
+ * position d'une seule de ses lignes : à Porte Dauphine, le rond est celui du métro 2, à 260 m du terminus du T3b, qui
+ * porte le même nom. `possible` dit si la ligne se prolonge bien depuis ce terminus.
+ */
+export function prolongementsDepuis(
+  reseau: ReseauActuel | null,
+  mode: ModeLigne,
+  depart: [number, number],
+  station: StationExistante | null,
+  mx: number,
+  possible: (terminus: [number, number]) => boolean,
+): { ligne: LigneExistante & { mode: 'metro' | 'tram' }; terminus: StationLigne }[] {
+  return (reseau?.lignes ?? [])
+    .filter((l): l is LigneExistante & { mode: 'metro' | 'tram' } => prolongeable(l) && l.mode === mode)
+    .flatMap((ligne) => {
+      const terminus = terminusProche(ligne, depart, mx)
+      if (!terminus) return []
+      const distance = metres(mx, terminus.pos, depart)
+      const proche = distance <= ECART_PROLONGEMENT || Boolean(station?.terminus.includes(ligne.id))
+      return proche && possible(terminus.pos) ? [{ ligne, terminus, distance }] : []
+    })
+    .sort((a, b) => a.distance - b.distance)
+    .map(({ ligne, terminus }) => ({ ligne, terminus }))
+}
+
+/** Le terminus d'une ligne le plus proche d'un point : celui d'où part son prolongement. */
+export function terminusProche(ligne: LigneExistante, pos: [number, number], mx: number): StationLigne | undefined {
+  return terminusDe(ligne).sort((a, b) => metres(mx, a.pos, pos) - metres(mx, b.pos, pos))[0]
 }
 
 /**
@@ -157,9 +199,9 @@ export function stationProche(stations: StationExistante[], p: [number, number],
 
 const MOTS: Record<ModeExistant, string> = { metro: 'métro', rer: 'RER', tram: 'tram', train: 'train', cable: 'téléphérique', bus: 'bus' }
 
-/** « métro A et D », « RER B », « tram T1 » : les lignes d'une station, dites dans une phrase. */
+/** « métro A et D », « RER B », « tram T1 », « bus TVM » : les lignes d'une station, dites dans une phrase. */
 export function direLignes(lignes: { mode: ModeExistant; ref: string }[]) {
-  const parMode = (['metro', 'rer', 'tram', 'train', 'cable'] as ModeExistant[])
+  const parMode = (['metro', 'rer', 'tram', 'train', 'cable', 'bus'] as ModeExistant[])
     .map((mode) => ({ mode, refs: lignes.filter((l) => l.mode === mode).map((l) => l.ref) }))
     .filter((g) => g.refs.length)
   return enumerer(parMode.map((g) => `${MOTS[g.mode]} ${enumerer(g.refs)}`))
@@ -183,8 +225,8 @@ export function direCorrespondances(liste: ReturnType<typeof correspondances>) {
 }
 
 /**
- * Les noms des points d'un tracé : une station posée sur une station existante en prend le nom, les autres
- * prennent celui de leur quartier ; un point de passage n'a pas de nom.
+ * Les noms des points d'un tracé : celui que le joueur a choisi s'il en a donné un ; sinon une station posée sur une
+ * station existante en prend le nom, les autres prennent celui de leur quartier. Un point de passage n'a pas de nom.
  */
 export function nommerTrace(
   arrets: [number, number][],
@@ -192,6 +234,7 @@ export function nommerTrace(
   lieux: Lieux,
   stations: StationExistante[],
   mx: number,
+  choisis?: (string | null)[],
 ): (string | null)[] {
   const rangs = arrets.map((_, i) => i).filter((i) => estStation[i])
   const noms = nommerArrets(
@@ -201,7 +244,7 @@ export function nommerTrace(
   const resultat: (string | null)[] = arrets.map(() => null)
   rangs.forEach((i, k) => {
     const existante = stationProche(stations, arrets[i]!, mx, 60)
-    resultat[i] = existante?.nom || noms[k]!
+    resultat[i] = choisis?.[i] || existante?.nom || noms[k]!
   })
   return resultat
 }
