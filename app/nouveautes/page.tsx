@@ -33,6 +33,7 @@ const VERSIONS: Version[] = [
           'Des objectifs se consultent dans le menu et se jugent au bilan. Le premier consiste à tenir le budget sans augmenter le ticket ni l’abonnement.',
           'La fiche d’une ligne que vous tracez dit quelles communes elle dessert, et la compare à un chantier réel du même mode et de longueur voisine.',
           'Tous les bus que leur réseau présente comme à haut niveau de service apparaissent sur la carte : les TramBus de Lyon, les Linéo de Toulouse, les lignes B1 à B5 de Marseille, l’Aixpress et le BAM de Miramas. Ils ne changent pas le calcul des voyageurs.',
+          'À Lyon, la fiche de chaque projet raconte son histoire en quelques dates, résume ce qu’en ont dit les habitants lors de la concertation et cite des articles de presse, chaque fois avec le document d’origine.',
         ],
       },
       {

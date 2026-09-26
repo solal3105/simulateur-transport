@@ -1,0 +1,1603 @@
+{
+ "grande-dorsale": {
+  "histoire": [
+   {
+    "date": "2026-01",
+    "texte": "Le 19 janvier 2026, Véronique Sarselli et Jean-Michel Aulas, alors candidats, proposent une « grande dorsale » : un métro de Tassin-la-Demi-Lune à l'aéroport Saint-Exupéry à l'horizon 2040, en prolongeant le métro E par Part-Dieu et l'est lyonnais.",
+    "source": {
+     "titre": "Un métro est-ouest pour relier Tassin à l'aéroport de Lyon : le projet ambitieux d'Aulas et Sarselli, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/mobilites/un-metro-est-ouest-pour-relier-tassin-a-l-aeroport-de-lyon-le-projet-ambitieux-d-aulas-et-sarselli"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le programme de Véronique Sarselli pour les élections de mars 2026 inscrit parmi ses priorités un prolongement du métro E vers l'est par Part-Dieu, pour créer une ligne ouest-est.",
+    "source": {
+     "titre": "Véronique Sarselli, candidate à la présidence de la Métropole de Lyon (programme, élections métropolitaines des 15 et 22 mars 2026)",
+     "url": "https://coeurlyonnais.fr/wp-content/uploads/2026/03/le_programme_de_la_metropole_avec_veronique_sarselli.pdf"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le 26 mars 2026, Véronique Sarselli est élue présidente de la Métropole de Lyon. Elle annonce l'arrêt de TEOL et la relance du métro E.",
+    "source": {
+     "titre": "Les annonces de la présidente, Véronique Sarselli, en matière de transports dans la métropole de Lyon, France 3 Auvergne-Rhône-Alpes",
+     "url": "https://france3-regions.franceinfo.fr/auvergne-rhone-alpes/rhone/lyon/les-annonces-de-la-presidente-veronique-sarselli-en-matiere-de-transports-dans-la-metropole-de-lyon-3324122.html"
+    }
+   },
+   {
+    "date": "2026-06",
+    "texte": "Le 22 juin 2026, le conseil de la Métropole vote un plan d'actions sur les mobilités. Il prévoit des assises métropolitaines de la mobilité au dernier trimestre 2026 pour fixer les priorités, notamment pour les transports lourds.",
+    "source": {
+     "titre": "La Métropole de Lyon engage un plan d'actions sur les mobilités, Métropole de Lyon",
+     "url": "https://www.grandlyon.com/actualite/la-metropole-de-lyon-engage-un-plan-dactions-sur-les-mobilites"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Un métro est-ouest pour relier Tassin à l'aéroport de Lyon : le projet ambitieux d'Aulas et Sarselli",
+    "media": "Lyon Capitale",
+    "date": "2026-01-19",
+    "url": "https://www.lyoncapitale.fr/mobilites/un-metro-est-ouest-pour-relier-tassin-a-l-aeroport-de-lyon-le-projet-ambitieux-d-aulas-et-sarselli"
+   },
+   {
+    "titre": "TCL : Aulas et Sarselli confirment l'abandon du TEOL au profit d'un métro E pour la métropole de Lyon",
+    "media": "Lyon Capitale",
+    "date": "2026-01-19",
+    "url": "https://www.lyoncapitale.fr/actualite/tcl-aulas-et-sarselli-confirment-l-abandon-du-teol-au-profit-d-un-metro-e-pour-la-metropole-de-lyon"
+   }
+  ]
+ },
+ "metro-e-bellecour": {
+  "histoire": [
+   {
+    "date": "2019-03",
+    "texte": "Du 4 mars au 6 mai 2019, Sytral soumet à la concertation une ligne de métro d'Alaï, à Tassin-la-Demi-Lune, jusqu'au centre de Lyon, avec un terminus à Bellecour ou à Hôtel de Ville. Son coût est alors estimé entre 1 et 1,2 milliard d'euros.",
+    "source": {
+     "titre": "Bilan des garants, création d'une nouvelle ligne de métro depuis l'ouest de l'agglomération lyonnaise, concertation préalable du 4 mars au 6 mai 2019",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/metro-e/concertation-prealable-5-documents/metro-ligne-e-bilan-v2.pdf"
+    }
+   },
+   {
+    "date": "2021-09",
+    "texte": "Du 21 septembre au 15 décembre 2021, Sytral consulte le public sur quatre projets de métro, dont la ligne E, alors estimée entre 1,5 et 2 milliards d'euros.",
+    "source": {
+     "titre": "Consultation métro, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/archives-1/consultation-metro_-r.html"
+    }
+   },
+   {
+    "date": "2022-10",
+    "texte": "Le 24 octobre 2022, le conseil d'administration de Sytral arrête les études du métro E, jugé surdimensionné pour la densité du secteur, très cher et trop long à réaliser, et lui préfère un tramway express.",
+    "source": {
+     "titre": "Métro ligne E (Concertations 2019-2021), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+    }
+   },
+   {
+    "date": "2026-01",
+    "texte": "Le 19 janvier 2026, en pleine campagne, Véronique Sarselli et Jean-Michel Aulas promettent d'abandonner TEOL et de relancer le métro E d'Alaï à Bellecour, qu'ils chiffrent à 1,4 milliard d'euros.",
+    "source": {
+     "titre": "TCL : Aulas et Sarselli confirment l'abandon du TEOL au profit d'un métro E pour la métropole de Lyon, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/tcl-aulas-et-sarselli-confirment-l-abandon-du-teol-au-profit-d-un-metro-e-pour-la-metropole-de-lyon"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le 26 mars 2026, Véronique Sarselli est élue présidente de la Métropole et annonce un métro E entre Tassin, Bellecour et la Part-Dieu à l'horizon 2035.",
+    "source": {
+     "titre": "Les annonces de la présidente, Véronique Sarselli, en matière de transports dans la métropole de Lyon, France 3 Auvergne-Rhône-Alpes",
+     "url": "https://france3-regions.franceinfo.fr/auvergne-rhone-alpes/rhone/lyon/les-annonces-de-la-presidente-veronique-sarselli-en-matiere-de-transports-dans-la-metropole-de-lyon-3324122.html"
+    }
+   },
+   {
+    "date": "2026-06",
+    "texte": "Le 24 juin 2026, devenue présidente de Sytral, elle confirme la relance du métro E et prévient qu'il faudra reprendre des études et chiffrer à nouveau les coûts, le tracé et le calendrier.",
+    "source": {
+     "titre": "Sarselli présidente, Bernard tranchant : chaude ambiance lors de l'installation du Sytral, Tout Lyon",
+     "url": "https://mesinfos.fr/69000-lyon/sarselli-presidente-bernard-tranchant-chaude-ambiance-lors-de-l-installation-du-sytral-333812.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "La concertation de 2019 a recueilli 2 836 avis. Personne n'a contesté le besoin de mieux desservir l'ouest, et une majorité a approuvé le métro pour sa rapidité et sa fiabilité. Plusieurs participants ont jugé le coût trop élevé pour le nombre de voyageurs attendus et proposé un tramway ou un téléphérique. Le terminus a été le sujet le plus discuté : Bellecour pour la correspondance avec la ligne D, Hôtel de Ville pour ne pas surcharger Bellecour.",
+   "source": {
+    "titre": "Bilan des garants, création d'une nouvelle ligne de métro depuis l'ouest de l'agglomération lyonnaise, concertation préalable du 4 mars au 6 mai 2019",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/metro-e/concertation-prealable-5-documents/metro-ligne-e-bilan-v2.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Ouest de Lyon : sans surprise, le métro E est abandonné au profit du tramway express",
+    "media": "Rue89Lyon",
+    "date": "2022-10-25",
+    "url": "https://www.rue89lyon.fr/2022/10/25/tcl-lyon-ouest-tramway-express-metro-e/"
+   },
+   {
+    "titre": "TCL : Aulas et Sarselli confirment l'abandon du TEOL au profit d'un métro E pour la métropole de Lyon",
+    "media": "Lyon Capitale",
+    "date": "2026-01-19",
+    "url": "https://www.lyoncapitale.fr/actualite/tcl-aulas-et-sarselli-confirment-l-abandon-du-teol-au-profit-d-un-metro-e-pour-la-metropole-de-lyon"
+   },
+   {
+    "titre": "« Le métro E version Gérard Collomb ne tient certainement plus »",
+    "media": "L'Arrière-Cour",
+    "date": "2026-05-01",
+    "url": "https://www.larrierecour.fr/2026/05/01/le-metro-e-version-gerard-collomb-ne-tient-certainement-plus"
+   }
+  ]
+ },
+ "ext-a-est": {
+  "histoire": [
+   {
+    "date": "2021-05",
+    "texte": "En mai 2021, Sytral annonce une consultation sur quatre projets de métro, dont le prolongement de la ligne A de Vaulx-en-Velin La Soie à Meyzieu.",
+    "source": {
+     "titre": "Une grande consultation « métro » à la rentrée, Mobiles, le magazine de Sytral",
+     "url": "https://magazine.sytral.fr/grande-consultation-metro-a-rentree/"
+    }
+   },
+   {
+    "date": "2021-09",
+    "texte": "Du 21 septembre au 15 décembre 2021, la consultation présente ce prolongement par Décines jusqu'à Meyzieu, estimé entre 1,6 et 1,7 milliard d'euros pour 48 000 à 49 000 voyages par jour.",
+    "source": {
+     "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+    }
+   },
+   {
+    "date": "2021-10",
+    "texte": "En octobre 2021, les villes de Décines et de Meyzieu lancent une pétition pour obtenir le prolongement.",
+    "source": {
+     "titre": "Décines et Meyzieu lancent une pétition pour prolonger le métro A à l'est de Lyon, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/decines-et-meyzieu-lancent-une-petition-pour-prolonger-le-metro-a-a-l-est-de-lyon"
+    }
+   },
+   {
+    "date": "2021-12",
+    "texte": "Le 16 décembre 2021, le président de Sytral, Bruno Bernard, annonce qu'il n'y aura pas de prolongement de la ligne A, car le secteur a déjà des solutions, même si elles restent à améliorer.",
+    "source": {
+     "titre": "Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole présente à la place un renforcement du tram T3 entre La Soie et Meyzieu, pour 150 à 200 millions d'euros.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité des territoires lyonnais, adopté le 2 octobre 2025, ne prévoit aucun prolongement de métro ; il retient le renforcement du T3.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la consultation de 2021, les participants ont reconnu des atouts au prolongement : desservir Décines, Meyzieu et le quartier du stade, retenir les voitures venant de l'Ain et de l'Isère, pour un coût plus faible que les autres projets de métro. Ils l'ont pourtant jugé moins prioritaire, parce que les trams T3 et T7 desservent déjà le secteur, à condition d'augmenter la capacité du T3. Le panel de citoyens a proposé en complément un bus à haut niveau de service.",
+   "source": {
+    "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Décines et Meyzieu lancent une pétition pour prolonger le métro A à l'est de Lyon",
+    "media": "Lyon Capitale",
+    "date": "2021-10-19",
+    "url": "https://www.lyoncapitale.fr/actualite/decines-et-meyzieu-lancent-une-petition-pour-prolonger-le-metro-a-a-l-est-de-lyon"
+   },
+   {
+    "titre": "Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E",
+    "media": "Lyon Capitale",
+    "date": "2021-12-16",
+    "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+   },
+   {
+    "titre": "La prolongation du métro A vers Décines-Meyzieu abandonnée : comment le Sytral envisage de renforcer le T3 ?",
+    "media": "Lyon Capitale",
+    "date": "2022-03-18",
+    "url": "https://www.lyoncapitale.fr/actualite/la-prolongation-du-metro-a-vers-decines-meyzieu-abandonnee-comment-le-sytral-envisage-de-renforcer-le-t3"
+   }
+  ]
+ },
+ "ext-d": {
+  "histoire": [
+   {
+    "date": "2021-05",
+    "texte": "En mai 2021, Sytral annonce une consultation sur quatre projets de métro, dont le prolongement de la ligne D de la gare de Vaise à la Duchère.",
+    "source": {
+     "titre": "Une grande consultation « métro » à la rentrée, Mobiles, le magazine de Sytral",
+     "url": "https://magazine.sytral.fr/grande-consultation-metro-a-rentree/"
+    }
+   },
+   {
+    "date": "2021-09",
+    "texte": "Du 21 septembre au 15 décembre 2021, la consultation présente ce prolongement, estimé entre 1 et 1,2 milliard d'euros pour 33 000 à 47 000 voyages par jour.",
+    "source": {
+     "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+    }
+   },
+   {
+    "date": "2021-12",
+    "texte": "Le 16 décembre 2021, le président de Sytral, Bruno Bernard, écarte le prolongement de la ligne D, comme celui de la ligne A.",
+    "source": {
+     "titre": "Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole propose à la place une ligne de bus à haut niveau de service ou de tram de la Part-Dieu à Écully par Vaise et la Duchère.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 ne prévoit pas ce prolongement. Il retient une ligne de Part-Dieu vers Écully avant 2040, dont le mode reste à choisir.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la consultation de 2021, ce projet a été jugé le moins prioritaire des quatre. Les participants ont estimé que la Duchère est déjà bien desservie par les bus, qui descendent vite à la gare de Vaise par le tunnel de Balmont, et que le coût est élevé pour une si courte distance. Une ligne de la Part-Dieu au campus d'Écully par Vaise et la Duchère leur a paru une alternative évidente, plus rapide à construire et bien moins chère.",
+   "source": {
+    "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Métropole de Lyon : de nouvelles études pour les métros B et E, les prolongements des lignes A et D aux oubliettes",
+    "media": "LyonMag",
+    "date": "2021-12-17",
+    "url": "https://www.lyonmag.com/article/119863/metropole-de-lyon-de-nouvelles-etudes-pour-les-metros-b-et-e-les-prolongements-des-lignes-a-et-d-aux-oubliettes"
+   },
+   {
+    "titre": "Lyon : un tram dans le tunnel de la Croix-Rousse à l'horizon 2029 ?",
+    "media": "Lyon Capitale",
+    "date": "2022-03-18",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-un-tram-dans-le-tunnel-de-la-croix-rousse-a-l-horizon-2029"
+   }
+  ]
+ },
+ "metro-e-part-dieu": {
+  "histoire": [
+   {
+    "date": "2019-05",
+    "texte": "Pendant la concertation du printemps 2019 sur le métro E, près de 500 contributions demandent d'aller jusqu'à la gare Part-Dieu, et un collectif se crée pour défendre ce prolongement.",
+    "source": {
+     "titre": "Bilan des garants, création d'une nouvelle ligne de métro depuis l'ouest de l'agglomération lyonnaise, concertation préalable du 4 mars au 6 mai 2019",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/metro-e/concertation-prealable-5-documents/metro-ligne-e-bilan-v2.pdf"
+    }
+   },
+   {
+    "date": "2019",
+    "texte": "À l'issue de la concertation, Sytral commande une étude sur la faisabilité d'un prolongement de la ligne E jusqu'à la gare Part-Dieu.",
+    "source": {
+     "titre": "Métro ligne E (Concertations 2019-2021), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+    }
+   },
+   {
+    "date": "2021-09",
+    "texte": "La consultation métro de l'automne 2021 présente une variante jusqu'à Part-Dieu : la ligne passerait de 64 000 à 102 000 voyages par jour.",
+    "source": {
+     "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, devant les élus de la Métropole, le vice-président chargé des transports juge très difficile d'aller jusqu'à Part-Dieu, à cause des ouvrages souterrains existants et de la nappe phréatique.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2022-10",
+    "texte": "Le 24 octobre 2022, Sytral met fin aux études du métro E.",
+    "source": {
+     "titre": "Métro ligne E (Concertations 2019-2021), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le programme de Véronique Sarselli, élue présidente de la Métropole le 26 mars 2026, prévoit de planifier un prolongement du métro E vers l'est en passant par Part-Dieu.",
+    "source": {
+     "titre": "Véronique Sarselli, candidate à la présidence de la Métropole de Lyon (programme, élections métropolitaines des 15 et 22 mars 2026)",
+     "url": "https://coeurlyonnais.fr/wp-content/uploads/2026/03/le_programme_de_la_metropole_avec_veronique_sarselli.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la concertation de 2019, près de 500 contributions ont demandé d'aller sans attendre jusqu'à la gare Part-Dieu, pour rapprocher l'ouest des quartiers d'emploi et des autres lignes lourdes, et pour que la ligne serve toute l'agglomération. Pour ces participants, le choix du terminus en centre-ville devait dépendre de la facilité à prolonger vers l'est, et ils demandaient d'étudier ce tracé tout de suite pour éviter un surcoût plus tard.",
+   "source": {
+    "titre": "Bilan des garants, création d'une nouvelle ligne de métro depuis l'ouest de l'agglomération lyonnaise, concertation préalable du 4 mars au 6 mai 2019",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/metro-e/concertation-prealable-5-documents/metro-ligne-e-bilan-v2.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés",
+    "media": "LyonMag",
+    "date": "2022-03-03",
+    "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+   },
+   {
+    "titre": "Un métro est-ouest pour relier Tassin à l'aéroport de Lyon : le projet ambitieux d'Aulas et Sarselli",
+    "media": "Lyon Capitale",
+    "date": "2026-01-19",
+    "url": "https://www.lyoncapitale.fr/mobilites/un-metro-est-ouest-pour-relier-tassin-a-l-aeroport-de-lyon-le-projet-ambitieux-d-aulas-et-sarselli"
+   },
+   {
+    "titre": "Les annonces de la présidente, Véronique Sarselli, en matière de transports dans la métropole de Lyon",
+    "media": "France 3 Auvergne-Rhône-Alpes",
+    "date": "2026-03-26",
+    "url": "https://france3-regions.franceinfo.fr/auvergne-rhone-alpes/rhone/lyon/les-annonces-de-la-presidente-veronique-sarselli-en-matiere-de-transports-dans-la-metropole-de-lyon-3324122.html"
+   }
+  ]
+ },
+ "ligne-du-nord": {
+  "histoire": [
+   {
+    "date": "2021-09",
+    "texte": "Du 21 septembre au 15 décembre 2021, la consultation métro présente un prolongement de la ligne B de Charpennes à Rillieux-la-Pape, estimé entre 2,2 et 2,7 milliards d'euros pour 62 000 à 81 000 voyages par jour.",
+    "source": {
+     "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+    }
+   },
+   {
+    "date": "2021-12",
+    "texte": "Le 16 décembre 2021, le président de Sytral juge les besoins indiscutables sur le corridor du métro B, comme sur celui du métro E, et demande des études complémentaires.",
+    "source": {
+     "titre": "Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole présente des solutions moins chères qu'un métro : un bus à haut niveau de service, un tram en surface d'environ 400 millions d'euros ou un tram en grande partie souterrain d'environ 1 milliard.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 prévoit avant 2040 une ligne de bus ou de tram express vers le Plateau Nord et Rillieux, peut-être en partie enterrée : 400 millions d'euros en surface, 1 milliard en souterrain.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2026-02",
+    "texte": "Le 19 février 2026, Bruno Bernard, candidat à sa réélection, propose un tram de 8 km entre Rillieux et la Part-Dieu : 300 à 350 millions d'euros en surface pour 2034, ou 700 à 850 millions en partie en tunnel pour 2040. Les maires de Rillieux, Caluire et Sathonay-Camp réclament un métro.",
+    "source": {
+     "titre": "Un tramway entre Rillieux et la Part-Dieu : Bruno Bernard propose deux scénarios à plusieurs centaines de millions d’euros, LyonMag",
+     "url": "https://www.lyonmag.com/article/150289/un-tramway-entre-rillieux-et-la-part-dieu-bruno-bernard-propose-deux-scenarios-a-plusieurs-centaines-de-millions-d-euros"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la consultation de 2021, le prolongement de la ligne B est ressorti parmi les deux projets prioritaires : mieux relier le Plateau Nord et ses zones d'emploi au centre, désenclaver Rillieux et accompagner la rénovation des quartiers. Les participants ont aussi relevé sa difficulté technique et son coût, le plus élevé des quatre projets. Lors de l'atelier sur les alternatives, un tram en surface ou en partie enterré n'a pas été écarté, et le panel de citoyens a proposé un bus à haut niveau de service si le métro ne se faisait pas.",
+   "source": {
+    "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Lyon : projet de prolongation du métro B sur la Plateau-nord : un atelier de consultation lundi soir à Rillieux",
+    "media": "Lyon Capitale",
+    "date": "2021-10-11",
+    "url": "https://www.lyoncapitale.fr/mobilites/lyon-projet-de-prolongation-du-metro-b-sur-la-plateau-nord-un-atelier-de-consultation-lundi-soir-a-rillieux"
+   },
+   {
+    "titre": "Plateau Nord : un tram et une succesion difficile",
+    "media": "Lyon Capitale",
+    "date": "2025-11-02",
+    "url": "https://www.lyoncapitale.fr/elections-2026/elections-municipales-2026/plateau-nord-un-tram-et-une-succesion-difficile"
+   },
+   {
+    "titre": "Un tramway entre Rillieux et la Part-Dieu : Bruno Bernard propose deux scénarios à plusieurs centaines de millions d’euros",
+    "media": "LyonMag",
+    "date": "2026-02-19",
+    "url": "https://www.lyonmag.com/article/150289/un-tramway-entre-rillieux-et-la-part-dieu-bruno-bernard-propose-deux-scenarios-a-plusieurs-centaines-de-millions-d-euros"
+   }
+  ]
+ },
+ "teol": {
+  "histoire": [
+   {
+    "date": "2022-10",
+    "texte": "Le 24 octobre 2022, le conseil d'administration de Sytral arrête les études du métro E et décide d'étudier à la place un tramway express vers l'ouest.",
+    "source": {
+     "titre": "Métro ligne E (Concertations 2019-2021), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+    }
+   },
+   {
+    "date": "2023-11",
+    "texte": "Du 6 novembre 2023 au 5 février 2024, une concertation préalable suivie par trois garants de la Commission nationale du débat public réunit environ 2 200 personnes.",
+    "source": {
+     "titre": "Bilan de la concertation préalable, projet TEOL : Tram Express de l'Ouest Lyonnais (garants de la CNDP, 5 mars 2024)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2024-03/TEOL-Bilan-concertation-5mars24.pdf"
+    }
+   },
+   {
+    "date": "2024-05",
+    "texte": "Le 16 mai 2024, Sytral fixe le tracé : cinq nouvelles stations entre Alaï et Confluence, dont deux sous terre, puis la ligne du tram T2, que TEOL prolonge.",
+    "source": {
+     "titre": "Tramway express de l'ouest lyonnais (TEOL), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-express-de-l-ouest-lyonnais-teol_-r.html"
+    }
+   },
+   {
+    "date": "2025-09",
+    "texte": "Du 8 septembre au 8 octobre 2025, le projet passe en enquête publique. Le commissaire enquêteur rend ensuite un avis favorable.",
+    "source": {
+     "titre": "Tramway express de l'ouest lyonnais (TEOL), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-express-de-l-ouest-lyonnais-teol_-r.html"
+    }
+   },
+   {
+    "date": "2025-12",
+    "texte": "Le 18 décembre 2025, le conseil d'administration de Sytral confirme l'intérêt général du projet. La préfète du Rhône a alors un an pour se prononcer sur son utilité publique. Sytral annonce des travaux en 2028 et une mise en service vers 2032.",
+    "source": {
+     "titre": "Tramway express de l'ouest lyonnais (TEOL), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-express-de-l-ouest-lyonnais-teol_-r.html"
+    }
+   },
+   {
+    "date": "2026-06",
+    "texte": "Le 24 juin 2026, au premier conseil d'administration du nouveau mandat, la présidente de Sytral, Véronique Sarselli, confirme l'arrêt de TEOL au profit du métro E.",
+    "source": {
+     "titre": "Sarselli présidente, Bernard tranchant : chaude ambiance lors de l'installation du Sytral, Tout Lyon",
+     "url": "https://mesinfos.fr/69000-lyon/sarselli-presidente-bernard-tranchant-chaude-ambiance-lors-de-l-installation-du-sytral-333812.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Beaucoup de participants attendaient une meilleure desserte de l'ouest, et beaucoup ont regretté l'abandon du métro E, surtout à Tassin-la-Demi-Lune, où le passage du tram en surface inquiétait pour la circulation, le stationnement et les expropriations. D'autres jugeaient les bus actuels suffisants ou trouvaient la mise en service trop lointaine. Les échanges ont aussi porté sur le choix du tracé à Tassin et à Confluence, les arbres, le bruit, les parcs relais et la réorganisation des bus.",
+   "source": {
+    "titre": "Bilan de la concertation préalable, projet TEOL : Tram Express de l'Ouest Lyonnais (garants de la CNDP, 5 mars 2024)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2024-03/TEOL-Bilan-concertation-5mars24.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Ouest de Lyon : sans surprise, le métro E est abandonné au profit du tramway express",
+    "media": "Rue89Lyon",
+    "date": "2022-10-25",
+    "url": "https://www.rue89lyon.fr/2022/10/25/tcl-lyon-ouest-tramway-express-metro-e/"
+   },
+   {
+    "titre": "TEOL : feu vert du commissaire enquêteur pour le tramway express de l'Ouest lyonnais",
+    "media": "LyonMag",
+    "date": "2025-12-04",
+    "url": "https://www.lyonmag.com/article/148722/teol-feu-vert-du-commissaire-enqueteur-pour-le-tramway-express-de-l-ouest-lyonnais"
+   },
+   {
+    "titre": "Sarselli présidente, Bernard tranchant : chaude ambiance lors de l'installation du Sytral",
+    "media": "Tout Lyon",
+    "date": "2026-06-24",
+    "url": "https://mesinfos.fr/69000-lyon/sarselli-presidente-bernard-tranchant-chaude-ambiance-lors-de-l-installation-du-sytral-333812.html"
+   }
+  ]
+ },
+ "modern-a": {
+  "histoire": [
+   {
+    "date": "2023-06",
+    "texte": "Le 28 juin 2023, Sytral présente un plan de 1,7 milliard d'euros pour moderniser le métro d'ici 2035. Pour la ligne A, 686 millions d'euros : pilotage automatique, portes palières sur les quais et 20 nouvelles rames automatiques plus grandes.",
+    "source": {
+     "titre": "Lyon : près de deux milliards d'euros investis dans le métro d'ici 2035, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-pres-de-deux-milliards-d-euros-investis-dans-le-metro-d-ici-2035"
+    }
+   },
+   {
+    "date": "2025-02",
+    "texte": "Le 13 février 2025, le président de Sytral reconnaît que la ligne A a peut-être pris plus de retard que la ligne D dans ce programme.",
+    "source": {
+     "titre": "À Lyon, l'exécutif écologiste défend son \"vrai plan métro\" en modernisant les lignes, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/a-lyon-la-modernisation-du-metro-d-va-pouvoir-debuter"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 prévoit d'ici 2026 la fin de la rénovation des rames, des caméras à bord, le réaménagement de quatre stations et trois rames de plus, puis d'ici 2035 une ligne entièrement automatique avec 20 rames de quatre voitures au lieu de trois.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le programme de Véronique Sarselli, élue présidente de la Métropole le 26 mars 2026, reprend la modernisation des lignes A, B, C et D, chiffrée à 1,5 milliard d'euros.",
+    "source": {
+     "titre": "Véronique Sarselli, candidate à la présidence de la Métropole de Lyon (programme, élections métropolitaines des 15 et 22 mars 2026)",
+     "url": "https://coeurlyonnais.fr/wp-content/uploads/2026/03/le_programme_de_la_metropole_avec_veronique_sarselli.pdf"
+    }
+   },
+   {
+    "date": "2026-08",
+    "texte": "En août 2026, la station Gratte-Ciel rouvre rénovée, après Foch et République-Villeurbanne en 2025 ; le chantier de Flachet dure jusqu'en 2027.",
+    "source": {
+     "titre": "La station Gratte-Ciel dévoile son nouveau visage, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/actualites/la-station-gratte-ciel-devoile-son-nouveau-visage_-n.html"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Lyon : près de deux milliards d'euros investis dans le métro d'ici 2035",
+    "media": "Lyon Capitale",
+    "date": "2023-06-28",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-pres-de-deux-milliards-d-euros-investis-dans-le-metro-d-ici-2035"
+   },
+   {
+    "titre": "Lyon : fin des interruptions du métro B espérée d’ici 2025, la ligne A bientôt automatisée",
+    "media": "LyonMag",
+    "date": "2023-06-28",
+    "url": "https://www.lyonmag.com/article/130822/lyon-fin-des-interruptions-du-metro-b-esperee-d-ici-2025-la-ligne-a-bientot-automatisee"
+   },
+   {
+    "titre": "Pourquoi des portes palières seront installées sur le métro A d’ici 2035 ?",
+    "media": "Lyon Capitale",
+    "date": "2023-07-12",
+    "url": "https://www.lyoncapitale.fr/actualite/pourquoi-des-portes-palieres-seront-installees-sur-le-metro-a-dici-2035"
+   }
+  ]
+ },
+ "modern-d": {
+  "histoire": [
+   {
+    "date": "2023-06",
+    "texte": "Le 28 juin 2023, le plan de modernisation du métro prévoit pour la ligne D 339 millions d'euros : de nouveaux systèmes de pilotage et 18 rames neuves.",
+    "source": {
+     "titre": "Lyon : près de deux milliards d'euros investis dans le métro d'ici 2035, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-pres-de-deux-milliards-d-euros-investis-dans-le-metro-d-ici-2035"
+    }
+   },
+   {
+    "date": "2025-02",
+    "texte": "Le 13 février 2025, Sytral approuve le marché de maîtrise d'œuvre et annonce des rames climatisées et plus grandes pour 2030.",
+    "source": {
+     "titre": "À Lyon, l'exécutif écologiste défend son \"vrai plan métro\" en modernisant les lignes, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/a-lyon-la-modernisation-du-metro-d-va-pouvoir-debuter"
+    }
+   },
+   {
+    "date": "2025-07",
+    "texte": "En juillet 2025, le conseil d'administration de Sytral autorise les marchés pour 26 nouvelles rames automatiques et le renouvellement du pilotage automatique.",
+    "source": {
+     "titre": "Lyon : feu vert pour la modernisation de la ligne D du métro, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-feu-vert-pour-la-modernisation-de-la-ligne-d-du-metro"
+    }
+   },
+   {
+    "date": "2025-07",
+    "texte": "Le 30 juillet 2025, Sytral signe avec Alstom un contrat de 303 millions d'euros : 145 millions pour les rames, 158 millions pour le pilotage automatique.",
+    "source": {
+     "titre": "Modernisation de la ligne D du métro de Lyon : un contrat stratégique pour Alstom et SYTRAL Mobilités, Lyon Entreprises",
+     "url": "https://www.lyon-entreprises.com/actualites/article/modernisation-de-la-ligne-d-du-metro-de-lyon-un-contrat-strategique-pour-alstom-et-sytral-mobilites"
+    }
+   },
+   {
+    "date": "2025-12",
+    "texte": "Le 18 décembre 2025, le conseil d'administration porte l'enveloppe du programme de 339 à 522 millions d'euros, avec des dépenses étalées jusqu'en 2035.",
+    "source": {
+     "titre": "Sytral Mobilités, délibération 25-079 du 18 décembre 2025, autorisations de programme 2026",
+     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "À Lyon, l'exécutif écologiste défend son \"vrai plan métro\" en modernisant les lignes",
+    "media": "Lyon Capitale",
+    "date": "2025-02-13",
+    "url": "https://www.lyoncapitale.fr/actualite/a-lyon-la-modernisation-du-metro-d-va-pouvoir-debuter"
+   },
+   {
+    "titre": "Lyon : feu vert pour la modernisation de la ligne D du métro",
+    "media": "Lyon Capitale",
+    "date": "2025-07-11",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-feu-vert-pour-la-modernisation-de-la-ligne-d-du-metro"
+   },
+   {
+    "titre": "Modernisation de la ligne D du métro de Lyon : un contrat stratégique pour Alstom et SYTRAL Mobilités",
+    "media": "Lyon Entreprises",
+    "date": "2025-07-30",
+    "url": "https://www.lyon-entreprises.com/actualites/article/modernisation-de-la-ligne-d-du-metro-de-lyon-un-contrat-strategique-pour-alstom-et-sytral-mobilites"
+   }
+  ]
+ },
+ "modern-c": {
+  "histoire": [
+   {
+    "date": "2023-06",
+    "texte": "Le 28 juin 2023, le plan de modernisation du métro prévoit pour la ligne C, seule ligne de métro à crémaillère, 7 à 9 rames neuves et une double voie entre Hénon et Cuire, pour 239 millions d'euros. Ses cinq rames actuelles seront obsolètes d'ici 2035.",
+    "source": {
+     "titre": "Lyon : près de deux milliards d'euros investis dans le métro d'ici 2035, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-pres-de-deux-milliards-d-euros-investis-dans-le-metro-d-ici-2035"
+    }
+   },
+   {
+    "date": "2023-07",
+    "texte": "En juillet 2023, Sytral indique que les rames de la ligne C ont reçu des caméras de surveillance dans l'année.",
+    "source": {
+     "titre": "Un plan ambitieux pour l'avenir du métro, Mobiles, le magazine de Sytral",
+     "url": "https://magazine.sytral.fr/un-plan-ambitieux-pour-lavenir-du-metro/"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 confirme pour l'horizon 2035 l'achat de 7 à 9 rames et la double voie entre Hénon et Cuire, seul tronçon de la ligne à voie unique.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Le programme de Véronique Sarselli, élue présidente de la Métropole le 26 mars 2026, reprend la modernisation des lignes A, B, C et D, chiffrée à 1,5 milliard d'euros.",
+    "source": {
+     "titre": "Véronique Sarselli, candidate à la présidence de la Métropole de Lyon (programme, élections métropolitaines des 15 et 22 mars 2026)",
+     "url": "https://coeurlyonnais.fr/wp-content/uploads/2026/03/le_programme_de_la_metropole_avec_veronique_sarselli.pdf"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Lyon : près de deux milliards d'euros investis dans le métro d'ici 2035",
+    "media": "Lyon Capitale",
+    "date": "2023-06-28",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-pres-de-deux-milliards-d-euros-investis-dans-le-metro-d-ici-2035"
+   },
+   {
+    "titre": "À Lyon, l'exécutif écologiste défend son \"vrai plan métro\" en modernisant les lignes",
+    "media": "Lyon Capitale",
+    "date": "2025-02-13",
+    "url": "https://www.lyoncapitale.fr/actualite/a-lyon-la-modernisation-du-metro-d-va-pouvoir-debuter"
+   }
+  ]
+ },
+ "t12-c3": {
+  "histoire": [
+   {
+    "date": "2013-03",
+    "texte": "En mars 2013, la Ville de Lyon annonce une concertation sur des voies réservées au C3, la ligne de bus la plus fréquentée du réseau ; plusieurs groupes d'élus demandent d'étudier plutôt un tramway.",
+    "source": {
+     "titre": "Transports en commun : un tramway à la place de la ligne C3 ?, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/transports-en-commun-un-tramway-a-la-place-de-la-ligne-c3"
+    }
+   },
+   {
+    "date": "2015-06",
+    "texte": "En juin 2015, pendant l'enquête publique, un collectif d'usagers réclame un tramway à la place du trolleybus.",
+    "source": {
+     "titre": "Ligne C3 : \"Le tramway a beaucoup plus d'atouts que le bus\", Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/ligne-c3-le-tramway-a-beaucoup-plus-d-atouts-que-le-bus"
+    }
+   },
+   {
+    "date": "2015-09",
+    "texte": "En septembre 2015, le commissaire enquêteur approuve les voies réservées sur 5,5 km entre le pont Lafayette et Laurent-Bonnevay, et recommande d'étudier sans tarder un tramway pour remplacer le C3.",
+    "source": {
+     "titre": "Aménagement du C3 : un avis favorable pour une solution bientôt obsolète ?, LyonMag",
+     "url": "https://www.lyonmag.com/article/75168/amenagement-du-c3-un-avis-favorable-pour-une-solution-bientot-obsolete"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole chiffre un tram sur tout le trajet du C3 entre 350 et 450 millions d'euros, ou entre 200 et 250 millions pour un tram court entre Cordeliers et Laurent-Bonnevay.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2025-09",
+    "texte": "À partir de septembre 2025, la ligne C3 devient le TB11, un Trambus : un bus électrique articulé qui roule sur une voie réservée sur tout son parcours.",
+    "source": {
+     "titre": "Une nouvelle offre bus pour un réseau toujours plus performant et maillé en Presqu'île comme sur le reste du territoire, dossier de presse Sytral Mobilités, juin 2025",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/projet-en-cours/reseau-bus-performant/dp-piav-nouvelle-offre-bus.pdf"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 ne cite pas de tram sur l'axe du C3 parmi ses projets chiffrés.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Transports en commun : un tramway à la place de la ligne C3 ?",
+    "media": "Lyon Capitale",
+    "date": "2013-03-12",
+    "url": "https://www.lyoncapitale.fr/actualite/transports-en-commun-un-tramway-a-la-place-de-la-ligne-c3"
+   },
+   {
+    "titre": "Ligne C3 : \"Le tramway a beaucoup plus d'atouts que le bus\"",
+    "media": "Lyon Capitale",
+    "date": "2015-06-03",
+    "url": "https://www.lyoncapitale.fr/actualite/ligne-c3-le-tramway-a-beaucoup-plus-d-atouts-que-le-bus"
+   },
+   {
+    "titre": "Aménagement du C3 : un avis favorable pour une solution bientôt obsolète ?",
+    "media": "LyonMag",
+    "date": "2015-09-02",
+    "url": "https://www.lyonmag.com/article/75168/amenagement-du-c3-un-avis-favorable-pour-une-solution-bientot-obsolete"
+   }
+  ]
+ },
+ "ligne-ouest": {
+  "histoire": [
+   {
+    "date": "2019-12",
+    "texte": "En décembre 2019, Sytral lance les études d'une ligne de bus reliant la Duchère, le Pérollier et le campus d'Écully.",
+    "source": {
+     "titre": "Métropole de Lyon : les projets révolutionnaires du Sytral, Radio Scoop",
+     "url": "https://www.radioscoop.com/infos/metropole-de-lyon-les-projets-revolutionnaires-du-sytral_178000"
+    }
+   },
+   {
+    "date": "2020-12",
+    "texte": "Le 17 décembre 2020, le plan de mandat de Sytral prévoit une nouvelle ligne « Centre Ouest » en bus à haut niveau de service ou en tram.",
+    "source": {
+     "titre": "Porter-à-connaissance, plan de mandat 2021-2026 du Sytral, lignes T6 Nord, T9 et T10 (préfecture du Rhône, juin 2021)",
+     "url": "https://www.rhone.gouv.fr/contenu/telechargement/57738/394705/file/Porter%20%C3%A0%20connaissance%20plan%20de%20mandat%202021_2026%20du%20Syndicat%20mixte%20des%20transports%20pour%20le%20Rh%C3%B4ne%20et%20l'agglom%C3%A9ration%20lyonnaise_partie%201%2006-2021.pdf"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole compare deux versions d'une ligne de la Part-Dieu à Écully par Vaise et la Duchère : un bus à haut niveau de service en 40 minutes pour 150 à 200 millions d'euros, ou un tram en 35 minutes pour environ 400 millions.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Sytral envisage de faire passer cette ligne au milieu du tunnel de la Croix-Rousse, avec une mise en service espérée en 2028 en bus ou en 2029 en tram.",
+    "source": {
+     "titre": "Lyon : un tram dans le tunnel de la Croix-Rousse à l'horizon 2029 ?, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-un-tram-dans-le-tunnel-de-la-croix-rousse-a-l-horizon-2029"
+    }
+   },
+   {
+    "date": "2024-12",
+    "texte": "En décembre 2024, la presse rapporte que Sytral va étudier un tram depuis Vaise vers la Duchère et Écully, possible en 2030.",
+    "source": {
+     "titre": "Encore un nouveau tramway ? Un projet Ecully-Lyon à l'étude, LyonMag",
+     "url": "https://www.lyonmag.com/article/139824/encore-un-nouveau-tramway-un-projet-ecully-lyon-a-l-etude"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 prévoit avant 2040 une ligne de la Part-Dieu vers Écully, dont le mode reste à choisir, estimée à 400 millions d'euros.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la consultation métro de 2021, une ligne de la Part-Dieu au campus d'Écully par Vaise et la Duchère est apparue aux participants comme une alternative évidente au prolongement du métro D : plus rapide à construire et bien moins chère, pour un temps de trajet acceptable. Les participants à l'atelier sur les alternatives ont préféré un bus à haut niveau de service, le panel de citoyens un tram, pour ce qu'il apporte aux espaces publics.",
+   "source": {
+    "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Lyon : un tram dans le tunnel de la Croix-Rousse à l'horizon 2029 ?",
+    "media": "Lyon Capitale",
+    "date": "2022-03-18",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-un-tram-dans-le-tunnel-de-la-croix-rousse-a-l-horizon-2029"
+   },
+   {
+    "titre": "TCL à l'Ouest de Lyon : la Métropole enterre le téléphérique et déterre (en partie) le tracé de la ligne E",
+    "media": "Rue89Lyon",
+    "date": "2022-05-16",
+    "url": "https://www.rue89lyon.fr/2022/05/16/tcl-ouest-lyon-metropole-enterre-telepherique-et-deterre-en-partie-trace-ligne-e/"
+   },
+   {
+    "titre": "Encore un nouveau tramway ? Un projet Ecully-Lyon à l'étude",
+    "media": "LyonMag",
+    "date": "2024-12-04",
+    "url": "https://www.lyonmag.com/article/139824/encore-un-nouveau-tramway-un-projet-ecully-lyon-a-l-etude"
+   }
+  ]
+ },
+ "teol-craponne": {
+  "histoire": [
+   {
+    "date": "2022-05",
+    "texte": "Le 16 mai 2022, en présentant le tram express de l'ouest, la Métropole indique que la ligne pourrait un jour être prolongée vers Craponne.",
+    "source": {
+     "titre": "TCL à l'Ouest de Lyon : la Métropole enterre le téléphérique et déterre (en partie) le tracé de la ligne E, Rue89Lyon",
+     "url": "https://www.rue89lyon.fr/2022/05/16/tcl-ouest-lyon-metropole-enterre-telepherique-et-deterre-en-partie-trace-ligne-e/"
+    }
+   },
+   {
+    "date": "2023-11",
+    "texte": "En novembre 2023, au lancement de la concertation, le président de Sytral se dit favorable à un prolongement futur jusqu'à Craponne, commune associée aux discussions.",
+    "source": {
+     "titre": "Pour l’Ouest lyonnais ce sera le tram express ou rien, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/pour-louest-lyonnais-ce-sera-le-tram-express-ou-rien"
+    }
+   },
+   {
+    "date": "2024-03",
+    "texte": "Le bilan de la concertation, publié en mars 2024, rapporte des demandes de prolongement du tram au-delà d'Alaï jusqu'à Craponne.",
+    "source": {
+     "titre": "Bilan de la concertation préalable, projet TEOL : Tram Express de l'Ouest Lyonnais (garants de la CNDP, 5 mars 2024)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2024-03/TEOL-Bilan-concertation-5mars24.pdf"
+    }
+   },
+   {
+    "date": "2024-05",
+    "texte": "En mai 2024, le tracé retenu à Tassin est présenté comme compatible avec un prolongement vers Craponne.",
+    "source": {
+     "titre": "Le tracé du futur tram express de l'ouest lyonnais enfin connu, Métropole de Lyon",
+     "url": "https://www.grandlyon.com/actualite/le-trace-du-futur-tram-express-de-louest-lyonnais-enfin-connu"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 inscrit un prolongement possible de TEOL jusqu'à Craponne avant 2040, estimé à 150 millions d'euros.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2026-06",
+    "texte": "Le 24 juin 2026, la nouvelle présidente de Sytral confirme l'arrêt de TEOL, ce qui retire toute base à ce prolongement.",
+    "source": {
+     "titre": "Sarselli présidente, Bernard tranchant : chaude ambiance lors de l'installation du Sytral, Tout Lyon",
+     "url": "https://mesinfos.fr/69000-lyon/sarselli-presidente-bernard-tranchant-chaude-ambiance-lors-de-l-installation-du-sytral-333812.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Pendant la concertation sur TEOL, des participants ont demandé si le tram pourrait aller au-delà d'Alaï jusqu'à Craponne, certains voulant d'abord un viaduc sur l'Yzeron. Pour d'autres, un futur prolongement vers Craponne plaidait pour les tracés les plus rapides à Tassin. Des habitants ont aussi insisté sur l'importance d'attirer ceux de Craponne, Grézieu et Vaugneray, avec des bus fréquents vers Alaï et un grand parc relais.",
+   "source": {
+    "titre": "Bilan de la concertation préalable, projet TEOL : Tram Express de l'Ouest Lyonnais (garants de la CNDP, 5 mars 2024)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2024-03/TEOL-Bilan-concertation-5mars24.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "TCL à l'Ouest de Lyon : la Métropole enterre le téléphérique et déterre (en partie) le tracé de la ligne E",
+    "media": "Rue89Lyon",
+    "date": "2022-05-16",
+    "url": "https://www.rue89lyon.fr/2022/05/16/tcl-ouest-lyon-metropole-enterre-telepherique-et-deterre-en-partie-trace-ligne-e/"
+   },
+   {
+    "titre": "Pour l’Ouest lyonnais ce sera le tram express ou rien",
+    "media": "Lyon Capitale",
+    "date": "2023-11-08",
+    "url": "https://www.lyoncapitale.fr/actualite/pour-louest-lyonnais-ce-sera-le-tram-express-ou-rien"
+   }
+  ]
+ },
+ "t8": {
+  "histoire": [
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole évoque une liaison entre la gare de Vénissieux et La Soie, en bus à haut niveau de service pour 110 à 150 millions d'euros ou en tram pour 250 à 300 millions.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2025-06",
+    "texte": "Du 23 juin au 19 juillet, puis du 25 août au 10 octobre 2025, Sytral soumet à la concertation un tram de La Soie à la gare de Vénissieux, estimé à 250 millions d'euros pour une mise en service en 2030.",
+    "source": {
+     "titre": "Tramway T8 (Vaulx-en-Velin ↔ Gare de Vénissieux), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-t8-vaulx-en-velin-gare-de-venissieux-1_-r.html"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 range ce tram de rocade parmi les réalisations prévues avant 2035.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2025-12",
+    "texte": "Le 18 décembre 2025, le conseil d'administration de Sytral porte l'enveloppe du projet de 250 à 278 millions d'euros.",
+    "source": {
+     "titre": "Sytral Mobilités, délibération 25-079 du 18 décembre 2025, autorisations de programme 2026",
+     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+    }
+   },
+   {
+    "date": "2026-01",
+    "texte": "En janvier 2026, Sytral publie les enseignements de la concertation et poursuit les études en vue d'une enquête publique fin 2026.",
+    "source": {
+     "titre": "Enseignements et engagements issus de la concertation préalable, projet de tramway T8, Vaulx-en-Velin La Soie, Gare de Vénissieux (Sytral Mobilités)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2026-01/T8-Bilan-V7-BD-web.pdf"
+    }
+   },
+   {
+    "date": "2026-09",
+    "texte": "En septembre 2026, la présidente de Sytral indique que le T8 devrait être mené à bien, avec un tracé qui pourrait changer pour mieux desservir les zones d'activité de la Porte des Alpes.",
+    "source": {
+     "titre": "Métropole de Lyon. Véronique Sarselli, des signaux mais pas encore de fumée, Tout Lyon",
+     "url": "https://mesinfos.fr/69000-lyon/metropole-de-lyon-veronique-sarselli-des-signaux-mais-pas-encore-de-fumee-338200.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Une très grande majorité de participants a vu le T8 comme une nette amélioration pour l'est de la Métropole : des trajets de banlieue à banlieue et la desserte de zones d'emploi et de campus. Certains ont trouvé 2030 trop lointain ; d'autres ont douté qu'il faille à la fois ce tram et le prolongement du bus TB12 sur le même boulevard, ou proposé de prolonger les T9 et T10 à la place. Les demandes ont aussi porté sur des stations près de l'hippodrome de Parilly et de Renault Trucks, le devenir des lignes de bus et l'agrandissement des parcs relais.",
+   "source": {
+    "titre": "Enseignements et engagements issus de la concertation préalable, projet de tramway T8, Vaulx-en-Velin La Soie, Gare de Vénissieux (Sytral Mobilités)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2026-01/T8-Bilan-V7-BD-web.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "T8 : un tram peut en cacher un autre",
+    "media": "Expressions (Vénissieux)",
+    "date": "2024-10-24",
+    "url": "https://www.expressions-venissieux.fr/2024-10-24-t8-un-tram-peut-en-cacher-un-autre/"
+   },
+   {
+    "titre": "Nouveau tram T8 et prolongement du BHNS : le Sytral lance les concertations",
+    "media": "Lyon Capitale",
+    "date": "2025-06-03",
+    "url": "https://www.lyoncapitale.fr/actualite/nouveau-tram-t8-et-prolongement-du-bhns-le-sytral-lance-les-concertations"
+   },
+   {
+    "titre": "Métropole de Lyon. Véronique Sarselli, des signaux mais pas encore de fumée",
+    "media": "Tout Lyon",
+    "date": "2026-09-07",
+    "url": "https://mesinfos.fr/69000-lyon/metropole-de-lyon-veronique-sarselli-des-signaux-mais-pas-encore-de-fumee-338200.html"
+   }
+  ]
+ },
+ "telepherique-ouest": {
+  "histoire": [
+   {
+    "date": "2019-12",
+    "texte": "En décembre 2019, Sytral indique avoir étudié une dizaine de liaisons par câble dans l'agglomération, dont une entre Francheville et le stade de Gerland.",
+    "source": {
+     "titre": "Métropole de Lyon : les projets révolutionnaires du Sytral, Radio Scoop",
+     "url": "https://www.radioscoop.com/infos/metropole-de-lyon-les-projets-revolutionnaires-du-sytral_178000"
+    }
+   },
+   {
+    "date": "2020-12",
+    "texte": "Le 17 décembre 2020, le plan de mandat de Sytral prévoit la première ligne de transport par câble de l'agglomération, entre Francheville et Lyon.",
+    "source": {
+     "titre": "Porter-à-connaissance, plan de mandat 2021-2026 du Sytral, ligne T8, BHNS Centre Est et transport par câble (préfecture du Rhône, décembre 2021)",
+     "url": "https://www.rhone.gouv.fr/contenu/telechargement/57739/394710/file/Porter%20%C3%A0%20connaissance%20plan%20de%20mandat%202021_2026%20du%20Syndicat%20mixte%20des%20transports%20pour%20le%20Rh%C3%B4ne%20et%20l'agglomaration%20lyonnaise_partie%202%2012-2021.pdf"
+    }
+   },
+   {
+    "date": "2021-11",
+    "texte": "Du 15 novembre 2021 au 15 février 2022, la concertation préalable présente quatre tracés possibles et recueille 5 696 contributions.",
+    "source": {
+     "titre": "Enseignements de la concertation, transport par câble Francheville Lyon (Sytral, 2022)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2022-07/SYTRAL_Bilan_de_la_concertation_VF.pdf"
+    }
+   },
+   {
+    "date": "2022-05",
+    "texte": "Le 10 mai 2022, Bruno Bernard, président de la Métropole et de Sytral, annonce l'abandon du projet face à une forte opposition.",
+    "source": {
+     "titre": "Téléphérique entre Francheville et Lyon : le projet définitivement abandonné, Radio Scoop",
+     "url": "https://www.radioscoop.com/infos/telepherique-entre-francheville-et-lyon-le-projet-definitivement-abandonne_245071"
+    }
+   },
+   {
+    "date": "2022-07",
+    "texte": "En juillet 2022, la Commission nationale du débat public publie les engagements de Sytral : abandon du téléphérique et recherche d'autres solutions pour l'ouest de la Métropole.",
+    "source": {
+     "titre": "Transport par câble entre Francheville et Lyon : projet abandonné mais nouvelles perspectives, CNDP",
+     "url": "https://www.debatpublic.fr/transport-par-cable-entre-francheville-et-lyon-projet-abandonne-mais-nouvelles-perspectives-3224"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Les avis défavorables ont été nettement majoritaires, 72,4 %, surtout dans les communes survolées, Sainte-Foy-lès-Lyon et La Mulatière : peur pour le cadre de vie avec les pylônes, les survols et le bruit, et doutes sur le fonctionnement par vent ou par orage. Les partisans mettaient en avant des trajets plus courts vers Lyon, moins d'embouteillages et un chantier plus rapide. Beaucoup ont reconnu le besoin de mieux desservir l'ouest, et les propositions d'autres solutions ont représenté plus du tiers des contributions.",
+   "source": {
+    "titre": "Enseignements de la concertation, transport par câble Francheville Lyon (Sytral, 2022)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2022-07/SYTRAL_Bilan_de_la_concertation_VF.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Lyon : fin de la concertation sur le téléphérique, un projet à bout de souffle",
+    "media": "Lyon Capitale",
+    "date": "2022-02-15",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-fin-de-la-concertation-sur-le-telepherique-ce-mardi-un-projet-a-bout-de-souffle"
+   },
+   {
+    "titre": "Téléphérique entre Francheville et Lyon : le projet définitivement abandonné",
+    "media": "Radio Scoop",
+    "date": "2022-05-10",
+    "url": "https://www.radioscoop.com/infos/telepherique-entre-francheville-et-lyon-le-projet-definitivement-abandonne_245071"
+   },
+   {
+    "titre": "Téléphérique Lyon-Francheville : un projet abandonné qui aura quand même coûté près d'un million d'euros",
+    "media": "LyonMag",
+    "date": "2022-07-09",
+    "url": "https://www.lyonmag.com/article/124458/telepherique-lyon-francheville-un-projet-abandonne-qui-aura-quand-meme-coute-pres-d-un-million-d-euros"
+   }
+  ]
+ },
+ "bhns-rive-droite": {
+  "histoire": [
+   {
+    "date": "2021-11",
+    "texte": "Du 8 novembre au 30 décembre 2021, la Métropole et la Ville de Lyon mènent une concertation sur le réaménagement de 2,5 km de quais de la rive droite du Rhône, qui doit notamment faire une place réservée aux transports en commun.",
+    "source": {
+     "titre": "Dossier de presse Rive droite du Rhône, Métropole de Lyon, 7 juin 2023",
+     "url": "https://www.grandlyon.com/fileadmin/user_upload/media/pdf/espace-presse/dp/2023/20230607_dp_rive-droite.pdf"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole évoque une ligne de bus à haut niveau de service entre Perrache et le tunnel de la Croix-Rousse pour 20 à 30 millions d'euros, ou un tram pour 50 à 100 millions.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2023-06",
+    "texte": "Le 7 juin 2023, le projet retenu pour les quais prévoit des voies de bus dans les deux sens au sud de Bellecour et au nord des Cordeliers, et une nouvelle ligne de bus vers la Part-Dieu et Villeurbanne. Les travaux sont prévus de 2025 à 2030.",
+    "source": {
+     "titre": "Dossier de presse Rive droite du Rhône, Métropole de Lyon, 7 juin 2023",
+     "url": "https://www.grandlyon.com/fileadmin/user_upload/media/pdf/espace-presse/dp/2023/20230607_dp_rive-droite.pdf"
+    }
+   },
+   {
+    "date": "2025-06",
+    "texte": "Le 23 juin 2025, Sytral lance la ligne de bus C23, de Villeurbanne Flachet à la Cité internationale par les Cordeliers et la rive droite, et rénove les couloirs de bus des quais.",
+    "source": {
+     "titre": "Une nouvelle offre bus pour un réseau toujours plus performant et maillé en Presqu'île comme sur le reste du territoire, dossier de presse Sytral Mobilités, juin 2025",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/projet-en-cours/reseau-bus-performant/dp-piav-nouvelle-offre-bus.pdf"
+    }
+   },
+   {
+    "date": "2026-03",
+    "texte": "Fin mars 2026, la nouvelle présidente de la Métropole suspend les travaux de réaménagement des quais, qui devaient commencer le 30 mars.",
+    "source": {
+     "titre": "Lyon. Les travaux de fermeture de la Rive droite sont suspendus, Lyon People",
+     "url": "https://www.lyonpeople.com/actualites-lyon/lyon-les-travaux-de-fermeture-de-la-rive-droite-sont-suspendus-2026-03-27.html"
+    }
+   },
+   {
+    "date": "2026-07",
+    "texte": "En juillet 2026, la Métropole confirme l'abandon du réaménagement des quais de la rive droite.",
+    "source": {
+     "titre": "Suspendu à trois jours du début des travaux, le Projet Rive Droite finalement abandonné par la Métropole de Lyon, LyonMag",
+     "url": "https://www.lyonmag.com/article/153212/suspendu-a-trois-jours-du-debut-des-travaux-le-projet-rive-droite-finalement-abandonne-par-la-metropole-de-lyon"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés",
+    "media": "LyonMag",
+    "date": "2022-03-03",
+    "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+   },
+   {
+    "titre": "D’abord mis en pause, le projet Rive Droite définitivement abandonné par la Métropole de Lyon",
+    "media": "Lyon Capitale",
+    "date": "2026-07-23",
+    "url": "https://www.lyoncapitale.fr/actualite/dabord-mis-en-pause-le-projet-rive-droite-definitivement-abandonne-par-la-metropole-de-lyon"
+   },
+   {
+    "titre": "Suspendu à trois jours du début des travaux, le Projet Rive Droite finalement abandonné par la Métropole de Lyon",
+    "media": "LyonMag",
+    "date": "2026-07-23",
+    "url": "https://www.lyonmag.com/article/153212/suspendu-a-trois-jours-du-debut-des-travaux-le-projet-rive-droite-finalement-abandonne-par-la-metropole-de-lyon"
+   }
+  ]
+ },
+ "bhns-parilly": {
+  "histoire": [
+   {
+    "date": "2024",
+    "texte": "En 2024, les études de Sytral sur l'est lyonnais aboutissent à deux projets nord-sud : le tram T8 et le prolongement du bus à haut niveau de service des Sept Chemins jusqu'à Parilly.",
+    "source": {
+     "titre": "Bilan de la concertation préalable, prolongement Sept Chemins Parilly, du 20 juin au 20 juillet 2025 (Sytral Mobilités)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/tb12-prolongement/concertation/prealable/bhns2-bilan.pdf"
+    }
+   },
+   {
+    "date": "2025-06",
+    "texte": "Du 20 juin au 20 juillet 2025, une concertation préalable présente ce prolongement, du nord de Bron à la station Parilly du métro D par Chassieu et Saint-Priest, pour une mise en service vers 2029.",
+    "source": {
+     "titre": "Bilan de la concertation préalable, prolongement Sept Chemins Parilly, du 20 juin au 20 juillet 2025 (Sytral Mobilités)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/tb12-prolongement/concertation/prealable/bhns2-bilan.pdf"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 chiffre cette ligne à 80 millions d'euros.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2025-11",
+    "texte": "En novembre 2025, le conseil d'administration de Sytral approuve le bilan et les enseignements de la concertation.",
+    "source": {
+     "titre": "Prolongement du BHNS 7 chemins, Parilly (page du projet, Sytral Mobilités)",
+     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/prolongement-du-bhns-7-chemins-parilly_-r.html"
+    }
+   },
+   {
+    "date": "2025-12",
+    "texte": "Le 18 décembre 2025, son enveloppe passe de 80 à 89,6 millions d'euros, avec l'essentiel des dépenses prévu en 2028 et 2029.",
+    "source": {
+     "titre": "Sytral Mobilités, délibération 25-079 du 18 décembre 2025, autorisations de programme 2026",
+     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "La concertation a confirmé le besoin d'une ligne forte dans ce secteur, et une majorité de participants a jugé le tracé cohérent pour desservir les grands pôles d'emploi et le campus de la Porte des Alpes. Certains ont douté qu'il faille à la fois ce bus et le tram T8, et proposé une seule ligne. Les entreprises proches de l'aéroport de Bron ont regretté de ne pas être desservies, d'autres participants ont demandé un prolongement vers la zone industrielle de Corbas et Vénissieux, et des usagers se sont inquiétés pour la ligne de bus C25.",
+   "source": {
+    "titre": "Bilan de la concertation préalable, prolongement Sept Chemins Parilly, du 20 juin au 20 juillet 2025 (Sytral Mobilités)",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/tb12-prolongement/concertation/prealable/bhns2-bilan.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Nouveau tram T8 et prolongement du BHNS : le Sytral lance les concertations",
+    "media": "Lyon Capitale",
+    "date": "2025-06-03",
+    "url": "https://www.lyoncapitale.fr/actualite/nouveau-tram-t8-et-prolongement-du-bhns-le-sytral-lance-les-concertations"
+   },
+   {
+    "titre": "T8 et prolongement du BHNS : le Sytral lance les concertations",
+    "media": "Expressions (Vénissieux)",
+    "date": "2025-06-14",
+    "url": "https://www.expressions-venissieux.fr/2025-06-14-t8-et-prolongement-du-bhns-le-sytral-lance-les-concertations/"
+   }
+  ]
+ },
+ "t9-final": {
+  "histoire": [
+   {
+    "date": "2020-12",
+    "texte": "Le 17 décembre 2020, Sytral inscrit dans son plan de mandat quatre nouvelles lignes de tram, dont le T9 entre La Soie et Charpennes.",
+    "source": {
+     "titre": "Porter-à-connaissance, plan de mandat 2021-2026 du Sytral, lignes T6 Nord, T9 et T10 (préfecture du Rhône, juin 2021)",
+     "url": "https://www.rhone.gouv.fr/contenu/telechargement/57738/394705/file/Porter%20%C3%A0%20connaissance%20plan%20de%20mandat%202021_2026%20du%20Syndicat%20mixte%20des%20transports%20pour%20le%20Rh%C3%B4ne%20et%20l'agglom%C3%A9ration%20lyonnaise_partie%201%2006-2021.pdf"
+    }
+   },
+   {
+    "date": "2021-08",
+    "texte": "Du 23 août au 23 octobre 2021, une concertation préalable a lieu sous le regard de deux garants de la Commission nationale du débat public.",
+    "source": {
+     "titre": "Bilan de la concertation, tramway T9 La Soie Charpennes (garants de la CNDP, novembre 2021)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2021-11/Bilan%20Garants_Tram%20T9_VF-2%20et%20annexes.pdf"
+    }
+   },
+   {
+    "date": "2021-12",
+    "texte": "Le 10 décembre 2021, Sytral approuve le tracé, par la rue de la Feyssine et l'avenue Albert-Einstein, et l'emplacement des stations.",
+    "source": {
+     "titre": "Rapport de la concertation continue, tramway T9 (garante de la CNDP, 2023)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2023-09/Bilan-garant_concertation_continue_T9_VFF-1.pdf"
+    }
+   },
+   {
+    "date": "2024-02",
+    "texte": "Après une enquête publique du 4 septembre au 3 octobre 2023, la préfecture déclare le projet d'utilité publique le 26 février 2024. Les travaux commencent la même année.",
+    "source": {
+     "titre": "Le tramway T9 déclaré d'utilité publique, Sytral Mobilités",
+     "url": "http://sytral-mobilites.fr/fr/travaux-en-cours/le-tramway-t9-declare-d-utilite-publique_-n.html"
+    }
+   },
+   {
+    "date": "2026-02",
+    "texte": "Le 5 février 2026, le nouveau pont du T9 sur le canal de Jonage ouvre aux piétons et aux vélos. Sytral annonce la mise en service du tram pour 2027.",
+    "source": {
+     "titre": "Tramway T9 Vaulx-en-Velin La Soie ↔ Charpennes, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tramway-t9-vaulx-en-velin-la-soie-charpennes_-r.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Le T9 est apparu comme un projet attendu depuis longtemps : relier le sud et le nord de Vaulx-en-Velin, séparés par le canal, désenclaver l'est de Villeurbanne et changer l'image du Mas du Taureau. Les débats ont surtout porté sur le tracé : des habitants de la Soie ont contesté un terminus jugé trop loin du métro et des autres trams, et le passage par l'avenue Dimitrov a été refusé par une pétition mais défendu par des habitants du sud de Vaulx. Certains ont aussi douté de l'intérêt de continuer jusqu'à Charpennes, déjà desservie par les trams T1 et T4.",
+   "source": {
+    "titre": "Bilan de la concertation, tramway T9 La Soie Charpennes (garants de la CNDP, novembre 2021)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2021-11/Bilan%20Garants_Tram%20T9_VF-2%20et%20annexes.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Le tram T9 va traverser Vaulx-en-Velin dès 2026 : \"la vie des Vaudais va être transformée\"",
+    "media": "Lyon Capitale",
+    "date": "2021-12-07",
+    "url": "https://www.lyoncapitale.fr/actualite/le-tram-t9-va-traverser-vaulx-en-velin-des-2026-la-vie-des-vaudais-va-etre-transformee"
+   },
+   {
+    "titre": "Lyon : la livraison du tramway T9 pourrait finalement être retardée",
+    "media": "Lyon Capitale",
+    "date": "2025-03-05",
+    "url": "https://www.lyoncapitale.fr/actualite/metropole-de-lyon-la-livraison-du-tramway-t10-prevue-pour-2026-finalement-retardee"
+   }
+  ]
+ },
+ "t10-final": {
+  "histoire": [
+   {
+    "date": "2020-12",
+    "texte": "Le 17 décembre 2020, Sytral inscrit le tram T10, de la gare de Vénissieux à Gerland par Saint-Fons, dans son plan de mandat.",
+    "source": {
+     "titre": "Porter-à-connaissance, plan de mandat 2021-2026 du Sytral, lignes T6 Nord, T9 et T10 (préfecture du Rhône, juin 2021)",
+     "url": "https://www.rhone.gouv.fr/contenu/telechargement/57738/394705/file/Porter%20%C3%A0%20connaissance%20plan%20de%20mandat%202021_2026%20du%20Syndicat%20mixte%20des%20transports%20pour%20le%20Rh%C3%B4ne%20et%20l'agglom%C3%A9ration%20lyonnaise_partie%201%2006-2021.pdf"
+    }
+   },
+   {
+    "date": "2021-08",
+    "texte": "Du 23 août au 23 octobre 2021, une concertation préalable a lieu sous le regard de deux garants de la Commission nationale du débat public.",
+    "source": {
+     "titre": "Bilan de la concertation, tramway T10 Gare de Vénissieux Gerland (garants de la CNDP, novembre 2021)",
+     "url": "https://www.debatpublic.fr/sites/default/files/2021-11/Bilan%20Garants_Tram%20T10_VF-2%20et%20annexes.pdf"
+    }
+   },
+   {
+    "date": "2021-12",
+    "texte": "Le 10 décembre 2021, Sytral approuve le tracé définitif et l'emplacement des stations.",
+    "source": {
+     "titre": "Tramway T10 (Gare de Vénissieux ↔ Gerland), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tramway-t10-gare-de-venissieux-gerland_-r.html"
+    }
+   },
+   {
+    "date": "2023-10",
+    "texte": "Le 10 octobre 2023, le projet est déclaré d'utilité publique. Les travaux commencent en janvier 2024.",
+    "source": {
+     "titre": "Tramway T10 (Gare de Vénissieux ↔ Gerland), Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tramway-t10-gare-de-venissieux-gerland_-r.html"
+    }
+   },
+   {
+    "date": "2026-07",
+    "texte": "En juillet 2026, Sytral repousse à 2027 la mise en service, d'abord prévue à l'automne 2026, sans donner de mois.",
+    "source": {
+     "titre": "Tramway T10 : le dernier été de grands travaux, Expressions (Vénissieux)",
+     "url": "https://www.expressions-venissieux.fr/2026-07-21-tramway-t10-le-dernier-ete-de-grands-travaux/amp/"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Le T10 est apparu comme un projet attendu, surtout pour désenclaver Saint-Fons et relier les communes autour de Lyon sans passer par le centre. D'autres participants l'ont jugé moins prioritaire que l'ouest lyonnais, trop cher, ou inutile à côté du métro D et des bus existants, et ont craint des embouteillages et la perte de stationnement dans des rues étroites. Beaucoup de propositions ont porté sur le tracé : desservir la gare de Saint-Fons, prolonger la ligne vers Confluence ou Part-Dieu, bien placer les stations.",
+   "source": {
+    "titre": "Bilan de la concertation, tramway T10 Gare de Vénissieux Gerland (garants de la CNDP, novembre 2021)",
+    "url": "https://www.debatpublic.fr/sites/default/files/2021-11/Bilan%20Garants_Tram%20T10_VF-2%20et%20annexes.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Tram T10, direction 2026",
+    "media": "Expressions (Vénissieux)",
+    "date": "2023-09-27",
+    "url": "https://www.expressions-venissieux.fr/2023-09-27-tram-t10-direction-2026/"
+   },
+   {
+    "titre": "« La ligne T10 sera bien mise en service en 2026 »",
+    "media": "Expressions (Vénissieux)",
+    "date": "2025-11-10",
+    "url": "https://www.expressions-venissieux.fr/2025-11-10-la-ligne-t10-sera-bien-mise-en-service-en-2026/"
+   },
+   {
+    "titre": "Tramway T10 : le dernier été de grands travaux",
+    "media": "Expressions (Vénissieux)",
+    "date": "2026-07-21",
+    "url": "https://www.expressions-venissieux.fr/2026-07-21-tramway-t10-le-dernier-ete-de-grands-travaux/amp/"
+   }
+  ]
+ },
+ "navette-fluv": {
+  "histoire": [
+   {
+    "date": "2019-12",
+    "texte": "En décembre 2019, dans son étude du réseau à l'horizon 2050, Sytral examine deux lignes de bateaux : l'une sur la Saône entre Vaise et Confluence, l'autre sur le Rhône entre la Cité internationale et Gerland. Il faudrait 29 minutes pour cette dernière.",
+    "source": {
+     "titre": "Lyon : des bateaux TCL entre Vaise, Confluence et Cité internationale ?, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/lyon-des-bateaux-tcl-entre-vaise-confluence-et-cite-internationale"
+    }
+   },
+   {
+    "date": "2020-03",
+    "texte": "Pendant la campagne municipale de 2020, plusieurs candidats promettent des navettes sur le Rhône et la Saône, par exemple entre la Cité internationale et l'Hôtel-Dieu.",
+    "source": {
+     "titre": "Les navettes fluviales de Lyon, une vraie solution ?, Lyon Entreprises",
+     "url": "https://www.lyon-entreprises.com/actualites/article/navettes-fluviales-lyon"
+    }
+   },
+   {
+    "date": "2025-06",
+    "texte": "En juin 2025, la navette Navigône ouvre sur la Saône, entre Vaise-Industrie et Confluence, accessible avec les abonnements TCL.",
+    "source": {
+     "titre": "Navettes fluviales Navigône, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-mis-en-service/navettes-fluviales-navigone_-r.html"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 chiffre la navette de la Saône à 26 millions d'euros avec quatre bateaux. Il évoque, après évaluation du service, d'éventuels développements le long du Rhône, sans les chiffrer.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2026-06",
+    "texte": "Depuis le 20 juin 2026, quatre bateaux électriques assurent un départ toutes les 15 minutes aux heures de pointe, avec une nouvelle halte quai Saint-Vincent. La navette a compté près de 200 000 voyages la première année.",
+    "source": {
+     "titre": "Navettes fluviales Navigône, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/projets-mis-en-service/navettes-fluviales-navigone_-r.html"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Lyon : des bateaux TCL entre Vaise, Confluence et Cité internationale ?",
+    "media": "Lyon Capitale",
+    "date": "2019-12-13",
+    "url": "https://www.lyoncapitale.fr/actualite/lyon-des-bateaux-tcl-entre-vaise-confluence-et-cite-internationale"
+   },
+   {
+    "titre": "Les navettes fluviales de Lyon, une vraie solution ?",
+    "media": "Lyon Entreprises",
+    "date": "2020-03-30",
+    "url": "https://www.lyon-entreprises.com/actualites/article/navettes-fluviales-lyon"
+   },
+   {
+    "titre": "Le SYTRAL-Métropole de Lyon lancent la navette fluviale Navigône",
+    "media": "Enviscope",
+    "date": "2025-07-05",
+    "url": "https://www.enviscope.com/le-sytral-metrpole-de-lyon-lancent-la-navette-fluviale-navigone/"
+   }
+  ]
+ },
+ "t3-renf": {
+  "histoire": [
+   {
+    "date": "2021-12",
+    "texte": "À la fin de la consultation métro de 2021, les participants jugent le prolongement du métro A moins prioritaire, à condition d'augmenter la capacité du tram T3.",
+    "source": {
+     "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Le 3 mars 2022, la Métropole propose un T3 renforcé, plus capacitaire ou plus fréquent, avec un nouveau terminus plus grand à la Part-Dieu, pour 150 à 200 millions d'euros.",
+    "source": {
+     "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés, LyonMag",
+     "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+    }
+   },
+   {
+    "date": "2022-03",
+    "texte": "Sytral envisage de déplacer le terminus de l'autre côté de la gare Part-Dieu, vers la rue Garibaldi, sans travaux prévus à court terme.",
+    "source": {
+     "titre": "La prolongation du métro A vers Décines-Meyzieu abandonnée : comment le Sytral envisage de renforcer le T3 ?, Lyon Capitale",
+     "url": "https://www.lyoncapitale.fr/actualite/la-prolongation-du-metro-a-vers-decines-meyzieu-abandonnee-comment-le-sytral-envisage-de-renforcer-le-t3"
+    }
+   },
+   {
+    "date": "2024-09",
+    "texte": "En septembre 2024, Sytral annonce des rames de 43 mètres, 30 % plus capacitaires, sur ses lignes de tram les plus chargées dont le T3, et deux nouvelles stations du T3 à Meyzieu et Décines pour début 2025.",
+    "source": {
+     "titre": "Trois nouvelles stations sur le réseau tramway début 2025, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/trois-nouvelles-stations-sur-le-reseau-tramway-debut-2025_-n.html"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 prévoit avant 2035 de renforcer l'offre et la capacité du T3, pour 100 millions d'euros.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "Aucune concertation n'a porté sur le seul renfort du T3. Pendant la consultation métro de 2021, les participants ont estimé que les trams T3 et T7 rendaient le prolongement du métro A moins urgent, à condition d'augmenter la capacité du T3 pour en faire une solution solide à long terme.",
+   "source": {
+    "titre": "Synthèse des enseignements clés, consultation publique sur les 4 projets de métro A B D E, Sytral",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/consultations-passees/consultation-metro/comptes-rendus/sytral-synthese-de-l-enseignement.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Métropole de Lyon : on connaît désormais toutes les alternatives aux projets de métros probablement abandonnés",
+    "media": "LyonMag",
+    "date": "2022-03-03",
+    "url": "https://www.lyonmag.com/article/121438/metropole-de-lyon-on-connait-desormais-toutes-les-alternatives-aux-projets-de-metros-probablement-abandonnes"
+   },
+   {
+    "titre": "La prolongation du métro A vers Décines-Meyzieu abandonnée : comment le Sytral envisage de renforcer le T3 ?",
+    "media": "Lyon Capitale",
+    "date": "2022-03-18",
+    "url": "https://www.lyoncapitale.fr/actualite/la-prolongation-du-metro-a-vers-decines-meyzieu-abandonnee-comment-le-sytral-envisage-de-renforcer-le-t3"
+   }
+  ]
+ },
+ "bhns-kimmerling": {
+  "histoire": [
+   {
+    "date": "2019-12",
+    "texte": "En décembre 2019, Sytral lance les études d'une ligne de bus « Centre Est » de la Part-Dieu vers Villeurbanne, Genas et Saint-Exupéry.",
+    "source": {
+     "titre": "Métropole de Lyon : les projets révolutionnaires du Sytral, Radio Scoop",
+     "url": "https://www.radioscoop.com/infos/metropole-de-lyon-les-projets-revolutionnaires-du-sytral_178000"
+    }
+   },
+   {
+    "date": "2021-10",
+    "texte": "Du 11 octobre au 19 novembre 2021, une concertation préalable porte sur un bus à haut niveau de service de la Part-Dieu aux Sept Chemins par la route de Genas.",
+    "source": {
+     "titre": "Déclaration de projet du BHNS Part-Dieu Sept Chemins, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/declaration-de-projet-du-bhns-part-dieu-lt-gt-sept-chemins_-n.html"
+    }
+   },
+   {
+    "date": "2023-05",
+    "texte": "Le 25 mai 2023, Sytral approuve l'avant-projet pour 137 millions d'euros.",
+    "source": {
+     "titre": "Déclaration de projet du BHNS Part-Dieu Sept Chemins, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/declaration-de-projet-du-bhns-part-dieu-lt-gt-sept-chemins_-n.html"
+    }
+   },
+   {
+    "date": "2023-12",
+    "texte": "Du 4 décembre 2023 au 12 janvier 2024, une enquête publique a lieu. Le commissaire enquêteur rend un avis favorable à l'utilité publique, avec quatre réserves et quatre recommandations.",
+    "source": {
+     "titre": "Déclaration de projet du BHNS Part-Dieu Sept Chemins, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/declaration-de-projet-du-bhns-part-dieu-lt-gt-sept-chemins_-n.html"
+    }
+   },
+   {
+    "date": "2026-02",
+    "texte": "Le 28 février 2026, le Trambus TB12 ouvre entre la gare Part-Dieu Vivier Merle et Kimmerling-Genêts, dans le quartier de Montchat.",
+    "source": {
+     "titre": "TB12 Kimmerling, Sept Chemins (page du projet, Sytral Mobilités)",
+     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tb12-kimmerling-sept-chemins_-r.html"
+    }
+   },
+   {
+    "date": "2026-09",
+    "texte": "Sytral annonce la mise en service jusqu'aux Sept Chemins pour 2027. Une enquête parcellaire complémentaire se tient du 15 septembre au 28 octobre 2026.",
+    "source": {
+     "titre": "TB12 Kimmerling, Sept Chemins (page du projet, Sytral Mobilités)",
+     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tb12-kimmerling-sept-chemins_-r.html"
+    }
+   }
+  ],
+  "avis": {
+   "texte": "La concertation de 2021 a confirmé l'intérêt de la ligne et son passage par la route de Genas. Le choix d'un bus plutôt que d'un tram a suscité des questions, des participants ont demandé de prolonger la ligne au-delà des Sept Chemins jusqu'à Chassieu, et 59 % des répondants au questionnaire ont préféré le passage par l'avenue Félix-Faure. Beaucoup se sont inquiétés de la réorganisation des bus, de la place laissée aux voitures et des travaux, et ont demandé des arbres le long de la route de Genas.",
+   "source": {
+    "titre": "Bilan de la concertation préalable qui s'est déroulée du 11 octobre au 19 novembre 2021, BHNS Part-Dieu Sept Chemins (Sytral, janvier 2022)",
+    "url": "https://sytral-mobilites.fr/UserFiles/File/projet/tb12/concertation/prealable/bilan-de-la-concertation-prealable.pdf"
+   }
+  },
+  "presse": [
+   {
+    "titre": "Le Sytral dévoile son projet de Bus à haut niveau de service entre Lyon Part-Dieu et les Sept Chemins",
+    "media": "LyonMag",
+    "date": "2021-10-06",
+    "url": "https://www.lyonmag.com/article/118253/le-sytral-devoile-son-projet-de-bus-a-haut-niveau-de-service-entre-lyon-part-dieu-et-les-sept-chemins"
+   },
+   {
+    "titre": "Cette nouvelle ligne de bus bientôt opérationnelle à Lyon",
+    "media": "Lyon Capitale",
+    "date": "2026-01-20",
+    "url": "https://www.lyoncapitale.fr/actualite/cette-nouvelle-ligne-de-bus-bientot-operationnelle-a-lyon"
+   }
+  ]
+ },
+ "electrification-bus": {
+  "histoire": [
+   {
+    "date": "2020",
+    "texte": "Depuis 2020, Sytral n'achète plus que des bus à faibles ou très faibles émissions, cinq ans avant l'obligation de la loi.",
+    "source": {
+     "titre": "Transition écologique du réseau TCL, Sytral Mobilités",
+     "url": "https://sytral-mobilites.fr/fr/transition-ecologique.html"
+    }
+   },
+   {
+    "date": "2021",
+    "texte": "En 2021, les premiers bus au biogaz roulent sur les lignes urbaines TCL et Sytral achète treize bus électriques à batteries.",
+    "source": {
+     "titre": "Auvergne-Rhône-Alpes : où en est la transition énergétique des bus et cars ?, transbus.org",
+     "url": "https://www.transbus.org/actualite/actu-2026-07-bus-cars-transition-energetique-region-aura.html"
+    }
+   },
+   {
+    "date": "2023-11",
+    "texte": "En novembre 2023, Sytral annonce que les bus diesel ne représenteront plus que la moitié du parc TCL en 2026, contre 86 % en 2020, avec 400 bus au gaz ou électriques achetés en cinq ans.",
+    "source": {
+     "titre": "TCL : 100% de bus verts en 2030 ?, Expressions (Vénissieux)",
+     "url": "https://www.expressions-venissieux.fr/2023-11-21-tcl-100-de-bus-verts-en-2030/"
+    }
+   },
+   {
+    "date": "2025-10",
+    "texte": "Le Plan de mobilité adopté le 2 octobre 2025 vise un parc de bus et de cars entièrement électrique ou au bio-GNV avant 2035. Il compte 742 millions d'euros pour renouveler les flottes de 2025 à 2040 et 200 millions pour les dépôts.",
+    "source": {
+     "titre": "Plan de mobilité des territoires lyonnais, Sytral Mobilités (document complet)",
+     "url": "https://sytral-mobilites.fr/UserFiles/File/nos-missions/pdmtl/plandemobilitedesterritoireslyonnais-compressed.pdf"
+    }
+   },
+   {
+    "date": "2025-12",
+    "texte": "Le 18 décembre 2025, le programme d'achat de bus et de trolleybus lancé en 2022 est ramené à 233 millions d'euros, et celui d'adaptation des dépôts à 24 millions.",
+    "source": {
+     "titre": "Sytral Mobilités, délibération 25-079 du 18 décembre 2025, autorisations de programme 2026",
+     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+    }
+   },
+   {
+    "date": "2026-07",
+    "texte": "En juillet 2026, plus de 430 bus et cars au gaz naturel circulent sur le réseau TCL, à côté des trolleybus et des bus électriques à batteries.",
+    "source": {
+     "titre": "Auvergne-Rhône-Alpes : où en est la transition énergétique des bus et cars ?, transbus.org",
+     "url": "https://www.transbus.org/actualite/actu-2026-07-bus-cars-transition-energetique-region-aura.html"
+    }
+   }
+  ],
+  "presse": [
+   {
+    "titre": "Lyon : le Sytral diversifie les énergies de sa flotte de bus",
+    "media": "transbus.org",
+    "date": "2021-04-27",
+    "url": "https://www.transbus.org/actualite/actu-2021-04-sytral-tcl-transition-energetique.html"
+   },
+   {
+    "titre": "TCL : 100% de bus verts en 2030 ?",
+    "media": "Expressions (Vénissieux)",
+    "date": "2023-11-21",
+    "url": "https://www.expressions-venissieux.fr/2023-11-21-tcl-100-de-bus-verts-en-2030/"
+   },
+   {
+    "titre": "Auvergne-Rhône-Alpes : où en est la transition énergétique des bus et cars ?",
+    "media": "transbus.org",
+    "date": "2026-07-07",
+    "url": "https://www.transbus.org/actualite/actu-2026-07-bus-cars-transition-energetique-region-aura.html"
+   }
+  ]
+ }
+}
