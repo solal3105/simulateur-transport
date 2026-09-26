@@ -125,46 +125,6 @@
 [data-gares='0'] .nom-gare {
   display: none;
 }
-/* Nom d'un arrêt posé par le joueur. */
-.reperes-ligne {
-  display: flex;
-  gap: 2px;
-  pointer-events: none;
-}
-.repere-ligne {
-  display: grid;
-  min-width: 20px;
-  height: 20px;
-  place-items: center;
-  padding: 0 5px;
-  border: 2px solid #fff;
-  border-radius: 6px;
-  background: #5d5852;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.18);
-}
-.repere-ligne[data-mode='tram'] {
-  border-radius: 999px;
-  background: #8a8278;
-}
-/* Le RER et les trains Transilien en lettres foncées sur blanc, comme sur les plans du réseau francilien. */
-.repere-ligne[data-mode='rer'] {
-  border-color: #6f6860;
-  background: #fff;
-  color: #4a4540;
-}
-.repere-ligne[data-mode='train'] {
-  border-color: #aaa298;
-  border-radius: 999px;
-  background: #fff;
-  color: #6f6860;
-}
-[data-loin='1'] .reperes-ligne {
-  display: none;
-}
 .bulle-station .maplibregl-popup-content {
   display: flex;
   flex-direction: column;
@@ -182,6 +142,7 @@
   color: #6b6760;
   font-weight: 700;
 }
+/* Nom d'un arrêt posé par le joueur. */
 .nom-arret {
   display: block;
   font:

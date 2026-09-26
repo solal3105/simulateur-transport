@@ -12,6 +12,7 @@ import {
   type MapMouseEvent,
   type MapTouchEvent,
   type StyleSpecification,
+  type SymbolLayerSpecification,
 } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -22,11 +23,12 @@ import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu } from '@/lib/geo'
 import { rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { direLignes, direOuvertures, nommerTrace, terminusDe } from '@/lib/reseau'
+import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
+import { imagePastille } from './pastilles'
 import { imageRelief } from './relief'
 
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
@@ -42,13 +44,10 @@ const COULEURS = {
   bordRoute: '#e3ddd4',
   rail: '#bdb6ac',
   limite: '#cfc8bd',
-  // Le réseau actuel reste neutre pour que les projets et vos lignes se lisent d'abord, mais assez sombre
-  // pour qu'on voie tout de suite où passent déjà le tram et le métro.
+  // Chaque ligne du réseau actuel a sa couleur. Le gris reste pour les voies qu'aucune ligne en service n'emprunte
+  // encore, comme celles des lignes en chantier, et pour une ligne dont on ne connaît pas la couleur.
   tram: '#9a9288',
   metroActuel: '#5d5852',
-  // Le RER presque comme le métro, les trains Transilien plus discrets.
-  rer: '#6f6860',
-  train: '#aaa298',
   gare: '#3f3a35',
 }
 
@@ -56,8 +55,11 @@ const COULEURS = {
 const ZOOM_QUARTIERS = 13
 /** À partir de ce zoom, les gares montrent leur nom. */
 const ZOOM_GARES = 12
-/** En deçà de ce zoom, les repères des lignes existantes se cachent pour laisser la vue d'ensemble lisible. */
-const ZOOM_REPERES = 11
+/** En deçà de ce zoom, les lignes existantes ne portent pas leur nom, pour laisser la vue d'ensemble lisible. */
+const ZOOM_NOMS_LIGNES = 10.5
+
+/** L'ordre de dessin des lignes existantes, du train régional au métro, qui passe dessus. */
+const RANG_MODE: Record<ModeExistant, number> = { train: 0, rer: 1, bus: 2, tram: 2, cable: 3, metro: 4 }
 
 type EtatProjet = 'etude' | 'construit' | 'chantier' | 'choisi' | 'indisponible'
 
@@ -105,6 +107,35 @@ const largeurRang = (grande: number, moyenne: number) =>
     }),
   ] as unknown as number
 
+/** Une largeur par mode pour les lignes existantes ; comme ailleurs, le zoom reste l'expression la plus externe. */
+const largeurMode = (base: Record<ModeExistant, number>) =>
+  [
+    'interpolate',
+    ['exponential', 1.5],
+    ['zoom'],
+    ...[10, 13, 15].flatMap((z, i) => {
+      const k = [0.6, 1.4, 3][i]!
+      return [z, ['match', ['get', 'mode'], ...Object.entries(base).flatMap(([mode, b]) => [mode, b * k]), base.tram * k]]
+    }),
+  ] as unknown as number
+
+/** Les pastilles des lignes existantes, espacées d'autant plus qu'on voit loin. */
+const nomsLignes = {
+  type: 'symbol',
+  source: 'lignes',
+  minzoom: ZOOM_NOMS_LIGNES,
+  layout: {
+    'symbol-placement': 'line',
+    'symbol-spacing': ['interpolate', ['linear'], ['zoom'], ZOOM_NOMS_LIGNES, 300, 14, 380],
+    'symbol-sort-key': ['get', 'priorite'],
+    'symbol-avoid-edges': true,
+    'icon-image': ['get', 'pastille'],
+    'icon-rotation-alignment': 'viewport',
+    'icon-size': ['interpolate', ['linear'], ['zoom'], ZOOM_NOMS_LIGNES, 0.85, 13, 1],
+    'icon-padding': 6,
+  },
+} as const satisfies Omit<SymbolLayerSpecification, 'id'>
+
 const vide = () => ({ type: 'FeatureCollection', features: [] }) as FeatureCollection
 const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kind]
 const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
@@ -150,20 +181,26 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           .filter((a) => a[2] === 1)
           .map((a) => ({ type: 'Feature', properties: { grande: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
   }
-  // Le RER et les trains Transilien, que le fond de carte ne dessine pas : leur tracé vient des lignes existantes.
-  const trains: FeatureCollection<MultiLineString> = {
+  // Chaque ligne du réseau actuel, dans sa couleur. Une ligne en chantier n'a pas encore de tracé : le fil de ses
+  // gares ne sert qu'à poser son nom, le long du trait gris que le fond de carte dessine pour elle.
+  const lignes: FeatureCollection<MultiLineString> = {
     type: 'FeatureCollection',
-    features: (donnees.reseau?.lignes ?? []).flatMap((l) =>
-      l.trace
-        ? [
-            {
-              type: 'Feature' as const,
-              properties: { rer: l.mode === 'rer' },
-              geometry: { type: 'MultiLineString' as const, coordinates: l.trace },
-            },
-          ]
-        : [],
-    ),
+    features: (donnees.reseau?.lignes ?? []).map((l) => ({
+      type: 'Feature' as const,
+      properties: {
+        mode: l.mode,
+        couleur: l.couleur ?? COULEURS.metroActuel,
+        pastille: `ligne-${l.id}`,
+        rang: RANG_MODE[l.mode],
+        // Quand la place manque, le nom du métro passe avant celui du tram, puis des trains.
+        priorite: RANG_MODE.metro - RANG_MODE[l.mode],
+        dessinee: Boolean(l.trace?.length),
+      },
+      geometry: {
+        type: 'MultiLineString' as const,
+        coordinates: l.trace?.length ? l.trace : l.branches.map((b) => b.map((s) => s.pos)),
+      },
+    })),
   }
   // Le relief ne se montre que pendant le tracé d'une ligne, sous la densité.
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
@@ -174,7 +211,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
-      trains: { type: 'geojson', data: trains },
+      lignes: { type: 'geojson', data: lignes },
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
       joueur: { type: 'geojson', data: vide() },
@@ -255,45 +292,15 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           'fill-opacity': ['interpolate', ['linear'], ['get', 'poids'], d1, 0.06, d2, 0.18, d3, 0.34, d4, 0.55],
         },
       },
-      {
-        id: 'train-bord',
-        type: 'line',
-        source: 'trains',
-        filter: ['!', ['get', 'rer']],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
-      },
-      {
-        id: 'train-actuel',
-        type: 'line',
-        source: 'trains',
-        filter: ['!', ['get', 'rer']],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.train, 'line-width': largeur(1.8) },
-      },
-      {
-        id: 'rer-bord',
-        type: 'line',
-        source: 'trains',
-        filter: ['get', 'rer'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(5.6) },
-      },
-      {
-        id: 'rer-actuel',
-        type: 'line',
-        source: 'trains',
-        filter: ['get', 'rer'],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.rer, 'line-width': largeur(3) },
-      },
+      // Les voies de métro et de tram du fond de carte, en gris et plus fines que les lignes en couleur qui les
+      // recouvrent : on ne les voit que là où aucune ligne en service ne passe encore, sur les lignes en chantier.
       {
         id: 'tram-bord',
         type: 'line',
         source: 'fond',
         filter: genre('tram'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(4) },
+        paint: { 'line-color': '#fff', 'line-width': largeur(3.4) },
       },
       {
         id: 'tram-actuel',
@@ -301,7 +308,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('tram'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(2.2) },
+        paint: { 'line-color': COULEURS.tram, 'line-width': largeur(1.6) },
       },
       {
         id: 'metro-bord',
@@ -309,7 +316,7 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('metro'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#fff', 'line-width': largeur(6.2) },
+        paint: { 'line-color': '#fff', 'line-width': largeur(5) },
       },
       {
         id: 'metro-actuel',
@@ -317,9 +324,26 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         source: 'fond',
         filter: genre('metro'),
         layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': COULEURS.metroActuel, 'line-width': largeur(2.6) },
+      },
+      // Les lignes en service, chacune dans sa couleur, cerclées de blanc ; le métro passe sur le tram et les trains.
+      {
+        id: 'lignes-bord',
+        type: 'line',
+        source: 'lignes',
+        filter: ['get', 'dessinee'],
+        layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'rang'] },
+        paint: { 'line-color': '#fff', 'line-width': largeurMode({ metro: 7, rer: 6.2, tram: 4.6, bus: 4.6, cable: 4.6, train: 3.8 }) },
+      },
+      {
+        id: 'lignes-actuelles',
+        type: 'line',
+        source: 'lignes',
+        filter: ['get', 'dessinee'],
+        layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'rang'] },
         paint: {
-          'line-color': COULEURS.metroActuel,
-          'line-width': largeur(3.4),
+          'line-color': ['get', 'couleur'],
+          'line-width': largeurMode({ metro: 3.4, rer: 3, tram: 2.2, bus: 2.2, cable: 2.2, train: 1.8 }),
         },
       },
       {
@@ -368,6 +392,11 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
           'circle-color': COULEURS.gare,
         },
       },
+      // Le nom de chaque ligne, répété le long de son tracé. La carte n'en garde que ce qui tient sans se chevaucher,
+      // le métro d'abord, et ceux des trains Transilien n'apparaissent qu'en zoomant ; les pastilles sont dessinées
+      // à la demande (voir pastilles.ts).
+      { ...nomsLignes, id: 'lignes-noms-trains', filter: ['==', ['get', 'mode'], 'train'], minzoom: ZOOM_GARES },
+      { ...nomsLignes, id: 'lignes-noms', filter: ['!=', ['get', 'mode'], 'train'] },
       {
         id: 'projets-etude',
         type: 'line',
@@ -678,36 +707,27 @@ export function Carte({
       return [{ pos: s.pos, marker: new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(s.pos) }]
     })
     poserProches(m, gares, ZOOM_GARES)
-    // Le nom de chaque ligne du réseau actuel, à ses deux terminus, comme sur un plan de réseau. Deux lignes qui
-    // finissent à la même station partagent un seul repère.
-    const terminus = new Map<string, { pos: [number, number]; lignes: { ref: string; mode: string; nom: string }[] }>()
-    for (const l of donnees.reseau?.lignes ?? []) {
-      for (const s of terminusDe(l)) {
-        const cle = s.nom || s.pos.join(',')
-        const t = terminus.get(cle) ?? { pos: s.pos, lignes: [] }
-        if (!t.lignes.some((x) => x.ref === l.ref && x.mode === l.mode)) t.lignes.push({ ref: l.ref, mode: l.mode, nom: l.nom })
-        terminus.set(cle, t)
-      }
+    // La pastille de chaque ligne existante se dessine quand la carte en a besoin pour la première fois. Celles
+    // dessinées avant l'arrivée de la police du site sont refaites avec elle.
+    const pastilles = new Map((donnees.reseau?.lignes ?? []).map((l) => [`ligne-${l.id}`, l]))
+    const poserPastille = (id: string) => {
+      const l = pastilles.get(id)
+      if (!l) return
+      const { image, ratio } = imagePastille(l.ref, l.couleur ?? COULEURS.metroActuel, l.mode)
+      if (m.hasImage(id)) m.removeImage(id)
+      m.addImage(id, image, { pixelRatio: ratio })
     }
-    for (const t of terminus.values()) {
-      const el = document.createElement('div')
-      el.className = 'reperes-ligne'
-      el.setAttribute('aria-hidden', 'true')
-      for (const l of t.lignes) {
-        const pastille = document.createElement('span')
-        pastille.className = 'repere-ligne'
-        pastille.dataset.mode = l.mode
-        pastille.textContent = l.ref
-        pastille.title = l.nom
-        el.appendChild(pastille)
-      }
-      new Marker({ element: el, anchor: 'bottom', offset: [0, -7] }).setLngLat(t.pos).addTo(m)
+    m.setMissingStyleImageResolver(poserPastille)
+    if (document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(() => {
+        if (carte.current !== m) return
+        for (const id of pastilles.keys()) if (m.hasImage(id)) poserPastille(id)
+      })
     }
 
     const majZoom = () => {
       boite.dataset.proche = m.getZoom() >= ZOOM_QUARTIERS ? '1' : '0'
       boite.dataset.gares = m.getZoom() >= ZOOM_GARES ? '1' : '0'
-      boite.dataset.loin = m.getZoom() < ZOOM_REPERES ? '1' : '0'
     }
     majZoom()
     m.on('zoom', majZoom)

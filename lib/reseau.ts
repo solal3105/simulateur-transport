@@ -33,7 +33,10 @@ export interface LigneExistante {
   branches: StationLigne[][]
   /** Ses terminus, quand le script les établit lui-même : les RER, dont OpenStreetMap coupe parfois les parcours. */
   terminus?: string[]
-  /** Le tracé de ses voies, pour les lignes que le fond de carte ne dessine pas : le RER et les trains Transilien. */
+  /**
+   * Le tracé de ses voies, pour dessiner la ligne dans sa couleur et écrire son nom le long. Les lignes en chantier
+   * n'en ont pas : OpenStreetMap ne les compte pas encore comme des lignes, et le fond de carte les dessine en gris.
+   */
   trace?: [number, number][][]
 }
 

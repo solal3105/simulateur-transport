@@ -358,8 +358,16 @@ function construire(brut) {
     if (stations.length < 2) continue
     const lieu = RESEAUX_SECONDAIRES[t.network] ?? null
     const cle = `${mode}:${ref}:${lieu}`
-    const groupe = groupes.get(cle) ?? { mode, ref, lieu, couleur: null, listes: [] }
+    const groupe = groupes.get(cle) ?? { mode, ref, lieu, couleur: null, listes: [], voies: new Map() }
     groupe.listes.push(stations)
+    for (const m of r.members) {
+      if (m.type === 'way' && m.geometry?.length > 1 && !/^(platform|stop)/.test(m.role)) {
+        groupe.voies.set(
+          m.ref,
+          m.geometry.map((g) => [arrondi(g.lon), arrondi(g.lat)]),
+        )
+      }
+    }
     if (!groupe.couleur && /^#[0-9a-f]{6}$/i.test(t.colour ?? '')) groupe.couleur = t.colour.toLowerCase()
     groupes.set(cle, groupe)
   }
@@ -373,6 +381,8 @@ function construire(brut) {
       (g.lieu ? ` d’${g.lieu}` : ''),
     couleur: g.couleur,
     branches: branchesDistinctes(g.listes),
+    // Le tracé des voies, pour dessiner la ligne dans sa couleur et écrire son nom le long.
+    trace: enchainer([...g.voies.values()]).map((c) => simplifier(c, 0.00005)),
   }))
 }
 
