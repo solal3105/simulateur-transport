@@ -8,7 +8,7 @@ import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
-import type { PointProjet } from '@/lib/types'
+import type { PointProjet, Projet } from '@/lib/types'
 
 import { Deplier } from '../explications/Deplier'
 import { Sources } from '../explications/Budget'
@@ -347,6 +347,8 @@ export function FicheProjet({ id }: { id: string }) {
 
       <StationsProjet parcours={projet.parcours} />
 
+      <HistoireProjet projet={projet} />
+
       {projet.precisions?.length || projet.sources?.length ? (
         <Deplier titre="D’où viennent ces chiffres">
           {projet.precisions?.length ? (
@@ -360,6 +362,69 @@ export function FicheProjet({ id }: { id: string }) {
         </Deplier>
       ) : null}
     </Panneau>
+  )
+}
+
+const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+/** « 2024-06 » devient « juin 2024 » ; une année seule reste telle quelle. */
+const dateLisible = (date: string) => {
+  const [annee, mois] = date.split('-')
+  return mois ? `${MOIS[Number(mois) - 1] ?? ''} ${annee}`.trim() : (annee ?? date)
+}
+
+/**
+ * L'histoire d'un projet réel, repliée pour garder la fiche courte : ses grandes dates, ce qu'en ont dit les habitants
+ * d'après les documents publics de la concertation ou de l'enquête, et quelques articles de presse. Rien n'y est
+ * inventé : chaque ligne renvoie à son document.
+ */
+function HistoireProjet({ projet }: { projet: Projet }) {
+  const { histoire, avis, presse } = projet
+  if (!histoire?.length && !avis && !presse?.length) return null
+  const lien = 'underline decoration-trait decoration-2 underline-offset-2 hover:text-encre hover:decoration-rouge'
+  return (
+    <Deplier titre="L’histoire du projet">
+      {histoire?.length ? (
+        <ol className="flex flex-col gap-2">
+          {histoire.map((h) => (
+            <li key={`${h.date} ${h.texte}`} className="grid grid-cols-[88px_minmax(0,1fr)] gap-2 text-[13.5px] leading-snug">
+              <span className="font-extrabold">{dateLisible(h.date)}</span>
+              <span>
+                {h.texte}{' '}
+                <a href={h.source.url} target="_blank" rel="noreferrer" className={clsx('text-[12.5px] text-gris', lien)}>
+                  {h.source.titre}
+                </a>
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {avis ? (
+        <div className="flex flex-col gap-1">
+          <Surtitre>Ce qu’en ont dit les habitants</Surtitre>
+          <p className="text-[13.5px] leading-normal">{avis.texte}</p>
+          <a href={avis.source.url} target="_blank" rel="noreferrer" className={clsx('text-[12.5px] text-gris', lien)}>
+            {avis.source.titre}
+          </a>
+        </div>
+      ) : null}
+      {presse?.length ? (
+        <div className="flex flex-col gap-1">
+          <Surtitre>Dans la presse</Surtitre>
+          <ul className="flex flex-col gap-1.5 text-[13.5px] leading-snug">
+            {presse.map((a) => (
+              <li key={a.url}>
+                <a href={a.url} target="_blank" rel="noreferrer" className={clsx('font-bold', lien)}>
+                  {a.titre}
+                </a>
+                <span className="text-gris">
+                  , {a.media}, {dateLisible(a.date)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </Deplier>
   )
 }
 

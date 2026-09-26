@@ -44,7 +44,17 @@ function alleger(source, champs) {
   }
   return gardees.join('\n')
 }
-const CHAMPS_CATALOGUE = { description: "''", statut: null, parcours: null, precisions: null, sources: null, planReel: null }
+const CHAMPS_CATALOGUE = {
+  description: "''",
+  statut: null,
+  parcours: null,
+  precisions: null,
+  sources: null,
+  planReel: null,
+  histoire: null,
+  avis: null,
+  presse: null,
+}
 const CHAMPS_BUDGET = { simple: "''", explication: "''", sources: '[]', limites: '[]', textes: null }
 
 for (const nom of [
