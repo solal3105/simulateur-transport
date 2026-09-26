@@ -577,8 +577,8 @@ type Etiquette = { el: HTMLButtonElement; marqueur: Marker; places: [number, num
 
 /**
  * Place les étiquettes sans qu'elles se chevauchent : le projet choisi et les projets décidés passent d'abord, puis les
- * plus chers. Une étiquette dont le milieu est pris glisse le long de son tracé, et ne se cache que si aucune place n'est
- * libre. Les tracés restent cliquables, et la liste donne accès à tout.
+ * plus chers. Une étiquette dont le milieu est pris glisse le long de son tracé ; si aucune place n'est libre, elle devient
+ * un point de la couleur du projet, qui s'ouvre au toucher comme l'étiquette.
  */
 function eviterChevauchements(m: CarteMaplibre, etiquettes: Map<string, Etiquette>) {
   const prises: { left: number; right: number; top: number; bottom: number }[] = []
@@ -592,7 +592,8 @@ function eviterChevauchements(m: CarteMaplibre, etiquettes: Map<string, Etiquett
         Number(b.el.dataset.cout ?? 0) - Number(a.el.dataset.cout ?? 0),
     )
   for (const e of ordre) {
-    e.el.classList.remove('etiquette-masquee')
+    // L'étiquette se mesure dépliée, même si elle était un point au passage précédent.
+    delete e.el.dataset.forme
     const r = e.el.getBoundingClientRect()
     const ici = m.project(e.marqueur.getLngLat())
     // Le rectangle qu'occuperait l'étiquette à chaque place : le sien, décalé de l'écart à l'écran.
@@ -603,7 +604,9 @@ function eviterChevauchements(m: CarteMaplibre, etiquettes: Map<string, Etiquett
     })
     const choisie = essais.find((x) => libre(x.r))
     if (!choisie) {
-      e.el.classList.add('etiquette-masquee')
+      // Faute de place, un point de la couleur du projet au milieu de son tracé, qu'on voit et qu'on touche encore.
+      e.el.dataset.forme = 'point'
+      e.marqueur.setLngLat(e.places[0]!)
       continue
     }
     prises.push(choisie.r)
@@ -863,9 +866,13 @@ export function Carte({
       if (decor) return
       const ligne = m.queryRenderedFeatures(e.point, { layers: ['joueur-cible'] })[0]?.properties?.id as string | undefined
       if (ligne && jeu.lignes.some((l) => l.id === ligne)) return jeu.ouvrir({ type: 'ligne-joueur', id: ligne })
-      const trace = m.queryRenderedFeatures(e.point, { layers: ['projets-cible'] })[0]?.properties?.id as string | undefined
-      // Sans tracé touché, aucun projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
-      const projet = trace ? catalogue.projets.find((p) => p.trace === trace) : undefined
+      // Le premier tracé touché qui porte un projet : un tracé voisin ne doit pas avaler le clic. Sans tracé touché, aucun
+      // projet : sinon on ouvrirait le premier projet sans tracé, l'électrification des bus.
+      const projet = m
+        .queryRenderedFeatures(e.point, { layers: ['projets-cible'] })
+        .map((f) => f.properties?.id as string | undefined)
+        .map((id) => (id ? catalogue.projets.find((p) => p.trace === id) : undefined))
+        .find((p) => p !== undefined)
       if (projet) return jeu.ouvrir({ type: 'projet', id: projet.id })
       // Sur un écran tactile, toucher une station du réseau actuel montre son nom et ses lignes.
       const station = m.queryRenderedFeatures(zoneAutour(e.point, 10), { layers: ['gares', 'stations'] })[0]

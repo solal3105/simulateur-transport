@@ -77,8 +77,22 @@
   color: var(--mode);
   box-shadow: inset 0 0 0 2px var(--mode);
 }
-.etiquette-masquee {
-  visibility: hidden;
+/* Faute de place, l'étiquette devient un point de la couleur du projet, qu'on touche pour ouvrir sa fiche. MapLibre
+   place le marqueur avec transform : ces règles n'y touchent pas. */
+.etiquette[data-forme='point'],
+.etiquette[data-forme='point']:hover {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  font-size: 0;
+  background: var(--mode);
+  box-shadow: 0 0 0 2px #fff;
+}
+/* Une zone de toucher d'une quarantaine de pixels autour du point. */
+.etiquette[data-forme='point']::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
 }
 .etiquette:hover {
   background: var(--color-rouge-pale);
@@ -167,7 +181,7 @@
   background: var(--color-rouge);
   padding: 7px 12px;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgb(227 5 27 / 0.35);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-rouge) 35%, transparent);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
   animation: monte 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
@@ -212,19 +226,19 @@
 /* MapLibre place les marqueurs avec transform : l'animation ne doit toucher qu'à l'ombre. */
 @keyframes appel {
   0% {
-    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.7);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-rouge) 70%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 16px rgb(227 5 27 / 0);
+    box-shadow: 0 0 0 16px color-mix(in srgb, var(--color-rouge) 0%, transparent);
   }
 }
 @keyframes appel-bouton {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(227 5 27 / 0.45);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-rouge) 45%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 10px rgb(227 5 27 / 0);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-rouge) 0%, transparent);
   }
 }
 

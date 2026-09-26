@@ -303,14 +303,19 @@ function Chiffres({ e, arrets, mode }: { e: Estimation; arrets: number; mode: Mo
   )
 }
 
-/** Un nom réduit à ses lettres : « Châtelet » et « chatelet », « Saint-Lazare » et « saint lazare », « L’Ariane » et « L'Ariane » se retrouvent. */
+/** Un nom réduit à ses lettres : « Châtelet » et « chatelet », « L’Ariane » et « l'ariane », « St-Priest » et « Saint Priest » se retrouvent. */
 const cleRecherche = (nom: string) =>
   nom
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    // « Cœur d'Orly » s'écrit aussi « Coeur d'Orly ».
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
+    // « St Priest », « Ste-Foy » : les abréviations de saint et de sainte.
+    .replace(/\bste?\b/g, (m) => (m === 'st' ? 'saint' : 'sainte'))
 
 /** Un lieu où poser un arrêt : une station ou une gare du réseau actuel, un arrondissement, une commune ou un quartier. */
 type LieuCherche = { nom: string; cle: string; pos: [number, number]; station: boolean }
@@ -373,7 +378,7 @@ function AjoutParNom() {
       setErreur(`Nous ne trouvons pas ce lieu. Essayez un nom de station, de commune ou de quartier ${ville.territoire}.`)
       return
     }
-    ajouterArret(trouve.pos)
+    ajouterArret(trouve.pos, { station: true })
     setTexte('')
     setErreur('')
   }

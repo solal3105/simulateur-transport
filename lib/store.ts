@@ -113,7 +113,8 @@ interface Etat {
   quitterAccueil: () => void
   tracer: (mode?: ModeLigne) => void
   changerMode: (mode: ModeLigne) => void
-  ajouterArret: (p: [number, number]) => void
+  /** Ajoute un point au bout du tracé ; un arrêt choisi par son nom est une station, même avec l'outil des points de passage. */
+  ajouterArret: (p: [number, number], options?: { station?: boolean }) => void
   retirerArret: () => void
   /** Retire un arrêt précis du tracé, où qu'il soit. */
   enleverArret: (i: number) => void
@@ -271,11 +272,11 @@ export const useJeu = create<Etat>()(
             ? { ...s.brouillon, mode, prolonge: s.brouillon.mode === mode ? s.brouillon.prolonge : undefined }
             : { mode, arrets: [] },
         })),
-      ajouterArret: (p) =>
+      ajouterArret: (p, options) =>
         set((s) => {
           const b = s.brouillon
           if (!b) return {}
-          const passage = b.outil === 'passage' && b.arrets.length > 0
+          const passage = !options?.station && b.outil === 'passage' && b.arrets.length > 0
           return { brouillon: { ...b, arrets: [...b.arrets, p], passages: avecPoint(b.passages, b.arrets.length, passage) } }
         }),
       retirerArret: () =>
