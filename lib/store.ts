@@ -132,7 +132,8 @@ interface Etat {
   /** Fait du prolongement en cours une ligne à part entière, qui ne prolonge plus rien. */
   detacher: () => void
   /** Fait du tracé en cours, qui part déjà du terminus d'une ligne, le prolongement de cette ligne. */
-  rattacher: (ligne: string) => void
+  /** Fait d'un tracé le prolongement d'une ligne existante ; son premier point se pose alors sur le terminus. */
+  rattacher: (ligne: string, terminus?: [number, number]) => void
   abandonnerTrace: () => void
   construireLigne: (nom: string, estimation: Estimation, etale: boolean) => void
   /** Recalcule le coût et les voyageurs des lignes tracées avec le modèle actuel, quand il a changé. */
@@ -341,7 +342,18 @@ export const useJeu = create<Etat>()(
           apercu: 0,
         })),
       detacher: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: undefined } } : {})),
-      rattacher: (ligne) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: ligne } } : {})),
+      rattacher: (ligne, terminus) =>
+        set((s) =>
+          s.brouillon
+            ? {
+                brouillon: {
+                  ...s.brouillon,
+                  prolonge: ligne,
+                  arrets: terminus ? [terminus, ...s.brouillon.arrets.slice(1)] : s.brouillon.arrets,
+                },
+              }
+            : {},
+        ),
       modifierLigne: (id) =>
         set((s) => {
           const l = s.lignes.find((x) => x.id === id && x.mandat === s.mandat)

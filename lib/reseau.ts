@@ -98,6 +98,41 @@ export function terminusDe(ligne: LigneExistante): StationLigne[] {
   return [...bouts.values()]
 }
 
+/** Distance, en mètres, jusqu'à laquelle un tracé qui part près d'un terminus peut prolonger sa ligne. */
+export const ECART_PROLONGEMENT = 150
+
+/**
+ * Les lignes qu'un tracé peut prolonger depuis son premier point, de la plus proche à la plus lointaine : celles du même
+ * mode dont un terminus est tout près, et celles dont la station touchée est le terminus. Une station fusionnée garde la
+ * position d'une seule de ses lignes : à Porte Dauphine, le rond est celui du métro 2, à 260 m du terminus du T3b, qui
+ * porte le même nom. `possible` dit si la ligne se prolonge bien depuis ce terminus.
+ */
+export function prolongementsDepuis(
+  reseau: ReseauActuel | null,
+  mode: ModeLigne,
+  depart: [number, number],
+  station: StationExistante | null,
+  mx: number,
+  possible: (terminus: [number, number]) => boolean,
+): { ligne: LigneExistante & { mode: 'metro' | 'tram' }; terminus: StationLigne }[] {
+  return (reseau?.lignes ?? [])
+    .filter((l): l is LigneExistante & { mode: 'metro' | 'tram' } => prolongeable(l) && l.mode === mode)
+    .flatMap((ligne) => {
+      const terminus = terminusProche(ligne, depart, mx)
+      if (!terminus) return []
+      const distance = metres(mx, terminus.pos, depart)
+      const proche = distance <= ECART_PROLONGEMENT || Boolean(station?.terminus.includes(ligne.id))
+      return proche && possible(terminus.pos) ? [{ ligne, terminus, distance }] : []
+    })
+    .sort((a, b) => a.distance - b.distance)
+    .map(({ ligne, terminus }) => ({ ligne, terminus }))
+}
+
+/** Le terminus d'une ligne le plus proche d'un point : celui d'où part son prolongement. */
+export function terminusProche(ligne: LigneExistante, pos: [number, number], mx: number): StationLigne | undefined {
+  return terminusDe(ligne).sort((a, b) => metres(mx, a.pos, pos) - metres(mx, b.pos, pos))[0]
+}
+
 /**
  * Les stations du réseau, une par lieu : un pôle comme Bellecour, desservi par deux métros, n'apparaît
  * qu'une fois, avec ses deux lignes.

@@ -8,7 +8,17 @@ import { approx, km, n } from '@/lib/format'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import { DUREE_CHANTIER, estimer, prolongementPossible, rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { correspondances, direLignes, nommerTrace, prolongeable, stationProche, terminusDe, type LigneExistante } from '@/lib/reseau'
+import {
+  correspondances,
+  direLignes,
+  nommerTrace,
+  prolongeable,
+  prolongementsDepuis,
+  stationProche,
+  terminusDe,
+  terminusProche,
+  type LigneExistante,
+} from '@/lib/reseau'
 import { ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, LigneJoueur, ModeLigne } from '@/lib/types'
@@ -71,6 +81,12 @@ export function useEstimation(): Estimation | null {
   )
 }
 
+/** Ce qui identifie une proposition de prolongement, pour ne plus la montrer une fois écartée. */
+const cleProposition = (liste: { ligne: { id: string } }[]) => liste.map((c) => c.ligne.id).join(',')
+
+/** « a, b et c » : une énumération dans une phrase. */
+const enumerer = (mots: string[]) => (mots.length <= 1 ? (mots[0] ?? '') : `${mots.slice(0, -1).join(', ')} et ${mots.at(-1)}`)
+
 /** « Métro D » devient « métro D », pour le glisser dans une phrase. */
 const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice(1)
 
@@ -94,11 +110,18 @@ function useReseauDuTrace(trace: Pick<LigneJoueur, 'mode' | 'arrets' | 'passages
           : c,
       )
       .filter((c) => c.station.lignes.length || c.station.gare)
+    // Les lignes que le tracé pourrait prolonger, s'il part tout près d'un de leurs terminus : toutes, et pas seulement
+    // la première, quand deux lignes finissent au même endroit.
     const depart = trace.arrets[0]
-    const terminus = depart && !trace.prolonge ? stationProche(donnees.stations, depart, mx, 60) : null
-    const aProlonger = terminus?.terminus
-      .map((id) => donnees.reseau?.lignes.find((l) => l.id === id))
-      .find((l): l is LigneExistante => Boolean(l && l.mode === trace.mode && prolongementPossible(l.mode, depart!, donnees.carreaux)))
+    const aProlonger =
+      depart && !trace.prolonge
+        ? prolongementsDepuis(donnees.reseau, trace.mode, depart, stationProche(donnees.stations, depart, mx, 60), mx, (p) =>
+            prolongementPossible(trace.mode, p, donnees.carreaux),
+          )
+        : []
+    // Un prolongement part du terminus de sa ligne et en porte le nom, même si une autre station est plus proche.
+    const depuis = prolongee && depart ? terminusProche(prolongee, depart, mx) : undefined
+    if (depuis && estStation[0]) noms[0] = depuis.nom
     const stationsNommees = noms.filter((x): x is string => Boolean(x))
     return { estStation, noms, stationsNommees, liste, prolongee, aProlonger, donnees }
   }, [donnees, trace])
@@ -581,16 +604,20 @@ export function Traceur() {
 
       {arrets === 0 && !modifiee && r?.donnees.reseau ? <Prolonger lignes={r.donnees.reseau.lignes} /> : null}
 
-      {r?.aProlonger && ecartee !== r.aProlonger.id ? (
+      {r?.aProlonger.length && ecartee !== cleProposition(r.aProlonger) ? (
         <div role="group" aria-labelledby="proposer-prolongement" className="flex flex-col gap-3 rounded-2xl bg-sable p-4">
           <p id="proposer-prolongement" className="text-[14.5px] leading-relaxed">
-            Votre ligne part du terminus du {minuscule(r.aProlonger.nom)}. Voulez-vous la prolonger ? Sa première station existe déjà.
+            {r.aProlonger.length === 1
+              ? `Votre ligne part du terminus du ${minuscule(r.aProlonger[0]!.ligne.nom)}, à ${r.aProlonger[0]!.terminus.nom}. Voulez-vous la prolonger ? Sa première station existe déjà.`
+              : `Votre ligne part d’un terminus ${enumerer(r.aProlonger.map((c) => `du ${minuscule(c.ligne.nom)}`))}. Voulez-vous prolonger l’une de ces lignes ? Sa première station existe déjà.`}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <Bouton genre="rouge" taille="petit" onClick={() => rattacher(r.aProlonger!.id)}>
-              Prolonger le {minuscule(r.aProlonger.nom)}
-            </Bouton>
-            <Bouton genre="contour" taille="petit" onClick={() => setEcartee(r.aProlonger!.id)}>
+            {r.aProlonger.map((c) => (
+              <Bouton key={c.ligne.id} genre="rouge" taille="petit" onClick={() => rattacher(c.ligne.id, c.terminus.pos)}>
+                Prolonger le {minuscule(c.ligne.nom)}
+              </Bouton>
+            ))}
+            <Bouton genre="contour" taille="petit" onClick={() => setEcartee(cleProposition(r.aProlonger))}>
               Garder une ligne à part
             </Bouton>
           </div>

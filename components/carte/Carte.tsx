@@ -23,7 +23,7 @@ import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
 import { rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
+import { direLignes, direOuvertures, nommerTrace, terminusProche, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
@@ -1061,7 +1061,12 @@ export function Carte({
 
       // Le nom de chaque station posée : celui de la station existante où elle s'accroche, sinon son quartier.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
-      nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx).forEach((nom, i) => {
+      const noms = nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx)
+      // Un prolongement part du terminus de sa ligne et en porte le nom.
+      const prolongee = brouillon?.prolonge ? donnees.reseau?.lignes.find((l) => l.id === brouillon.prolonge) : undefined
+      const depuis = prolongee && arrets[0] ? terminusProche(prolongee, arrets[0], donnees.carreaux.mx) : undefined
+      if (depuis && estStation[0]) noms[0] = depuis.nom
+      noms.forEach((nom, i) => {
         if (!nom) return
         const el = document.createElement('div')
         const etiquette = document.createElement('span')
