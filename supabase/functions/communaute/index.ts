@@ -21,11 +21,11 @@ const base = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_
 // Empreinte des données du modèle de chaque ville (carreaux.json et arrets.json de public/data ou
 // public/data/<ville>) : seules ces données exactes peuvent être déposées, une fois par ville.
 const EMPREINTES: Record<IdVille, string> = {
-  lyon: 'a2127334171f48f6fd596c2b0bc21474867bfd188eb8e65bd723ad1097519631',
+  lyon: '757415eaf42c6e32d58851ef8d232778d19d987b14dd05c2c34808f5100cca04',
   toulouse: '8bb4ba127285f7407c9a4df8fc00492e6c80f8de1ece55b5495cee124e9878fa',
   marseille: '559c8700d0582cc5f128704869d91843b4e0ce655b4e8a4a77b75c44cc51a2f1',
   nice: '18766bf4503eb0e2fea45f62571b703e1bf9cc611ae5c5d48df35cee46127fff',
-  idf: '2899dcf2ef96441bfc27385f07c7ea65db3327c1facc89043e8da9bc3115aebb',
+  idf: 'c0da7db6e8d97e6b08636a9ecafedfbb4ae8171039f15e9bb8d2d471b738c1b3',
 }
 
 // Empreinte du terrain de chaque ville (relief.json et grands cours d'eau de fond.json), déposé par

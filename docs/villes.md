@@ -88,7 +88,7 @@ La carte montre chaque ligne de métro, de tram et de téléphérique avec ses s
 
 Les gares sont les points et les surfaces qu'OpenStreetMap marque `railway=station` ou `railway=halt` dans l'emprise de chaque réseau : 43 dans le réseau lyonnais, 17 à Toulouse, 46 dans la métropole d'Aix-Marseille-Provence, 30 à Nice et 468 en Île-de-France. On écarte les stations de métro, de tram et de funiculaire, les petits trains touristiques et de parcs d'attractions (Disneyland, vélorails), les gares désaffectées et celles qui n'ont ni exploitant, ni réseau, ni code ferroviaire. Quelques noms sont corrigés pour être ceux d'un plan (« Salon-de-Provence » plutôt que « Salon », une seule écriture de « Gare de l'Est » sur toutes les lignes). Pour que la carte reste fluide sur un téléphone, les noms des gares et des quartiers ne sont posés qu'autour de la vue, et remis à jour à la fin de chaque déplacement.
 
-Ces données servent à l'affichage et aux correspondances, pas au calcul des voyageurs : le modèle ne compte comme déjà desservis que les habitants proches d'un arrêt de tram ou d'une station de métro (`public/data/<ville>/arrets.json`), pas ceux d'une gare. Une ligne tracée le long du RER gagne donc des voyageurs qu'il transporte déjà.
+Ces données servent à l'affichage et aux correspondances, pas au calcul des voyageurs : le modèle ne compte comme déjà desservis que les habitants proches d'un arrêt de tram ou d'une station de métro (`public/data/<ville>/arrets.json`, écrit par `scripts/arrets.mjs` avec les arrêts d'OpenStreetMap et ceux des lignes de métro et de tram en service, dont les trams-trains d'Île-de-France), pas ceux d'une gare. Une ligne tracée le long du RER gagne donc des voyageurs qu'il transporte déjà.
 
 ## Toulouse
 
