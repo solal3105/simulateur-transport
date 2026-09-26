@@ -37,6 +37,36 @@ export function milieu(geometry: MultiLineString): [number, number] {
   return [p[0]!, p[1]!]
 }
 
+/**
+ * Des points répartis le long de la plus longue partie d'un tracé, aux fractions de sa longueur demandées : les places
+ * possibles de son étiquette, quand le milieu est déjà pris par celle d'un autre projet.
+ */
+export function pointsLeLong(geometry: MultiLineString, fractions: number[]): [number, number][] {
+  const longueur = (l: number[][]) => {
+    let t = 0
+    for (let i = 1; i < l.length; i += 1) t += Math.hypot((l[i]![0]! - l[i - 1]![0]!) * MX, (l[i]![1]! - l[i - 1]![1]!) * MY)
+    return t
+  }
+  const partie = geometry.coordinates.reduce<number[][]>((a, b) => (longueur(b) > longueur(a) ? b : a), geometry.coordinates[0] ?? [])
+  const total = longueur(partie)
+  if (!partie.length || total === 0) return [milieu(geometry)]
+  return fractions.map((f) => {
+    let parcouru = 0
+    for (let i = 1; i < partie.length; i += 1) {
+      const a = partie[i - 1]!
+      const b = partie[i]!
+      const pas = Math.hypot((b[0]! - a[0]!) * MX, (b[1]! - a[1]!) * MY)
+      if (parcouru + pas >= total * f) {
+        const r = pas === 0 ? 0 : (total * f - parcouru) / pas
+        return [a[0]! + (b[0]! - a[0]!) * r, a[1]! + (b[1]! - a[1]!) * r]
+      }
+      parcouru += pas
+    }
+    const fin = partie.at(-1)!
+    return [fin[0]!, fin[1]!]
+  })
+}
+
 /** Cercle de rayon donné en mètres, en polygone, à la latitude de la ville. */
 export function cercle(centre: [number, number], rayon: number, latitude: number, cotes = 40): Feature<Polygon> {
   const mx = metresParDegre(latitude)

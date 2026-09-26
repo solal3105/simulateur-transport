@@ -21,7 +21,7 @@ import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
-import { carreau, cercle, milieu } from '@/lib/geo'
+import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
 import { rayonBassin, stationsDuTrace } from '@/lib/modele'
 import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
@@ -569,25 +569,45 @@ function eclat(m: CarteMaplibre, coordonnees: number[][][], couleur: string) {
 
 const PRIORITE: Record<string, number> = { choisi: 0, construit: 1, chantier: 1, etude: 2, indisponible: 3 }
 
+/** Les places essayées pour l'étiquette d'un projet, en fractions de son tracé : le milieu, puis de part et d'autre. */
+const PLACES = [0.5, 0.35, 0.65, 0.2, 0.8, 0.1, 0.9]
+
+/** L'étiquette de prix d'un projet, son marqueur sur la carte et les places qu'elle peut prendre le long de son tracé. */
+type Etiquette = { el: HTMLButtonElement; marqueur: Marker; places: [number, number][] }
+
 /**
- * Masque les étiquettes qui se chevauchent : le projet choisi et les projets décidés passent
- * d'abord, puis les plus chers. Les tracés restent cliquables, et la liste donne accès à tout.
+ * Place les étiquettes sans qu'elles se chevauchent : le projet choisi et les projets décidés passent d'abord, puis les
+ * plus chers. Une étiquette dont le milieu est pris glisse le long de son tracé, et ne se cache que si aucune place n'est
+ * libre. Les tracés restent cliquables, et la liste donne accès à tout.
  */
-function eviterChevauchements(etiquettes: Map<string, HTMLButtonElement>) {
-  const visibles: DOMRect[] = []
+function eviterChevauchements(m: CarteMaplibre, etiquettes: Map<string, Etiquette>) {
+  const prises: { left: number; right: number; top: number; bottom: number }[] = []
+  const libre = (r: (typeof prises)[number]) =>
+    !prises.some((v) => r.left < v.right + 4 && r.right > v.left - 4 && r.top < v.bottom + 2 && r.bottom > v.top - 2)
   const ordre = [...etiquettes.values()]
-    .filter((el) => el.style.display !== 'none')
+    .filter((e) => e.el.style.display !== 'none')
     .sort(
       (a, b) =>
-        (PRIORITE[a.dataset.etat ?? 'etude'] ?? 2) - (PRIORITE[b.dataset.etat ?? 'etude'] ?? 2) ||
-        Number(b.dataset.cout ?? 0) - Number(a.dataset.cout ?? 0),
+        (PRIORITE[a.el.dataset.etat ?? 'etude'] ?? 2) - (PRIORITE[b.el.dataset.etat ?? 'etude'] ?? 2) ||
+        Number(b.el.dataset.cout ?? 0) - Number(a.el.dataset.cout ?? 0),
     )
-  for (const el of ordre) {
-    el.classList.remove('etiquette-masquee')
-    const r = el.getBoundingClientRect()
-    const gene = visibles.some((v) => r.left < v.right + 4 && r.right > v.left - 4 && r.top < v.bottom + 2 && r.bottom > v.top - 2)
-    if (gene) el.classList.add('etiquette-masquee')
-    else visibles.push(r)
+  for (const e of ordre) {
+    e.el.classList.remove('etiquette-masquee')
+    const r = e.el.getBoundingClientRect()
+    const ici = m.project(e.marqueur.getLngLat())
+    // Le rectangle qu'occuperait l'étiquette à chaque place : le sien, décalé de l'écart à l'écran.
+    const essais = e.places.map((p) => {
+      const q = m.project(p)
+      const [dx, dy] = [q.x - ici.x, q.y - ici.y]
+      return { p, r: { left: r.left + dx, right: r.right + dx, top: r.top + dy, bottom: r.bottom + dy } }
+    })
+    const choisie = essais.find((x) => libre(x.r))
+    if (!choisie) {
+      e.el.classList.add('etiquette-masquee')
+      continue
+    }
+    prises.push(choisie.r)
+    e.marqueur.setLngLat(choisie.p)
   }
 }
 
@@ -627,7 +647,7 @@ export function Carte({
   const catalogue = CATALOGUES[ville.id]
   const conteneur = useRef<HTMLDivElement>(null)
   const carte = useRef<CarteMaplibre | null>(null)
-  const [etiquettes] = useState(() => new Map<string, HTMLButtonElement>())
+  const [etiquettes] = useState(() => new Map<string, Etiquette>())
   const [nomsArrets] = useState<Marker[]>(() => [])
   const pret = useRef(false)
   const appliquerEtat = useRef<() => void>(() => {})
@@ -747,8 +767,9 @@ export function Carte({
         if (useJeu.getState().brouillon) return
         useJeu.getState().ouvrir({ type: 'projet', id: projet.id })
       })
-      new Marker({ element: el }).setLngLat(milieu(f.geometry)).addTo(m)
-      etiquettes.set(f.properties.id, el)
+      const places = pointsLeLong(f.geometry, PLACES)
+      const marqueur = new Marker({ element: el }).setLngLat(places[0] ?? milieu(f.geometry)).addTo(m)
+      etiquettes.set(f.properties.id, { el, marqueur, places })
     }
 
     // Pendant le tracé, on fait glisser un arrêt pour le déplacer. Un glissement ne doit pas poser d'arrêt au
@@ -896,7 +917,7 @@ export function Carte({
         m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
       })
     }
-    m.on('moveend', () => eviterChevauchements(etiquettes))
+    m.on('moveend', () => eviterChevauchements(m, etiquettes))
     m.on('load', () => {
       pret.current = true
       appliquerEtat.current()
@@ -956,7 +977,7 @@ export function Carte({
       precedents.current = new Map(etats)
 
       for (const [nomTrace, etat] of etats) {
-        const el = etiquettes.get(nomTrace)
+        const el = etiquettes.get(nomTrace)?.el
         if (!el) continue
         el.dataset.etat = etat
         const projet = catalogue.projets.find((p) => p.trace === nomTrace)
@@ -971,8 +992,8 @@ export function Carte({
                 ? n(resoudre(projet, c).cout)
                 : ''
       }
-      for (const el of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
-      requestAnimationFrame(() => eviterChevauchements(etiquettes))
+      for (const { el } of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
+      requestAnimationFrame(() => eviterChevauchements(m, etiquettes))
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
       if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace ? 'visible' : 'none')
       m.getCanvas().style.cursor = trace ? 'crosshair' : ''
