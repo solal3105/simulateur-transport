@@ -54,7 +54,7 @@ const VERSIONS: Version[] = [
           'Les lignes de métro, de tram, de RER et de train sont dessinées dans leurs couleurs, et leur nom est répété le long du tracé.',
           'La partie ne s’arrête plus forcément en 2038 : au bilan, vous pouvez la continuer, mandat après mandat. Faute de budget publié au-delà, chaque nouveau mandat reprend celui du second.',
           'Vous renommez une station de votre tracé en la touchant, sur la carte ou dans la liste de vos arrêts, et son nom la suit jusque dans le lien que vous partagez.',
-          'Les bus qui roulent surtout sur des voies réservées, comme le TVM, le 393 et les Tzen en Île-de-France, le L6 à Toulouse, le B3 à Marseille, apparaissent parmi les lignes existantes, avec leurs arrêts et leurs correspondances. Ils ne changent pas le calcul des voyageurs.',
+          'Les bus à haut niveau de service, comme le TVM et les Tzen en Île-de-France, les TramBus de Lyon, les Linéo de Toulouse, les lignes B1 à B5 de Marseille et l’Aixpress, apparaissent parmi les lignes existantes, avec leurs arrêts et leurs correspondances. Ils ne changent pas le calcul des voyageurs.',
         ],
       },
       {

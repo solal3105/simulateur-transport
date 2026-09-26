@@ -22,7 +22,7 @@ export type ModeExistant = ModeLigne | 'rer' | 'train'
 export interface LigneExistante {
   /** « metro-A », « tram-T1 », « rer-B », « bus-TVM ». */
   id: string
-  /** Un bus est un bus en site propre, comme le TVM : la carte le montre, mais il ne se prolonge pas. */
+  /** Un bus est un bus à haut niveau de service, comme le TVM ou un Linéo : la carte le montre, mais il ne se prolonge pas. */
   mode: ModeExistant
   /** Le nom court de la ligne : « A », « T1 », « 14 ». */
   ref: string
@@ -49,7 +49,7 @@ export interface ReseauActuel {
 
 /**
  * Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train, et le calcul des voyageurs ne
- * connaît pas les arrêts des bus en site propre, que la carte montre sans qu'ils comptent comme une desserte.
+ * connaît pas les arrêts des bus à haut niveau de service, que la carte montre sans qu'ils comptent comme une desserte.
  */
 export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: 'metro' | 'tram' } => l.mode === 'metro' || l.mode === 'tram'
 
@@ -139,7 +139,8 @@ export function terminusProche(ligne: LigneExistante, pos: [number, number], mx:
 
 /**
  * Les stations du réseau, une par lieu : un pôle comme Bellecour, desservi par deux métros, n'apparaît
- * qu'une fois, avec ses deux lignes.
+ * qu'une fois, avec ses deux lignes. Les arrêts des bus viennent en dernier, après les gares : un arrêt tout près
+ * d'une station ou d'une gare s'y fond, et la gare de Lyon-Saint-Paul reste à sa place, pas à celle de l'arrêt du TB11.
  */
 export function stationsExistantes(reseau: ReseauActuel | null, mx: number): StationExistante[] {
   if (!reseau) return []
@@ -150,7 +151,7 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
       return d < MEME_LIEU || (s.nom !== '' && cleNom(x.nom) === cleNom(s.nom) && d < MEME_STATION)
     })
   const cle = (s: StationLigne) => cleNom(s.nom) || s.pos.join(',')
-  for (const l of reseau.lignes) {
+  const ajouter = (l: LigneExistante) => {
     const bouts = new Set(terminusDe(l).map(cle))
     for (const s of l.branches.flat()) {
       let station = retrouver(s)
@@ -166,12 +167,14 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
       if (!station.nom && s.nom) station.nom = s.nom
     }
   }
+  for (const l of reseau.lignes) if (l.mode !== 'bus') ajouter(l)
   // Les gares : une station du même nom tout près en devient une, sinon la gare s'ajoute seule.
   for (const g of reseau.gares ?? []) {
     const station = retrouver(g)
     if (station) station.gare = true
     else stations.push({ nom: g.nom, pos: g.pos, lignes: [], terminus: [], gare: true })
   }
+  for (const l of reseau.lignes) if (l.mode === 'bus') ajouter(l)
   return stations
 }
 
