@@ -65,7 +65,7 @@ function Rangee({
     <div
       role="row"
       className={clsx(
-        'grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b border-trait px-5 py-3 lg:gap-4 lg:px-7',
+        'grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b border-trait px-4 py-3 lg:gap-4 lg:px-5',
         GRILLE,
         choisi && 'bg-[#fff7f8]',
       )}
@@ -135,6 +135,18 @@ export function Liste() {
     return rows
   }, [catalogue, chantiers, mandat, tri])
 
+  // Vos lignes suivent le même tri que les projets du catalogue.
+  const lignesTriees = useMemo(() => {
+    const valeur = (l: (typeof lignes)[number]) => {
+      const e = l.estimation
+      if (tri === 'voyageurs') return -e.nouveaux
+      if (tri === 'rendement') return e.cout > 0 ? -e.nouveaux / e.cout : 0
+      if (tri === 'prix') return e.cout
+      return ouverture(l.mandat, e.duree)
+    }
+    return [...lignes].sort((a, b) => valeur(a) - valeur(b))
+  }, [lignes, tri])
+
   // La barre des voyageurs se rapporte au plus fréquenté de la liste, projets et lignes tracées ensemble.
   const plusFrequente = Math.max(1, ...lignesTableau.map((x) => x.r.voyageurs), ...lignes.map((l) => l.estimation.nouveaux))
   const echelleRendement =
@@ -151,7 +163,7 @@ export function Liste() {
 
   return (
     <Panneau titre={ville.catalogue ? `${catalogue.length} projets` : 'Vos lignes'} largeur="pleine" hauteurTelephone="pleine">
-      {ville.catalogue ? (
+      {ville.catalogue || lignes.length > 1 ? (
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Trier les projets">
           <span className="mr-1 text-[13px] font-semibold text-gris">Trier par</span>
           {tris.map((t) => (
@@ -171,11 +183,11 @@ export function Liste() {
         </div>
       ) : null}
 
-      <div className="-mx-5 lg:-mx-7" role="table" aria-label={ville.catalogue ? 'Vos lignes et les projets du catalogue' : 'Vos lignes'}>
+      <div className="-mx-4 lg:-mx-5" role="table" aria-label={ville.catalogue ? 'Vos lignes et les projets du catalogue' : 'Vos lignes'}>
         <div
           role="row"
           className={clsx(
-            'hidden gap-4 border-y border-trait px-7 py-2.5 text-xs font-extrabold tracking-[0.06em] text-muet uppercase lg:grid',
+            'hidden gap-4 border-y border-trait px-5 py-2.5 text-xs font-extrabold tracking-[0.06em] text-muet uppercase lg:grid',
             GRILLE,
           )}
         >
@@ -191,8 +203,8 @@ export function Liste() {
 
         {lignes.length ? (
           <>
-            {ville.catalogue ? <h3 className="px-5 pt-4 pb-1 text-base font-black lg:px-7">Vos lignes</h3> : null}
-            {lignes.map((l) => {
+            {ville.catalogue ? <h3 className="px-4 pt-4 pb-1 text-base font-black lg:px-5">Vos lignes</h3> : null}
+            {lignesTriees.map((l) => {
               const e = l.estimation
               const rendement = e.cout > 0 ? e.nouveaux / e.cout : 0
               const annee = ouverture(l.mandat, e.duree)
@@ -248,7 +260,7 @@ export function Liste() {
                 />
               )
             })}
-            {ville.catalogue ? <h3 className="px-5 pt-5 pb-1 text-base font-black lg:px-7">Les projets du catalogue</h3> : null}
+            {ville.catalogue ? <h3 className="px-4 pt-5 pb-1 text-base font-black lg:px-5">Les projets du catalogue</h3> : null}
           </>
         ) : null}
 
