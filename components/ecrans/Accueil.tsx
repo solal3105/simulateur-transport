@@ -476,6 +476,12 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
               </Link>
             ) : null}
             <Link
+              href="/nouveautes"
+              className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
+            >
+              Nouveautés
+            </Link>
+            <Link
               href="/mentions-legales"
               className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
             >

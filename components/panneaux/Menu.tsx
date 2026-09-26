@@ -56,12 +56,20 @@ export function Menu() {
           Signaler un bug ou proposer une amélioration
         </Bouton>
       </div>
-      <Link
-        href="/mentions-legales"
-        className="self-start text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
-      >
-        Mentions légales et confidentialité
-      </Link>
+      <div className="flex flex-wrap gap-x-5 gap-y-1">
+        <Link
+          href="/nouveautes"
+          className="text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
+        >
+          Nouveautés du jeu
+        </Link>
+        <Link
+          href="/mentions-legales"
+          className="text-[13.5px] font-extrabold text-gris underline decoration-trait underline-offset-3 hover:text-encre"
+        >
+          Mentions légales et confidentialité
+        </Link>
+      </div>
     </Panneau>
   )
 }
