@@ -65,12 +65,6 @@ export interface Projet {
   /** Les chiffres que nous estimons nous-mêmes, faute d'étude publiée, avec la méthode des lignes que vous tracez. */
   estime?: { voyageurs?: boolean; duree?: boolean }
   sources?: Source[]
-  /** L'histoire du projet en quelques dates, « 2024-06 » ou « 2024 », chacune avec le document qui l'établit. */
-  histoire?: { date: string; texte: string; source: Source }[]
-  /** Ce qu'en ont dit les habitants pendant la concertation ou l'enquête publique, résumé, avec le document résumé. */
-  avis?: { texte: string; source: Source }
-  /** Des articles de presse sur le projet : leur titre, leur média, leur date et leur adresse, jamais leur texte. */
-  presse?: { titre: string; media: string; date: string; url: string }[]
 }
 
 /** Le catalogue d'un réseau : ses projets réels, et celui que le tutoriel fait lancer. */

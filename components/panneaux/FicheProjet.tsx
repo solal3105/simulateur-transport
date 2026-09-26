@@ -7,7 +7,8 @@ import { horizon, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
-import { useJeu } from '@/lib/store'
+import { ficheProjet } from '@/lib/fiches'
+import { useJeu, useVille } from '@/lib/store'
 import type { PointProjet, Projet } from '@/lib/types'
 
 import { Deplier } from '../explications/Deplier'
@@ -378,8 +379,9 @@ const dateLisible = (date: string) => {
  * inventé : chaque ligne renvoie à son document.
  */
 function HistoireProjet({ projet }: { projet: Projet }) {
-  const { histoire, avis, presse } = projet
-  if (!histoire?.length && !avis && !presse?.length) return null
+  const fiche = ficheProjet(useVille().id, projet.id)
+  if (!fiche) return null
+  const { histoire, avis, presse } = fiche
   const lien = 'underline decoration-trait decoration-2 underline-offset-2 hover:text-encre hover:decoration-rouge'
   return (
     <Deplier titre="L’histoire du projet">
