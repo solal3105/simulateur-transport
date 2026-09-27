@@ -4,13 +4,13 @@ import { clsx } from 'clsx'
 import Link from 'next/link'
 
 import { de } from '@/lib/format'
-import { communauteActive } from '@/lib/communaute'
-import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille } from '@/lib/villes'
+import { adresseAccueil, adresseMethode, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
 
 import { useCouleursReseau } from '../couleurs'
-import { Icone, Logo, useChoixVisible } from '../ui'
+import { Icone, useChoixVisible } from '../ui'
 import { EcrireBudget, ExplicationBudget, ExplicationLeviers } from './Budget'
 import { EcrireVoyageurs, ExplicationVoyageurs } from './Voyageurs'
+import { BarreSite } from '../BarreSite'
 
 /**
  * La page qui explique, sans commencer de partie, comment nous calculons le budget d'un réseau, ce que
@@ -29,29 +29,7 @@ export function PageMethode({ ville: id }: { ville: IdVille }) {
     <main className="min-h-dvh bg-white">
       <header className="bg-rouge text-white">
         <div className="mx-auto flex max-w-[880px] flex-col gap-6 px-5 pt-5 pb-9 lg:gap-8 lg:px-8 lg:pt-8 lg:pb-12">
-          <div className="flex items-center justify-between gap-4">
-            <Link href={adresseAccueil(id)} className="flex items-center gap-2.5">
-              <Logo taille={36} inverse />
-              <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-            </Link>
-            <nav aria-label="Pages du réseau" className="flex items-center gap-4">
-              {communauteActive ? (
-                <Link
-                  href={adresseReseaux(id)}
-                  className="hidden min-h-10 items-center text-[14px] font-extrabold underline decoration-white/60 decoration-2 underline-offset-4 sm:flex"
-                >
-                  Réseaux publiés
-                </Link>
-              ) : null}
-              <Link
-                href={adresseAccueil(id)}
-                className="flex min-h-10 items-center gap-1.5 text-[14px] font-extrabold underline decoration-white/60 decoration-2 underline-offset-4"
-              >
-                <Icone nom="retour" taille={17} epaisseur={2.4} />
-                Accueil
-              </Link>
-            </nav>
-          </div>
+          <BarreSite ville={id} page="methode" />
           <h1 className="max-w-[720px] text-[38px] leading-[0.97] font-black tracking-[-0.03em] text-balance lg:text-[60px] lg:leading-[0.95]">
             Comment nous calculons le budget et les voyageurs
           </h1>

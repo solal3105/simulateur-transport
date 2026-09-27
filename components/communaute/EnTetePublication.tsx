@@ -54,7 +54,15 @@ export function EnTetePublication({ publication }: { publication: Publication })
         Publié par {publication.auteur?.pseudo ?? 'un joueur'}, le {date(publication.creeLe)}
       </span>
       <h1 className="text-[30px] leading-[1.02] font-black tracking-[-0.025em] text-balance lg:text-[38px]">{publication.titre}</h1>
-      {publication.intention ? <p className="text-[15.5px] leading-relaxed text-gris">{publication.intention}</p> : null}
+      {/* Les mots de l'auteur, en citation : ils ne se confondent pas avec nos textes. */}
+      {publication.intention ? (
+        <figure className="flex flex-col gap-1 rounded-xl bg-rouge-pale px-4 py-3">
+          <blockquote className="text-[16px] leading-snug font-semibold text-encre lg:text-[17px]">« {publication.intention} »</blockquote>
+          <figcaption className="text-[12.5px] font-bold text-gris">
+            {publication.auteur?.pseudo ?? 'L’auteur'}, en publiant ce réseau
+          </figcaption>
+        </figure>
+      ) : null}
       {publication.source ? (
         <p className="text-[14px] leading-relaxed text-gris">
           Inspiré de{' '}

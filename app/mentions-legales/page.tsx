@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { Icone, Logo } from '@/components/ui'
+import { BarreSite } from '@/components/BarreSite'
 import { MARQUE, VILLES } from '@/lib/villes'
 
 import { Contact } from './Contact'
@@ -35,19 +34,7 @@ export default function Page() {
     <main className="min-h-dvh bg-white">
       <header className="bg-rouge text-white">
         <div className="mx-auto flex max-w-[760px] flex-col gap-6 px-5 pt-5 pb-9 lg:gap-8 lg:px-8 lg:pt-8 lg:pb-12">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <Logo taille={36} inverse />
-              <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-            </Link>
-            <Link
-              href="/"
-              className="flex min-h-10 items-center gap-1.5 text-[14px] font-extrabold underline decoration-white/60 decoration-2 underline-offset-4"
-            >
-              <Icone nom="retour" taille={17} epaisseur={2.4} />
-              Accueil
-            </Link>
-          </div>
+          <BarreSite page="autre" />
           <h1 className="text-[38px] leading-[0.97] font-black tracking-[-0.03em] text-balance lg:text-[56px] lg:leading-[0.95]">
             Mentions légales et confidentialité
           </h1>
