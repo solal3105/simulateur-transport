@@ -19,7 +19,6 @@ import { Carte } from '../carte/Carte'
 import { TraitReseau } from '../carte/TraitReseau'
 import { useCouleursReseau } from '../couleurs'
 import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
-import { Devoilement } from './Devoilement'
 
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
@@ -191,26 +190,6 @@ function ChoixVille({ ville, choisir }: { ville: IdVille; choisir: (v: IdVille) 
   )
 }
 
-/** Le bouton qui ouvre le dévoilement de tout ce que le jeu permet. */
-function BoutonDevoilement({ ouvrir }: { ouvrir: () => void }) {
-  return (
-    <motion.button
-      variants={cascade.enfant}
-      type="button"
-      onClick={ouvrir}
-      className="group flex items-center gap-3 rounded-full py-1 pr-2 text-left"
-    >
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition-colors group-hover:bg-white/30">
-        <Icone nom="drapeau" taille={19} epaisseur={2.2} />
-      </span>
-      <span className="flex-1 text-[15.5px] leading-tight font-black underline decoration-white/40 underline-offset-4 group-hover:decoration-white">
-        Voir tout ce que le jeu permet
-      </span>
-      <Icone nom="fleche" taille={20} epaisseur={2.3} className="transition-transform group-hover:translate-x-1" />
-    </motion.button>
-  )
-}
-
 /** Les deux façons de jouer, proposées quand on commence une partie. */
 function ChoixMode({ pourLignes, choisir, annuler }: { pourLignes: number; choisir: (libre: boolean) => void; annuler: () => void }) {
   const carte =
@@ -294,7 +273,6 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
   // d'entrée : l'adresse du joueur et son engagement à signaler bugs et améliorations.
   const acces = useAcces()
   const avecAcces = (action: () => void) => exigerAcces(action, choix)
-  const [devoilement, setDevoilement] = useState(false)
 
   // L'adresse et le titre de l'onglet suivent la ville affichée. Le routeur remet le titre de la page
   // d'origine après un changement d'adresse : le titre est corrigé juste après.
@@ -374,8 +352,6 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         </div>
 
         <Parcours key={choix} arrets={t.arrets} />
-
-        <BoutonDevoilement ouvrir={() => setDevoilement(true)} />
 
         {/* Sur téléphone, le bouton pour commencer reste en bas de l'écran pendant qu'on lit, et le choix du
             mode s'ouvre au même endroit. */}
@@ -490,15 +466,6 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
           </motion.nav>
         )}
       </motion.div>
-      <Devoilement
-        ouvert={devoilement}
-        acces={acces}
-        fermer={() => setDevoilement(false)}
-        commencer={() => {
-          setDevoilement(false)
-          avecAcces(() => setEtape({ ville: choix }))
-        }}
-      />
     </main>
   )
 }
