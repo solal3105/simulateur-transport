@@ -22,8 +22,9 @@ const VERSIONS: Version[] = [
   {
     iso: '2026-09-27',
     date: '27 septembre 2026',
-    titre: 'Des panneaux plus compacts et des objectifs',
-    texte: 'Les panneaux laissent plus de place à la carte, et la partie gagne des objectifs et de quoi prolonger vos propres lignes.',
+    titre: 'Des objectifs et une interface plus compacte',
+    texte:
+      'La carte gagne de la place, sur ordinateur comme sur téléphone, et la partie gagne des objectifs et de quoi prolonger vos propres lignes.',
     groupes: [
       {
         titre: 'Nouveau',
@@ -39,6 +40,17 @@ const VERSIONS: Version[] = [
         titre: 'Amélioré',
         points: [
           'Les panneaux sont plus compacts. Pour tracer une ligne, on choisit le mode parmi quatre tuiles, la liste des lignes à prolonger reste repliée, et les chiffres tiennent sur une seule bande : la carte reste visible.',
+          'Sur téléphone, la barre du haut tient en deux lignes, la légende en une, et les boutons comme les prix sur la carte sont plus petits : la carte prend l’essentiel de l’écran.',
+          'Toutes les pages hors de la partie ont la même barre en haut : les réseaux publiés, la façon dont nous calculons, et de quoi jouer ou reprendre sa partie.',
+          'Sur la page d’un réseau publié, la phrase de son auteur s’affiche en citation, signée de son pseudo.',
+          'L’accueil va à l’essentiel : l’écran de présentation et les liens répétés en bas de page sont retirés.',
+        ],
+      },
+      {
+        titre: 'Corrigé',
+        points: [
+          'Dans la liste des lignes, vos propres lignes suivent le tri choisi, comme les projets du catalogue.',
+          'Parmi les réseaux publiés, ceux qui n’ont pas encore de soutien se classent par le nombre de joueurs partis d’eux, puis par leurs voyageurs : « Les plus soutenus » ne reprend plus l’ordre des plus récents.',
         ],
       },
     ],
