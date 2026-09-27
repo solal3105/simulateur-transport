@@ -12,7 +12,7 @@ import { communauteActive } from '@/lib/communaute'
 import { enLettres } from '@/lib/format'
 import { NOM_COURT } from '@/lib/noms'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseMethode, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
@@ -437,20 +437,6 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
             aria-label="Pour aller plus loin"
             className="flex flex-wrap justify-center gap-x-5 gap-y-0.5 border-t border-white/25 pt-2 text-[13.5px] font-extrabold lg:justify-start"
           >
-            <Link
-              href={adresseMethode(choix)}
-              className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
-            >
-              Comment nous calculons le budget et les voyageurs
-            </Link>
-            {communauteActive ? (
-              <Link
-                href={adresseReseaux(choix)}
-                className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
-              >
-                Les réseaux publiés
-              </Link>
-            ) : null}
             <Link
               href="/nouveautes"
               className="flex min-h-10 items-center underline decoration-white/50 underline-offset-3 hover:decoration-white"
