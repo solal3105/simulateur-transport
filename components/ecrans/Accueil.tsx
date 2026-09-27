@@ -8,17 +8,17 @@ import { useEffect, useState } from 'react'
 import { exigerAcces, useAcces } from '@/lib/acces'
 import { libre } from '@/lib/budget'
 import { nombreProjets } from '@/lib/catalogue'
-import { communauteActive } from '@/lib/communaute'
 import { enLettres } from '@/lib/format'
 import { NOM_COURT } from '@/lib/noms'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseReseaux, ID_VILLES, MARQUE, VILLES, type IdVille, type Ville } from '@/lib/villes'
+import { adresseAccueil, ID_VILLES, VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { cascade } from '../anim'
 import { Carte } from '../carte/Carte'
 import { TraitReseau } from '../carte/TraitReseau'
 import { useCouleursReseau } from '../couleurs'
-import { Bouton, Icone, Logo, useChoixVisible } from '../ui'
+import { Bouton, Icone, useChoixVisible } from '../ui'
+import { BarreSite } from '../BarreSite'
 
 const MARGES = { top: 20, left: 20, right: 20, bottom: 20 }
 /** La carte de l'accueil montre le réseau d'aujourd'hui, jamais celui de la partie enregistrée. */
@@ -296,20 +296,8 @@ export function Accueil({ villeInitiale = 'lyon', partieEnCours }: { villeInitia
         animate="show"
         className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col gap-6 px-6 pt-5 pb-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[640px] lg:gap-6 lg:overflow-y-auto lg:rounded-r-[36px] lg:bg-rouge lg:px-14 lg:pt-8 lg:pb-7"
       >
-        <motion.div variants={cascade.enfant} className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2.5">
-            <Logo taille={36} inverse />
-            <span className="text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-          </span>
-          {communauteActive ? (
-            <Link
-              href={adresseReseaux(choix)}
-              className="flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-white/18 px-3.5 text-[13.5px] font-extrabold transition-colors hover:bg-white/28"
-            >
-              <Icone nom="voyageurs" taille={16} epaisseur={2.4} />
-              Réseaux publiés
-            </Link>
-          ) : null}
+        <motion.div variants={cascade.enfant}>
+          <BarreSite ville={choix} page="accueil" />
         </motion.div>
 
         <motion.div variants={cascade.enfant} className="flex flex-col gap-4">

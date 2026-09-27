@@ -12,11 +12,12 @@ import { NOM_COURT } from '@/lib/noms'
 import { horizon } from '@/lib/catalogue'
 import { mandatsDe, villeDePartie } from '@/lib/partie'
 import { useJeu } from '@/lib/store'
-import { adresseAccueil, adresseMethode, adresseReseaux, estVille, ID_VILLES, MARQUE, VILLES, type IdVille } from '@/lib/villes'
+import { adresseAccueil, adresseReseaux, estVille, ID_VILLES, VILLES, type IdVille } from '@/lib/villes'
 
 import { cascade } from '../anim'
+import { BarreSite } from '../BarreSite'
 import { useCouleursReseau } from '../couleurs'
-import { Bouton, BoutonLien, Icone, Logo, useChoixVisible } from '../ui'
+import { Bouton, BoutonLien, Icone, useChoixVisible } from '../ui'
 import { MiniCarte } from './MiniCarte'
 
 type Onglet = 'populaires' | 'recents' | 'miens'
@@ -41,29 +42,10 @@ function useVersLaPartie(ville: IdVille) {
  * du réseau, et les trois pages d'un réseau, jouer, les réseaux publiés et la méthode.
  */
 export function EnteteCommunaute({ ville = 'lyon', children }: { ville?: IdVille; children?: React.ReactNode }) {
-  const { enCours, href } = useVersLaPartie(ville)
-  const lien = 'flex min-h-10 items-center rounded-full px-3.5 text-[13.5px] font-extrabold transition-colors'
   return (
     <header className="bg-rouge text-white">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-5 pt-4 lg:px-8 lg:pt-5">
-        <div className="flex items-center justify-between gap-3">
-          <Link href={adresseAccueil(ville)} className="flex min-w-0 items-center gap-2.5">
-            <Logo taille={36} inverse />
-            <span className="truncate text-[15px] font-extrabold lg:text-[17px]">{MARQUE}</span>
-          </Link>
-          <nav aria-label="Pages du réseau" className="flex shrink-0 items-center gap-1">
-            <Link href={adresseMethode(ville)} className={clsx(lien, 'hidden hover:bg-white/15 lg:flex')}>
-              Comment nous calculons
-            </Link>
-            <Link href={adresseReseaux(ville)} aria-current="page" className={clsx(lien, 'hidden bg-white/15 lg:flex')}>
-              Réseaux publiés
-            </Link>
-            <Link href={href} className={clsx(lien, 'gap-2 bg-white text-rouge hover:bg-rouge-pale')}>
-              {enCours ? 'Reprendre ma partie' : 'Jouer'}
-              <Icone nom="fleche" taille={16} epaisseur={2.4} />
-            </Link>
-          </nav>
-        </div>
+        <BarreSite ville={ville} page="reseaux" />
         {children ?? <div className="h-3" />}
       </div>
     </header>
