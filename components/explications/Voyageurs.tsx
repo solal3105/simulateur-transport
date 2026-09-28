@@ -6,7 +6,7 @@ import { COEFFICIENT_RESEAU, prixReseau } from '@/lib/couts'
 import { FOURCHETTE } from '@/lib/modele'
 import type { IdVille, Ville } from '@/lib/villes'
 
-import { Deplier } from './Deplier'
+import { Deroulant } from '../ui'
 import { Ecrire } from './Ecrire'
 
 type Calage = { ligne: string; reel: number; ecart: number }[]
@@ -123,7 +123,7 @@ export function ExplicationVoyageurs({ ville }: { ville: Ville }) {
           ? `, et nous les majorons de ${Math.round((COEFFICIENT_RESEAU[ville.id] - 1) * 100)} % ${ville.territoire.replace(/^de /, 'dans ').replace(/^d’/, 'en ')}, où l’on construit plus cher qu’ailleurs.`
           : '.'}
       </p>
-      <Deplier titre="Voir le détail de la formule">
+      <Deroulant titre="Voir le détail de la formule">
         <p className="text-[14.5px] leading-relaxed">
           Nous comptons les habitants et les emplois à moins de {metres(FORMULE.rayonMetro)} d’une station de métro, et à moins de{' '}
           {metres(FORMULE.rayonAutres)} d’un arrêt de tram, de bus ou de téléphérique
@@ -169,7 +169,7 @@ export function ExplicationVoyageurs({ ville }: { ville: Ville }) {
           jour de semaine. Habitants : carroyage Filosofi 2021 recalé sur le recensement 2022. Emplois : recensement 2022 réparti selon la
           base Sirene. Lignes et arrêts : OpenStreetMap.
         </p>
-      </Deplier>
+      </Deroulant>
     </div>
   )
 }

@@ -31,6 +31,9 @@ const TRACES = {
   liste: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
   carte: 'M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14',
   points: 'M5 12h.01M12 12h.01M19 12h.01',
+  poignee: 'M9 5.5h.01M15 5.5h.01M9 12h.01M15 12h.01M9 18.5h.01M15 18.5h.01',
+  calques: 'M12 3l9 5-9 5-9-5zM3 12.5l9 5 9-5M3 16.5l9 5 9-5',
+  loupe: 'M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM15.5 15.5L20 20',
   maison: 'M4 10.5L12 4l8 6.5M6 9v10.5h4.5V14h3v5.5H18V9',
   burger: 'M4 7h16M4 12h16M4 17h16',
   trace:
@@ -185,6 +188,71 @@ export function BoutonRond({
 
 export function Surtitre({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={clsx('text-xs font-extrabold tracking-[0.08em] text-muet uppercase', className)}>{children}</div>
+}
+
+/**
+ * Un bloc qu'on déplie, le même partout dans le jeu : un titre, une phrase qui dit ce qu'il contient, et son contenu.
+ * En grand dans les pages et les fiches ; en compact dans les panneaux, où la carte doit rester visible. Il s'ouvre
+ * au toucher, ou quand celui qui l'affiche le décide (`ouvert`, avec `onChange` pour suivre le joueur).
+ */
+export function Deroulant({
+  titre,
+  resume,
+  icone,
+  taille = 'normal',
+  ouvert,
+  ouvertAuDepart = false,
+  onChange,
+  className,
+  children,
+}: {
+  titre: ReactNode
+  resume?: ReactNode
+  icone?: NomIcone
+  taille?: 'normal' | 'compact'
+  ouvert?: boolean
+  ouvertAuDepart?: boolean
+  onChange?: (ouvert: boolean) => void
+  className?: string
+  children: ReactNode
+}) {
+  const [interne, setInterne] = useState(ouvertAuDepart)
+  const deplie = ouvert ?? interne
+  const compact = taille === 'compact'
+  return (
+    <details
+      open={deplie}
+      onToggle={(e) => {
+        const v = e.currentTarget.open
+        if (v === deplie) return
+        setInterne(v)
+        onChange?.(v)
+      }}
+      className={clsx('group rounded-2xl bg-white shadow-[inset_0_0_0_1.5px_var(--color-trait)]', className)}
+    >
+      <summary
+        className={clsx(
+          'flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl [&::-webkit-details-marker]:hidden',
+          compact ? 'min-h-11 px-3 py-2' : 'min-h-12 px-4 py-2.5',
+        )}
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          {icone ? <Icone nom={icone} taille={compact ? 17 : 19} epaisseur={2.3} className="text-gris" /> : null}
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className={clsx('leading-tight font-extrabold', compact ? 'text-[13.5px]' : 'text-[14.5px]')}>{titre}</span>
+            {resume ? <span className="text-[12px] leading-snug font-semibold text-gris">{resume}</span> : null}
+          </span>
+        </span>
+        <Icone
+          nom="plus"
+          taille={compact ? 16 : 18}
+          epaisseur={2.4}
+          className="shrink-0 text-rouge transition-transform group-open:rotate-45"
+        />
+      </summary>
+      <div className={clsx('flex flex-col', compact ? 'gap-3 px-3 pb-3' : 'gap-4 px-4 pb-5')}>{children}</div>
+    </details>
+  )
 }
 
 export function Pastille({

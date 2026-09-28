@@ -11,10 +11,9 @@ import { ficheProjet } from '@/lib/fiches'
 import { useJeu, useVille } from '@/lib/store'
 import type { PointProjet, Projet } from '@/lib/types'
 
-import { Deplier } from '../explications/Deplier'
 import { Sources } from '../explications/Budget'
 import { useBilan } from '../partie/budget'
-import { Bouton, CarteChiffre, Icone, ICONE_MODE, Pastille, Surtitre } from '../ui'
+import { Bouton, CarteChiffre, Deroulant, Icone, ICONE_MODE, Pastille, Surtitre } from '../ui'
 import { Panneau } from './Panneau'
 import { Rendement } from './Rendement'
 
@@ -351,7 +350,7 @@ export function FicheProjet({ id }: { id: string }) {
       <HistoireProjet projet={projet} />
 
       {projet.precisions?.length || projet.sources?.length ? (
-        <Deplier titre="D’où viennent ces chiffres">
+        <Deroulant titre="D’où viennent ces chiffres">
           {projet.precisions?.length ? (
             <ul className="flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-normal text-gris">
               {projet.precisions.map((p) => (
@@ -360,7 +359,7 @@ export function FicheProjet({ id }: { id: string }) {
             </ul>
           ) : null}
           <Sources sources={projet.sources ?? []} />
-        </Deplier>
+        </Deroulant>
       ) : null}
     </Panneau>
   )
@@ -384,7 +383,7 @@ function HistoireProjet({ projet }: { projet: Projet }) {
   const { histoire, avis, presse } = fiche
   const lien = 'underline decoration-trait decoration-2 underline-offset-2 hover:text-encre hover:decoration-rouge'
   return (
-    <Deplier titre="L’histoire du projet">
+    <Deroulant titre="L’histoire du projet">
       {histoire?.length ? (
         <ol className="flex flex-col gap-2">
           {histoire.map((h) => (
@@ -426,7 +425,7 @@ function HistoireProjet({ projet }: { projet: Projet }) {
           </ul>
         </div>
       ) : null}
-    </Deplier>
+    </Deroulant>
   )
 }
 

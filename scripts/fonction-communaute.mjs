@@ -60,6 +60,7 @@ for (const nom of [
   'regles',
   'formule',
   'modele',
+  'terminus',
   'partie',
   'budget',
   'leviers',

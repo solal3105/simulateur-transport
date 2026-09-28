@@ -20,6 +20,37 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  */
 const VERSIONS: Version[] = [
   {
+    iso: '2026-09-28',
+    date: '28 septembre 2026',
+    titre: 'Prolonger un prolongement, et la vue aérienne',
+    texte:
+      'Une ligne prolongée au premier mandat se prolonge encore au second, les bus rapides et les téléphériques se prolongent aussi, et la carte peut passer en photographies aériennes.',
+    groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'Le bouton « Vue aérienne » remplace le plan par les photographies aériennes de l’IGN, pour suivre les rues et voir les quartiers pendant que vous tracez. Le choix reste le même d’une partie à l’autre.',
+          'Les bus à haut niveau de service et les téléphériques se prolongent comme le métro et le tram : un Linéo, un TramBus, le TVM ou Téléo repartent de leur terminus, dont la station n’est pas payée une seconde fois.',
+          'Dans la liste de vos arrêts, vous changez l’ordre des stations en les faisant glisser par leur poignée, ou avec les flèches du clavier. Le + entre deux stations en ajoute une à mi-chemin, que vous placez ensuite sur la carte.',
+        ],
+      },
+      {
+        titre: 'Amélioré',
+        points: [
+          'Quand vous commencez une ligne, « Prolonger une ligne existante » s’affiche en tête du panneau, avec vos propres lignes des mandats précédents en premier.',
+          'La fiche d’une ligne décidée à un mandat précédent propose de la prolonger depuis l’un de ses bouts.',
+          'Tout ce qui se déplie a la même forme : le choix de la ligne à prolonger, l’ajout d’un arrêt par son nom, la liste de vos arrêts, le détail des fiches et des explications.',
+        ],
+      },
+      {
+        titre: 'Corrigé',
+        points: [
+          'Au second mandat, une ligne déjà prolongée au premier, par un projet du catalogue comme le T10 jusqu’à la gare de Clamart ou par votre propre tracé, repart du bout de ce prolongement et plus de son ancien terminus.',
+        ],
+      },
+    ],
+  },
+  {
     iso: '2026-09-27',
     date: '27 septembre 2026',
     titre: 'Des objectifs et une interface plus compacte',

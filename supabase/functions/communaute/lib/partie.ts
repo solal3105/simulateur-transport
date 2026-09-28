@@ -1,7 +1,7 @@
 // Copie de lib/partie.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue.ts'
 import { leviersPossibles } from './leviers.ts'
-import { estimer, prolongementPossible, suiteDe, type Carreaux } from './modele.ts'
+import { estimer, premiereStationPayee, prolongementPossible, type Carreaux } from './modele.ts'
 import { LEVIERS_NEUTRES, leviersDu } from './regles.ts'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types.ts'
 import { estVille, VILLES, type IdVille } from './villes.ts'
@@ -165,7 +165,9 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       : []
     // Un prolongement doit partir d'une station existante du même mode ; sinon, c'est une ligne à part entière.
     const prolonge =
-      typeof l.o === 'string' && /^(metro|tram)-[\p{L}\p{N} .'-]{1,24}$/u.test(l.o) && prolongementPossible(mode, l.a[0], carreaux)
+      typeof l.o === 'string' &&
+      /^(metro|tram|bus|cable)-[\p{L}\p{N} .'-]{1,24}$/u.test(l.o) &&
+      prolongementPossible(mode, l.a[0], carreaux)
         ? l.o
         : undefined
     const noms = lireNoms(l.s, l.a.length, passages)
@@ -181,10 +183,10 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       arrets: l.a,
     })
   })
-  // Une ligne qui part du terminus d'une ligne d'un mandat précédent la continue : sa première station est déjà payée.
-  // On le reconnaît au tracé, une fois toutes les lignes lues, sans rien lire de plus dans la partie.
+  // Une ligne qui part du bout d'une ligne ou d'un prolongement du catalogue d'un mandat précédent le continue : sa
+  // première station est déjà payée. On le reconnaît au tracé, une fois tout lu, sans rien lire de plus dans la partie.
   const lignes: LigneJoueur[] = lues.map((l) => {
-    const suite = !l.prolonge && Boolean(suiteDe(l, lues, carreaux.mx))
+    const suite = !l.prolonge && premiereStationPayee(l, lues, chantiersValides, carreaux.mx)
     const estimation = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
     return { ...l, estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 } }
   })
