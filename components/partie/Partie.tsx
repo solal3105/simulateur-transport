@@ -1,5 +1,6 @@
 'use client'
 
+import { clsx } from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -96,6 +97,31 @@ function Legende() {
   )
 }
 
+/**
+ * Le fond de carte en photographies aériennes de l'IGN plutôt qu'en plan, pour suivre les rues et voir les quartiers :
+ * un bouton rond sous la légende sur téléphone, où il reste visible pendant le tracé, et une étiquette
+ * sur ordinateur, à gauche du panneau ouvert.
+ */
+function ChoixFond({ droite }: { droite?: number }) {
+  const { aerien, basculerAerien } = useJeu()
+  return (
+    <button
+      type="button"
+      onClick={basculerAerien}
+      aria-pressed={aerien}
+      title="Voir la carte en photographies aériennes"
+      style={droite !== undefined ? { right: droite } : undefined}
+      className={clsx(
+        'absolute top-[134px] right-2 z-10 grid size-9 place-items-center rounded-full shadow-flotte transition-colors lg:top-[114px] lg:flex lg:size-auto lg:min-h-11 lg:gap-2 lg:px-4',
+        aerien ? 'bg-encre text-white' : 'bg-white text-encre hover:bg-sable',
+      )}
+    >
+      <Icone nom="calques" taille={18} epaisseur={2.2} />
+      <span className="sr-only text-sm font-extrabold lg:not-sr-only">Vue aérienne</span>
+    </button>
+  )
+}
+
 export function Partie() {
   const { panneau, brouillon, ecran, ouvrir, tracer, tuto: etapeTuto, lignes } = useJeu()
   const ville = useVille()
@@ -123,6 +149,7 @@ export function Partie() {
       <Carte marges={marges} />
       <Entete />
       {!tuto || etapeTuto === 2 ? <Programme /> : null}
+      {!tuto ? <ChoixFond droite={grand ? (panneau ? marges.right : 20) : undefined} /> : null}
 
       {!tuto && !panneau && !brouillon ? (
         <>

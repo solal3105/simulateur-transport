@@ -23,9 +23,11 @@ import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
 import { rayonBassin, stationsDuTrace } from '@/lib/modele'
-import { direLignes, direOuvertures, nommerTrace, terminusProche, type ModeExistant } from '@/lib/reseau'
+import { nomDuDepart } from '@/lib/prolongements'
+import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
+import { BOUTS_PROJETS } from '@/lib/terminus'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
 import { imagePastille } from './pastilles'
@@ -138,6 +140,13 @@ const nomsLignes = {
 
 const vide = () => ({ type: 'FeatureCollection', features: [] }) as FeatureCollection
 const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kind]
+
+/**
+ * Les photographies aériennes de l'IGN (BD ORTHO), libres de droits et servies sans clé par la Géoplateforme : le fond
+ * que le joueur peut choisir à la place du plan. Elles ne se chargent qu'une fois ce fond choisi.
+ */
+const TUILES_AERIENNES =
+  'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}'
 const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
   'all',
   ['==', ['get', 'kind'], 'route'],
@@ -208,6 +217,13 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
     version: 8,
     sources: {
       ...(relief ? { relief: { type: 'image' as const, url: relief.url, coordinates: relief.coordinates } } : {}),
+      aerien: {
+        type: 'raster',
+        tiles: [TUILES_AERIENNES],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: 'Photographies aériennes © IGN',
+      },
       decor: { type: 'geojson', data: vide() },
       fond: { type: 'geojson', data: donnees.fond },
       stations: { type: 'geojson', data: stations },
@@ -271,6 +287,8 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         filter: genre('rail'),
         paint: { 'line-color': COULEURS.rail, 'line-width': largeur(1), 'line-dasharray': [4, 2] },
       },
+      // Les photographies aériennes recouvrent le plan : les lignes, les stations et les projets restent par-dessus.
+      { id: 'aerien', type: 'raster', source: 'aerien', layout: { visibility: 'none' } },
       ...(relief
         ? [
             {
@@ -657,10 +675,12 @@ export function Carte({
   const precedents = useRef<Map<string, EtatProjet> | null>(null)
 
   const jeu = useJeu()
-  const { brouillon, panneau, ecran, tuto } = jeu
+  const { brouillon, panneau, ecran, tuto, mandat } = jeu
   const chantiers = partie?.chantiers ?? jeu.chantiers
   const lignes = partie?.lignes ?? jeu.lignes
   const trace = brouillon !== null
+  // Le fond en photographies aériennes, choisi pendant la partie ; les cartes de récapitulatif gardent le plan.
+  const aerien = jeu.aerien && !decor
   // Ce qui ouvre après la fin de la partie, en 2038 ou à la fin du dernier mandat joué, reste en chantier sur la carte.
   const fin = horizon(partie ? (partie.mandats ?? 2) : jeu.mandat)
 
@@ -933,8 +953,8 @@ export function Carte({
       [p.x + r, p.y + r],
     ]
     /**
-     * La position d'une station posée : celle de la station existante la plus proche à l'écran, ou le terminus d'une de
-     * vos lignes, qu'on peut ainsi prolonger au mandat suivant ; sinon le point touché.
+     * La position d'une station posée : celle de la station existante la plus proche à l'écran, ou le bout d'une de vos
+     * lignes ou d'un prolongement du catalogue, qu'on peut ainsi continuer au mandat suivant ; sinon le point touché.
      */
     function accrocher(point: { x: number; y: number }, lngLat: { lng: number; lat: number }): [number, number] {
       let meilleure: [number, number] | null = null
@@ -948,13 +968,15 @@ export function Carte({
         garder((f.geometry as Point).coordinates as [number, number])
       }
       const jeu = useJeu.getState()
-      for (const l of jeu.lignes) {
-        if (l.id === jeu.brouillon?.edition) continue
-        for (const t of [l.arrets[0], l.arrets.at(-1)]) {
-          if (!t) continue
-          const q = m.project(t)
-          if (Math.hypot(q.x - point.x, q.y - point.y) <= 16) garder(t)
-        }
+      const bouts = [
+        ...jeu.lignes.filter((l) => l.id !== jeu.brouillon?.edition).flatMap((l) => [l.arrets[0], l.arrets.at(-1)]),
+        // La dernière station d'un prolongement du catalogue décidé, qu'on continue de la même façon.
+        ...jeu.chantiers.flatMap((c) => BOUTS_PROJETS[c.id]?.bouts.map((b) => b.pos) ?? []),
+      ]
+      for (const t of bouts) {
+        if (!t) continue
+        const q = m.project(t)
+        if (Math.hypot(q.x - point.x, q.y - point.y) <= 16) garder(t)
       }
       return meilleure ?? [lngLat.lng, lngLat.lat]
     }
@@ -1044,7 +1066,9 @@ export function Carte({
       for (const { el } of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
       requestAnimationFrame(() => eviterChevauchements(m, etiquettes))
       m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
-      if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace ? 'visible' : 'none')
+      m.setLayoutProperty('aerien', 'visibility', aerien ? 'visible' : 'none')
+      // Sur les photographies, le relief les cacherait : on le montre seulement sur le plan.
+      if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace && !aerien ? 'visible' : 'none')
       m.getCanvas().style.cursor = trace ? 'crosshair' : ''
 
       const joueur: FeatureCollection<LineString> = {
@@ -1092,10 +1116,10 @@ export function Carte({
       // Le nom de chaque station posée : celui de la station existante où elle s'accroche, sinon son quartier.
       while (nomsArrets.length) nomsArrets.pop()!.remove()
       const noms = nommerTrace(arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx, brouillon?.noms)
-      // Un prolongement part du terminus de sa ligne et en porte le nom, sauf si le joueur l'a renommé.
-      const prolongee = brouillon?.prolonge ? donnees.reseau?.lignes.find((l) => l.id === brouillon.prolonge) : undefined
-      const depuis = prolongee && arrets[0] ? terminusProche(prolongee, arrets[0], donnees.carreaux.mx) : undefined
-      if (depuis && estStation[0] && !brouillon?.noms?.[0]) noms[0] = depuis.nom
+      // La première station porte le nom de ce qu'elle prolonge ou continue, comme dans le panneau, sauf si le joueur
+      // l'a renommée.
+      const depuis = brouillon ? nomDuDepart({ ...brouillon, mandat }, { lignes, chantiers }, donnees) : undefined
+      if (depuis && estStation[0] && !brouillon?.noms?.[0]) noms[0] = depuis
       // Toucher le nom ouvre le champ pour le changer, comme toucher la station.
       noms.forEach((nom, i) => {
         if (!nom) return
@@ -1117,7 +1141,24 @@ export function Carte({
     }
     appliquerEtat.current = appliquer
     appliquer()
-  }, [catalogue, etats, lignes, brouillon, trace, chantiers, donnees, decor, etiquettes, nomsArrets, anneeMax, ville, panneau, fin])
+  }, [
+    catalogue,
+    etats,
+    lignes,
+    brouillon,
+    trace,
+    chantiers,
+    donnees,
+    decor,
+    etiquettes,
+    nomsArrets,
+    anneeMax,
+    ville,
+    panneau,
+    fin,
+    aerien,
+    mandat,
+  ])
 
   // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {

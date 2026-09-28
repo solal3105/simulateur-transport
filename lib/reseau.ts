@@ -22,7 +22,10 @@ export type ModeExistant = ModeLigne | 'rer' | 'train'
 export interface LigneExistante {
   /** « metro-A », « tram-T1 », « rer-B », « bus-TVM ». */
   id: string
-  /** Un bus est un bus à haut niveau de service, comme le TVM ou un Linéo : la carte le montre, mais il ne se prolonge pas. */
+  /**
+   * Un bus est un bus à haut niveau de service, comme le TVM ou un Linéo : la carte le montre et on peut le prolonger,
+   * mais ses arrêts ne comptent pas comme une desserte dans le calcul des voyageurs.
+   */
   mode: ModeExistant
   /** Le nom court de la ligne : « A », « T1 », « 14 ». */
   ref: string
@@ -47,11 +50,8 @@ export interface ReseauActuel {
   gares?: { nom: string; pos: [number, number] }[]
 }
 
-/**
- * Seuls le métro et le tram se prolongent : le joueur ne construit ni RER ni train, et le calcul des voyageurs ne
- * connaît pas les arrêts des bus à haut niveau de service, que la carte montre sans qu'ils comptent comme une desserte.
- */
-export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: 'metro' | 'tram' } => l.mode === 'metro' || l.mode === 'tram'
+/** Toute ligne d'un mode que le joueur construit se prolonge ; le RER et les trains, qu'il ne construit pas, non. */
+export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: ModeLigne } => l.mode !== 'rer' && l.mode !== 'train'
 
 /** Une station du réseau actuel, et les lignes qui s'y arrêtent. */
 export interface StationExistante {
@@ -118,9 +118,9 @@ export function prolongementsDepuis(
   station: StationExistante | null,
   mx: number,
   possible: (terminus: [number, number]) => boolean,
-): { ligne: LigneExistante & { mode: 'metro' | 'tram' }; terminus: StationLigne }[] {
+): { ligne: LigneExistante & { mode: ModeLigne }; terminus: StationLigne }[] {
   return (reseau?.lignes ?? [])
-    .filter((l): l is LigneExistante & { mode: 'metro' | 'tram' } => prolongeable(l) && l.mode === mode)
+    .filter((l): l is LigneExistante & { mode: ModeLigne } => prolongeable(l) && l.mode === mode)
     .flatMap((ligne) => {
       const terminus = terminusProche(ligne, depart, mx)
       if (!terminus) return []

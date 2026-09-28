@@ -8,7 +8,7 @@ import { de, enLettres, n } from '@/lib/format'
 import { MESURES, titreMesure } from '@/lib/leviers'
 import type { Ville } from '@/lib/villes'
 
-import { Deplier } from './Deplier'
+import { Deroulant } from '../ui'
 import { Ecrire } from './Ecrire'
 
 const TITRES: Record<NomPoste, string> = {
@@ -160,7 +160,7 @@ export function ExplicationBudget({ ville }: { ville: Ville }) {
         </ul>
       ) : null}
       {source ? (
-        <Deplier titre="Voir le détail du calcul et les sources">
+        <Deroulant titre="Voir le détail du calcul et les sources">
           {POSTES.filter((p) => b[p].explication).map((p) => (
             <section key={p} className="flex flex-col gap-2">
               <h4 className="text-[15.5px] font-black">{TITRES[p]}</h4>
@@ -179,7 +179,7 @@ export function ExplicationBudget({ ville }: { ville: Ville }) {
             </section>
           ) : null}
           {b.releve ? <p className="text-[13px] leading-relaxed text-gris">Chiffres relevés en {b.releve}.</p> : null}
-        </Deplier>
+        </Deroulant>
       ) : null}
     </div>
   )
@@ -232,10 +232,10 @@ export function ExplicationLeviers({ ville }: { ville: Ville }) {
       </div>
       <p className="text-[15px] leading-relaxed">{p.simple}</p>
       {p.sources.length ? (
-        <Deplier titre="Voir le détail du calcul et les sources">
+        <Deroulant titre="Voir le détail du calcul et les sources">
           <Paragraphes texte={p.explication} />
           <Sources sources={p.sources} />
-        </Deplier>
+        </Deroulant>
       ) : (
         <p className="text-[14.5px] leading-relaxed text-gris">{p.explication}</p>
       )}

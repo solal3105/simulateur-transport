@@ -1,8 +1,9 @@
 // Copie de lib/modele.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import { coutLigne, totalCout } from './couts.ts'
 import { FORMULE } from './formule.ts'
+import { BOUTS_PROJETS, TERMINUS } from './terminus.ts'
 import type { Terrain } from './terrain.ts'
-import type { Estimation, Mandat, ModeLigne, OptionsLigne } from './types.ts'
+import type { Chantier, Estimation, Mandat, ModeLigne, OptionsLigne } from './types.ts'
 import type { IdVille, Ville } from './villes.ts'
 
 /**
@@ -115,17 +116,23 @@ const ECART_TERMINUS = 150
 
 /**
  * Le premier point d'un prolongement doit être une station du réseau actuel, du même mode : une station de
- * métro pour un métro, un arrêt de tram pour un tram. Sinon, la ligne est une ligne à part entière.
+ * métro pour un métro, un arrêt de tram pour un tram, le terminus d'un bus à haut niveau de service ou d'un
+ * téléphérique pour ces deux modes (lib/terminus.ts). Sinon, la ligne est une ligne à part entière.
  */
-export function prolongementPossible(mode: ModeLigne, depart: [number, number] | undefined, carreaux: Pick<Carreaux, 'mx' | 'existants'>) {
-  if (!depart || (mode !== 'metro' && mode !== 'tram')) return false
+export function prolongementPossible(
+  mode: ModeLigne,
+  depart: [number, number] | undefined,
+  carreaux: Pick<Carreaux, 'mx' | 'existants' | 'ville'>,
+) {
+  if (!depart) return false
   const metres = distance(carreaux.mx)
+  if (mode === 'bus' || mode === 'cable') return TERMINUS[carreaux.ville][mode].some((t) => metres(depart, t) <= ECART_TERMINUS)
   const genre = mode === 'metro' ? 1 : 0
   return carreaux.existants.some((a) => a[2] === genre && metres(depart, [a[0]!, a[1]!]) <= ECART_TERMINUS)
 }
 
 /** En deçà, en mètres, le premier point d'une ligne est bien le terminus de la ligne du joueur qu'elle continue. */
-const ECART_SUITE = 60
+export const ECART_SUITE = 60
 
 /** Ce qu'il faut savoir d'une ligne pour reconnaître qu'elle en continue une autre. */
 type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat }
@@ -147,6 +154,38 @@ export function suiteDe<L extends TraceMandat>(ligne: TraceMandat, lignes: reado
       [l.arrets[0], l.arrets.at(-1)].some((t) => t !== undefined && metres(t, depart) <= ECART_SUITE),
   )
 }
+
+/**
+ * Le prolongement du catalogue que cette ligne continue : un projet décidé à un mandat précédent, du même mode, dont
+ * elle part de la dernière station (lib/terminus.ts). Cette station sera construite avec lui. Comme pour un terminus
+ * existant, on accepte un départ à 150 m : on pose souvent le premier arrêt sur la gare voisine de la future station.
+ */
+export function projetContinue(
+  ligne: TraceMandat,
+  chantiers: readonly Pick<Chantier, 'id' | 'mandat'>[],
+  mx: number,
+): { id: string; mandat: Mandat; ligne: string } | undefined {
+  const depart = ligne.arrets[0]
+  if (!depart) return undefined
+  const metres = distance(mx)
+  for (const c of chantiers) {
+    const p = BOUTS_PROJETS[c.id]
+    if (p && c.mandat < ligne.mandat && p.mode === ligne.mode && p.bouts.some((b) => metres(b.pos, depart) <= ECART_TERMINUS))
+      return { id: c.id, mandat: c.mandat, ligne: p.ligne }
+  }
+  return undefined
+}
+
+/**
+ * La première station d'une ligne est déjà payée quand la ligne continue l'une de vos lignes ou un prolongement du
+ * catalogue décidés à un mandat précédent : on le reconnaît au tracé, dans le jeu comme sur le serveur.
+ */
+export const premiereStationPayee = <L extends TraceMandat>(
+  ligne: TraceMandat,
+  lignes: readonly L[],
+  chantiers: readonly Pick<Chantier, 'id' | 'mandat'>[],
+  mx: number,
+) => Boolean(suiteDe(ligne, lignes, mx) ?? projetContinue(ligne, chantiers, mx))
 
 /** Quels points du tracé sont des stations : tous, sauf les points de passage, et toujours les deux terminus. */
 export function stationsDuTrace(nombre: number, passages: number[] = []) {

@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { finMandat, PROJETS } from './catalogue'
 import { approx, n } from './format'
 import { mesurer } from './mesure'
-import { estimer, suiteDe, type Carreaux } from './modele'
+import { estimer, premiereStationPayee, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
 import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
@@ -104,6 +104,8 @@ interface Etat {
   apercu: number
   /** L'accueil est affiché par-dessus la partie enregistrée, qui reste intacte jusqu'à une nouvelle partie. */
   pause: boolean
+  /** Le fond de carte en photographies aériennes plutôt qu'en plan ; le choix vaut pour toutes les parties. */
+  aerien: boolean
 
   /**
    * Commence une partie : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. Le jeu
@@ -140,8 +142,13 @@ interface Etat {
   enleverArret: (i: number) => void
   /** Déplace un arrêt du tracé, quand on le fait glisser sur la carte. */
   deplacerArret: (i: number, p: [number, number]) => void
-  /** Insère un arrêt à la position i, quand on touche la ligne entre deux arrêts. */
-  insererArret: (i: number, p: [number, number]) => void
+  /**
+   * Insère un arrêt à la position i, quand on touche la ligne entre deux arrêts ; un arrêt ajouté depuis la liste est
+   * une station, même avec l'outil des points de passage.
+   */
+  insererArret: (i: number, p: [number, number], options?: { station?: boolean }) => void
+  /** Change l'ordre du tracé : le point au rang `de` passe au rang `vers`, avec son nom et son rôle de point de passage. */
+  reordonner: (de: number, vers: number) => void
   /** Rouvre le traceur sur une ligne déjà construite, pour changer son tracé ou son mode. */
   modifierLigne: (id: string) => void
   /** Fait d'un point une station, ou d'une station un point de passage. Les terminus restent des stations. */
@@ -152,11 +159,14 @@ interface Etat {
   nommerArret: (i: number, nom: string) => void
   /** Choisit ce que pose le prochain clic : une station ou un point de passage. */
   choisirOutil: (outil: 'station' | 'passage') => void
-  /** Commence le prolongement d'une ligne existante depuis l'un de ses terminus. */
-  prolonger: (ligne: string, mode: ModeLigne, terminus: [number, number]) => void
+  /**
+   * Commence le prolongement d'une ligne existante depuis l'un de ses terminus ; sans ligne existante, la suite de ce qui
+   * a été décidé à un mandat précédent (une de vos lignes, un prolongement du catalogue) depuis son bout, que le tracé
+   * reconnaît lui-même (`premiereStationPayee`).
+   */
+  prolonger: (ligne: string | undefined, mode: ModeLigne, terminus: [number, number]) => void
   /** Fait du prolongement en cours une ligne à part entière, qui ne prolonge plus rien. */
   detacher: () => void
-  /** Fait du tracé en cours, qui part déjà du terminus d'une ligne, le prolongement de cette ligne. */
   /** Fait d'un tracé le prolongement d'une ligne existante ; son premier point se pose alors sur le terminus. */
   rattacher: (ligne: string, terminus?: [number, number]) => void
   abandonnerTrace: () => void
@@ -165,6 +175,7 @@ interface Etat {
   actualiserLignes: (carreaux: Carreaux) => void
   effacerMessage: () => void
   setApercu: (v: number) => void
+  basculerAerien: () => void
 }
 
 const DEPART = {
@@ -190,6 +201,7 @@ export const useJeu = create<Etat>()(
   persist(
     (set, get) => ({
       ...DEPART,
+      aerien: false,
       commencer: (ville, libre = false) => {
         mesurer('partie commencée', { reseau: ville, libre })
         set(
@@ -363,7 +375,7 @@ export const useJeu = create<Etat>()(
           // Déplacer le terminus d'un prolongement le détache de la ligne existante.
           return { brouillon: { ...b, arrets: b.arrets.map((a, k) => (k === i ? p : a)), prolonge: i === 0 ? undefined : b.prolonge } }
         }),
-      insererArret: (i, p) =>
+      insererArret: (i, p, options) =>
         set((s) => {
           const b = s.brouillon
           if (!b) return {}
@@ -371,9 +383,37 @@ export const useJeu = create<Etat>()(
             brouillon: {
               ...b,
               arrets: [...b.arrets.slice(0, i), p, ...b.arrets.slice(i)],
-              passages: avecPoint(b.passages, i, b.outil === 'passage'),
+              passages: avecPoint(b.passages, i, !options?.station && b.outil === 'passage'),
               noms: nomsAvec(b.noms, i),
               renomme: undefined,
+            },
+          }
+        }),
+      reordonner: (de, vers) =>
+        set((s) => {
+          const b = s.brouillon
+          const n = b?.arrets.length ?? 0
+          if (!b || de === vers || de < 0 || vers < 0 || de >= n || vers >= n) return {}
+          const deplacer = <T>(liste: T[]) => {
+            const copie = [...liste]
+            copie.splice(vers, 0, ...copie.splice(de, 1))
+            return copie
+          }
+          const passages = deplacer(b.arrets.map((_, k) => (b.passages ?? []).includes(k)))
+          const noms = b.noms ? deplacer(b.arrets.map((_, k) => b.noms?.[k] ?? null)) : undefined
+          return {
+            brouillon: {
+              ...b,
+              arrets: deplacer(b.arrets),
+              // Un point de passage arrivé au bout de la ligne en devient le terminus : une station.
+              passages: nettoyer(
+                passages.flatMap((p, k) => (p ? [k] : [])),
+                n,
+              ),
+              noms,
+              renomme: undefined,
+              // Un autre premier point que le terminus existant, et la ligne ne prolonge plus rien.
+              prolonge: de === 0 || vers === 0 ? undefined : b.prolonge,
             },
           }
         }),
@@ -497,7 +537,7 @@ export const useJeu = create<Etat>()(
           if (carreaux.ville !== s.ville || s.lignes.length === 0) return {}
           let change = false
           const lignes = s.lignes.map((l) => {
-            const suite = !l.prolonge && Boolean(suiteDe(l, s.lignes, carreaux.mx))
+            const suite = !l.prolonge && premiereStationPayee(l, s.lignes, s.chantiers, carreaux.mx)
             const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
             const estimation = { ...e, nouveaux: Math.round(e.nouveaux / 100) * 100 }
             if (estimation.cout === l.estimation.cout && estimation.nouveaux === l.estimation.nouveaux && l.estimation.detail) return l
@@ -508,6 +548,7 @@ export const useJeu = create<Etat>()(
         }),
       effacerMessage: () => set({ message: null }),
       setApercu: (apercu) => set({ apercu }),
+      basculerAerien: () => set((s) => ({ aerien: !s.aerien })),
     }),
     {
       name: 'simulateur-tcl-partie',
@@ -533,6 +574,7 @@ export const useJeu = create<Etat>()(
         aVenir: s.aVenir,
         inspire: s.inspire,
         publie: s.publie,
+        aerien: s.aerien,
       }),
     },
   ),
