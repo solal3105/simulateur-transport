@@ -144,7 +144,7 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
         equilibre: resultat.equilibre,
         libre,
         traces,
-        lignes: lignes.map((l) => ({ arrets: l.arrets, couleur: couleurLigne(l.mode) })),
+        lignes: lignes.map((l) => ({ arrets: l.arrets, couleur: couleurLigne(l.mode, l.couleur) })),
         adresse: window.location.host,
       },
       format,

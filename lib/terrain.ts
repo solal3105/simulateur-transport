@@ -186,20 +186,29 @@ export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], 
   return { kmOuvrage, profondeurs, penteTerrain: Math.round(penteTerrain * 1000) / 10, denivele: Math.round(denivele), profil, stations }
 }
 
-function secantes(a: [number, number], b: [number, number], c: [number, number], d: [number, number]) {
+/** Le point où le segment [a, b] coupe le segment [c, d], s'ils se coupent. */
+function croisement(a: [number, number], b: [number, number], c: [number, number], d: [number, number]): [number, number] | null {
   const o = (p: [number, number], q: [number, number], r: [number, number]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
-  return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0
+  if (!(o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0)) return null
+  const t = o(c, d, a) / (o(c, d, a) - o(c, d, b))
+  return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]
 }
 
-/** Combien de fois la ligne traverse un grand cours d'eau. */
-export function franchissements(t: Terrain, arrets: [number, number][]): number {
-  let n = 0
+/** Les endroits où la ligne traverse un grand cours d'eau. */
+export function croisementsFleuves(t: Terrain, arrets: [number, number][]): [number, number][] {
+  const points: [number, number][] = []
   for (let k = 1; k < arrets.length; k += 1) {
     const a = arrets[k - 1]!
     const b = arrets[k]!
     for (const fleuve of t.fleuves) {
-      for (let q = 1; q < fleuve.length; q += 1) if (secantes(a, b, fleuve[q - 1]!, fleuve[q]!)) n += 1
+      for (let q = 1; q < fleuve.length; q += 1) {
+        const p = croisement(a, b, fleuve[q - 1]!, fleuve[q]!)
+        if (p) points.push(p)
+      }
     }
   }
-  return n
+  return points
 }
+
+/** Combien de fois la ligne traverse un grand cours d'eau. */
+export const franchissements = (t: Terrain, arrets: [number, number][]) => croisementsFleuves(t, arrets).length

@@ -99,6 +99,13 @@ export interface LigneJoueur {
   passages?: number[]
   /** La ligne existante que celle-ci prolonge depuis son terminus, qui est alors son premier point : « metro-D ». */
   prolonge?: string
+  /**
+   * Une ligne qui part du bout d'une autre de vos lignes, ou d'un prolongement du catalogue, sans la continuer : le
+   * joueur en a fait une ligne à part, qui paie sa première station comme une correspondance.
+   */
+  aPart?: boolean
+  /** La couleur choisie par le joueur dans la palette commune ; sans elle, la couleur de son mode. */
+  couleur?: string
   /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom de la station existante ou du quartier. */
   noms?: (string | null)[]
   mandat: Mandat
@@ -145,7 +152,10 @@ export interface DetailCout {
   /** Stations de métro plus profondes que d'ordinaire, sous une colline. */
   profondeur: number
   kmOuvrage: number
+  /** Les grands cours d'eau franchis sur un pont neuf, ou dessous pour un métro. */
   franchissements: number
+  /** Ceux qu'un bus franchit sur un pont routier existant, sans rien payer de plus. */
+  pontsRoutiers?: number
   stationsProfondes: number
   /** Plus forte pente du terrain sur 200 m, en pourcentage. */
   penteTerrain: number

@@ -36,6 +36,10 @@ export interface Brouillon {
   outil?: 'station' | 'passage'
   /** La ligne existante prolongée depuis son terminus, qui est alors le premier point du tracé. */
   prolonge?: string
+  /** Le tracé part du bout d'une de vos lignes ou d'un prolongement du catalogue, mais n'en est pas la suite. */
+  aPart?: boolean
+  /** La couleur choisie pour la ligne dans la palette commune. */
+  couleur?: string
   /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
   edition?: string
   /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom que nous proposons. */
@@ -167,6 +171,10 @@ interface Etat {
   prolonger: (ligne: string | undefined, mode: ModeLigne, terminus: [number, number]) => void
   /** Fait du prolongement en cours une ligne à part entière, qui ne prolonge plus rien. */
   detacher: () => void
+  /** Fait du tracé une ligne à part plutôt que la suite de ce qu'il touche à son départ, ou l'inverse. */
+  mettreAPart: (aPart: boolean) => void
+  /** Choisit la couleur de la ligne en cours de tracé, ou d'une ligne construite ; sans couleur, celle de son mode. */
+  colorer: (couleur: string | undefined, id?: string) => void
   /** Fait d'un tracé le prolongement d'une ligne existante ; son premier point se pose alors sur le terminus. */
   rattacher: (ligne: string, terminus?: [number, number]) => void
   abandonnerTrace: () => void
@@ -442,6 +450,15 @@ export const useJeu = create<Etat>()(
           apercu: 0,
         })),
       detacher: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: undefined } } : {})),
+      mettreAPart: (aPart) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, aPart: aPart || undefined } } : {})),
+      colorer: (couleur, id) =>
+        set((s) =>
+          id
+            ? { lignes: s.lignes.map((l) => (l.id === id ? { ...l, couleur } : l)) }
+            : s.brouillon
+              ? { brouillon: { ...s.brouillon, couleur } }
+              : {},
+        ),
       rattacher: (ligne, terminus) =>
         set((s) =>
           s.brouillon
@@ -467,6 +484,8 @@ export const useJeu = create<Etat>()(
                   passages: [...(l.passages ?? [])],
                   noms: l.noms ? [...l.noms] : undefined,
                   prolonge: l.prolonge,
+                  aPart: l.aPart,
+                  couleur: l.couleur,
                   edition: l.id,
                 },
                 panneau: { type: 'trace' },
@@ -496,6 +515,8 @@ export const useJeu = create<Etat>()(
               passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
               noms: nomsGardes(s.brouillon),
               prolonge: s.brouillon.prolonge,
+              aPart: s.brouillon.aPart,
+              couleur: s.brouillon.couleur,
               estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
             }
             return {
@@ -517,6 +538,8 @@ export const useJeu = create<Etat>()(
             passages: nettoyer(s.brouillon.passages, s.brouillon.arrets.length),
             noms: nomsGardes(s.brouillon),
             prolonge: s.brouillon.prolonge,
+            ...(s.brouillon.aPart ? { aPart: true } : {}),
+            ...(s.brouillon.couleur ? { couleur: s.brouillon.couleur } : {}),
             mandat: s.mandat,
             etale,
             // Une estimation ne mérite pas plus de précision que la centaine.

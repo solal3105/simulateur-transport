@@ -134,7 +134,7 @@ export function prolongementPossible(
 export const ECART_SUITE = 60
 
 /** Ce qu'il faut savoir d'une ligne pour reconnaître qu'elle en continue une autre. */
-type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat }
+type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat; aPart?: boolean }
 
 /**
  * La ligne du joueur que celle-ci continue : décidée à un mandat précédent, du même mode, et commençant ou finissant là
@@ -177,14 +177,15 @@ export function projetContinue(
 
 /**
  * La première station d'une ligne est déjà payée quand la ligne continue l'une de vos lignes ou un prolongement du
- * catalogue décidés à un mandat précédent : on le reconnaît au tracé, dans le jeu comme sur le serveur.
+ * catalogue décidés à un mandat précédent : on le reconnaît au tracé, dans le jeu comme sur le serveur. Une ligne que le
+ * joueur a mise à part n'en continue aucune, et paie sa première station.
  */
 export const premiereStationPayee = <L extends TraceMandat>(
   ligne: TraceMandat,
   lignes: readonly L[],
   chantiers: readonly Pick<Chantier, 'id' | 'mandat'>[],
   mx: number,
-) => Boolean(suiteDe(ligne, lignes, mx) ?? projetContinue(ligne, chantiers, mx))
+) => !ligne.aPart && Boolean(suiteDe(ligne, lignes, mx) ?? projetContinue(ligne, chantiers, mx))
 
 /** Quels points du tracé sont des stations : tous, sauf les points de passage, et toujours les deux terminus. */
 export function stationsDuTrace(nombre: number, passages: number[] = []) {

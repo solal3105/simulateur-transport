@@ -145,6 +145,8 @@ export interface Ouverture {
   /** Pour retrouver la couleur de la ligne : sa version, ou le mode d'une ligne du joueur. */
   varianteId?: string
   modeLigne?: ModeLigne
+  /** La couleur choisie par le joueur pour sa ligne. */
+  couleur?: string
 }
 
 export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouverture[] {
@@ -170,6 +172,7 @@ export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouvert
       voyageurs: l.estimation.nouveaux,
       joueur: true,
       modeLigne: l.mode,
+      couleur: l.couleur,
     })
   }
   return liste.sort((a, b) => a.annee - b.annee || b.voyageurs - a.voyageurs)

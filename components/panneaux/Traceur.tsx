@@ -7,6 +7,7 @@ import { chantierComparable } from '@/lib/chantiers'
 import { useDonnees } from '@/lib/donnees'
 import { approx, km, n } from '@/lib/format'
 import { communesDes } from '@/lib/lieux'
+import { couleurLigne, PALETTE_LIGNES } from '@/lib/couleurs'
 import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import {
@@ -45,7 +46,8 @@ const MODES: { id: ModeLigne; nom: string; court: string; icone: NomIcone; reper
     nom: 'Bus à haut niveau de service',
     court: 'Bus rapide',
     icone: 'bus',
-    repere: 'Le moins cher au kilomètre, sur des voies réservées, et il grimpe jusqu’à 10 %.',
+    repere:
+      'Le moins cher au kilomètre, sur des voies réservées, et il grimpe jusqu’à 10 %. Il franchit les fleuves sur les ponts routiers existants.',
   },
   {
     id: 'metro',
@@ -86,7 +88,12 @@ export function useEstimation(): Estimation | null {
             // continuer : sa station est déjà là.
             suite:
               !brouillon.prolonge &&
-              premiereStationPayee({ mode: brouillon.mode, arrets: brouillon.arrets, mandat }, lignes, chantiers, donnees.carreaux.mx),
+              premiereStationPayee(
+                { mode: brouillon.mode, arrets: brouillon.arrets, mandat, aPart: brouillon.aPart },
+                lignes,
+                chantiers,
+                donnees.carreaux.mx,
+              ),
           })
         : null,
     [donnees, brouillon, lignes, chantiers, mandat],
@@ -106,7 +113,9 @@ const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice
  * Ce qu'un tracé sait du réseau actuel : lesquels de ses points sont des stations, leurs noms, leurs
  * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
  */
-function useReseauDuTrace(trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms'> & { mandat?: Mandat }) | null) {
+function useReseauDuTrace(
+  trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms' | 'aPart'> & { mandat?: Mandat }) | null,
+) {
   const donnees = useDonnees(useVille().id)
   const lignes = useJeu((s) => s.lignes)
   const chantiers = useJeu((s) => s.chantiers)
@@ -120,10 +129,13 @@ function useReseauDuTrace(trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passage
     const t = { mode: trace.mode, arrets: trace.arrets, mandat: trace.mandat ?? mandatCourant }
     // Une de vos lignes d'un mandat précédent que ce tracé continue depuis son bout, dont il reprend la station ; à
     // défaut, un prolongement du catalogue décidé avant, dont il reprend la dernière station.
-    const suite = trace.prolonge ? undefined : suiteDe(t, lignes, mx)
-    const projet = trace.prolonge || suite ? undefined : projetContinue(t, chantiers, mx)
+    const touche = trace.prolonge ? undefined : (suiteDe(t, lignes, mx) ?? projetContinue(t, chantiers, mx))
+    // Mis à part par le joueur, le tracé ne continue rien : on garde seulement ce qu'il aurait continué, pour le proposer.
+    const suite = trace.aPart || trace.prolonge ? undefined : suiteDe(t, lignes, mx)
+    const projet = trace.aPart || trace.prolonge || suite ? undefined : projetContinue(t, chantiers, mx)
     // Ce que le tracé continue en fin de compte : une ligne existante, ou la première de vos lignes.
     const origine = suite || projet ? origineDe(t, { lignes, chantiers }, donnees) : undefined
+    const aurait = trace.aPart && touche ? origineDe(t, { lignes, chantiers }, donnees) : undefined
     // La première station porte le nom de ce qu'elle prolonge ou continue, sauf si le joueur l'a renommée.
     const nomDepart = nomDuDepart({ ...t, prolonge: trace.prolonge }, { lignes, chantiers }, donnees)
     if (nomDepart && estStation[0] && !trace.noms?.[0]) noms[0] = nomDepart
@@ -154,24 +166,88 @@ function useReseauDuTrace(trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passage
         : null
     // La première station est déjà construite : celle de la ligne prolongée, ou celle de ce que le tracé continue.
     const premiereConstruite = Boolean(trace.prolonge || suite || projet)
-    return { estStation, noms, stationsNommees, liste, prolongee, suite, origine, quoi, premiereConstruite, aProlonger, donnees }
+    return { estStation, noms, stationsNommees, liste, prolongee, suite, origine, aurait, quoi, premiereConstruite, aProlonger, donnees }
   }, [donnees, trace, lignes, chantiers, mandatCourant])
 }
 
-/** Les stations d'une ligne, dans l'ordre, reliées par un trait. */
-function ListeStations({ noms, titre }: { noms: string[]; titre: string }) {
-  if (!noms.length) return null
+/**
+ * Le plan d'une ligne, de haut en bas : ses stations sur le fil de sa couleur, et sous chacune les lignes du réseau
+ * actuel qu'on y retrouve en correspondance.
+ */
+function PlanLigne({
+  titre,
+  noms,
+  estStation,
+  liste,
+  couleur,
+}: {
+  titre: string
+  noms: (string | null)[]
+  estStation: boolean[]
+  liste: { rang: number; station: { nom: string; lignes: Parameters<typeof direLignes>[0]; gare?: boolean } }[]
+  couleur: string
+}) {
+  const rangs = noms.map((_, i) => i).filter((i) => estStation[i] && noms[i])
+  if (!rangs.length) return null
+  const correspondance = new Map(liste.map((c) => [c.rang, c.station]))
   return (
     <div className="flex flex-col gap-2">
       <Surtitre>{titre}</Surtitre>
-      <ol className="flex flex-wrap items-center gap-x-1 gap-y-1.5 text-[13.5px] font-bold">
-        {noms.map((nom, i) => (
-          <li key={i} className="flex items-center gap-1">
-            <span className="rounded-full bg-sable px-2.5 py-1">{nom}</span>
-            {i < noms.length - 1 ? <span aria-hidden="true" className="h-0.5 w-2.5 bg-encre" /> : null}
-          </li>
-        ))}
+      <ol className="flex flex-col">
+        {rangs.map((i, k) => {
+          const c = correspondance.get(i)
+          return (
+            <li key={i} className="relative flex gap-3 pb-3 last:pb-0">
+              <span aria-hidden="true" className="relative flex w-4 shrink-0 justify-center">
+                {k > 0 ? <span className="absolute top-0 h-2.5 w-1" style={{ background: couleur }} /> : null}
+                {k < rangs.length - 1 ? <span className="absolute top-2.5 -bottom-0 w-1" style={{ background: couleur }} /> : null}
+                <span className="relative mt-1 size-3 rounded-full bg-white" style={{ boxShadow: `0 0 0 3px ${couleur}` }} />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-[13.5px] leading-snug font-bold">{noms[i]}</span>
+                {c ? (
+                  <span className="text-[12px] leading-snug font-semibold text-gris">
+                    {c.lignes.length ? `Correspondance : ${direLignes(c.lignes)}${c.gare ? ', et la gare' : ''}` : 'Gare'}
+                  </span>
+                ) : null}
+              </span>
+            </li>
+          )
+        })}
       </ol>
+    </div>
+  )
+}
+
+/** La couleur d'une ligne : celle de son mode, ou l'une de la palette commune à tous les réseaux. */
+function ChoixCouleur({ mode, valeur, onChange }: { mode: ModeLigne; valeur?: string; onChange: (couleur?: string) => void }) {
+  const options = [{ nom: `Couleur du ${NOM_MODE[mode]}`, couleur: undefined as string | undefined }, ...PALETTE_LIGNES]
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Surtitre>Couleur de la ligne</Surtitre>
+      <div role="radiogroup" aria-label="Couleur de la ligne" className="flex flex-wrap gap-1.5">
+        {options.map((o) => {
+          const choisi = valeur === o.couleur
+          return (
+            <button
+              key={o.nom}
+              type="button"
+              role="radio"
+              aria-checked={choisi}
+              aria-label={o.nom}
+              title={o.nom}
+              onClick={() => onChange(o.couleur)}
+              style={{ background: couleurLigne(mode, o.couleur) }}
+              className={clsx(
+                'grid size-8 place-items-center rounded-full transition-transform',
+                choisi ? 'ring-2 ring-encre ring-offset-2' : 'hover:scale-110',
+              )}
+            >
+              {choisi ? <Icone nom="valider" taille={14} epaisseur={3} className="text-white" /> : null}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -323,9 +399,12 @@ export function DetailCout({ e, arrets, mode, prolonge }: { e: Estimation; arret
     lignes.push([
       mode === 'metro'
         ? `${d.franchissements} ${pluriel(d.franchissements, 'passage', 'passages')} sous un fleuve`
-        : `${d.franchissements} ${pluriel(d.franchissements, 'pont', 'ponts')} sur un fleuve`,
+        : `${d.franchissements} ${pluriel(d.franchissements, 'pont neuf', 'ponts neufs')} sur un fleuve`,
       d.ponts,
     ])
+  // Le bus passe sur les ponts routiers existants : on le dit, pour qu'on voie pourquoi il ne paie rien.
+  if (d.pontsRoutiers)
+    lignes.push([`${d.pontsRoutiers} ${pluriel(d.pontsRoutiers, 'pont routier existant', 'ponts routiers existants')}, sans surcoût`, 0])
   if (d.profondeur > 0)
     lignes.push([
       mode === 'metro'
@@ -338,6 +417,11 @@ export function DetailCout({ e, arrets, mode, prolonge }: { e: Estimation; arret
       {lignes.map(([libelle, valeur]) => (
         <Ligne key={libelle} libelle={libelle} valeur={`${n(valeur)} M€`} />
       ))}
+      {mode === 'bus' && d.ponts > 0 ? (
+        <p className="pt-1.5 text-[12px] leading-snug text-gris">
+          Un point de passage posé sur un pont routier existant évite d’en construire un neuf.
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -732,7 +816,7 @@ export function Traceur() {
   const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes, basculerPassage, choisirOutil } =
     useJeu()
   const renommer = useJeu((s) => s.renommer)
-  const { detacher, rattacher } = useJeu()
+  const { detacher, rattacher, mettreAPart } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
@@ -808,12 +892,36 @@ export function Traceur() {
           </button>
         </div>
       ) : r?.origine ? (
-        <p className="rounded-xl bg-rouge-pale px-3 py-2.5 text-[13px] leading-snug font-semibold">
-          {r.origine.existante
-            ? `Vous prolongez le ${minuscule(r.origine.existante.nom)} depuis ${noms[0] ?? 'son terminus'}, au bout du prolongement décidé au mandat ${r.origine.mandat}.`
-            : `Vous prolongez votre ligne ${r.origine.premiere?.nom ?? ''}, décidée au mandat ${r.origine.mandat}, depuis ${noms[0] ?? 'son terminus'}.`}{' '}
-          Cette station sera déjà construite : vous ne payez que les nouvelles.
-        </p>
+        <div className="flex flex-col gap-1 rounded-xl bg-rouge-pale px-3 py-2.5">
+          <p className="text-[13px] leading-snug font-semibold">
+            {r.origine.existante
+              ? `Vous prolongez le ${minuscule(r.origine.existante.nom)} depuis ${noms[0] ?? 'son terminus'}, au bout du prolongement décidé au mandat ${r.origine.mandat}.`
+              : `Vous prolongez votre ligne ${r.origine.premiere?.nom ?? ''}, décidée au mandat ${r.origine.mandat}, depuis ${noms[0] ?? 'son terminus'}.`}{' '}
+            Cette station sera déjà construite : vous ne payez que les nouvelles.
+          </p>
+          <button
+            type="button"
+            onClick={() => mettreAPart(true)}
+            className="min-h-8 self-start text-[12.5px] font-extrabold text-rouge-fonce underline underline-offset-3"
+          >
+            En faire une ligne à part
+          </button>
+        </div>
+      ) : r?.aurait ? (
+        <div className="flex flex-col gap-1 rounded-xl bg-sable px-3 py-2.5">
+          <p className="text-[13px] leading-snug font-semibold">
+            Votre ligne part de {noms[0] ?? 'cette station'} sans prolonger{' '}
+            {r.aurait.existante ? `le ${minuscule(r.aurait.existante.nom)}` : `votre ligne ${r.aurait.premiere?.nom ?? ''}`} : elle paie sa
+            première station, en correspondance.
+          </p>
+          <button
+            type="button"
+            onClick={() => mettreAPart(false)}
+            className="min-h-8 self-start text-[12.5px] font-extrabold text-rouge-fonce underline underline-offset-3"
+          >
+            La prolonger plutôt
+          </button>
+        </div>
       ) : null}
       {arrets === 0 && !modifiee ? <Prolonger /> : null}
       <fieldset className="flex flex-col gap-2">
@@ -1122,7 +1230,7 @@ function VoyageursLigne({ e, conditionnel = false }: { e: Estimation; conditionn
 }
 
 export function MaLigne() {
-  const { brouillon, mandat, construireLigne, ouvrir, libre, lignes } = useJeu()
+  const { brouillon, mandat, construireLigne, ouvrir, libre, lignes, colorer } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const e = useEstimation()
@@ -1205,6 +1313,7 @@ export function MaLigne() {
     >
       <ChiffresLigne e={e} annee={annee} legendeCout={partDuBudget(e.cout, reste)} />
       <EnBref trace={brouillon} longueur={e.km} />
+      <ChoixCouleur mode={brouillon.mode} valeur={brouillon.couleur} onChange={(c) => colorer(c)} />
       {ancienne ? (
         <p className="text-[13.5px] leading-normal text-gris">
           Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
@@ -1228,8 +1337,15 @@ export function MaLigne() {
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
       </div>
-      <ListeStations noms={noms} titre="Vos stations" />
-      {r ? <PhraseCorrespondances liste={r.liste} /> : null}
+      {r ? (
+        <PlanLigne
+          titre="Vos stations"
+          noms={r.noms}
+          estStation={r.estStation}
+          liste={r.liste}
+          couleur={couleurLigne(brouillon.mode, brouillon.couleur)}
+        />
+      ) : null}
       <VoyageursLigne e={e} conditionnel />
       <Rendement voyageurs={e.nouveaux} cout={e.cout} ligne />
       <p className="text-[13.5px] leading-normal text-gris">
@@ -1251,7 +1367,7 @@ export function MaLigne() {
  * le détail de son coût, ses arrêts, et de quoi la supprimer ; décidée à un mandat précédent, de quoi la prolonger.
  */
 export function FicheLigne({ id }: { id: string }) {
-  const { lignes, chantiers, mandat, retirer, fermer, changerPaiement, libre, modifierLigne, prolonger } = useJeu()
+  const { lignes, chantiers, mandat, retirer, fermer, changerPaiement, libre, modifierLigne, prolonger, colorer } = useJeu()
   const ville = useVille()
   const l = lignes.find((x) => x.id === id)
   const r = useReseauDuTrace(l ?? null)
@@ -1340,6 +1456,7 @@ export function FicheLigne({ id }: { id: string }) {
     >
       <ChiffresLigne e={e} annee={annee} legendeCout="investis" />
       <EnBref trace={l} longueur={e.km} />
+      <ChoixCouleur mode={l.mode} valeur={l.couleur} onChange={(c) => colorer(c, l.id)} />
       {l.etale && !libre ? (
         <p className="text-[13.5px] leading-normal text-gris">
           Payée en deux fois : {n(moitie)} M€ sur le premier mandat, {n(e.cout - moitie)} M€ sur le second.
@@ -1363,8 +1480,9 @@ export function FicheLigne({ id }: { id: string }) {
         <Ligne libelle="Emplois" valeur={approx(e.emplois)} />
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
       </div>
-      <ListeStations noms={noms} titre="Ses stations" />
-      {r ? <PhraseCorrespondances liste={r.liste} /> : null}
+      {r ? (
+        <PlanLigne titre="Ses stations" noms={r.noms} estStation={r.estStation} liste={r.liste} couleur={couleurLigne(l.mode, l.couleur)} />
+      ) : null}
     </Panneau>
   )
 }

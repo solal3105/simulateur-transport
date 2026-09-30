@@ -39,7 +39,7 @@ export function useProgramme() {
       mandat: l.mandat,
       etale: l.etale,
       joueur: true,
-      couleur: couleurLigne(l.mode),
+      couleur: couleurLigne(l.mode, l.couleur),
     })),
   ]
   return { lignesProgramme, mandat }

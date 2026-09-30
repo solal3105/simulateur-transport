@@ -66,6 +66,7 @@ function suivre(depart: Bout, mode: ModeLigne, x: Decide, d: Contexte, vues: Set
         !vues.has(l.id) &&
         l.mode === mode &&
         !l.prolonge &&
+        !l.aPart &&
         l.arrets[0] &&
         metres(l.arrets[0], bout.pos) <= (premier ? ecart : ECART_SUITE),
     )
@@ -105,7 +106,7 @@ function boutsExistante(ligne: LigneExistante & { mode: ModeLigne }, x: Decide, 
 
 /** Une de vos lignes qui ne prolonge ni ne continue rien : elle a deux bouts d'où repartir. */
 const partDeRien = (l: LigneJoueur, x: Decide, mx: number) =>
-  !l.prolonge && !suiteDe(l, x.lignes, mx) && !projetContinue(l, x.chantiers, mx)
+  !l.prolonge && (Boolean(l.aPart) || (!suiteDe(l, x.lignes, mx) && !projetContinue(l, x.chantiers, mx)))
 
 /**
  * Les bouts d'une de vos lignes d'un mandat précédent : ses deux terminus quand elle part de rien, le dernier seulement
@@ -156,6 +157,8 @@ export function origineDe(
       mandat ??= avant.mandat
       if (avant.prolonge) return { existante: existante(avant.prolonge), mandat }
       premiere = avant
+      // Une ligne mise à part ouvre sa propre chaîne : on ne remonte pas au-delà.
+      if (avant.aPart) return { premiere, mandat }
       courant = avant
       continue
     }
