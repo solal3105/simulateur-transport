@@ -20,6 +20,30 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  */
 const VERSIONS: Version[] = [
   {
+    iso: '2026-09-30',
+    date: '30 septembre 2026',
+    titre: 'Ponts routiers, lignes à part et couleurs',
+    texte:
+      'Un bus rapide passe sur les ponts routiers existants, une nouvelle ligne peut partir du bout d’une autre sans la prolonger, et chaque ligne peut prendre sa couleur.',
+    groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'Un bus à haut niveau de service qui franchit un grand fleuve près d’un pont routier l’emprunte, sans payer de pont neuf. Un point de passage posé sur le pont suffit à y faire passer la ligne.',
+          'Chaque ligne que vous tracez peut prendre une couleur parmi quatorze, les mêmes dans tous les réseaux. Elle la garde sur la carte, dans votre programme et sur les images que vous partagez.',
+          'La fiche d’une ligne montre ses stations en plan vertical, avec sous chacune les lignes que l’on y retrouve en correspondance.',
+        ],
+      },
+      {
+        titre: 'Corrigé',
+        points: [
+          'Une nouvelle ligne qui part du bout d’une de vos lignes, ou d’un prolongement du catalogue, n’en est plus forcément la suite : « En faire une ligne à part » la rend indépendante, et elle paie alors sa première station.',
+          'Une correspondance se mesure depuis chaque bout des grandes gares : un arrêt posé au sud des quais de Laplace, sur le RER B, est bien en correspondance.',
+        ],
+      },
+    ],
+  },
+  {
     iso: '2026-09-28',
     date: '28 septembre 2026',
     titre: 'Prolonger un prolongement, et la vue aérienne',

@@ -216,7 +216,7 @@ export function Liste() {
                   icone={
                     <span
                       className="grid size-10 shrink-0 place-items-center rounded-xl text-white"
-                      style={{ background: couleurLigne(l.mode) }}
+                      style={{ background: couleurLigne(l.mode, l.couleur) }}
                     >
                       <Icone nom="trace" taille={19} />
                     </span>

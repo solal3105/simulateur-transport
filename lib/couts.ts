@@ -10,7 +10,8 @@
  * la méthode, les chantiers, leurs sources et l'écart entre leur coût réel et notre calcul sont dans
  * docs/couts.md, et scripts/verifier-couts.ts refait la comparaison.
  */
-import { ECART_OUVRAGE, franchissements, relief, type Terrain } from './terrain'
+import { PONTS_ROUTIERS } from './ponts'
+import { croisementsFleuves, ECART_OUVRAGE, relief, type Terrain } from './terrain'
 import type { DetailCout, ModeLigne } from './types'
 import type { IdVille } from './villes'
 
@@ -64,6 +65,13 @@ export const COEFFICIENT_RESEAU: Record<IdVille, number> = { lyon: 1.2, toulouse
 /** Profondeur ordinaire d'une station de métro, en mètres : au-delà, chaque mètre coûte. */
 const PROFONDEUR_ORDINAIRE = 25
 
+/**
+ * En deçà, en mètres, un bus qui traverse un grand cours d'eau passe sur le pont routier existant (lib/ponts.ts) et n'en
+ * construit pas de neuf : ses voies réservées se prennent sur la chaussée. Un point de passage posé sur le pont suffit à
+ * y faire passer la ligne.
+ */
+export const ECART_PONT_ROUTIER = 150
+
 export function coutLigne(
   mode: ModeLigne,
   arrets: [number, number][],
@@ -78,8 +86,16 @@ export function coutLigne(
   const r = terrain ? relief(terrain, mode, arrets, mx, options.estStation) : null
   // Les points de passage ne coûtent rien ; le terminus d'une ligne prolongée existe déjà.
   const nombreStations = (options.estStation ? options.estStation.filter(Boolean).length : arrets.length) - (options.prolonge ? 1 : 0)
-  // Le câble passe au-dessus des fleuves ; le tram et le bus ont besoin d'un pont, le métro d'un tunnel plus profond.
-  const n = terrain && mode !== 'cable' ? franchissements(terrain, arrets) : 0
+  // Le câble passe au-dessus des fleuves ; le tram a besoin d'un pont, le métro d'un tunnel plus profond, et le bus d'un
+  // pont neuf seulement là où aucun pont routier ne passe tout près.
+  const croisements = terrain && mode !== 'cable' ? croisementsFleuves(terrain, arrets) : []
+  const pontsRoutiers =
+    mode === 'bus'
+      ? croisements.filter((c) =>
+          PONTS_ROUTIERS[ville].some((p) => Math.hypot((p[0] - c[0]) * mx, (p[1] - c[1]) * 111320) <= ECART_PONT_ROUTIER),
+        ).length
+      : 0
+  const n = croisements.length - pontsRoutiers
   // En métro, les stations plus basses que d'ordinaire ; en tram et en bus, celles qui passent sous le sol.
   const seuil = mode === 'metro' ? PROFONDEUR_ORDINAIRE : ECART_OUVRAGE
   const profondes = r && mode !== 'cable' ? (options.prolonge ? r.profondeurs.slice(1) : r.profondeurs).filter((d) => d > seuil) : []
@@ -95,6 +111,7 @@ export function coutLigne(
         : profondes.length * p.stationSouterraine * k,
     kmOuvrage,
     franchissements: n,
+    ...(pontsRoutiers ? { pontsRoutiers } : {}),
     stationsProfondes: profondes.length,
     penteTerrain: r ? r.penteTerrain : 0,
   }

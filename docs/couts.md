@@ -5,7 +5,7 @@ Le coût d'une ligne additionne quatre parts, calculées dans `lib/couts.ts` à 
 - la voie, au kilomètre de tracé, matériel roulant et dépôt compris ;
 - chaque station ;
 - un tunnel ou une tranchée couverte là où le terrain monte plus vite que le mode ne sait gravir, avec des stations souterraines quand le tram ou le bus passe sous la colline ;
-- un pont pour chaque grand cours d'eau franchi en tram ou en bus, un passage dessous pour le métro ;
+- un pont pour chaque grand cours d'eau franchi en tram ou en bus, un passage dessous pour le métro ; un bus qui franchit le fleuve à moins de 150 m d'un pont routier existant l'emprunte sans payer de pont neuf, ses voies réservées se prenant sur la chaussée (`lib/ponts.ts`, écrit par `scripts/ponts.ts` à partir des ponts routiers d'OpenStreetMap : 28 dans le réseau lyonnais, 24 à Toulouse, 6 à Aix-Marseille-Provence, 24 à Nice et 176 en Île-de-France) ;
 - pour le métro, le tunnel creusé à plus de 30 m sous une colline et les stations creusées au-delà de 25 m.
 
 Le tout est multiplié par un coefficient propre au réseau, parce qu'on ne construit pas au même prix partout.

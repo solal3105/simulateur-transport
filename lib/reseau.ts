@@ -57,6 +57,11 @@ export const prolongeable = (l: LigneExistante): l is LigneExistante & { mode: M
 export interface StationExistante {
   nom: string
   pos: [number, number]
+  /**
+   * Tous les endroits où la station a été relevée, `pos` compris : une gare aux quais longs, comme Laplace sur le RER B,
+   * l'est aux deux bouts. Une correspondance se mesure depuis le plus proche.
+   */
+  points: [number, number][]
   lignes: { id: string; mode: ModeExistant; ref: string; ouverture?: string }[]
   /** Les lignes dont elle est un terminus : on peut les prolonger d'ici. */
   terminus: string[]
@@ -151,14 +156,18 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
       return d < MEME_LIEU || (s.nom !== '' && cleNom(x.nom) === cleNom(s.nom) && d < MEME_STATION)
     })
   const cle = (s: StationLigne) => cleNom(s.nom) || s.pos.join(',')
+  // Un autre endroit de la même station, s'il n'est pas déjà tout près d'un point connu.
+  const noter = (station: StationExistante, p: [number, number]) => {
+    if (station.points.every((q) => metres(mx, q, p) >= MEME_LIEU)) station.points.push(p)
+  }
   const ajouter = (l: LigneExistante) => {
     const bouts = new Set(terminusDe(l).map(cle))
     for (const s of l.branches.flat()) {
       let station = retrouver(s)
       if (!station) {
-        station = { nom: s.nom, pos: s.pos, lignes: [], terminus: [] }
+        station = { nom: s.nom, pos: s.pos, points: [s.pos], lignes: [], terminus: [] }
         stations.push(station)
-      }
+      } else noter(station, s.pos)
       const deja = station.lignes.find((x) => x.id === l.id)
       // Une ligne qui dessert déjà la station n'y ouvre pas plus tard.
       if (!deja) station.lignes.push({ id: l.id, mode: l.mode, ref: l.ref, ...(s.ouverture ? { ouverture: s.ouverture } : {}) })
@@ -171,8 +180,10 @@ export function stationsExistantes(reseau: ReseauActuel | null, mx: number): Sta
   // Les gares : une station du même nom tout près en devient une, sinon la gare s'ajoute seule.
   for (const g of reseau.gares ?? []) {
     const station = retrouver(g)
-    if (station) station.gare = true
-    else stations.push({ nom: g.nom, pos: g.pos, lignes: [], terminus: [], gare: true })
+    if (station) {
+      station.gare = true
+      noter(station, g.pos)
+    } else stations.push({ nom: g.nom, pos: g.pos, points: [g.pos], lignes: [], terminus: [], gare: true })
   }
   for (const l of reseau.lignes) if (l.mode === 'bus') ajouter(l)
   return stations
@@ -189,13 +200,18 @@ export function direOuvertures(lignes: StationExistante['lignes']) {
 /** Distance, en mètres, jusqu'à laquelle une station du joueur est en correspondance avec une station existante. */
 export const ECART_CORRESPONDANCE = 150
 
-/** La station existante la plus proche d'un point, si elle est assez proche pour une correspondance. */
+/**
+ * La station existante la plus proche d'un point, si elle est assez proche pour une correspondance. La distance se
+ * mesure depuis l'endroit le plus proche de la station : les deux bouts de quais d'une longue gare comptent.
+ */
 export function stationProche(stations: StationExistante[], p: [number, number], mx: number, ecart = ECART_CORRESPONDANCE) {
   let meilleure: StationExistante | null = null
   let distance = ecart
   for (const s of stations) {
-    const d = metres(mx, s.pos, p)
-    if (d <= distance) [meilleure, distance] = [s, d]
+    for (const q of s.points) {
+      const d = metres(mx, q, p)
+      if (d <= distance) [meilleure, distance] = [s, d]
+    }
   }
   return meilleure
 }

@@ -351,7 +351,7 @@ export function imageReseau(ville: Ville, r: ReseauApercu) {
     // Les points de passage guident le tracé sans être des stations : pas de rond pour eux.
     ...r.partie.l.map((l) => ({
       d: cadreMiniature(ville).chemin([l.a]),
-      couleur: couleurLigne(l.m as ModeLigne),
+      couleur: couleurLigne(l.m as ModeLigne, l.c),
       arrets: l.a.filter((_, i) => stationsDuTrace(l.a.length, l.p)[i]),
     })),
   ]

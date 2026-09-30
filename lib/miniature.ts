@@ -55,6 +55,6 @@ export function cheminsReseau(projets: Projets, partie: PartieCompacte, ville: P
       ? [{ d: chemin(geometrie.coordinates), couleur: couleurProjet(id, { varianteId: varianteId || undefined, option: option === 1 }) }]
       : []
   })
-  const lignes = partie.l.map((l) => ({ d: chemin([l.a]), couleur: couleurLigne(l.m as ModeLigne) }))
+  const lignes = partie.l.map((l) => ({ d: chemin([l.a]), couleur: couleurLigne(l.m as ModeLigne, l.c) }))
   return [...traces, ...lignes]
 }

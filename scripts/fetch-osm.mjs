@@ -18,6 +18,9 @@ const VILLES = {
       '(way["leisure"="park"](45.66,4.70,45.86,5.12);relation["leisure"="park"](45.66,4.70,45.86,5.12);way["landuse"="forest"](45.66,4.70,45.86,5.12);way["natural"="wood"](45.66,4.70,45.86,5.12););out geom;',
     eau: '(way["natural"="water"](45.66,4.70,45.86,5.12);relation["natural"="water"](45.66,4.70,45.86,5.12););out geom;',
     routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](45.66,4.70,45.86,5.12);out geom;',
+    // Les ponts routiers, pour qu'un bus qui franchit un grand cours d'eau emprunte le pont existant (scripts/ponts.ts).
+    ponts:
+      'way["bridge"]["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|busway|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](45.66,4.70,45.86,5.12);out geom;',
     rail: 'way["railway"="rail"][!"service"](45.66,4.70,45.86,5.12);out geom;',
     communes: 'relation["boundary"="administrative"]["admin_level"="8"](45.62,4.66,45.90,5.16);out geom;',
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](45.62,4.66,45.90,5.16);out;',
@@ -36,6 +39,9 @@ const VILLES = {
       '(way["leisure"="park"](43.42,1.18,43.78,1.68);relation["leisure"="park"](43.42,1.18,43.78,1.68);way["landuse"="forest"](43.42,1.18,43.78,1.68);way["natural"="wood"](43.42,1.18,43.78,1.68););out geom;',
     eau: '(way["natural"="water"](43.42,1.18,43.78,1.68);relation["natural"="water"](43.42,1.18,43.78,1.68););out geom;',
     routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](43.42,1.18,43.78,1.68);out geom;',
+    // Les ponts routiers, pour qu'un bus qui franchit un grand cours d'eau emprunte le pont existant (scripts/ponts.ts).
+    ponts:
+      'way["bridge"]["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|busway|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](43.42,1.18,43.78,1.68);out geom;',
     rail: 'way["railway"="rail"][!"service"](43.42,1.18,43.78,1.68);out geom;',
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.38,1.12,43.82,1.72);out;',
     stops:
@@ -52,6 +58,9 @@ const VILLES = {
       '(way["leisure"="park"](43.14,4.70,43.80,5.85);relation["leisure"="park"](43.14,4.70,43.80,5.85);way["landuse"="forest"](43.14,4.70,43.80,5.85);way["natural"="wood"](43.14,4.70,43.80,5.85););out geom;',
     eau: '(way["natural"="water"](43.14,4.70,43.80,5.85);relation["natural"="water"](43.14,4.70,43.80,5.85););out geom;',
     routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](43.14,4.70,43.80,5.85);out geom;',
+    // Les ponts routiers, pour qu'un bus qui franchit un grand cours d'eau emprunte le pont existant (scripts/ponts.ts).
+    ponts:
+      'way["bridge"]["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|busway|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](43.14,4.70,43.80,5.85);out geom;',
     rail: 'way["railway"="rail"][!"service"](43.14,4.70,43.80,5.85);out geom;',
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.10,4.65,43.82,5.90);out;',
     stops:
@@ -59,7 +68,8 @@ const VILLES = {
   },
   // Les 51 communes de la Métropole Nice Côte d'Azur, de la mer aux vallées de la Tinée et de la Vésubie.
   nice: {
-    rivers: 'way["waterway"="river"]["name"~"^(Var|Le Var|Paillon|Le Paillon|Tinée|La Tinée|Vésubie|La Vésubie)$"](43.63,6.77,44.37,7.45);out geom;',
+    rivers:
+      'way["waterway"="river"]["name"~"^(Var|Le Var|Paillon|Le Paillon|Tinée|La Tinée|Vésubie|La Vésubie)$"](43.63,6.77,44.37,7.45);out geom;',
     cote: 'way["natural"="coastline"](43.55,6.70,43.85,7.55);out geom;',
     tram: 'way["railway"~"^(tram|light_rail)$"][!"service"](43.63,7.10,43.80,7.40);out geom;',
     chantiers: 'way["railway"="construction"]["construction"~"^(tram|light_rail)$"](43.63,7.10,43.80,7.40);out geom;',
@@ -67,6 +77,9 @@ const VILLES = {
       '(way["leisure"="park"](43.63,6.77,44.37,7.45);relation["leisure"="park"](43.63,6.77,44.37,7.45);way["landuse"="forest"](43.63,6.77,44.37,7.45);way["natural"="wood"](43.63,6.77,44.37,7.45););out geom;',
     eau: '(way["natural"="water"](43.63,6.77,44.37,7.45);relation["natural"="water"](43.63,6.77,44.37,7.45););out geom;',
     routes: 'way["highway"~"^(motorway|trunk|primary|secondary)$"](43.63,6.77,44.37,7.45);out geom;',
+    // Les ponts routiers, pour qu'un bus qui franchit un grand cours d'eau emprunte le pont existant (scripts/ponts.ts).
+    ponts:
+      'way["bridge"]["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|busway|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](43.63,6.77,44.37,7.45);out geom;',
     rail: 'way["railway"="rail"][!"service"](43.63,6.77,44.37,7.45);out geom;',
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](43.60,6.74,44.40,7.50);out;',
     stops: '(node["railway"="tram_stop"](43.63,7.10,43.80,7.40););out;',
@@ -82,7 +95,11 @@ const VILLES = {
     parcs:
       '(way["leisure"="park"](48.10,1.43,49.25,3.57);relation["leisure"="park"](48.10,1.43,49.25,3.57);way["landuse"="forest"]["name"](48.10,1.43,49.25,3.57);relation["landuse"="forest"](48.10,1.43,49.25,3.57);way["natural"="wood"]["name"](48.10,1.43,49.25,3.57);relation["natural"="wood"](48.10,1.43,49.25,3.57););out geom;',
     eau: '(way["natural"="water"](48.10,1.43,49.25,3.57);relation["natural"="water"](48.10,1.43,49.25,3.57););out geom;',
-    routes: '(way["highway"~"^(motorway|trunk|primary)$"](48.10,1.43,49.25,3.57);way["highway"="secondary"](48.72,2.15,49.00,2.60););out geom;',
+    routes:
+      '(way["highway"~"^(motorway|trunk|primary)$"](48.10,1.43,49.25,3.57);way["highway"="secondary"](48.72,2.15,49.00,2.60););out geom;',
+    // Les ponts routiers, pour qu'un bus qui franchit un grand cours d'eau emprunte le pont existant (scripts/ponts.ts).
+    ponts:
+      'way["bridge"]["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|busway|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](48.10,1.43,49.25,3.57);out geom;',
     rail: 'way["railway"="rail"][!"service"](48.10,1.43,49.25,3.57);out geom;',
     lieux: 'node["place"~"^(city|town|village|suburb|quarter|neighbourhood)$"](48.10,1.43,49.25,3.57);out;',
     stops:

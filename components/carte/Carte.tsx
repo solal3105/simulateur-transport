@@ -1082,7 +1082,7 @@ export function Carte({
             properties: {
               id: l.id,
               chantier: anneeMax === undefined && ouverture(l.mandat, l.estimation.duree) > fin,
-              couleur: couleurLigne(l.mode),
+              couleur: couleurLigne(l.mode, l.couleur),
               choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
             geometry: { type: 'LineString', coordinates: l.arrets },
@@ -1096,7 +1096,7 @@ export function Carte({
       if (arrets.length >= 2 && brouillon)
         traits.push({
           type: 'Feature',
-          properties: { couleur: couleurLigne(brouillon.mode) },
+          properties: { couleur: couleurLigne(brouillon.mode, brouillon.couleur) },
           geometry: { type: 'LineString', coordinates: arrets },
         })
       arrets.forEach((a, i) =>

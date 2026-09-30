@@ -47,7 +47,20 @@ export interface PartieCompacte {
    * Les lignes : nom, mode, mandat, paiement étalé, points, et au besoin les rangs des points de passage, la ligne prolongée
    * et les stations renommées par le joueur, chacune avec son rang.
    */
-  l: { n: string; m: string; d: number; e: number; a: [number, number][]; p?: number[]; o?: string; s?: [number, string][] }[]
+  l: {
+    n: string
+    m: string
+    d: number
+    e: number
+    a: [number, number][]
+    p?: number[]
+    o?: string
+    s?: [number, string][]
+    /** 1 pour une ligne mise à part, qui ne continue pas ce qu'elle touche à son départ. */
+    j?: 1
+    /** La couleur choisie par le joueur, « #rrggbb ». */
+    c?: string
+  }[]
   f: Record<number, Leviers>
 }
 
@@ -71,6 +84,8 @@ export function compacter(p: PartiePartagee): PartieCompacte {
       ...(l.passages?.length ? { p: l.passages } : {}),
       ...(l.prolonge ? { o: l.prolonge } : {}),
       ...(nomsChoisis(l).length ? { s: nomsChoisis(l) } : {}),
+      ...(l.aPart ? { j: 1 as const } : {}),
+      ...(l.couleur ? { c: l.couleur } : {}),
     })),
     f: Object.fromEntries(Array.from({ length: Math.max(MANDATS_DE_BASE, p.mandats) }, (_, i) => [i + 1, leviersDu(p.leviers, i + 1)])),
   }
@@ -177,6 +192,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       ...(passages.length ? { passages } : {}),
       ...(prolonge ? { prolonge } : {}),
       ...(noms ? { noms } : {}),
+      ...(l.j === 1 && !prolonge ? { aPart: true } : {}),
+      ...(typeof l.c === 'string' && /^#[0-9a-f]{6}$/i.test(l.c) ? { couleur: l.c.toLowerCase() } : {}),
       mandat: mandatDe(l.d),
       etale: l.e === 1 && mandatDe(l.d) === 1 && !libre,
       arrets: l.a,
