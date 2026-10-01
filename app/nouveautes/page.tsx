@@ -28,8 +28,8 @@ const VERSIONS: Version[] = [
       {
         titre: 'Nouveau',
         points: [
-          'Une ligne de trois stations au moins peut revenir à son départ : « Revenir en boucle », dans le traceur, ajoute le tronçon qui la referme, compté dans le prix et la longueur, sans station en plus. Une boucle ne se prolonge pas.',
-          'Le tutoriel se termine par la création de votre propre ligne, avec le bouton « Créer ma ligne », pour tracer ce que le catalogue ne propose pas.',
+          'Une ligne de trois stations au moins peut revenir à son départ. Dans le traceur, le bouton qui propose de revenir en boucle à la première station ajoute le tronçon qui referme la ligne, compté dans le prix et la longueur, sans station de plus. « Rouvrir la boucle » le retire. Une boucle ne se prolonge pas, et un prolongement ne se referme pas.',
+          'La dernière étape du tutoriel présente le bouton « Créer ma ligne », qui sert à tracer ce que le catalogue ne propose pas, et permet de commencer votre ligne tout de suite.',
         ],
       },
       {
@@ -39,13 +39,15 @@ const VERSIONS: Version[] = [
           'Après « Terminer la ligne » ou « Voir le résultat », un clic sur la carte ne pose plus d’arrêt.',
           'Dans le plan vertical d’une ligne, le trait de couleur ne s’interrompt plus entre les stations.',
           'Dans la liste des projets, le tri choisi reste le même quand on revient à la liste après avoir ouvert ou décidé un projet.',
-          'Sur téléphone, un toucher interrompu pendant le tracé ne bloque plus la carte.',
+          'Sur téléphone, quand le navigateur interrompt le déplacement d’un arrêt, par exemple si un deuxième doigt se pose, l’arrêt est relâché et la carte glisse de nouveau.',
           'La fiche du Tram du Centre parle du Trambus TB11, l’ancienne ligne C3.',
         ],
       },
       {
         titre: 'Retiré',
-        points: ['La grande dorsale est-ouest quitte le catalogue de Lyon : aucune étude ni délibération ne la porte.'],
+        points: [
+          'La grande dorsale est-ouest quitte le catalogue de Lyon : aucune étude ni délibération ne la porte. Une partie qui l’avait lancée la perd, et son coût revient dans le budget.',
+        ],
       },
     ],
   },
