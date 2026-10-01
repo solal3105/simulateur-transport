@@ -7,19 +7,6 @@ import type { Catalogue, Projet } from '../types'
  */
 const projets: Projet[] = [
   {
-    id: 'grande-dorsale',
-    feminin: true,
-    nom: 'Grande Dorsale est-ouest',
-    genre: 'Nouvelle ligne de métro',
-    description:
-      "Une traversée souterraine de la Métropole, de l'ouest lyonnais à l'est. C'est le projet le plus lourd du catalogue et le plus long à construire : trente ans de chantier, bien au-delà des deux mandats.",
-    mode: 'metro',
-    cout: 6000,
-    voyageurs: 182000,
-    duree: 30,
-    trace: 'grande-dorsale',
-  },
-  {
     id: 'metro-e-bellecour',
     nom: 'Métro E jusqu’à Bellecour',
     genre: 'Nouvelle ligne de métro',
@@ -173,7 +160,7 @@ const projets: Projet[] = [
     id: 't12-c3',
     nom: 'Tram du Centre',
     genre: 'Nouveau tramway',
-    description: 'La ligne de bus C3 devient un tramway, sur l’un des axes les plus chargés du réseau.',
+    description: 'Le Trambus TB11, l’ancienne ligne C3, devient un tramway, sur l’un des axes les plus chargés du réseau.',
     mode: 'tram',
     cout: 540,
     voyageurs: 75000,

@@ -59,6 +59,8 @@ export interface PartieCompacte {
     s?: [number, string][]
     /** 1 pour une ligne mise à part, qui ne continue pas ce qu'elle touche à son départ. */
     j?: 1
+    /** La ligne se referme sur sa première station. */
+    b?: 1
     /** La couleur choisie par le joueur, « #rrggbb ». */
     c?: string
   }[]
@@ -86,6 +88,7 @@ export function compacter(p: PartiePartagee): PartieCompacte {
       ...(l.prolonge ? { o: l.prolonge } : {}),
       ...(nomsChoisis(l).length ? { s: nomsChoisis(l) } : {}),
       ...(l.aPart ? { j: 1 as const } : {}),
+      ...(l.boucle ? { b: 1 as const } : {}),
       ...(l.couleur ? { c: l.couleur } : {}),
     })),
     f: Object.fromEntries(Array.from({ length: Math.max(MANDATS_DE_BASE, p.mandats) }, (_, i) => [i + 1, leviersDu(p.leviers, i + 1)])),
@@ -194,6 +197,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
       ...(prolonge ? { prolonge } : {}),
       ...(noms ? { noms } : {}),
       ...(l.j === 1 && !prolonge ? { aPart: true } : {}),
+      // Une boucle n'est jamais un prolongement, et il lui faut trois points au moins.
+      ...(l.b === 1 && !prolonge && l.a.length >= 3 ? { boucle: true } : {}),
       ...(typeof l.c === 'string' && /^#[0-9a-f]{6}$/i.test(l.c) ? { couleur: l.c.toLowerCase() } : {}),
       mandat: mandatDe(l.d),
       etale: l.e === 1 && mandatDe(l.d) === 1 && !libre,
@@ -204,7 +209,7 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   // première station est déjà payée. On le reconnaît au tracé, une fois tout lu, sans rien lire de plus dans la partie.
   const lignes: LigneJoueur[] = lues.map((l) => {
     const suite = !l.prolonge && premiereStationPayee(l, lues, chantiersValides, carreaux.mx)
-    const estimation = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
+    const estimation = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite, boucle: l.boucle })
     return { ...l, estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 } }
   })
 

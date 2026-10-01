@@ -16,9 +16,10 @@ import { useBilan } from './budget'
  * Étape 0 : toucher sur la carte le projet choisi pour le tutoriel de chaque réseau, le T8 à Lyon. Étape 1 : la
  * fiche guide depuis l'intérieur (voir FicheProjet).
  * Étape 2 : ce que la décision vient de changer, et la suite de la partie.
+ * Étape 3 : on peut aussi créer sa propre ligne, que le catalogue ne propose pas, avec le bouton « Créer ma ligne ».
  */
 export function Tutoriel() {
-  const { tuto, finirTuto, chantiers } = useJeu()
+  const { tuto, finirTuto, etapeTuto, tracer, chantiers } = useJeu()
   const guide = CATALOGUES[useVille().id].tutoriel
   const bilan = useBilan()
   const grand = useGrandEcran()
@@ -62,9 +63,39 @@ export function Tutoriel() {
               2032.
             </p>
           </div>
-          <Bouton genre="rouge" icone="fleche" onClick={finirTuto}>
-            Continuer la partie
+          <Bouton genre="rouge" icone="fleche" onClick={() => etapeTuto(3)}>
+            Continuer
           </Bouton>
+        </Bulle>
+      ) : null}
+      {tuto === 3 ? (
+        <Bulle key="3" position="haut">
+          <Entete etape={4} />
+          <div className="flex flex-col gap-2">
+            <h2 id="titre-tuto" className="text-lg leading-tight font-black lg:text-xl">
+              Vous pouvez aussi créer votre propre ligne.
+            </h2>
+            <p className="text-[14.5px] leading-relaxed text-gris">
+              Le catalogue ne propose que les projets étudiés. Avec le bouton « Créer ma ligne »,{' '}
+              {grand ? 'en haut, à droite de votre programme' : 'en bas à droite de la carte'}, vous tracez une ligne de tram, de métro, de
+              bus ou de téléphérique là où vous voulez, arrêt par arrêt. Son prix et ses voyageurs se calculent pendant que vous tracez.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Bouton
+              genre="rouge"
+              iconeAGauche="trace"
+              onClick={() => {
+                finirTuto()
+                tracer('tram')
+              }}
+            >
+              Créer ma ligne
+            </Bouton>
+            <Bouton genre="sable" onClick={finirTuto}>
+              Continuer la partie
+            </Bouton>
+          </div>
         </Bulle>
       ) : null}
     </AnimatePresence>
@@ -97,11 +128,11 @@ function Entete({ etape, onPasser }: { etape: number; onPasser?: () => void }) {
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="flex gap-1" aria-hidden="true">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4].map((i) => (
             <span key={i} className={clsx('h-1.5 w-5.5 rounded-full transition-colors', i <= etape ? 'bg-rouge' : 'bg-trait')} />
           ))}
         </div>
-        <span className="text-xs font-extrabold text-muet">Première décision, étape {etape} sur 3</span>
+        <span className="text-xs font-extrabold text-muet">Prise en main, étape {etape} sur 4</span>
       </div>
       {onPasser ? (
         <button type="button" onClick={onPasser} className="min-h-10 text-[13px] font-extrabold text-gris underline underline-offset-3">

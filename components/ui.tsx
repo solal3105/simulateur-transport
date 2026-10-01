@@ -24,6 +24,8 @@ const TRACES = {
   cle: 'M14.5 4.5a4 4 0 0 0 5 5l-9.5 9.5a2.1 2.1 0 0 1-3-3z',
   partager: 'M12 3v12M7 8l5-5 5 5M5 14v6h14v-6',
   rejouer: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 3.5v5h5',
+  // Une ligne qui revient à son départ : un anneau, et la flèche qui le referme.
+  boucle: 'M17 7.5A7 7 0 1 0 19 12M19 4v4h-4',
   loi: 'M4 20h16M6 17V9M10 17V9M14 17V9M18 17V9M3 9l9-5 9 5z',
   moins: 'M6 12h12',
   plus: 'M6 12h12M12 6v12',

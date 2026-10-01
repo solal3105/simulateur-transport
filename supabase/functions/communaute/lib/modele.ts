@@ -135,7 +135,7 @@ export function prolongementPossible(
 export const ECART_SUITE = 60
 
 /** Ce qu'il faut savoir d'une ligne pour reconnaître qu'elle en continue une autre. */
-type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat; aPart?: boolean }
+type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat; aPart?: boolean; boucle?: boolean }
 
 /**
  * La ligne du joueur que celle-ci continue : décidée à un mandat précédent, du même mode, et commençant ou finissant là
@@ -144,11 +144,13 @@ type TraceMandat = { mode: ModeLigne; arrets: [number, number][]; mandat: Mandat
  */
 export function suiteDe<L extends TraceMandat>(ligne: TraceMandat, lignes: readonly L[], mx: number): L | undefined {
   const depart = ligne.arrets[0]
-  if (!depart) return undefined
+  // Une boucle n'a pas de bout : elle ne continue rien, et rien ne la continue.
+  if (!depart || ligne.boucle) return undefined
   const metres = distance(mx)
   return lignes.find(
     (l) =>
       l !== ligne &&
+      !l.boucle &&
       l.mandat < ligne.mandat &&
       l.mode === ligne.mode &&
       [l.arrets[0], l.arrets.at(-1)].some((t) => t !== undefined && metres(t, depart) <= ECART_SUITE),
@@ -166,7 +168,7 @@ export function projetContinue(
   mx: number,
 ): { id: string; mandat: Mandat; ligne: string } | undefined {
   const depart = ligne.arrets[0]
-  if (!depart) return undefined
+  if (!depart || ligne.boucle) return undefined
   const metres = distance(mx)
   for (const c of chantiers) {
     const p = BOUTS_PROJETS[c.id]
@@ -186,9 +188,16 @@ export const premiereStationPayee = <L extends TraceMandat>(
   lignes: readonly L[],
   chantiers: readonly Pick<Chantier, 'id' | 'mandat'>[],
   mx: number,
-) => !ligne.aPart && Boolean(suiteDe(ligne, lignes, mx) ?? projetContinue(ligne, chantiers, mx))
+) => !ligne.aPart && !ligne.boucle && Boolean(suiteDe(ligne, lignes, mx) ?? projetContinue(ligne, chantiers, mx))
 
 /** Quels points du tracé sont des stations : tous, sauf les points de passage, et toujours les deux terminus. */
+/** Une boucle demande au moins trois stations : en deçà, elle ne ferait qu'un aller-retour. */
+export const estBoucle = (boucle: boolean | undefined, arrets: readonly unknown[]) => Boolean(boucle) && arrets.length >= 3
+
+/** Le tracé dessiné d'une ligne : une boucle revient à son premier point. */
+export const traceFerme = <P>(arrets: readonly P[], boucle?: boolean): P[] =>
+  estBoucle(boucle, arrets) ? [...arrets, arrets[0]!] : [...arrets]
+
 export function stationsDuTrace(nombre: number, passages: number[] = []) {
   const passe = new Set(passages)
   return Array.from({ length: nombre }, (_, i) => i === 0 || i === nombre - 1 || !passe.has(i))
@@ -199,10 +208,16 @@ export function estimer(mode: ModeLigne, arrets: [number, number][], carreaux: C
   const metres = distance(mx)
   // La longueur et le relief suivent tout le tracé ; le bassin de voyageurs ne compte que les stations.
   const estStation = stationsDuTrace(arrets.length, options.passages)
+  // Une boucle revient à sa première station : le tronçon qui la referme compte, sans station de plus.
+  const boucle = estBoucle(options.boucle, arrets)
+  const trace = boucle ? [...arrets, arrets[0]!] : arrets
   // La première station existe déjà : celle d'une ligne existante qu'on prolonge, ou celle d'une de vos lignes qu'on continue.
-  const prolonge = (Boolean(options.prolonge) && prolongementPossible(mode, arrets[0], carreaux)) || Boolean(options.suite)
-  const km = longueurKm(arrets, mode, mx)
-  const detail = coutLigne(mode, arrets, km, mx, carreaux.ville, carreaux.terrain, { estStation, prolonge })
+  const prolonge = !boucle && ((Boolean(options.prolonge) && prolongementPossible(mode, arrets[0], carreaux)) || Boolean(options.suite))
+  const km = longueurKm(trace, mode, mx)
+  const detail = coutLigne(mode, trace, km, mx, carreaux.ville, carreaux.terrain, {
+    estStation: boucle ? [...estStation, false] : estStation,
+    prolonge,
+  })
   const stations = arrets.filter((_, i) => estStation[i])
   const cout = totalCout(detail)
   const c = FORMULE.coefficients

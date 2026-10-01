@@ -12,6 +12,7 @@ import { prixReseau } from '@/lib/couts'
 import { PENTE_MAX, relief, TUNNEL_PROFOND } from '@/lib/terrain'
 import {
   DUREE_CHANTIER,
+  estBoucle,
   estimer,
   premiereStationPayee,
   projetContinue,
@@ -89,11 +90,12 @@ export function useEstimation(): Estimation | null {
             suite:
               !brouillon.prolonge &&
               premiereStationPayee(
-                { mode: brouillon.mode, arrets: brouillon.arrets, mandat, aPart: brouillon.aPart },
+                { mode: brouillon.mode, arrets: brouillon.arrets, mandat, aPart: brouillon.aPart, boucle: brouillon.boucle },
                 lignes,
                 chantiers,
                 donnees.carreaux.mx,
               ),
+            boucle: brouillon.boucle,
           })
         : null,
     [donnees, brouillon, lignes, chantiers, mandat],
@@ -114,7 +116,7 @@ const minuscule = (texte: string) => texte.charAt(0).toLowerCase() + texte.slice
  * correspondances, la ligne qu'il prolonge, et celle qu'il pourrait prolonger s'il part de son terminus.
  */
 function useReseauDuTrace(
-  trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms' | 'aPart'> & { mandat?: Mandat }) | null,
+  trace: (Pick<LigneJoueur, 'mode' | 'arrets' | 'passages' | 'prolonge' | 'noms' | 'aPart' | 'boucle'> & { mandat?: Mandat }) | null,
 ) {
   const donnees = useDonnees(useVille().id)
   const lignes = useJeu((s) => s.lignes)
@@ -126,7 +128,7 @@ function useReseauDuTrace(
     const estStation = stationsDuTrace(trace.arrets.length, trace.passages)
     const noms = nommerTrace(trace.arrets, estStation, donnees.lieux, donnees.stations, mx, trace.noms)
     const prolongee = trace.prolonge ? donnees.reseau?.lignes.find((l) => l.id === trace.prolonge) : undefined
-    const t = { mode: trace.mode, arrets: trace.arrets, mandat: trace.mandat ?? mandatCourant }
+    const t = { mode: trace.mode, arrets: trace.arrets, mandat: trace.mandat ?? mandatCourant, boucle: trace.boucle }
     // Une de vos lignes d'un mandat précédent que ce tracé continue depuis son bout, dont il reprend la station ; à
     // défaut, un prolongement du catalogue décidé avant, dont il reprend la dernière station.
     const touche = trace.prolonge ? undefined : (suiteDe(t, lignes, mx) ?? projetContinue(t, chantiers, mx))
@@ -180,15 +182,19 @@ function PlanLigne({
   estStation,
   liste,
   couleur,
+  boucle = false,
 }: {
   titre: string
   noms: (string | null)[]
   estStation: boolean[]
   liste: { rang: number; station: { nom: string; lignes: Parameters<typeof direLignes>[0]; gare?: boolean } }[]
   couleur: string
+  /** Une boucle revient à sa première station, qu'on répète en bas du plan. */
+  boucle?: boolean
 }) {
-  const rangs = noms.map((_, i) => i).filter((i) => estStation[i] && noms[i])
-  if (!rangs.length) return null
+  const stations = noms.map((_, i) => i).filter((i) => estStation[i] && noms[i])
+  if (!stations.length) return null
+  const rangs = boucle ? [...stations, stations[0]!] : stations
   const correspondance = new Map(liste.map((c) => [c.rang, c.station]))
   return (
     <div className="flex flex-col gap-2">
@@ -197,15 +203,18 @@ function PlanLigne({
         {rangs.map((i, k) => {
           const c = correspondance.get(i)
           return (
-            <li key={i} className="relative flex gap-3 pb-3 last:pb-0">
+            <li key={k} className="relative flex gap-3 pb-3 last:pb-0">
               <span aria-hidden="true" className="relative flex w-4 shrink-0 justify-center">
                 {k > 0 ? <span className="absolute top-0 h-2.5 w-1" style={{ background: couleur }} /> : null}
-                {k < rangs.length - 1 ? <span className="absolute top-2.5 -bottom-0 w-1" style={{ background: couleur }} /> : null}
+                {k < rangs.length - 1 ? <span className="absolute top-2.5 -bottom-3 w-1" style={{ background: couleur }} /> : null}
                 <span className="relative mt-1 size-3 rounded-full bg-white" style={{ boxShadow: `0 0 0 3px ${couleur}` }} />
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="text-[13.5px] leading-snug font-bold">{noms[i]}</span>
-                {c ? (
+                <span className="text-[13.5px] leading-snug font-bold">
+                  {noms[i]}
+                  {boucle && k === rangs.length - 1 ? <span className="font-semibold text-gris"> : retour au départ</span> : null}
+                </span>
+                {c && !(boucle && k === rangs.length - 1) ? (
                   <span className="text-[12px] leading-snug font-semibold text-gris">
                     {c.lignes.length ? `Correspondance : ${direLignes(c.lignes)}${c.gare ? ', et la gare' : ''}` : 'Gare'}
                   </span>
@@ -816,7 +825,7 @@ export function Traceur() {
   const { brouillon, changerMode, retirerArret, enleverArret, abandonnerTrace, ouvrir, libre, lignes, basculerPassage, choisirOutil } =
     useJeu()
   const renommer = useJeu((s) => s.renommer)
-  const { detacher, rattacher, mettreAPart } = useJeu()
+  const { detacher, rattacher, mettreAPart, fermerBoucle } = useJeu()
   const ville = useVille()
   const bilan = useBilan()
   const depenses = useDepenses()
@@ -1007,6 +1016,29 @@ export function Traceur() {
         ) : null}
       </div>
 
+      {/* Une ligne de trois points au moins peut revenir à son départ, sauf si elle prolonge ou continue une autre ligne. */}
+      {!brouillon.prolonge && !r?.origine && arrets >= 3 ? (
+        estBoucle(brouillon.boucle, brouillon.arrets) ? (
+          <div className="flex flex-col gap-1 rounded-xl bg-sable px-3 py-2.5">
+            <p className="text-[13px] leading-snug font-semibold">
+              Votre ligne revient à {noms[0] ?? 'sa première station'} : un dernier tronçon la referme, compté dans le prix et la longueur.
+              Les stations que vous posez s’ajoutent avant le retour.
+            </p>
+            <button
+              type="button"
+              onClick={() => fermerBoucle(false)}
+              className="min-h-8 self-start text-[12.5px] font-extrabold text-rouge-fonce underline underline-offset-3"
+            >
+              Rouvrir la boucle
+            </button>
+          </div>
+        ) : (
+          <Bouton genre="contour" taille="petit" iconeAGauche="boucle" className="self-start" onClick={() => fermerBoucle(true)}>
+            Revenir à {noms[0] ?? 'la première station'} en boucle
+          </Bouton>
+        )
+      ) : null}
+
       <AjoutParNom />
 
       {r?.aProlonger.length && ecartee !== cleProposition(r.aProlonger) ? (
@@ -1069,13 +1101,21 @@ export function Traceur() {
       ) : (
         <>
           <Chiffres e={e} arrets={stations} mode={brouillon.mode} />
-          <p className="text-[13px] leading-snug font-semibold">
-            <span className="text-gris">De </span>
-            {nomsStations[0]}
-            <span className="text-gris"> à </span>
-            {nomsStations.at(-1)}
-            {nomsStations.length > 2 ? <span className="text-gris">, par {nomsStations.slice(1, -1).join(', ')}</span> : null}
-          </p>
+          {estBoucle(brouillon.boucle, brouillon.arrets) ? (
+            <p className="text-[13px] leading-snug font-semibold">
+              <span className="text-gris">Boucle au départ de </span>
+              {nomsStations[0]}
+              {nomsStations.length > 1 ? <span className="text-gris">, par {nomsStations.slice(1).join(', ')}</span> : null}
+            </p>
+          ) : (
+            <p className="text-[13px] leading-snug font-semibold">
+              <span className="text-gris">De </span>
+              {nomsStations[0]}
+              <span className="text-gris"> à </span>
+              {nomsStations.at(-1)}
+              {nomsStations.length > 2 ? <span className="text-gris">, par {nomsStations.slice(1, -1).join(', ')}</span> : null}
+            </p>
+          )}
           <div className="flex flex-col gap-1">
             <Surtitre>Le relief sous la ligne</Surtitre>
             <Profil mode={brouillon.mode} arrets={brouillon.arrets} passages={brouillon.passages} />
@@ -1246,9 +1286,11 @@ export function MaLigne() {
     nomSaisi ??
     (r?.quoi
       ? sansDoublon(`Prolongement ${r.quoi.complement}`)
-      : noms.length >= 2
-        ? `${noms[0]} - ${noms.at(-1)}`
-        : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
+      : brouillon && estBoucle(brouillon.boucle, brouillon.arrets) && noms[0]
+        ? `Boucle de ${noms[0]}`
+        : noms.length >= 2
+          ? `${noms[0]} - ${noms.at(-1)}`
+          : `Ma ligne de ${brouillon ? NOM_MODE[brouillon.mode] : 'tramway'}`)
   if (!brouillon || !e) return null
   const annee = ouverture(mandat, e.duree)
   // La part payée sur ce mandat ; en modification, l'ancienne version libère la sienne.
@@ -1344,6 +1386,7 @@ export function MaLigne() {
           estStation={r.estStation}
           liste={r.liste}
           couleur={couleurLigne(brouillon.mode, brouillon.couleur)}
+          boucle={estBoucle(brouillon.boucle, brouillon.arrets)}
         />
       ) : null}
       <VoyageursLigne e={e} conditionnel />
@@ -1481,7 +1524,14 @@ export function FicheLigne({ id }: { id: string }) {
         <Ligne libelle="Habitants sans tram ni métro aujourd’hui" valeur={approx(e.habitantsNonDesservis)} />
       </div>
       {r ? (
-        <PlanLigne titre="Ses stations" noms={r.noms} estStation={r.estStation} liste={r.liste} couleur={couleurLigne(l.mode, l.couleur)} />
+        <PlanLigne
+          titre="Ses stations"
+          noms={r.noms}
+          estStation={r.estStation}
+          liste={r.liste}
+          couleur={couleurLigne(l.mode, l.couleur)}
+          boucle={estBoucle(l.boucle, l.arrets)}
+        />
       ) : null}
     </Panneau>
   )

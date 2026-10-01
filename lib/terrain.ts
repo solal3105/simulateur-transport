@@ -145,11 +145,12 @@ export function relief(t: Terrain, mode: ModeLigne, arrets: [number, number][], 
   const dessous = zs.slice()
   for (let i = 1; i < points.length; i += 1) {
     const d = points[i]!.s - points[i - 1]!.s
-    dessous[i] = Math.min(dessous[i]!, dessous[i - 1]! + g * d)
+    // Deux points confondus ne laissent aucune distance : sans pente maximale (le câble), Infinity × 0 donnerait NaN.
+    dessous[i] = Math.min(dessous[i]!, dessous[i - 1]! + (d > 0 ? g * d : 0))
   }
   for (let i = points.length - 2; i >= 0; i -= 1) {
     const d = points[i + 1]!.s - points[i]!.s
-    dessous[i] = Math.min(dessous[i]!, dessous[i + 1]! + g * d)
+    dessous[i] = Math.min(dessous[i]!, dessous[i + 1]! + (d > 0 ? g * d : 0))
   }
   const enOuvrage: boolean[] = []
   const profondeurs: number[] = []

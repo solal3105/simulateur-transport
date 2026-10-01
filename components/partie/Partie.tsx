@@ -148,7 +148,7 @@ export function Partie() {
       </h1>
       <Carte marges={marges} />
       <Entete />
-      {!tuto || etapeTuto === 2 ? <Programme /> : null}
+      {!tuto || etapeTuto >= 2 ? <Programme /> : null}
       {!tuto ? <ChoixFond droite={grand ? (panneau ? marges.right : 20) : undefined} /> : null}
 
       {!tuto && !panneau && !brouillon ? (
@@ -180,7 +180,7 @@ export function Partie() {
         </>
       ) : null}
 
-      {(!tuto || etapeTuto === 2) && !brouillon ? <BarreBas /> : null}
+      {(!tuto || etapeTuto >= 2) && !brouillon ? <BarreBas /> : null}
       <Message />
 
       <AnimatePresence>

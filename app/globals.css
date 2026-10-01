@@ -157,6 +157,11 @@
   line-height: 1.25;
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.16);
 }
+.bulle-station .maplibregl-popup-content > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
 .bulle-station strong {
   font-weight: 900;
 }
