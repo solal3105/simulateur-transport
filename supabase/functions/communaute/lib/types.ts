@@ -104,6 +104,11 @@ export interface LigneJoueur {
    * joueur en a fait une ligne à part, qui paie sa première station comme une correspondance.
    */
   aPart?: boolean
+  /**
+   * La ligne revient à sa première station : un dernier tronçon la referme, sans station de plus. Une boucle n'a pas
+   * de bout : elle ne prolonge rien, et rien ne la continue.
+   */
+  boucle?: boolean
   /** La couleur choisie par le joueur dans la palette commune ; sans elle, la couleur de son mode. */
   couleur?: string
   /** Les noms choisis par le joueur, rang par rang comme `arrets` ; null garde le nom de la station existante ou du quartier. */
@@ -123,6 +128,8 @@ export interface OptionsLigne {
    * station est déjà construite. Celui qui appelle l'a vérifié (`suiteDe`).
    */
   suite?: boolean
+  /** La ligne se referme sur sa première station : le tronçon du dernier point au premier compte dans la longueur et le prix. */
+  boucle?: boolean
 }
 
 export interface Estimation {

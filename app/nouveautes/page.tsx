@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     'Ce qui change dans le Simulateur transport, mise en ligne après mise en ligne, avec les bugs corrigés grâce à vos signalements.',
 }
 
-type Groupe = { titre: 'Nouveau' | 'Amélioré' | 'Corrigé'; points: string[] }
+type Groupe = { titre: 'Nouveau' | 'Amélioré' | 'Corrigé' | 'Retiré'; points: string[] }
 
 /** Une mise en ligne : sa date, ce qu'elle apporte en une phrase, puis le détail, chaque point dit du côté du joueur. */
 type Version = { iso: string; date: string; titre: string; texte: string; groupes: Groupe[] }
@@ -19,6 +19,38 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  * phrase, et ne promet rien que le jeu ne fasse déjà.
  */
 const VERSIONS: Version[] = [
+  {
+    iso: '2026-10-01',
+    date: '1er octobre 2026',
+    titre: 'Lignes en boucle',
+    texte: 'Une ligne peut maintenant revenir à sa première station, et le tutoriel montre comment créer la vôtre.',
+    groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'Une ligne de trois stations au moins peut revenir à son départ. Dans le traceur, le bouton qui propose de revenir en boucle à la première station ajoute le tronçon qui referme la ligne, compté dans le prix et la longueur, sans station de plus. « Rouvrir la boucle » le retire. Une boucle ne se prolonge pas, et un prolongement ne se referme pas.',
+          'La dernière étape du tutoriel présente le bouton « Créer ma ligne », qui sert à tracer ce que le catalogue ne propose pas, et permet de commencer votre ligne tout de suite.',
+        ],
+      },
+      {
+        titre: 'Corrigé',
+        points: [
+          'Au survol d’une station, son nom et ses lignes s’affichent l’un sous l’autre, et non plus collés.',
+          'Après « Terminer la ligne » ou « Voir le résultat », un clic sur la carte ne pose plus d’arrêt.',
+          'Dans le plan vertical d’une ligne, le trait de couleur ne s’interrompt plus entre les stations.',
+          'Dans la liste des projets, le tri choisi reste le même quand on revient à la liste après avoir ouvert ou décidé un projet.',
+          'Sur téléphone, quand le navigateur interrompt le déplacement d’un arrêt, par exemple si un deuxième doigt se pose, l’arrêt est relâché et la carte glisse de nouveau.',
+          'La fiche du Tram du Centre parle du Trambus TB11, l’ancienne ligne C3.',
+        ],
+      },
+      {
+        titre: 'Retiré',
+        points: [
+          'La grande dorsale est-ouest quitte le catalogue de Lyon : aucune étude ni délibération ne la porte. Une partie qui l’avait lancée la perd, et son coût revient dans le budget.',
+        ],
+      },
+    ],
+  },
   {
     iso: '2026-09-30',
     date: '30 septembre 2026',
@@ -156,6 +188,7 @@ const PASTILLE: Record<Groupe['titre'], string> = {
   Nouveau: 'bg-rouge text-white',
   Amélioré: 'bg-encre text-white',
   Corrigé: 'bg-sable text-encre shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+  Retiré: 'bg-white text-gris shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
 }
 
 /** Les nouveautés du jeu, sur une seule page, dans l'ordre inverse des mises en ligne. */

@@ -3,10 +3,10 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { finMandat, PROJETS } from './catalogue'
+import { finMandat, projetDe, PROJETS } from './catalogue'
 import { approx, n } from './format'
 import { mesurer } from './mesure'
-import { estimer, premiereStationPayee, type Carreaux } from './modele'
+import { estBoucle, estimer, premiereStationPayee, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
 import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
@@ -27,6 +27,9 @@ export type Panneau =
   | { type: 'budget' }
   | { type: 'menu' }
 
+/** Comment la liste des projets est triée. */
+export type TriListe = 'voyageurs' | 'rendement' | 'prix' | 'ouverture'
+
 export interface Brouillon {
   mode: ModeLigne
   arrets: [number, number][]
@@ -38,6 +41,8 @@ export interface Brouillon {
   prolonge?: string
   /** Le tracé part du bout d'une de vos lignes ou d'un prolongement du catalogue, mais n'en est pas la suite. */
   aPart?: boolean
+  /** La ligne se referme sur sa première station. */
+  boucle?: boolean
   /** La couleur choisie pour la ligne dans la palette commune. */
   couleur?: string
   /** La ligne construite qu'on est en train de modifier, s'il ne s'agit pas d'une nouvelle ligne. */
@@ -110,6 +115,8 @@ interface Etat {
   pause: boolean
   /** Le fond de carte en photographies aériennes plutôt qu'en plan ; le choix vaut pour toutes les parties. */
   aerien: boolean
+  /** Le tri de la liste des projets, gardé quand on la quitte pour ouvrir ou décider un projet, puis qu'on y revient. */
+  triListe: TriListe
 
   /**
    * Commence une partie : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. Le jeu
@@ -173,6 +180,8 @@ interface Etat {
   detacher: () => void
   /** Fait du tracé une ligne à part plutôt que la suite de ce qu'il touche à son départ, ou l'inverse. */
   mettreAPart: (aPart: boolean) => void
+  /** Referme la ligne sur sa première station, ou la rouvre. */
+  fermerBoucle: (boucle: boolean) => void
   /** Choisit la couleur de la ligne en cours de tracé, ou d'une ligne construite ; sans couleur, celle de son mode. */
   colorer: (couleur: string | undefined, id?: string) => void
   /** Fait d'un tracé le prolongement d'une ligne existante ; son premier point se pose alors sur le terminus. */
@@ -184,6 +193,7 @@ interface Etat {
   effacerMessage: () => void
   setApercu: (v: number) => void
   basculerAerien: () => void
+  trierListe: (tri: TriListe) => void
 }
 
 const DEPART = {
@@ -210,6 +220,7 @@ export const useJeu = create<Etat>()(
     (set, get) => ({
       ...DEPART,
       aerien: false,
+      triListe: 'voyageurs',
       commencer: (ville, libre = false) => {
         mesurer('partie commencée', { reseau: ville, libre })
         set(
@@ -451,6 +462,8 @@ export const useJeu = create<Etat>()(
         })),
       detacher: () => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, prolonge: undefined } } : {})),
       mettreAPart: (aPart) => set((s) => (s.brouillon ? { brouillon: { ...s.brouillon, aPart: aPart || undefined } } : {})),
+      fermerBoucle: (boucle) =>
+        set((s) => (s.brouillon && !s.brouillon.prolonge ? { brouillon: { ...s.brouillon, boucle: boucle || undefined } } : {})),
       colorer: (couleur, id) =>
         set((s) =>
           id
@@ -485,6 +498,7 @@ export const useJeu = create<Etat>()(
                   noms: l.noms ? [...l.noms] : undefined,
                   prolonge: l.prolonge,
                   aPart: l.aPart,
+                  boucle: l.boucle,
                   couleur: l.couleur,
                   edition: l.id,
                 },
@@ -516,6 +530,7 @@ export const useJeu = create<Etat>()(
               noms: nomsGardes(s.brouillon),
               prolonge: s.brouillon.prolonge,
               aPart: s.brouillon.aPart,
+              boucle: estBoucle(s.brouillon.boucle, s.brouillon.arrets) || undefined,
               couleur: s.brouillon.couleur,
               estimation: { ...estimation, nouveaux: Math.round(estimation.nouveaux / 100) * 100 },
             }
@@ -539,6 +554,7 @@ export const useJeu = create<Etat>()(
             noms: nomsGardes(s.brouillon),
             prolonge: s.brouillon.prolonge,
             ...(s.brouillon.aPart ? { aPart: true } : {}),
+            ...(estBoucle(s.brouillon.boucle, s.brouillon.arrets) ? { boucle: true } : {}),
             ...(s.brouillon.couleur ? { couleur: s.brouillon.couleur } : {}),
             mandat: s.mandat,
             etale,
@@ -561,7 +577,7 @@ export const useJeu = create<Etat>()(
           let change = false
           const lignes = s.lignes.map((l) => {
             const suite = !l.prolonge && premiereStationPayee(l, s.lignes, s.chantiers, carreaux.mx)
-            const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite })
+            const e = estimer(l.mode, l.arrets, carreaux, { passages: l.passages, prolonge: Boolean(l.prolonge), suite, boucle: l.boucle })
             const estimation = { ...e, nouveaux: Math.round(e.nouveaux / 100) * 100 }
             if (estimation.cout === l.estimation.cout && estimation.nouveaux === l.estimation.nouveaux && l.estimation.detail) return l
             change = true
@@ -572,6 +588,7 @@ export const useJeu = create<Etat>()(
       effacerMessage: () => set({ message: null }),
       setApercu: (apercu) => set({ apercu }),
       basculerAerien: () => set((s) => ({ aerien: !s.aerien })),
+      trierListe: (triListe) => set({ triListe }),
     }),
     {
       name: 'simulateur-tcl-partie',
@@ -581,9 +598,18 @@ export const useJeu = create<Etat>()(
       // Une partie enregistrée avant le jeu libre se joue avec le budget.
       migrate: (etat) => ({ libre: false, ...(etat as object) }),
       // Une partie d'un réseau qui n'existe plus (l'ancien « paris ») repart de zéro plutôt que de casser la page.
+      // Un projet retiré du catalogue (la grande dorsale, en octobre 2026) disparaît de la partie enregistrée.
       merge: (enregistre, actuel) => {
         const e = enregistre as Partial<Etat> | undefined
-        return e && estVille(e.ville) ? { ...actuel, ...e } : actuel
+        if (!e || !estVille(e.ville)) return actuel
+        const ville = e.ville
+        const connu = (c: Chantier) => Boolean(projetDe(ville, c.id))
+        return {
+          ...actuel,
+          ...e,
+          chantiers: (e.chantiers ?? []).filter(connu),
+          aVenir: e.aVenir ? { ...e.aVenir, chantiers: e.aVenir.chantiers.filter(connu) } : (e.aVenir ?? actuel.aVenir),
+        }
       },
       // Une partie enregistrée avant l'ouverture de Toulouse n'a pas de ville : elle reste à Lyon, valeur de départ.
       partialize: (s) => ({

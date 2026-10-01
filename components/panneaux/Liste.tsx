@@ -1,19 +1,19 @@
 'use client'
 
 import { clsx } from 'clsx'
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 
 import { catalogueDe, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { approx, n } from '@/lib/format'
 import { ouverture, resoudre } from '@/lib/regles'
-import { useJeu, useVille } from '@/lib/store'
+import { useJeu, useVille, type TriListe } from '@/lib/store'
 
 import { Icone, ICONE_MODE } from '../ui'
 import { Panneau } from './Panneau'
 import { useMeilleurRendement } from './Rendement'
 
-type Tri = 'voyageurs' | 'rendement' | 'prix' | 'ouverture'
+type Tri = TriListe
 
 const GRILLE = 'lg:grid-cols-[minmax(0,3fr)_0.9fr_1.8fr_1.3fr_0.7fr_1.3fr]'
 
@@ -110,9 +110,9 @@ const Resume = ({ voyageurs, detail, rendement, annee }: { voyageurs: number; de
 )
 
 export function Liste() {
-  const { chantiers, lignes, mandat, ouvrir, retirer, changerPaiement } = useJeu()
+  // Le tri choisi reste le même quand on revient à la liste après avoir ouvert ou décidé un projet.
+  const { chantiers, lignes, mandat, ouvrir, retirer, changerPaiement, triListe: tri, trierListe: setTri } = useJeu()
   const ville = useVille()
-  const [tri, setTri] = useState<Tri>('voyageurs')
   const catalogue = catalogueDe(ville.id)
   const meilleur = useMeilleurRendement()
 

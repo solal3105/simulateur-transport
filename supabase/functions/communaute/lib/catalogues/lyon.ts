@@ -8,18 +8,6 @@ import type { Catalogue, Projet } from '../types.ts'
  */
 const projets: Projet[] = [
   {
-    id: 'grande-dorsale',
-    feminin: true,
-    nom: 'Grande Dorsale est-ouest',
-    genre: 'Nouvelle ligne de métro',
-    description: '',
-    mode: 'metro',
-    cout: 6000,
-    voyageurs: 182000,
-    duree: 30,
-    trace: 'grande-dorsale',
-  },
-  {
     id: 'metro-e-bellecour',
     nom: 'Métro E jusqu’à Bellecour',
     genre: 'Nouvelle ligne de métro',

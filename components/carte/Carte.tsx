@@ -22,7 +22,7 @@ import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
 import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
-import { rayonBassin, stationsDuTrace } from '@/lib/modele'
+import { estBoucle, rayonBassin, stationsDuTrace, traceFerme } from '@/lib/modele'
 import { nomDuDepart } from '@/lib/prolongements'
 import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
 import { ouverture, resoudre } from '@/lib/regles'
@@ -821,10 +821,16 @@ export function Carte({
     // quelques pixels, ce n'est pas un glissement mais un toucher, qui ouvre le nom de la station.
     let glisse: number | null = null
     let vientDeGlisser = false
+    // Après « Terminer la ligne » ou « Voir le résultat », le panneau montre le résultat : la carte ne pose plus
+    // d'arrêt et ne déplace plus rien tant qu'on n'est pas revenu au tracé.
+    const enTrace = () => {
+      const j = useJeu.getState()
+      return Boolean(j.brouillon) && j.panneau?.type !== 'ligne'
+    }
     let attente: [number, number] | null = null
     let saisiA = { x: 0, y: 0 }
     const saisir = (e: MapMouseEvent | MapTouchEvent) => {
-      if (!useJeu.getState().brouillon || decor) return
+      if (!enTrace() || decor) return
       const i = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties?.i
       if (typeof i !== 'number') return
       e.preventDefault()
@@ -850,7 +856,7 @@ export function Carte({
       if (glisse === null) return
       glisse = null
       m.dragPan.enable()
-      m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+      m.getCanvas().style.cursor = enTrace() ? 'crosshair' : ''
       // Le clic qui suit la fin d'un glissement est ignoré, puis tout redevient normal.
       setTimeout(() => (vientDeGlisser = false), 50)
     }
@@ -862,11 +868,14 @@ export function Carte({
     m.on('touchmove', bouger)
     m.on('mouseup', lacher)
     m.on('touchend', lacher)
+    // Un toucher interrompu par le navigateur (un deuxième doigt, un geste du système) ne finit pas par touchend :
+    // sans cela, la carte restait bloquée, sans pouvoir glisser, avec un arrêt accroché au doigt.
+    m.on('touchcancel', lacher)
     m.on('mouseenter', 'brouillon-arrets', () => {
-      if (glisse === null) m.getCanvas().style.cursor = 'grab'
+      if (glisse === null && enTrace()) m.getCanvas().style.cursor = 'grab'
     })
     m.on('mouseleave', 'brouillon-arrets', () => {
-      if (glisse === null) m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+      if (glisse === null) m.getCanvas().style.cursor = enTrace() ? 'crosshair' : ''
     })
 
     // Un clic pose un arrêt pendant le tracé, ou l'insère s'il touche la ligne entre deux arrêts ; sinon il
@@ -874,7 +883,7 @@ export function Carte({
     m.on('click', (e: MapMouseEvent) => {
       const jeu = useJeu.getState()
       if (jeu.brouillon) {
-        if (vientDeGlisser) return
+        if (vientDeGlisser || !enTrace()) return
         // Toucher une station du tracé ouvre son nom dans le panneau ; toucher un point de passage ne fait rien.
         const arret = m.queryRenderedFeatures(e.point, { layers: ['brouillon-arrets'] })[0]?.properties
         if (arret) return typeof arret.i === 'number' && !arret.passage ? jeu.renommer(arret.i) : undefined
@@ -888,6 +897,12 @@ export function Carte({
             const d = distanceSegment(e.point, m.project(arrets[j - 1]!), m.project(arrets[j]!))
             if (d < distance) [distance, meilleur] = [d, j]
           }
+          // Sur le tronçon qui referme une boucle, la nouvelle station se pose après la dernière.
+          if (
+            estBoucle(jeu.brouillon.boucle, arrets) &&
+            distanceSegment(e.point, m.project(arrets.at(-1)!), m.project(arrets[0]!)) < distance
+          )
+            return jeu.ajouterArret(p)
           if (meilleur > 0) return jeu.insererArret(meilleur, p)
         }
         return jeu.ajouterArret(p)
@@ -985,7 +1000,7 @@ export function Carte({
         if (!decor && !useJeu.getState().brouillon) m.getCanvas().style.cursor = 'pointer'
       })
       m.on('mouseleave', couche, () => {
-        m.getCanvas().style.cursor = useJeu.getState().brouillon ? 'crosshair' : ''
+        m.getCanvas().style.cursor = enTrace() ? 'crosshair' : ''
       })
     }
     m.on('moveend', () => eviterChevauchements(m, etiquettes))
@@ -1069,7 +1084,7 @@ export function Carte({
       m.setLayoutProperty('aerien', 'visibility', aerien ? 'visible' : 'none')
       // Sur les photographies, le relief les cacherait : on le montre seulement sur le plan.
       if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace && !aerien ? 'visible' : 'none')
-      m.getCanvas().style.cursor = trace ? 'crosshair' : ''
+      m.getCanvas().style.cursor = trace && panneau?.type !== 'ligne' ? 'crosshair' : ''
 
       const joueur: FeatureCollection<LineString> = {
         type: 'FeatureCollection',
@@ -1085,7 +1100,7 @@ export function Carte({
               couleur: couleurLigne(l.mode, l.couleur),
               choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
-            geometry: { type: 'LineString', coordinates: l.arrets },
+            geometry: { type: 'LineString', coordinates: traceFerme(l.arrets, l.boucle) },
           })),
       }
       ;(m.getSource('joueur') as GeoJSONSource).setData(joueur)
@@ -1097,7 +1112,7 @@ export function Carte({
         traits.push({
           type: 'Feature',
           properties: { couleur: couleurLigne(brouillon.mode, brouillon.couleur) },
-          geometry: { type: 'LineString', coordinates: arrets },
+          geometry: { type: 'LineString', coordinates: traceFerme(arrets, brouillon.boucle) },
         })
       arrets.forEach((a, i) =>
         traits.push({
