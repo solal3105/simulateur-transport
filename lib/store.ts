@@ -6,11 +6,12 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { finMandat, projetDe, PROJETS } from './catalogue'
 import type { ModeCarte } from './couleurs'
 import { approx, n } from './format'
+import { normaliserTarifs } from './leviers'
 import { mesurer } from './mesure'
 import { estBoucle, estimer, premiereStationPayee, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
-import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
+import { bilanMandat, LEVIERS_NEUTRES, leviersDu, prixDuMandat } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -616,9 +617,17 @@ export const useJeu = create<Etat>()(
         if (!e || !estVille(e.ville)) return actuel
         const ville = e.ville
         const connu = (c: Chantier) => Boolean(projetDe(ville, c.id))
+        // Les leviers d'une partie d'avant l'inflation prennent le réglage des tarifs, sans changer son budget.
+        const leviers = e.leviers
+          ? (Object.fromEntries(Object.entries(e.leviers).map(([m, l]) => [m, normaliserTarifs(l, prixDuMandat(Number(m)))])) as Record<
+              Mandat,
+              Leviers
+            >)
+          : actuel.leviers
         return {
           ...actuel,
           ...e,
+          leviers,
           chantiers: (e.chantiers ?? []).filter(connu),
           aVenir: e.aVenir ? { ...e.aVenir, chantiers: e.aVenir.chantiers.filter(connu) } : (e.aVenir ?? actuel.aVenir),
         }

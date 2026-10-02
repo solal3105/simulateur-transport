@@ -29,7 +29,7 @@ const VERSIONS: Version[] = [
         titre: 'Nouveau',
         points: [
           'Le jeu compte une inflation de 2 % par an : à chaque mandat après le premier, le coût des projets et des lignes, le budget, ce que rapportent les tarifs et l’argent non dépensé montent d’environ 12,6 %.',
-          'Dans « Trouver de l’argent », une case fait suivre l’inflation au ticket et à l’abonnement, avec la hausse des prix depuis 2026 juste à côté. Décochée, ils restent au prix de 2026 et rapportent un peu moins à chaque mandat. Les tarifs peuvent maintenant monter jusqu’à +200 %.',
+          'Dans « Trouver de l’argent », une case fait suivre l’inflation au ticket et à l’abonnement, avec la hausse des prix depuis 2026 juste à côté. Cochée, leur prix monte de lui-même avec l’inflation. Décochée, vous le fixez vous-même par rapport à 2026, de -20 % à +200 %.',
           'Le bouton « Affichage », en haut à droite de la carte, remplace celui de la vue aérienne. Il choisit le fond de carte, cache les lignes d’un mode de transport, par exemple tous les bus rapides, et montre la densité de population à tout moment, plus seulement pendant le tracé d’une ligne.',
         ],
       },

@@ -1,8 +1,8 @@
 // Copie de lib/partie.ts, faite par scripts/fonction-communaute.mjs : ne pas modifier ici.
 import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue.ts'
-import { BAISSE_MAX, HAUSSE_MAX, leviersPossibles } from './leviers.ts'
+import { BAISSE_MAX, HAUSSE_MAX, leviersPossibles, normaliserTarifs } from './leviers.ts'
 import { estimer, premiereStationPayee, prolongementPossible, type Carreaux } from './modele.ts'
-import { LEVIERS_NEUTRES, leviersDu } from './regles.ts'
+import { LEVIERS_NEUTRES, leviersDu, prixDuMandat } from './regles.ts'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types.ts'
 import { estVille, VILLES, type IdVille } from './villes.ts'
 
@@ -226,11 +226,13 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     suppressionTarifSocial: l?.suppressionTarifSocial === true,
     metroNuit: l?.metroNuit === true,
     tva: l?.tva === true,
-    ...(l?.tarifsGeles === true ? { tarifsGeles: true } : {}),
+    // Absent dans une partie d'avant l'inflation : normaliserTarifs le déduit des hausses, mandat par mandat.
+    inflationTarifs: typeof l?.inflationTarifs === 'boolean' ? l.inflationTarifs : undefined,
   })
   const f = (b.f ?? {}) as Partial<Record<number, Partial<Leviers>>>
   const parametres = VILLES[ville].budget.leviers
   const leviers: Record<number, Leviers> = {}
-  for (let m = 1; m <= mandats; m += 1) leviers[m] = parametres && !libre ? leviersPossibles(lire(f[m]), parametres) : LEVIERS_NEUTRES
+  for (let m = 1; m <= mandats; m += 1)
+    leviers[m] = parametres && !libre ? leviersPossibles(normaliserTarifs(lire(f[m]), prixDuMandat(m)), parametres) : LEVIERS_NEUTRES
   return { ville, libre, mandats, chantiers: chantiersValides, lignes, leviers }
 }

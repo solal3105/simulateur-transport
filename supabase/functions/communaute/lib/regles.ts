@@ -79,6 +79,7 @@ export const LEVIERS_NEUTRES: Leviers = {
   suppressionTarifSocial: false,
   metroNuit: false,
   tva: false,
+  inflationTarifs: true,
 }
 
 /** Part d'un coût payée sur un mandat donné : tout au mandat de la décision, ou moitié-moitié avec le suivant. */

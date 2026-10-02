@@ -36,11 +36,23 @@ export const BAISSE_MAX = -20
 export const HAUSSE_MAX = 200
 
 /**
- * La hausse réelle d'un tarif, une fois l'inflation comptée, en points : celle qu'on a choisie quand les tarifs suivent
- * l'inflation, et sinon la hausse choisie moins celle des prix depuis 2026. `prix` vaut 1,126 au deuxième mandat.
+ * La hausse réelle d'un tarif, une fois l'inflation comptée, en points. Nulle quand il suit l'inflation ; sinon, le prix
+ * fixé par le joueur par rapport à 2026, moins la hausse des prix depuis. `prix` vaut 1,126 au deuxième mandat.
  */
-export const hausseReelle = (hausse: number, prix: number, geles: boolean | undefined) =>
-  geles ? ((1 + hausse / 100) / prix - 1) * 100 : hausse
+export const hausseReelle = (hausse: number, prix: number, inflation: boolean | undefined) =>
+  inflation === true ? 0 : inflation === false ? ((1 + hausse / 100) / prix - 1) * 100 : hausse
+
+/**
+ * Une partie d'avant l'inflation n'a pas le réglage, et sa hausse de tarif comptait en plus des prix. Sans hausse, elle
+ * suit l'inflation ; avec une hausse, le joueur fixe le prix, converti par rapport à 2026. L'arrondi se fait vers le haut
+ * et sans borne, pour que le budget d'un réseau déjà publié ne baisse jamais : au pire, il gagne quelques millions.
+ */
+export function normaliserTarifs(l: Leviers, prix: number): Leviers {
+  if (typeof l.inflationTarifs === 'boolean') return l
+  if (l.abonnements === 0 && l.tickets === 0) return { ...l, inflationTarifs: true }
+  const enPrix = (hausse: number) => Math.ceil((prix * (1 + hausse / 100) - 1) * 100 - 1e-9)
+  return { ...l, inflationTarifs: false, abonnements: enPrix(l.abonnements), tickets: enPrix(l.tickets) }
+}
 
 /**
  * Ce que les leviers ajoutent ou retirent à l'enveloppe d'un mandat, aux prix de ce mandat : les montants, calculés en
@@ -54,8 +66,8 @@ export function effetLeviers(l: Leviers, p: ParametresLeviers, prix = 1): number
     // La gratuité totale rend sans objet les autres mesures tarifaires.
     total += fixe('gratuiteMoins25') + fixe('gratuiteJeunesAbonnes') + fixe('suppressionTarifSocial')
     total +=
-      hausseReelle(l.abonnements, prix, l.tarifsGeles) * p.rendement.abonnements +
-      hausseReelle(l.tickets, prix, l.tarifsGeles) * p.rendement.tickets
+      hausseReelle(l.abonnements, prix, l.inflationTarifs) * p.rendement.abonnements +
+      hausseReelle(l.tickets, prix, l.inflationTarifs) * p.rendement.tickets
   }
   total += fixe('metroNuit') + fixe('tva')
   total += l.versementMobilite * p.rendement.versementMobilite

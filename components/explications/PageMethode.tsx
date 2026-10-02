@@ -78,7 +78,7 @@ export function PageMethode({ ville: id }: { ville: IdVille }) {
             d’aujourd’hui. À chaque mandat suivant, ils montent d’environ 12,6 % : le coût des projets et des lignes que vous lancez, votre
             budget, ce que rapportent les tarifs et l’argent que vous n’avez pas dépensé.
             {ville.budget.leviers
-              ? ' Dans « Trouver de l’argent », une case fait suivre l’inflation au ticket et à l’abonnement. Décochée, ils restent au prix de 2026 et rapportent un peu moins à chaque mandat.'
+              ? ' Dans « Trouver de l’argent », une case fait suivre l’inflation au ticket et à l’abonnement, sans rien rapporter de plus. Décochée, vous fixez vous-même leur prix par rapport à 2026 : au-dessus de l’inflation, ils rapportent davantage ; en dessous, moins.'
               : ''}
           </p>
           {ville.budget.leviers ? null : <EcrireBudget ville={ville} />}
