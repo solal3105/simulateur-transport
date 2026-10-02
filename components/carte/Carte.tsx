@@ -1088,14 +1088,14 @@ export function Carte({
         const projet = catalogue.projets.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
         if (projet) el.style.setProperty('--mode', couleurProjet(projet.id, c))
+        // Le prix d'un projet qu'on n'a pas lancé suit l'inflation : c'est celui du mandat en cours.
+        const cout = projet ? resoudre(projet, c ?? { mandat }).cout : 0
+        if (projet) {
+          el.setAttribute('aria-label', `${projet.nom}, ${n(cout)} millions d'euros`)
+          el.dataset.cout = String(cout)
+        }
         el.textContent =
-          etat === 'construit' && projet
-            ? mots(projet.id).participe
-            : etat === 'chantier'
-              ? 'En chantier'
-              : projet
-                ? n(resoudre(projet, c).cout)
-                : ''
+          etat === 'construit' && projet ? mots(projet.id).participe : etat === 'chantier' ? 'En chantier' : projet ? n(cout) : ''
       }
       for (const [nomTrace, { el }] of etiquettes) el.style.display = trace || decor || projetCache(nomTrace) ? 'none' : ''
       requestAnimationFrame(() => eviterChevauchements(m, etiquettes))

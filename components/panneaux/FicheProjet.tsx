@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { horizon, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
-import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
+import { auPrixDu, ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { ficheProjet } from '@/lib/fiches'
 import { useJeu, useVille } from '@/lib/store'
 import type { PointProjet, Projet } from '@/lib/types'
@@ -50,7 +50,9 @@ export function FicheProjet({ id }: { id: string }) {
   const existant = chantiers.find((c) => c.id === id)
   const [varianteId, setVarianteId] = useState(existant?.varianteId ?? projet.variantes?.[0]?.id)
   const [option, setOption] = useState(existant?.option ?? false)
-  const r = useMemo(() => resoudre(projet, { varianteId, option }), [projet, varianteId, option])
+  // Aux prix du mandat de la décision, ou du mandat en cours pour un projet qu'on n'a pas encore lancé.
+  const prixDe = existant?.mandat ?? mandat
+  const r = resoudre(projet, { varianteId, option, mandat: prixDe })
 
   const dependance = projet.requiert ? PROJETS.get(projet.requiert) : undefined
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
@@ -276,7 +278,7 @@ export function FicheProjet({ id }: { id: string }) {
           <legend className="mb-2 text-[14px] font-extrabold">Choisissez une version</legend>
           {projet.variantes.map((v) => {
             const choisi = v.id === varianteId
-            const tropCher = v.cout > reste
+            const tropCher = auPrixDu(v.cout, prixDe) > reste
             return (
               <label
                 key={v.id}
@@ -297,7 +299,7 @@ export function FicheProjet({ id }: { id: string }) {
                   <span className="text-[15px] font-extrabold">{v.nom}</span>
                   <span className="text-[13.5px] leading-snug text-gris">{v.detail}</span>
                   <span className="chiffres flex flex-wrap gap-x-3.5 gap-y-1 text-[13px] font-extrabold">
-                    <span>{n(v.cout)} M€</span>
+                    <span>{n(auPrixDu(v.cout, prixDe))} M€</span>
                     <span className="text-rouge">+{n(v.voyageurs)} voy./jour</span>
                     <span className="text-gris">ouvre en {ouvertureProjet(projet, mandat, v.duree, chantiers)}</span>
                   </span>
@@ -316,7 +318,7 @@ export function FicheProjet({ id }: { id: string }) {
           <input type="checkbox" checked={option} onChange={(e) => setOption(e.target.checked)} className="mt-1 size-5 accent-rouge" />
           <span className="flex flex-col gap-1">
             <span className="text-[14px] font-extrabold">
-              {projet.option.nom}, {n(projet.option.surcout)} M€ de plus
+              {projet.option.nom}, {n(auPrixDu(projet.option.surcout, prixDe))} M€ de plus
             </span>
             <span className="text-[13.5px] leading-snug text-gris">{projet.option.detail}</span>
           </span>

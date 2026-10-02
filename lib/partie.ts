@@ -1,5 +1,5 @@
 import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue'
-import { leviersPossibles } from './leviers'
+import { BAISSE_MAX, HAUSSE_MAX, leviersPossibles } from './leviers'
 import { estimer, premiereStationPayee, prolongementPossible, type Carreaux } from './modele'
 import { LEVIERS_NEUTRES, leviersDu } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
@@ -216,8 +216,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   const borne = (v: unknown, min: number, max: number) => Math.max(min, Math.min(max, Math.round(Number(v) || 0)))
   const lire = (l: Partial<Leviers> | undefined): Leviers => ({
     ...LEVIERS_NEUTRES,
-    abonnements: borne(l?.abonnements, -20, 30),
-    tickets: borne(l?.tickets, -20, 30),
+    abonnements: borne(l?.abonnements, BAISSE_MAX, HAUSSE_MAX),
+    tickets: borne(l?.tickets, BAISSE_MAX, HAUSSE_MAX),
     versementMobilite: borne(l?.versementMobilite, 0, 5),
     gratuiteTotale: l?.gratuiteTotale === true,
     gratuiteMoins25: l?.gratuiteMoins25 === true,
@@ -225,6 +225,7 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     suppressionTarifSocial: l?.suppressionTarifSocial === true,
     metroNuit: l?.metroNuit === true,
     tva: l?.tva === true,
+    ...(l?.tarifsGeles === true ? { tarifsGeles: true } : {}),
   })
   const f = (b.f ?? {}) as Partial<Record<number, Partial<Leviers>>>
   const parametres = VILLES[ville].budget.leviers

@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import { libre as libreDuMandat } from '@/lib/budget'
 import { PROJETS } from '@/lib/catalogue'
-import { bilanMandat, resoudre, score, type Bilan } from '@/lib/regles'
+import { bilanMandat, coutDeLigne, resoudre, score, type Bilan } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Mandat } from '@/lib/types'
 
@@ -54,7 +54,7 @@ export function useDepenses() {
       chantiers.reduce((t, c) => {
         const p = PROJETS.get(c.id)
         return p ? t + resoudre(p, c).cout : t
-      }, 0) + lignes.reduce((t, l) => t + l.estimation.cout, 0)
+      }, 0) + lignes.reduce((t, l) => t + coutDeLigne(l), 0)
     return { investi, budgetReel: libreDuMandat(ville.budget, 1) + libreDuMandat(ville.budget, 2) }
   }, [chantiers, lignes, ville])
 }

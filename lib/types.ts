@@ -177,4 +177,9 @@ export interface Leviers {
   suppressionTarifSocial: boolean
   metroNuit: boolean
   tva: boolean
+  /**
+   * Le ticket et l'abonnement restent à leur prix au lieu de suivre l'inflation : chaque mandat, ils perdent alors la
+   * hausse des prix depuis 2026. Absent, ils la suivent, et seule la hausse choisie en plus rapporte.
+   */
+  tarifsGeles?: boolean
 }

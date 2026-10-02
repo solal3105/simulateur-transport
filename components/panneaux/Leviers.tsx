@@ -2,9 +2,9 @@
 
 import { clsx } from 'clsx'
 
-import { n, signe } from '@/lib/format'
-import { detailMesure, MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
-import { leviersDu } from '@/lib/regles'
+import { hausse as enHausse, n, signe } from '@/lib/format'
+import { BAISSE_MAX, detailMesure, HAUSSE_MAX, hausseReelle, MESURES, titreMesure, type ParametresLeviers } from '@/lib/leviers'
+import { INFLATION_ANNUELLE, leviersDu, prixDuMandat } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Leviers as TLeviers } from '@/lib/types'
 import type { Ville } from '@/lib/villes'
@@ -17,26 +17,27 @@ import { Panneau } from './Panneau'
 const euros = (v: number) =>
   (Math.round((v + 1e-9) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-/**
- * Repère d'inflation : l'objectif de 2 % par an de la Banque centrale européenne, cumulé sur
- * les six ans d'un mandat. C'est une hypothèse de lecture, pas une prévision.
- */
-const INFLATION_ANNUELLE = 0.02
-const INFLATION_MANDAT = (1 + INFLATION_ANNUELLE) ** 6 - 1
+/** Ce que les prix prennent en un mandat de six ans, à 2 % par an : environ 12,6 %. */
+const INFLATION_MANDAT = (1 + INFLATION_ANNUELLE) ** 6
 
-/** Situe une hausse de tarif par rapport à l'inflation du mandat. */
-function situer(hausse: number) {
-  const inflation = INFLATION_MANDAT * 100
-  if (hausse < 0) return { texte: 'Baisse de prix', ton: 'fort' as const }
-  if (hausse === 0) return { texte: 'Prix gelé, donc en baisse une fois l’inflation comptée', ton: 'moyen' as const }
-  if (Math.abs(hausse - inflation) <= 1) return { texte: 'Au niveau de l’inflation', ton: 'neutre' as const }
-  return hausse < inflation
-    ? { texte: 'En dessous de l’inflation', ton: 'moyen' as const }
-    : { texte: 'Au-dessus de l’inflation', ton: 'fort' as const }
+/**
+ * Situe un tarif par rapport à l'inflation depuis 2026 : `hausse` est le réglage du joueur, `prix` ce que vaut un euro
+ * de 2026 au mandat en cours, et `geles` dit si les tarifs restent à leur prix au lieu de suivre l'inflation.
+ */
+function situer(hausse: number, prix: number, geles: boolean | undefined) {
+  const nominale = geles ? hausse : (prix * (1 + hausse / 100) - 1) * 100
+  const reelle = hausseReelle(hausse, prix, geles)
+  if (nominale < 0) return { texte: 'Baisse de prix', ton: 'fort' as const }
+  if (Math.abs(reelle) < 0.5) return { texte: 'Au niveau de l’inflation', ton: 'neutre' as const }
+  if (reelle < 0)
+    return nominale === 0
+      ? { texte: 'Prix gelé, donc en baisse une fois l’inflation comptée', ton: 'moyen' as const }
+      : { texte: 'En dessous de l’inflation', ton: 'moyen' as const }
+  return { texte: 'Au-dessus de l’inflation', ton: 'fort' as const }
 }
 
-function Repere({ hausse }: { hausse: number }) {
-  const s = situer(hausse)
+function Repere({ hausse, prix, geles }: { hausse: number; prix: number; geles: boolean | undefined }) {
+  const s = situer(hausse, prix, geles)
   return (
     <span
       className={clsx(
@@ -47,6 +48,12 @@ function Repere({ hausse }: { hausse: number }) {
       {s.texte}
     </span>
   )
+}
+
+/** Le pas des boutons + et - : un point jusqu'à 30 %, puis 5 jusqu'à 100 %, puis 10, pour atteindre +200 % sans cent clics. */
+const pasVers = (valeur: number, sens: 1 | -1) => {
+  const v = sens > 0 ? valeur : valeur - 1
+  return v >= 100 ? 10 : v >= 30 ? 5 : 1
 }
 
 function Pas({
@@ -85,7 +92,7 @@ function Pas({
           type="button"
           aria-label={`Baisser : ${titre}`}
           disabled={valeur <= min || !!desactive}
-          onClick={() => onChange(valeur - 1)}
+          onClick={() => onChange(Math.max(min, valeur - pasVers(valeur, -1)))}
           className="grid size-11 place-items-center rounded-full bg-sable disabled:opacity-35"
         >
           <Icone nom="moins" taille={18} epaisseur={2.6} />
@@ -98,7 +105,7 @@ function Pas({
           type="button"
           aria-label={`Augmenter : ${titre}`}
           disabled={valeur >= max || !!desactive}
-          onClick={() => onChange(valeur + 1)}
+          onClick={() => onChange(Math.min(max, valeur + pasVers(valeur, 1)))}
           className="grid size-11 place-items-center rounded-full bg-rouge text-white disabled:opacity-35"
         >
           <Icone nom="plus" taille={18} epaisseur={2.6} />
@@ -178,8 +185,13 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
   const { segments, total } = segmentsBudget(bilan)
   const gratuit = l.gratuiteTotale && p.fixes.gratuiteTotale !== undefined
   const sansObjet = 'Sans objet : le réseau est gratuit.'
-  const nouveauMois = p.tarifs.abonnement * (1 + l.abonnements / 100)
-  const nouveauTicket = p.tarifs.ticket * (1 + l.tickets / 100)
+  // Les montants du mandat en cours suivent l'inflation depuis 2026, et les tarifs aussi, sauf s'ils restent gelés.
+  const prix = prixDuMandat(mandat)
+  const geles = l.tarifsGeles
+  const indexe = geles ? 1 : prix
+  const nouveauMois = p.tarifs.abonnement * indexe * (1 + l.abonnements / 100)
+  const nouveauTicket = p.tarifs.ticket * indexe * (1 + l.tickets / 100)
+  const gainTarif = (hausse: number, rendement: number) => hausseReelle(hausse, prix, geles) * rendement * prix
 
   const groupe = (titre: string, contenu: React.ReactNode, intro?: string, icone?: boolean) => (
     <section className="flex flex-col gap-2.5">
@@ -226,14 +238,45 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
         {groupe(
           'Les tarifs',
           <>
+            {/* La case et le repère d'inflation, au-dessus des deux tarifs qu'elle concerne. */}
+            <label
+              className={clsx(
+                'flex cursor-pointer items-start gap-3 rounded-xl bg-white p-3',
+                !geles && !gratuit ? 'shadow-[inset_0_0_0_2px_var(--color-rouge)]' : 'shadow-[inset_0_0_0_1.5px_var(--color-trait)]',
+                gratuit && 'cursor-not-allowed opacity-55',
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={!geles}
+                disabled={gratuit}
+                onChange={(e) => maj('tarifsGeles')(!e.target.checked)}
+                className="mt-0.5 size-5 shrink-0 accent-rouge"
+              />
+              <span className="flex flex-1 flex-col gap-1.5">
+                <span className="text-[15px] leading-tight font-extrabold">Faire suivre l’inflation aux tarifs</span>
+                <span className="text-[13.5px] leading-snug text-gris">
+                  {gratuit
+                    ? sansObjet
+                    : geles
+                      ? 'Le ticket et l’abonnement restent au prix de 2026 : une fois l’inflation comptée, ils rapportent un peu moins à chaque mandat.'
+                      : 'Le ticket et l’abonnement montent avec les prix, de 2 % par an. La hausse que vous choisissez plus bas s’y ajoute.'}
+                </span>
+                <span className="self-start rounded-full bg-sable px-2.5 py-1 text-xs font-extrabold">
+                  {mandat === 1
+                    ? `Prix de 2026 sur ce mandat, puis +${enHausse(INFLATION_MANDAT)} à chaque mandat`
+                    : `Inflation depuis 2026 : +${enHausse(prix)}`}
+                </span>
+              </span>
+            </label>
             <Pas
               titre="Prix des abonnements"
               valeur={l.abonnements}
               unite="%"
-              min={-20}
-              max={30}
-              gain={gratuit ? 0 : l.abonnements * p.rendement.abonnements}
-              detail={`Chaque point rapporte ${millions(p.rendement.abonnements)} M€ par mandat.`}
+              min={BAISSE_MAX}
+              max={HAUSSE_MAX}
+              gain={gratuit ? 0 : gainTarif(l.abonnements, p.rendement.abonnements)}
+              detail={`Chaque point rapporte ${millions(p.rendement.abonnements * prix)} M€ par mandat.`}
               onChange={maj('abonnements')}
               desactive={gratuit ? sansObjet : undefined}
               enPlus={
@@ -241,14 +284,14 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl bg-sable px-3 py-2.5">
                       <div className="chiffres text-lg font-black">{euros(nouveauMois)} €</div>
-                      <div className="text-xs leading-snug text-gris">par mois, au lieu de {euros(p.tarifs.abonnement)} €</div>
+                      <div className="text-xs leading-snug text-gris">par mois, au lieu de {euros(p.tarifs.abonnement)} € en 2026</div>
                     </div>
                     <div className="rounded-xl bg-sable px-3 py-2.5">
                       <div className="chiffres text-lg font-black">{euros(nouveauMois / 2)} €</div>
                       <div className="text-xs leading-snug text-gris">pour un salarié, l’employeur payant la moitié</div>
                     </div>
                   </div>
-                  <Repere hausse={l.abonnements} />
+                  <Repere hausse={l.abonnements} prix={prix} geles={geles} />
                 </>
               }
             />
@@ -256,18 +299,18 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
               titre="Prix des tickets"
               valeur={l.tickets}
               unite="%"
-              min={-20}
-              max={30}
-              gain={gratuit ? 0 : l.tickets * p.rendement.tickets}
-              detail={`Le ticket passe de ${euros(p.tarifs.ticket)} € à ${euros(nouveauTicket)} €. Chaque point rapporte ${millions(p.rendement.tickets)} M€ par mandat.`}
+              min={BAISSE_MAX}
+              max={HAUSSE_MAX}
+              gain={gratuit ? 0 : gainTarif(l.tickets, p.rendement.tickets)}
+              detail={`Le ticket passe de ${euros(p.tarifs.ticket)} € en 2026 à ${euros(nouveauTicket)} €. Chaque point rapporte ${millions(p.rendement.tickets * prix)} M€ par mandat.`}
               onChange={maj('tickets')}
               desactive={gratuit ? sansObjet : undefined}
-              enPlus={<Repere hausse={l.tickets} />}
+              enPlus={<Repere hausse={l.tickets} prix={prix} geles={geles} />}
             />
             <p className="text-[12.5px] leading-normal text-gris">
-              Nous comparons chaque hausse à une inflation de 2 % par an, l’objectif de la Banque centrale européenne : sur les six ans d’un
-              mandat, les prix monteraient d’environ {(INFLATION_MANDAT * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %.
-              Tout employeur rembourse au moins la moitié de l’abonnement de ses salariés.
+              Nous comptons une inflation de 2 % par an, l’objectif de la Banque centrale européenne : les prix montent d’environ{' '}
+              {enHausse(INFLATION_MANDAT)} à chaque mandat, et les coûts des projets comme votre budget aussi. Tout employeur rembourse au
+              moins la moitié de l’abonnement de ses salariés.
             </p>
           </>,
         )}
@@ -279,7 +322,7 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
                 key={m.cle}
                 titre={titreMesure(m, p)}
                 detail={detailMesure(m, p)}
-                gain={p.fixes[m.cle]!}
+                gain={p.fixes[m.cle]! * prix}
                 actif={l[m.cle]}
                 onChange={maj(m.cle)}
                 desactive={gratuit && m.tarifaire ? sansObjet : undefined}
@@ -294,7 +337,7 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
               <Interrupteur
                 titre="TVA des transports à 5,5 %"
                 detail="Au lieu de 10 % aujourd’hui."
-                gain={p.fixes.tva}
+                gain={p.fixes.tva * prix}
                 actif={l.tva}
                 onChange={maj('tva')}
               />
@@ -305,12 +348,12 @@ function Contenu({ p, ville }: { p: ParametresLeviers; ville: Ville }) {
               unite="%"
               min={0}
               max={5}
-              gain={l.versementMobilite * p.rendement.versementMobilite}
+              gain={l.versementMobilite * p.rendement.versementMobilite * prix}
               detail={`Cette taxe est payée par les employeurs de 11 salariés et plus, en plus du remboursement des abonnements.${
                 p.tauxVersement
                   ? ` Son taux passe de ${taux(p.tauxVersement)} à ${taux(p.tauxVersement * (1 + l.versementMobilite / 100))} de la masse salariale.`
                   : ''
-              } Chaque hausse de 1 % rapporte ${millions(p.rendement.versementMobilite)} M€ par mandat.`}
+              } Chaque hausse de 1 % rapporte ${millions(p.rendement.versementMobilite * prix)} M€ par mandat.`}
               onChange={maj('versementMobilite')}
             />
           </>,

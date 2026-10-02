@@ -22,12 +22,14 @@ const VERSIONS: Version[] = [
   {
     iso: '2026-10-02',
     date: '2 octobre 2026',
-    titre: 'Un filtre pour la carte',
-    texte: 'Un seul bouton règle maintenant la carte : le fond, les lignes affichées et la densité de population.',
+    titre: 'L’inflation et un filtre pour la carte',
+    texte: 'Les prix montent maintenant de 2 % par an, les tarifs peuvent suivre l’inflation, et un seul bouton règle la carte.',
     groupes: [
       {
         titre: 'Nouveau',
         points: [
+          'Le jeu compte une inflation de 2 % par an : à chaque mandat après le premier, le coût des projets et des lignes, le budget, ce que rapportent les tarifs et l’argent non dépensé montent d’environ 12,6 %.',
+          'Dans « Trouver de l’argent », une case fait suivre l’inflation au ticket et à l’abonnement, avec la hausse des prix depuis 2026 juste à côté. Décochée, ils restent au prix de 2026 et rapportent un peu moins à chaque mandat. Les tarifs peuvent maintenant monter jusqu’à +200 %.',
           'Le bouton « Affichage », en haut à droite de la carte, remplace celui de la vue aérienne. Il choisit le fond de carte, cache les lignes d’un mode de transport, par exemple tous les bus rapides, et montre la densité de population à tout moment, plus seulement pendant le tracé d’une ligne.',
         ],
       },

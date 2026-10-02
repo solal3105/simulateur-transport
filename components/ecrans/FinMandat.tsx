@@ -4,8 +4,8 @@ import { motion } from 'motion/react'
 
 import { nomReserve } from '@/lib/budget'
 import { debutMandat, finMandat } from '@/lib/catalogue'
-import { n } from '@/lib/format'
-import { bilanMandat, leviersDu, ouvertures } from '@/lib/regles'
+import { hausse, n } from '@/lib/format'
+import { bilanMandat, leviersDu, ouvertures, prixDuMandat } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 
 import { cascade, useCompteur, useDefilement } from '../anim'
@@ -125,7 +125,9 @@ export function FinMandat() {
               {bilan2.reports > 0
                 ? ` et les ${n(bilan2.reports)} M€ ${reportes.length > 1 ? `des ${reportes.length} projets payés` : 'du projet payé'} en deux fois`
                 : ''}
-              .{ville.budget.leviers ? ' Vos choix de tarifs restent en place, et vous pourrez les revoir.' : ''}
+              . Avec une inflation de 2 % par an, tout est désormais compté aux prix du second mandat, {hausse(prixDuMandat(2))} au-dessus
+              de ceux d’aujourd’hui : les coûts des projets, le budget et l’argent économisé.
+              {ville.budget.leviers ? ' Vos choix de tarifs restent en place, et vous pourrez les revoir.' : ''}
               {nombreAVenir > 0
                 ? ` En commençant, ${nombreAVenir > 1 ? `les ${nombreAVenir} choix` : 'le choix'} du second mandat du réseau que vous avez repris ${nombreAVenir > 1 ? 's’ajouteront' : 's’ajoutera'} à votre programme.`
                 : ''}

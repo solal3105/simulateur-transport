@@ -5,7 +5,7 @@ import { clsx } from 'clsx'
 import { finMandat, PROJETS } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { n, ordinal } from '@/lib/format'
-import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
+import { coutDeLigne, ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 
 import { Bouton, Icone } from '../ui'
@@ -33,7 +33,7 @@ export function useProgramme() {
     ...lignes.map((l) => ({
       id: l.id,
       nom: l.nom,
-      cout: l.estimation.cout,
+      cout: coutDeLigne(l),
       voyageurs: l.estimation.nouveaux,
       annee: ouverture(l.mandat, l.estimation.duree),
       mandat: l.mandat,
