@@ -135,6 +135,20 @@ function bilanSeul(
 /** Année d'ouverture : début du mandat où la décision est prise, plus la durée du chantier. */
 export const ouverture = (mandat: Mandat, duree: number) => debutMandat(mandat) + duree
 
+/**
+ * Année d'ouverture d'un projet du catalogue : un prolongement n'ouvre pas avant la ligne qu'il prolonge. Le métro E
+ * jusqu'à Part-Dieu, décidé au second mandat avec quatre ans de chantier, attend celui jusqu'à Bellecour (2040) au lieu
+ * d'ouvrir seul en 2036.
+ */
+export function ouvertureProjet(p: Projet, mandat: Mandat, duree: number, chantiers: readonly Chantier[], vus = new Set<string>()): number {
+  const propre = ouverture(mandat, duree)
+  const requis = p.requiert ? chantiers.find((c) => c.id === p.requiert) : undefined
+  const prolongee = requis ? PROJETS.get(requis.id) : undefined
+  if (!requis || !prolongee || vus.has(prolongee.id)) return propre
+  vus.add(p.id)
+  return Math.max(propre, ouvertureProjet(prolongee, requis.mandat, resoudre(prolongee, requis).duree, chantiers, vus))
+}
+
 export interface Ouverture {
   id: string
   nom: string
@@ -157,7 +171,7 @@ export function ouvertures(chantiers: Chantier[], lignes: LigneJoueur[]): Ouvert
     liste.push({
       id: p.id,
       nom: p.nom,
-      annee: ouverture(c.mandat, r.duree),
+      annee: ouvertureProjet(p, c.mandat, r.duree, chantiers),
       voyageurs: r.voyageurs,
       joueur: false,
       varianteId: c.varianteId,

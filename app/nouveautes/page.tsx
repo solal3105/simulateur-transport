@@ -20,6 +20,28 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  */
 const VERSIONS: Version[] = [
   {
+    iso: '2026-10-02',
+    date: '2 octobre 2026',
+    titre: 'Un filtre pour la carte',
+    texte: 'Un seul bouton règle maintenant la carte : le fond, les lignes affichées et la densité de population.',
+    groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'Le bouton « Affichage », en haut à droite de la carte, remplace celui de la vue aérienne. Il choisit le fond de carte, cache les lignes d’un mode de transport, par exemple tous les bus rapides, et montre la densité de population à tout moment, plus seulement pendant le tracé d’une ligne.',
+        ],
+      },
+      {
+        titre: 'Corrigé',
+        points: [
+          'Un prolongement n’ouvre plus avant la ligne qu’il prolonge : le métro E jusqu’à Part-Dieu attend l’ouverture du tronçon jusqu’à Bellecour.',
+          'La fiche d’un projet payé en deux fois dit, au mandat suivant, que la seconde moitié est déjà retirée du budget et qu’il n’y a rien d’autre à payer.',
+          'Le bilan ne laisse plus croire que le projet le plus cher du catalogue fait partie de votre réseau : il le cite comme un projet que vous n’avez pas retenu.',
+        ],
+      },
+    ],
+  },
+  {
     iso: '2026-10-01',
     date: '1er octobre 2026',
     titre: 'Lignes en boucle',

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { horizon, mots, PROJETS } from '@/lib/catalogue'
 import { couleurProjet } from '@/lib/couleurs'
 import { n } from '@/lib/format'
-import { ouverture, resoudre } from '@/lib/regles'
+import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { ficheProjet } from '@/lib/fiches'
 import { useJeu, useVille } from '@/lib/store'
 import type { PointProjet, Projet } from '@/lib/types'
@@ -56,7 +56,9 @@ export function FicheProjet({ id }: { id: string }) {
   const bloque = dependance && !chantiers.some((c) => c.id === dependance.id)
   // En jeu libre, il n'y a pas de budget à tenir : rien n'est trop cher, et tout se paie en une fois.
   const reste = libre ? Infinity : bilan.reste
-  const annee = ouverture(existant?.mandat ?? mandat, r.duree)
+  const annee = ouvertureProjet(projet, existant?.mandat ?? mandat, r.duree, chantiers)
+  // Un prolongement qui attend l'ouverture de la ligne qu'il prolonge.
+  const attend = annee > ouverture(existant?.mandat ?? mandat, r.duree)
   // La fin de la partie : 2038, ou la fin du mandat en cours quand on l'a continuée.
   const fin = horizon(mandat)
   const apresFin = annee > fin
@@ -210,6 +212,18 @@ export function FicheProjet({ id }: { id: string }) {
         </div>
       ) : null}
 
+      {/* La seconde moitié d'un paiement étalé se retire seule du budget du mandat suivant : sans cette phrase, un joueur
+          cherchait un bouton pour « payer la fin des travaux ». */}
+      {existant?.etale && mandat > existant.mandat && !libre ? (
+        <p className="text-sm leading-normal text-gris">
+          Payé en deux fois : {n(moitie)} M€ au mandat {existant.mandat}, et {n(r.cout - moitie)} M€{' '}
+          {mandat === existant.mandat + 1
+            ? 'déjà retirés de votre budget de ce mandat'
+            : `retirés du budget du mandat ${existant.mandat + 1}`}
+          . Vous n’avez rien d’autre à payer.
+        </p>
+      ) : null}
+
       {existant && existant.mandat === mandat && mandat === 1 && !libre ? (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-[14px] font-extrabold">Comment le payer</legend>
@@ -285,7 +299,7 @@ export function FicheProjet({ id }: { id: string }) {
                   <span className="chiffres flex flex-wrap gap-x-3.5 gap-y-1 text-[13px] font-extrabold">
                     <span>{n(v.cout)} M€</span>
                     <span className="text-rouge">+{n(v.voyageurs)} voy./jour</span>
-                    <span className="text-gris">ouvre en {ouverture(mandat, v.duree)}</span>
+                    <span className="text-gris">ouvre en {ouvertureProjet(projet, mandat, v.duree, chantiers)}</span>
                   </span>
                   {tropCher ? (
                     <span className="text-[12.5px] font-extrabold text-rouge-fonce">Plus cher que tout votre budget restant</span>
@@ -333,13 +347,19 @@ export function FicheProjet({ id }: { id: string }) {
         <CarteChiffre
           icone="horloge"
           valeur={String(annee)}
-          legende={`après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier${projet.estime?.duree ? ', selon notre estimation' : ''}`}
+          legende={
+            attend
+              ? `à l’ouverture de la ligne qu’il prolonge, après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier`
+              : `après ${r.duree} an${r.duree > 1 ? 's' : ''} de chantier${projet.estime?.duree ? ', selon notre estimation' : ''}`
+          }
         />
       </div>
 
       {apresFin ? (
         <p className="text-sm leading-normal text-gris">
-          Ce projet ouvrira après {fin} : vous le payez, et vous ne l’inaugurerez que si vous continuez la partie.
+          {existant
+            ? `Il ouvrira en ${annee}, après la fin de la partie en ${fin} : vous le verrez ouvrir si vous continuez la partie.`
+            : `Il ouvrirait en ${annee}, après la fin de la partie en ${fin} : vous le paieriez sans le voir ouvrir, sauf si vous continuez la partie.`}
         </p>
       ) : null}
 

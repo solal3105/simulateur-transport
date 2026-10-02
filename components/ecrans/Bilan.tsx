@@ -349,8 +349,10 @@ export function Bilan({ partage, quitter, publication }: { partage?: PartieParta
 
         {resultat.plusGros ? (
           <p className="rounded-2xl bg-sable px-4 py-3.5 text-[14.5px] leading-relaxed text-gris">
-            {partage ? 'Ce réseau laisse' : 'Vous laissez'} {resultat.laisses.length} projets à l’étude, pour {n(resultat.coutLaisse)} M€.
-            Le plus cher est {resultat.plusGros.nom}, à {n(resoudre(resultat.plusGros).cout)} M€.
+            {/* Le projet le plus cher non retenu est nommé entre guillemets : sans cela, on lisait qu'il faisait partie du réseau. */}
+            {resultat.laisses.length === 1
+              ? `${partage ? 'Ce réseau n’a' : 'Vous n’avez'} pas retenu un projet du catalogue : « ${resultat.plusGros.nom} », qui coûterait ${n(resultat.coutLaisse)} M€.`
+              : `${partage ? 'Ce réseau n’a' : 'Vous n’avez'} pas retenu ${resultat.laisses.length} projets du catalogue, qui coûteraient ${n(resultat.coutLaisse)} M€ en tout. Le plus cher, « ${resultat.plusGros.nom} », coûterait à lui seul ${n(resoudre(resultat.plusGros).cout)} M€.`}
           </p>
         ) : null}
 

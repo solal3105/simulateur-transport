@@ -6,7 +6,7 @@ import { useMemo, type ReactNode } from 'react'
 import { catalogueDe, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { approx, n } from '@/lib/format'
-import { ouverture, resoudre } from '@/lib/regles'
+import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { useJeu, useVille, type TriListe } from '@/lib/store'
 
 import { Icone, ICONE_MODE } from '../ui'
@@ -121,7 +121,13 @@ export function Liste() {
     const rows = catalogue.map((p) => {
       const c = faits.get(p.id)
       const r = resoudre(p, c)
-      return { p, r, c, rendement: r.cout > 0 ? r.voyageurs / r.cout : 0, annee: ouverture(c?.mandat ?? mandat, r.duree) }
+      return {
+        p,
+        r,
+        c,
+        rendement: r.cout > 0 ? r.voyageurs / r.cout : 0,
+        annee: ouvertureProjet(p, c?.mandat ?? mandat, r.duree, chantiers),
+      }
     })
     rows.sort((a, b) =>
       tri === 'voyageurs'
