@@ -5,7 +5,7 @@ import { horizon } from '@/lib/catalogue'
 import { mandatsDe, villeDePartie } from '@/lib/partie'
 import { MARQUE, VILLES } from '@/lib/villes'
 
-import { lireApercu } from './apercu'
+import { lireApercu, ouvertAuxMoteurs } from './apercu'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${titre} | ${MARQUE}`,
     description,
+    ...(ouvertAuxMoteurs(reseau) ? {} : { robots: { index: false } }),
     openGraph: { title: titre, description },
     twitter: { card: 'summary_large_image', title: titre, description },
   }

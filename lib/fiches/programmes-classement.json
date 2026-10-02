@@ -1,494 +1,494 @@
 {
- "lyon": {
-  "documents": [
-   {
-    "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026 (autorisations de développement et de gestion patrimoniale, crédits de paiement jusqu’en 2035)",
-    "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf",
-    "date": "2025-12-18"
-   },
-   {
-    "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026 et prospective 2026-2035 (six enveloppes d’équipement)",
-    "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf",
-    "date": "2025-11-27"
-   },
-   {
-    "titre": "Sytral Mobilités, délibération n° 26-033 du 24 juin 2026, vote et actualisation des autorisations de programme du budget Transport, qui prolonge d’un an les autorisations patrimoniales dans l’attente du plan de mandat 2026-2031",
-    "url": "https://sytral-mobilites.fr/img_base/documents/371/26-033-delib-actualisation-ap-m43-signe-pref.pdf",
-    "date": "2026-06-24"
-   },
-   {
-    "titre": "Sytral Mobilités, plan de mobilité des territoires lyonnais à l’horizon 2040, approuvé le 2 octobre 2025",
-    "url": "https://sytral-mobilites.fr/fr/plan-de-mobilite-des-territoires-lyonnais.html",
-    "date": "2025-10-02"
-   }
-  ],
-  "projets": {
-   "metro-e-bellecour": {
-    "classe": "abandonne",
-    "explication": "Le conseil d’administration de Sytral a voté le 24 octobre 2022 la fin des études du métro E au profit du TEOL ; la nouvelle présidente a annoncé sa relance, qu’un conseil de fin septembre 2026 doit acter, mais aucune délibération en ce sens n’était publiée au 26 septembre 2026.",
-    "source": {
-     "titre": "Sytral Mobilités, page « Métro ligne E (concertations 2019-2021) », décision du conseil d’administration du 24 octobre 2022",
-     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+  "lyon": {
+    "documents": [
+      {
+        "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026 (autorisations de développement et de gestion patrimoniale, crédits de paiement jusqu’en 2035)",
+        "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf",
+        "date": "2025-12-18"
+      },
+      {
+        "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026 et prospective 2026-2035 (six enveloppes d’équipement)",
+        "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf",
+        "date": "2025-11-27"
+      },
+      {
+        "titre": "Sytral Mobilités, délibération n° 26-033 du 24 juin 2026, vote et actualisation des autorisations de programme du budget Transport, qui prolonge d’un an les autorisations patrimoniales dans l’attente du plan de mandat 2026-2031",
+        "url": "https://sytral-mobilites.fr/img_base/documents/371/26-033-delib-actualisation-ap-m43-signe-pref.pdf",
+        "date": "2026-06-24"
+      },
+      {
+        "titre": "Sytral Mobilités, plan de mobilité des territoires lyonnais à l’horizon 2040, approuvé le 2 octobre 2025",
+        "url": "https://sytral-mobilites.fr/fr/plan-de-mobilite-des-territoires-lyonnais.html",
+        "date": "2025-10-02"
+      }
+    ],
+    "projets": {
+      "metro-e-bellecour": {
+        "classe": "abandonne",
+        "explication": "Le conseil d’administration de Sytral a voté le 24 octobre 2022 la fin des études du métro E au profit du TEOL ; la nouvelle présidente a annoncé sa relance, qu’un conseil de fin septembre 2026 doit acter, mais aucune délibération en ce sens n’était publiée au 26 septembre 2026.",
+        "source": {
+          "titre": "Sytral Mobilités, page « Métro ligne E (concertations 2019-2021) », décision du conseil d’administration du 24 octobre 2022",
+          "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+        }
+      },
+      "ext-a-est": {
+        "classe": "abandonne",
+        "explication": "À la clôture de la consultation sur le métro, le 16 décembre 2021, le président de Sytral a écarté le prolongement de la ligne A vers Décines et Meyzieu, et aucune autorisation de programme ne l’a repris depuis.",
+        "source": {
+          "titre": "Lyon Capitale, « Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E », 16 décembre 2021",
+          "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+        }
+      },
+      "ext-d": {
+        "classe": "abandonne",
+        "explication": "Le président de Sytral a écarté le 16 décembre 2021 le prolongement de la ligne D vers La Duchère, pour lequel un bus ou un tramway vers Écully a ensuite été étudié, et aucune autorisation de programme ne l’a repris.",
+        "source": {
+          "titre": "Lyon Capitale, « Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E », 16 décembre 2021",
+          "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+        }
+      },
+      "metro-e-part-dieu": {
+        "classe": "abandonne",
+        "explication": "Ce prolongement suppose le métro E, dont Sytral a arrêté les études le 24 octobre 2022 ; la relance annoncée par la nouvelle présidente vise Tassin, Bellecour et Part-Dieu vers 2035, mais elle n’est pas encore votée.",
+        "source": {
+          "titre": "Sytral Mobilités, page « Métro ligne E (concertations 2019-2021) », décision du conseil d’administration du 24 octobre 2022",
+          "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+        }
+      },
+      "ligne-du-nord": {
+        "classe": "etude",
+        "explication": "Le plan de mobilité approuvé par Sytral en octobre 2025 prévoit une ligne vers le Plateau Nord à l’horizon 2040, en bus à haut niveau de service ou en tramway express d’après l’avis de l’autorité environnementale, sans mode arrêté, sans calendrier et sans autorisation de programme.",
+        "source": {
+          "titre": "Sytral Mobilités, « Approbation du plan de mobilité des territoires lyonnais », octobre 2025",
+          "url": "https://sytral-mobilites.fr/fr/approbation-du-plan-de-mobilite-des-territoires-lyonnais_-n.html"
+        }
+      },
+      "teol": {
+        "classe": "programme",
+        "explication": "Sytral a approuvé la déclaration de projet le 18 décembre 2025 et lui a ouvert une autorisation de programme de 754,1 M€ payée jusqu’en 2035, pour une mise en service visée en 2032 ; mais sa nouvelle présidente a annoncé en mars 2026 l’arrêt du projet au profit du métro E, et un conseil de fin septembre 2026 doit voter cet abandon.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "modern-a": {
+        "classe": "programme",
+        "explication": "L’autorisation de programme « Avenir métro A », portée à 737,4 M€ en décembre 2025, finance jusqu’en 2035 l’automatisation de la ligne, ses portes palières et vingt rames neuves.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "modern-d": {
+        "classe": "programme",
+        "explication": "L’autorisation de programme « Avenir métro D », portée de 339,1 à 522,4 M€ en décembre 2025, finance jusqu’en 2035 le remplacement des systèmes de pilotage et le renfort des rames.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "modern-c": {
+        "classe": "programme",
+        "explication": "L’autorisation de programme « Avenir métro C », portée à 258,1 M€ en décembre 2025, finance jusqu’en 2035 de nouvelles rames et une double voie entre Hénon et Cuire.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "t12-c3": {
+        "classe": "abandonne",
+        "explication": "Sytral a écarté le tramway sur l’axe du C3 en 2013 au profit d’un site propre pour trolleybus, et la ligne est devenue en septembre 2025 le TramBus TB11, en voie réservée sur tout son parcours, sans qu’aucun programme actuel ne prévoie de tramway.",
+        "source": {
+          "titre": "Lyon Capitale, « Ligne C3 : ce que veut faire le Sytral », 18 avril 2013",
+          "url": "https://www.lyoncapitale.fr/actualite/ligne-c3-ce-que-veut-faire-le-sytral"
+        }
+      },
+      "ligne-ouest": {
+        "classe": "etude",
+        "explication": "Le plan de mobilité approuvé par Sytral en octobre 2025 prévoit à l’horizon 2040 une ligne vers Écully, étudiée depuis 2022 en bus à haut niveau de service ou en tramway entre Part-Dieu et Écully, mais aucune autorisation de programme ni aucun calendrier ne l’accompagnent.",
+        "source": {
+          "titre": "Sytral Mobilités, « Approbation du plan de mobilité des territoires lyonnais », octobre 2025",
+          "url": "https://sytral-mobilites.fr/fr/approbation-du-plan-de-mobilite-des-territoires-lyonnais_-n.html"
+        }
+      },
+      "teol-craponne": {
+        "classe": "etude",
+        "explication": "Le plan de mobilité inscrit une extension ultérieure du TEOL vers Craponne, sans coût, calendrier ni financement, et elle dépend d’un TEOL dont la nouvelle présidence a annoncé l’abandon.",
+        "source": {
+          "titre": "Sytral Mobilités, page du projet TEOL, Tramway express de l’ouest lyonnais",
+          "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-express-de-l-ouest-lyonnais-teol_-r.html"
+        }
+      },
+      "t8": {
+        "classe": "programme",
+        "explication": "Sytral a ouvert en 2025 une autorisation de programme de 278 M€ payée jusqu’en 2031 et prévoit une enquête publique fin 2026, des travaux de 2027 à 2030 et une mise en service en 2030 ; la nouvelle présidente veut faire évoluer le tracé pour mieux desservir les zones d’activité de la Porte des Alpes.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "telepherique-ouest": {
+        "classe": "abandonne",
+        "explication": "Sytral a abandonné le téléphérique entre Francheville et Lyon après une concertation très défavorable, décision annoncée le 10 mai 2022 et soumise au vote de son conseil du 16 mai 2022.",
+        "source": {
+          "titre": "France 3 Auvergne-Rhône-Alpes, « Rhône : le projet de téléphérique Lyon/Francheville abandonné », 10 mai 2022",
+          "url": "https://france3-regions.franceinfo.fr/auvergne-rhone-alpes/rhone/lyon/rhone-le-projet-de-telepherique-lyon-francheville-abandonne-2539852.html"
+        }
+      },
+      "bhns-rive-droite": {
+        "classe": "inconnu",
+        "explication": "Nous n’avons trouvé aucun projet de bus à haut niveau de service ou de tramway continu le long des quais de la rive droite du Rhône : Sytral y a créé en juin 2025 des lignes de bus structurantes, dont la C23, et refait des couloirs de bus, sans site propre continu.",
+        "source": {
+          "titre": "Sytral Mobilités, dossier de presse « Une nouvelle offre bus pour un réseau toujours plus performant et maillé », juin 2025",
+          "url": "https://sytral-mobilites.fr/UserFiles/File/projet/projet-en-cours/reseau-bus-performant/dp-piav-nouvelle-offre-bus.pdf"
+        }
+      },
+      "bhns-parilly": {
+        "classe": "programme",
+        "explication": "Sytral a approuvé le bilan de la concertation le 27 novembre 2025 et ouvert une autorisation de programme de 89,6 M€ payée jusqu’en 2030, pour des travaux en 2028 et une mise en service fin 2029.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "t9-final": {
+        "classe": "programme",
+        "explication": "Le T9 est en chantier, financé par une autorisation de programme de 321 M€ payée jusqu’en 2029, et Sytral annonce sa mise en service en 2027.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "t10-final": {
+        "classe": "programme",
+        "explication": "Le T10 est en chantier, financé par une autorisation de programme de 378,3 M€, et Sytral annonce sa mise en service à l’été 2027.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
+          "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+        }
+      },
+      "navette-fluv": {
+        "classe": "etude",
+        "explication": "Sytral a étudié vers 2019 des navettes entre Vaise, Confluence et la Cité internationale, mais n’a réalisé que la ligne de la Saône, Navigône, en service depuis juin 2025 entre Vaise-Industrie et Confluence ; la section du Rhône que dessine le catalogue n’est dans aucun programme.",
+        "source": {
+          "titre": "Lyon Capitale, « Lyon : des bateaux TCL entre Vaise, Confluence et Cité internationale ? », 13 décembre 2019",
+          "url": "https://www.lyoncapitale.fr/actualite/lyon-des-bateaux-tcl-entre-vaise-confluence-et-cite-internationale"
+        }
+      },
+      "t3-renf": {
+        "classe": "programme",
+        "explication": "Sytral a porté le 2 octobre 2025 son autorisation de programme « Renfort capacité tramway » à 211,8 M€ pour acheter cinq rames de 43 m de plus et augmenter la fréquence du T3, mais le nouveau terminus de Part-Dieu étudié en 2022 n’est dans aucun programme.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-053 du 2 octobre 2025, vote et actualisation de l’autorisation de programme 2022-44",
+          "url": "https://sytral-mobilites.fr/img_base/documents/334/ca-25-053-delib-actualisation-ap-2022-44-ar-pref.pdf"
+        }
+      },
+      "bhns-kimmerling": {
+        "classe": "programme",
+        "explication": "Le tronçon du TramBus TB12 entre Kimmerling et Sept Chemins est en travaux depuis juin 2026, financé par l’autorisation de programme du bus Part-Dieu Sept Chemins (163,1 M€), pour une mise en service en 2027, et le nouveau conseil a relancé ses acquisitions foncières le 8 juillet 2026.",
+        "source": {
+          "titre": "Sytral Mobilités, page des travaux du TB12 entre Kimmerling-Genêts et Sept Chemins",
+          "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tb12-kimmerling-sept-chemins_-r.html"
+        }
+      },
+      "electrification-bus": {
+        "classe": "programme",
+        "explication": "Sytral finance la transition de ses bus, trolleybus et dépôts, avec 735 M€ restant à payer dont 497,8 M€ de 2026 à 2031, mais vers un parc électrique ou au bioGNV en 2035 et non entièrement électrique, si bien que le projet du catalogue n’est programmé qu’en partie.",
+        "source": {
+          "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026, enveloppes d’équipement (p. 8 du PDF)",
+          "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf"
+        }
+      }
     }
-   },
-   "ext-a-est": {
-    "classe": "abandonne",
-    "explication": "À la clôture de la consultation sur le métro, le 16 décembre 2021, le président de Sytral a écarté le prolongement de la ligne A vers Décines et Meyzieu, et aucune autorisation de programme ne l’a repris depuis.",
-    "source": {
-     "titre": "Lyon Capitale, « Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E », 16 décembre 2021",
-     "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+  },
+  "toulouse": {
+    "documents": [
+      {
+        "titre": "Tisséo Collectivités, prospectus de base du programme EMTN 2026 : plan pluriannuel d’investissement de 4,5 Md€ sur 2023-2030, consacré à la ligne C, au prolongement et à la connexion de la ligne B, au renouvellement du matériel et à l’entretien des lignes (p. 19)",
+        "url": "https://tisseo-collectivites.fr/sites/default/files/media/downloads/EUO2-%232006747555-v1%20Tisseo%20-%20EMTN%202026%20-%20Prospectus%20de%20Base%20%28Final%20with%20approval%20number%29.pdf",
+        "date": "2026-02"
+      },
+      {
+        "titre": "Moody’s, actualisation de l’analyse de crédit de Tisséo Collectivités : 3,8 Md€ d’extension du réseau sur 2024-2030, surtout pour la ligne C (p. 4 et 5)",
+        "url": "https://tisseo-collectivites.fr/sites/default/files/media/downloads/Credit_Opinion_-_Translation-Tisseo-Collectivites-SMTCAT-15Jun2026-PBC_1481862.pdf",
+        "date": "2026-06-15"
+      }
+    ],
+    "projets": {
+      "tls-bhns-ouest": {
+        "classe": "abandonne",
+        "explication": "Le bus en site propre de l’ouest étudié par Tisséo a été remplacé en mars 2015 par une ligne Linéo sans voie réservée à Lardenne, le Linéo 3 ouvert en janvier 2019 entre Plaisance-du-Touch, Tournefeuille et les Arènes, et le plan pluriannuel d’investissement 2023-2030 ne le reprend pas.",
+        "source": {
+          "titre": "Jean-Pierre Wolff et Florence Laumière, « Projets d’infrastructures de transports collectifs et enjeux électoraux dans une métropole française. Le projet de BHNS de l’ouest toulousain », Sud-Ouest européen n° 40, 2015",
+          "url": "https://journals.openedition.org/soe/2236"
+        }
+      },
+      "tls-tram-canal": {
+        "classe": "abandonne",
+        "explication": "Tisséo a lancé les études du tram Canal en juin 2013, mais la majorité élue en 2014 l’a abandonné pour financer la troisième ligne de métro, et il ne figure pas dans le plan pluriannuel d’investissement 2023-2030.",
+        "source": {
+          "titre": "Wikipédia, article « Tramway de Toulouse », partie sur les projets annulés, ligne « Canal »",
+          "url": "https://fr.wikipedia.org/wiki/Tramway_de_Toulouse"
+        }
+      }
     }
-   },
-   "ext-d": {
-    "classe": "abandonne",
-    "explication": "Le président de Sytral a écarté le 16 décembre 2021 le prolongement de la ligne D vers La Duchère, pour lequel un bus ou un tramway vers Écully a ensuite été étudié, et aucune autorisation de programme ne l’a repris.",
-    "source": {
-     "titre": "Lyon Capitale, « Fin de la consultation pour les projets de métros à Lyon : le A et le D abandonnés, des études en plus pour le B et le E », 16 décembre 2021",
-     "url": "https://www.lyoncapitale.fr/actualite/fin-de-la-consultation-pour-les-projets-de-metro-a-lyon-le-a-et-le-d-abandonnes-des-etudes-en-plus-pour-le-b-et-le-e"
+  },
+  "marseille": {
+    "documents": [
+      {
+        "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030 approuvé le 16 décembre 2021, annexe 5, note financière (coût de chaque action)",
+        "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf",
+        "date": "2021-12-16"
+      },
+      {
+        "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets de mobilité du plan Marseille en Grand, 2 Md€ dont 1 Md€ de l’État",
+        "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf",
+        "date": "2025-05"
+      },
+      {
+        "titre": "Métropole d’Aix-Marseille-Provence, rapport d’orientation budgétaire 2026 : programmation pluriannuelle des investissements fondée sur les autorisations de programme 2020-2026, à redéfinir pour le nouveau mandat (p. 110 et 127)",
+        "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/04/16/ANNEXE/160507_165637_160507%20Annexe%20ROB%202026%20vDEF%20v2.pdf",
+        "date": "2026-04-16"
+      }
+    ],
+    "projets": {
+      "amp-t3-nord-bricarde": {
+        "classe": "programme",
+        "explication": "Inscrite au plan de mobilité 2020-2030 et au plan Marseille en Grand, l’extension nord du T3 a son programme approuvé depuis 2019 et son tracé depuis 2023 ; la Métropole a porté son terminus à La Bricarde le 24 juin 2026, avant une enquête publique à l’automne 2026 et des travaux de 2027 à 2030.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-004-19495/26/CM du 24 juin 2026, déplacement du terminus de l’extension nord du tramway (deuxième phase) à la Bricarde",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/06/24/DECISION/164963.pdf"
+        }
+      },
+      "amp-t2-quatre-septembre": {
+        "classe": "programme",
+        "explication": "Projet du plan Marseille en Grand chiffré à 76 M€ hors taxes, le tramway du 4-Septembre a reçu un avis favorable d’enquête publique en juin 2026, avec des travaux principaux à partir d’avril 2027 et une mise en service à l’été 2030.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets du plan Marseille en Grand, mai 2025",
+          "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
+        }
+      },
+      "amp-tram-belle-de-mai": {
+        "classe": "programme",
+        "explication": "Projet du plan Marseille en Grand, le tramway National, Arenc, Belle de Mai a un programme d’opération annexé à une délibération du 5 décembre 2024, et le rapport d’orientation budgétaire 2026 en lance le projet de 2026 à 2028, pour une mise en service visée en 2030 ; sa branche sud dépend du chantier de la gare souterraine.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, programme de l’opération « Extension du réseau de tramway de Marseille, Arenc, National, Belle de Mai », octobre 2024, annexé à la délibération du 5 décembre 2024",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/12/05/ANNEXE/110783_PJ_Belle%20de%20mai_VDEF.pdf"
+        }
+      },
+      "amp-m2-saint-loup": {
+        "classe": "etude",
+        "explication": "Le métro vers l’est figure au plan de mobilité 2020-2030 pour 806 M€ mais pas parmi les 16 projets du plan Marseille en Grand, et il n’a ni financement ni calendrier : en octobre 2023, la présidente de la Métropole le disait non abandonné mais suspendu à un financement de l’État.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030, annexe 5, note financière (action TC09-4, Métro Est)",
+          "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
+        }
+      },
+      "amp-cable-aeroport": {
+        "classe": "programme",
+        "explication": "Le téléphérique figure au plan de mobilité 2020-2030 et parmi les 16 projets du plan Marseille en Grand cofinancé par l’État, avec une mise en service annoncée en 2029 ; la Métropole a lancé sa concertation préalable le 24 juin 2026, mais son programme n’est pas encore approuvé et seuls 3 M€ d’études lui ont été affectés en 2023.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-001-19492/26/CM du 24 juin 2026, lancement de la concertation préalable du transport par câble vers l’aéroport",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/06/24/DECISION/166535.pdf"
+        }
+      },
+      "amp-aixpress-val-saint-andre": {
+        "classe": "programme",
+        "explication": "Le prolongement de l’Aixpress fait partie des lignes de bus financées par l’État dans le plan Marseille en Grand, et son programme, annexé à une délibération du 22 février 2024, prévoit des travaux à partir de mi-2027 et une livraison fin 2028.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, programme de l’extension du BHNS Aixpress jusqu’à Malacrida et au Val Saint-André, annexé à la délibération du 22 février 2024",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/02/22/ANNEXE/85326_2.1-85326-Programme%20AIXPRESS%20Malacrida%20fevrier2024.pdf"
+        }
+      },
+      "amp-bhns-aix-duranne": {
+        "classe": "programme",
+        "explication": "La Métropole a approuvé le programme le 15 décembre 2025 pour 139 M€ hors taxes, inscrit ses crédits dans une autorisation de programme et fixé la mise en service à fin 2030.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-007-19154/25/CM du 15 décembre 2025, BHNS Aix Centre, pôle d’activités, Duranne, approbation du programme",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2025/12/15/DECISION/147472.pdf"
+        }
+      },
+      "amp-bhns-martigues-port-de-bouc": {
+        "classe": "programme",
+        "explication": "Ce bus à haut niveau de service est l’une des cinq lignes de bus financées par l’État dans le plan Marseille en Grand, pour 17 M€ et une mise en service annoncée en 2027 ; il reste pourtant en études de faisabilité, et son tracé à Port-de-Bouc était encore en discussion en 2025.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets du plan Marseille en Grand, mai 2025",
+          "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
+        }
+      },
+      "amp-bhns-istres": {
+        "classe": "programme",
+        "explication": "La Métropole a approuvé le 5 décembre 2024 le programme modifié du BHNS d’Istres, 15,5 M€ hors taxes inscrits dans une autorisation de programme, avec une mise en service fixée à fin 2028.",
+        "source": {
+          "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-006-17201/24/CM du 5 décembre 2024, approbation de la modification de programme du BHNS d’Istres",
+          "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/12/05/DECISION/110806.pdf"
+        }
+      }
     }
-   },
-   "metro-e-part-dieu": {
-    "classe": "abandonne",
-    "explication": "Ce prolongement suppose le métro E, dont Sytral a arrêté les études le 24 octobre 2022 ; la relance annoncée par la nouvelle présidente vise Tassin, Bellecour et Part-Dieu vers 2035, mais elle n’est pas encore votée.",
-    "source": {
-     "titre": "Sytral Mobilités, page « Métro ligne E (concertations 2019-2021) », décision du conseil d’administration du 24 octobre 2022",
-     "url": "https://sytral-mobilites.fr/fr/archives-1/metro-ligne-e-concertations-2019-2021_-r.html"
+  },
+  "nice": {
+    "documents": [
+      {
+        "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4 : autorisation de programme n° 4605 de 500 M€ pour l’extension du réseau de tramway, votée le 9 avril 2021 et reconduite à chaque budget, et échéancier de la ligne 4 de 2026 à 2032",
+        "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf",
+        "date": "2025-07"
+      },
+      {
+        "titre": "Métropole Nice Côte d’Azur, rapport sur les orientations budgétaires 2026, délibération du 22 octobre 2025 : poursuite des lignes 4 et 5 du tramway",
+        "url": "https://www.nicecotedazur.org/wp-content/uploads/2026/01/NCA-Rapport-sur-les-orientations-budgetaires-2026.pdf",
+        "date": "2025-10-22"
+      },
+      {
+        "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
+        "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf",
+        "date": "2026-07-27"
+      }
+    ],
+    "projets": {
+      "nca-tram-ligne-5": {
+        "classe": "programme",
+        "explication": "La ligne 5 a été déclarée d’utilité publique le 27 juillet 2026, après que le nouveau conseil métropolitain en a confirmé l’intérêt général le 8 juin 2026, et la Métropole prévoit des mises en service par tronçons vers 2028, 2030 et 2031.",
+        "source": {
+          "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
+          "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf"
+        }
+      },
+      "nca-tram-ligne-4": {
+        "classe": "programme",
+        "explication": "Déclarée d’utilité publique le 26 octobre 2023, ce que le tribunal administratif a confirmé en juillet 2026, la ligne 4 est financée par l’autorisation de programme de 500 M€ des extensions du tramway avec un échéancier jusqu’en 2032 ; mais le nouveau maire de Cagnes-sur-Mer a annoncé son abandon en avril 2026 et la Métropole a déclaré sans suite deux marchés du chantier en juillet et août 2026, sans que nous ayons trouvé de vote d’abandon.",
+        "source": {
+          "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4, modalités de financement, juillet 2025",
+          "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf"
+        }
+      },
+      "nca-telepherique-nice-saint-laurent": {
+        "classe": "etude",
+        "explication": "En janvier 2024, la Métropole a présenté le téléphérique comme décalé derrière la ligne 4, le maire de Saint-Laurent-du-Var l’a dit reporté sans date en mars 2025 et il n’apparaît pas dans le rapport d’orientation budgétaire 2026, même si la page du projet affiche toujours une livraison en 2028.",
+        "source": {
+          "titre": "ICI Azur, « Le projet de téléphérique Nice Saint-Laurent-du-Var reporté sine die », 12 mars 2025",
+          "url": "https://www.ici.fr/emissions/une-commune-une-info/le-projet-de-telepherique-nice-saint-laurent-du-var-reporte-sine-die-7240651"
+        }
+      }
     }
-   },
-   "ligne-du-nord": {
-    "classe": "etude",
-    "explication": "Le plan de mobilité approuvé par Sytral en octobre 2025 prévoit une ligne vers le Plateau Nord à l’horizon 2040, en bus à haut niveau de service ou en tramway express d’après l’avis de l’autorité environnementale, sans mode arrêté, sans calendrier et sans autorisation de programme.",
-    "source": {
-     "titre": "Sytral Mobilités, « Approbation du plan de mobilité des territoires lyonnais », octobre 2025",
-     "url": "https://sytral-mobilites.fr/fr/approbation-du-plan-de-mobilite-des-territoires-lyonnais_-n.html"
+  },
+  "idf": {
+    "documents": [
+      {
+        "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024 adoptant le volet mobilités 2023-2027 du contrat de plan État-Région 2021-2027 : projets inscrits (p. 9 et 10 de l’avenant) et maquette financière (p. 24)",
+        "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf",
+        "date": "2024-09-26"
+      },
+      {
+        "titre": "Île-de-France Mobilités, communiqué sur le conseil d’administration du 2 juillet 2026 (métro 1, T10, T7, Bus EVE)",
+        "url": "https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-poursuit-lagrandissement-du-reseau-francilien/",
+        "date": "2026-07-02"
+      }
+    ],
+    "projets": {
+      "idf-metro-1-val-de-fontenay": {
+        "classe": "etude",
+        "explication": "Le contrat de plan 2023-2027 ne finance que les études d’avant-projet et des mesures conservatoires ; Île-de-France Mobilités a lancé le 2 juillet 2026 une nouvelle concertation pour l’automne 2026, avec une mise en service à l’horizon 2040, sans financement des travaux dans le contrat de plan.",
+        "source": {
+          "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024, volet mobilités 2023-2027 du contrat de plan État-Région (projets inscrits p. 9 et 10 de l’avenant, maquette financière p. 24)",
+          "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf"
+        }
+      },
+      "idf-t1-val-de-fontenay": {
+        "classe": "programme",
+        "explication": "En travaux depuis 2019 et inscrit au contrat de plan 2023-2027 pour 222,7 M€, le prolongement doit atteindre la rue de Rosny, à Montreuil, mi-2028, puis Val de Fontenay mi-2030.",
+        "source": {
+          "titre": "Site du projet T1 Bobigny Val de Fontenay, page calendrier et acteurs",
+          "url": "https://www.t1bobigny-valdefontenay.fr/fr/calendrier-et-acteurs"
+        }
+      },
+      "idf-t1-colombes": {
+        "classe": "programme",
+        "explication": "Déclaré d’utilité publique en 2015 et inscrit au contrat de plan 2023-2027 avec le prolongement vers Rueil (282 M€ pour les deux), le prolongement a ouvert sa première phase en 2019 et sa seconde est en études, sans date de mise en service fixée.",
+        "source": {
+          "titre": "Département des Hauts-de-Seine et RATP, site du projet T1 Asnières Colombes, page le projet",
+          "url": "https://www.t1asnierescolombes.fr/projet/"
+        }
+      },
+      "idf-t1-rueil-malmaison": {
+        "classe": "programme",
+        "explication": "Déclaré d’utilité publique fin 2020 et inscrit au contrat de plan 2023-2027, le prolongement est en études ; la ville de Rueil-Malmaison annonce une mise en service en 2030 et celle de Nanterre une première phase en 2031, après le tram jusqu’à Petit Colombes.",
+        "source": {
+          "titre": "Ville de Rueil-Malmaison, page prolongement de la ligne de tramway T1, mise à jour le 21 juillet 2026",
+          "url": "https://www.villederueil.fr/votre-mairie/grands-projets/ligne-de-tram-t1/"
+        }
+      },
+      "idf-t8-sud": {
+        "classe": "programme",
+        "explication": "Déclaré d’utilité publique par l’arrêté inter-préfectoral du 20 mars 2025 et inscrit au contrat de plan 2023-2027 pour 68 M€ sur cette période, le prolongement doit être achevé vers 2031.",
+        "source": {
+          "titre": "Préfectures de la Seine-Saint-Denis et de Paris, arrêté inter-préfectoral n° 2025-1241 du 20 mars 2025 déclarant d’utilité publique le prolongement du T8 Sud",
+          "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/Z-F4bXdAxsiBv0Xi_2025-03-20_T8S_APDUP_1241.pdf"
+        }
+      },
+      "idf-t10-clamart": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027, qui n’en finance que 38 M€ sur environ 770 M€, le prolongement a son schéma de principe approuvé le 2 juillet 2026, avec une enquête publique début 2027, des travaux vers 2031 et une mise en service vers 2038.",
+        "source": {
+          "titre": "Île-de-France Mobilités, support de la réunion publique du 6 juillet 2026 sur le prolongement du T10 (calendrier p. 52)",
+          "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/7vZsjXKNHEFts1-8_T10-RPJuillet2026-PPT.V06.07.26.pdf"
+        }
+      },
+      "idf-t7-juvisy": {
+        "classe": "programme",
+        "explication": "En travaux et inscrit au contrat de plan 2023-2027 pour 230 M€, le prolongement a reçu le 2 juillet 2026 sa deuxième convention de financement, avec le génie civil du tunnel prévu à partir de fin 2026 et une mise en service à l’horizon 2032.",
+        "source": {
+          "titre": "Île-de-France Mobilités, dépliant du prolongement du tram T7, août 2026",
+          "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/Jee30Ah3GUBnvAO0_SE26000479_IDFM_T7_depliant_A5.pdf"
+        }
+      },
+      "idf-t13-acheres": {
+        "classe": "programme",
+        "explication": "Les travaux ont été lancés le 16 juin 2025, le projet est inscrit au contrat de plan 2023-2027 pour 471 M€ et sa mise en service est prévue à l’été 2028.",
+        "source": {
+          "titre": "DRIEAT Île-de-France, « Prolongement du Tram T13 : les travaux vers Achères sont officiellement lancés », 27 novembre 2025",
+          "url": "https://www.drieat.ile-de-france.developpement-durable.gouv.fr/prolongement-du-tram-t13-les-travaux-vers-acheres-a13251.html"
+        }
+      },
+      "idf-tzen-5": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 5 est en travaux en 2026 et 2027, pour des essais fin 2027 et un coût de 117 M€ hors taxes.",
+        "source": {
+          "titre": "Île-de-France Mobilités, dépliant Tzen 5, juin 2026",
+          "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/ajJIao1P9HI4UmgP_Tzen5_d%C3%A9pliantg%C3%A9n%C3%A9rique_Vdef_WEB.pdf"
+        }
+      },
+      "idf-tzen-3": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 3 a été revu après une concertation close en juin 2025 ; ses études d’avant-projet sont en cours et les travaux sont visés à partir de 2027, sans date de mise en service publiée.",
+        "source": {
+          "titre": "Département de la Seine-Saint-Denis, site du Tzen 3, « Les études se poursuivent », 18 avril 2026",
+          "url": "https://tzen3.fr/fr/actualites/les-etudes-se-poursuivent"
+        }
+      },
+      "idf-tzen-2": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 2 est en travaux par secteurs depuis mi-2019, pour une mise en service complète en 2031.",
+        "source": {
+          "titre": "Département de Seine-et-Marne, site du Tzen 2, page découvrir le Tzen 2",
+          "url": "https://www.tzen2.com/decouvrir-le-tzen-2"
+        }
+      },
+      "idf-bus-bords-de-marne": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027 et déclaré d’utilité publique par les préfets le 4 août 2025, le Bus Bords de Marne vise une mise en service à l’horizon 2030.",
+        "source": {
+          "titre": "Citoyens.com, « Zoom sur le Bus des bords de Marne qui reliera les RER de Val-de-Fontenay et Chelles-Gournay », 22 août 2025",
+          "url": "https://citoyens.com/2025/zoom-sur-le-bus-des-bords-de-marne-qui-reliera-les-rer-de-val-de-fontenay-et-chelles-gournay,22-08-2025.html"
+        }
+      },
+      "idf-bus-eve": {
+        "classe": "programme",
+        "explication": "Inscrit au contrat de plan 2023-2027, le Bus EVE repasse en concertation en septembre et octobre 2026, avant une enquête publique fin 2027, des travaux de 2030 à 2032 et une mise en service à l’horizon 2032.",
+        "source": {
+          "titre": "Île-de-France Mobilités, lettre d’information n° 2 du Bus EVE, septembre 2026",
+          "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/B5i4TMNqWzg0poxP_SE26000542_IDFM_EVE_Depliant_3volets_A4_web.pdf"
+        }
+      }
     }
-   },
-   "teol": {
-    "classe": "programme",
-    "explication": "Sytral a approuvé la déclaration de projet le 18 décembre 2025 et lui a ouvert une autorisation de programme de 754,1 M€ payée jusqu’en 2035, pour une mise en service visée en 2032 ; mais sa nouvelle présidente a annoncé en mars 2026 l’arrêt du projet au profit du métro E, et un conseil de fin septembre 2026 doit voter cet abandon.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "modern-a": {
-    "classe": "programme",
-    "explication": "L’autorisation de programme « Avenir métro A », portée à 737,4 M€ en décembre 2025, finance jusqu’en 2035 l’automatisation de la ligne, ses portes palières et vingt rames neuves.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "modern-d": {
-    "classe": "programme",
-    "explication": "L’autorisation de programme « Avenir métro D », portée de 339,1 à 522,4 M€ en décembre 2025, finance jusqu’en 2035 le remplacement des systèmes de pilotage et le renfort des rames.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "modern-c": {
-    "classe": "programme",
-    "explication": "L’autorisation de programme « Avenir métro C », portée à 258,1 M€ en décembre 2025, finance jusqu’en 2035 de nouvelles rames et une double voie entre Hénon et Cuire.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "t12-c3": {
-    "classe": "abandonne",
-    "explication": "Sytral a écarté le tramway sur l’axe du C3 en 2013 au profit d’un site propre pour trolleybus, et la ligne est devenue en septembre 2025 le TramBus TB11, en voie réservée sur tout son parcours, sans qu’aucun programme actuel ne prévoie de tramway.",
-    "source": {
-     "titre": "Lyon Capitale, « Ligne C3 : ce que veut faire le Sytral », 18 avril 2013",
-     "url": "https://www.lyoncapitale.fr/actualite/ligne-c3-ce-que-veut-faire-le-sytral"
-    }
-   },
-   "ligne-ouest": {
-    "classe": "etude",
-    "explication": "Le plan de mobilité approuvé par Sytral en octobre 2025 prévoit à l’horizon 2040 une ligne vers Écully, étudiée depuis 2022 en bus à haut niveau de service ou en tramway entre Part-Dieu et Écully, mais aucune autorisation de programme ni aucun calendrier ne l’accompagnent.",
-    "source": {
-     "titre": "Sytral Mobilités, « Approbation du plan de mobilité des territoires lyonnais », octobre 2025",
-     "url": "https://sytral-mobilites.fr/fr/approbation-du-plan-de-mobilite-des-territoires-lyonnais_-n.html"
-    }
-   },
-   "teol-craponne": {
-    "classe": "etude",
-    "explication": "Le plan de mobilité inscrit une extension ultérieure du TEOL vers Craponne, sans coût, calendrier ni financement, et elle dépend d’un TEOL dont la nouvelle présidence a annoncé l’abandon.",
-    "source": {
-     "titre": "Sytral Mobilités, page du projet TEOL, Tramway express de l’ouest lyonnais",
-     "url": "https://sytral-mobilites.fr/fr/projets-a-l-etude/tramway-express-de-l-ouest-lyonnais-teol_-r.html"
-    }
-   },
-   "t8": {
-    "classe": "programme",
-    "explication": "Sytral a ouvert en 2025 une autorisation de programme de 278 M€ payée jusqu’en 2031 et prévoit une enquête publique fin 2026, des travaux de 2027 à 2030 et une mise en service en 2030 ; la nouvelle présidente veut faire évoluer le tracé pour mieux desservir les zones d’activité de la Porte des Alpes.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "telepherique-ouest": {
-    "classe": "abandonne",
-    "explication": "Sytral a abandonné le téléphérique entre Francheville et Lyon après une concertation très défavorable, décision annoncée le 10 mai 2022 et soumise au vote de son conseil du 16 mai 2022.",
-    "source": {
-     "titre": "France 3 Auvergne-Rhône-Alpes, « Rhône : le projet de téléphérique Lyon/Francheville abandonné », 10 mai 2022",
-     "url": "https://france3-regions.franceinfo.fr/auvergne-rhone-alpes/rhone/lyon/rhone-le-projet-de-telepherique-lyon-francheville-abandonne-2539852.html"
-    }
-   },
-   "bhns-rive-droite": {
-    "classe": "inconnu",
-    "explication": "Nous n’avons trouvé aucun projet de bus à haut niveau de service ou de tramway continu le long des quais de la rive droite du Rhône : Sytral y a créé en juin 2025 des lignes de bus structurantes, dont la C23, et refait des couloirs de bus, sans site propre continu.",
-    "source": {
-     "titre": "Sytral Mobilités, dossier de presse « Une nouvelle offre bus pour un réseau toujours plus performant et maillé », juin 2025",
-     "url": "https://sytral-mobilites.fr/UserFiles/File/projet/projet-en-cours/reseau-bus-performant/dp-piav-nouvelle-offre-bus.pdf"
-    }
-   },
-   "bhns-parilly": {
-    "classe": "programme",
-    "explication": "Sytral a approuvé le bilan de la concertation le 27 novembre 2025 et ouvert une autorisation de programme de 89,6 M€ payée jusqu’en 2030, pour des travaux en 2028 et une mise en service fin 2029.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "t9-final": {
-    "classe": "programme",
-    "explication": "Le T9 est en chantier, financé par une autorisation de programme de 321 M€ payée jusqu’en 2029, et Sytral annonce sa mise en service en 2027.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "t10-final": {
-    "classe": "programme",
-    "explication": "Le T10 est en chantier, financé par une autorisation de programme de 378,3 M€, et Sytral annonce sa mise en service à l’été 2027.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026",
-     "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-    }
-   },
-   "navette-fluv": {
-    "classe": "etude",
-    "explication": "Sytral a étudié vers 2019 des navettes entre Vaise, Confluence et la Cité internationale, mais n’a réalisé que la ligne de la Saône, Navigône, en service depuis juin 2025 entre Vaise-Industrie et Confluence ; la section du Rhône que dessine le catalogue n’est dans aucun programme.",
-    "source": {
-     "titre": "Lyon Capitale, « Lyon : des bateaux TCL entre Vaise, Confluence et Cité internationale ? », 13 décembre 2019",
-     "url": "https://www.lyoncapitale.fr/actualite/lyon-des-bateaux-tcl-entre-vaise-confluence-et-cite-internationale"
-    }
-   },
-   "t3-renf": {
-    "classe": "programme",
-    "explication": "Sytral a porté le 2 octobre 2025 son autorisation de programme « Renfort capacité tramway » à 211,8 M€ pour acheter cinq rames de 43 m de plus et augmenter la fréquence du T3, mais le nouveau terminus de Part-Dieu étudié en 2022 n’est dans aucun programme.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-053 du 2 octobre 2025, vote et actualisation de l’autorisation de programme 2022-44",
-     "url": "https://sytral-mobilites.fr/img_base/documents/334/ca-25-053-delib-actualisation-ap-2022-44-ar-pref.pdf"
-    }
-   },
-   "bhns-kimmerling": {
-    "classe": "programme",
-    "explication": "Le tronçon du TramBus TB12 entre Kimmerling et Sept Chemins est en travaux depuis juin 2026, financé par l’autorisation de programme du bus Part-Dieu Sept Chemins (163,1 M€), pour une mise en service en 2027, et le nouveau conseil a relancé ses acquisitions foncières le 8 juillet 2026.",
-    "source": {
-     "titre": "Sytral Mobilités, page des travaux du TB12 entre Kimmerling-Genêts et Sept Chemins",
-     "url": "https://sytral-mobilites.fr/fr/travaux-en-cours/tb12-kimmerling-sept-chemins_-r.html"
-    }
-   },
-   "electrification-bus": {
-    "classe": "programme",
-    "explication": "Sytral finance la transition de ses bus, trolleybus et dépôts, avec 735 M€ restant à payer dont 497,8 M€ de 2026 à 2031, mais vers un parc électrique ou au bioGNV en 2035 et non entièrement électrique, si bien que le projet du catalogue n’est programmé qu’en partie.",
-    "source": {
-     "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026, enveloppes d’équipement (p. 8 du PDF)",
-     "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf"
-    }
-   }
   }
- },
- "toulouse": {
-  "documents": [
-   {
-    "titre": "Tisséo Collectivités, prospectus de base du programme EMTN 2026 : plan pluriannuel d’investissement de 4,5 Md€ sur 2023-2030, consacré à la ligne C, au prolongement et à la connexion de la ligne B, au renouvellement du matériel et à l’entretien des lignes (p. 19)",
-    "url": "https://tisseo-collectivites.fr/sites/default/files/media/downloads/EUO2-%232006747555-v1%20Tisseo%20-%20EMTN%202026%20-%20Prospectus%20de%20Base%20%28Final%20with%20approval%20number%29.pdf",
-    "date": "2026-02"
-   },
-   {
-    "titre": "Moody’s, actualisation de l’analyse de crédit de Tisséo Collectivités : 3,8 Md€ d’extension du réseau sur 2024-2030, surtout pour la ligne C (p. 4 et 5)",
-    "url": "https://tisseo-collectivites.fr/sites/default/files/media/downloads/Credit_Opinion_-_Translation-Tisseo-Collectivites-SMTCAT-15Jun2026-PBC_1481862.pdf",
-    "date": "2026-06-15"
-   }
-  ],
-  "projets": {
-   "tls-bhns-ouest": {
-    "classe": "abandonne",
-    "explication": "Le bus en site propre de l’ouest étudié par Tisséo a été remplacé en mars 2015 par une ligne Linéo sans voie réservée à Lardenne, le Linéo 3 ouvert en janvier 2019 entre Plaisance-du-Touch, Tournefeuille et les Arènes, et le plan pluriannuel d’investissement 2023-2030 ne le reprend pas.",
-    "source": {
-     "titre": "Jean-Pierre Wolff et Florence Laumière, « Projets d’infrastructures de transports collectifs et enjeux électoraux dans une métropole française. Le projet de BHNS de l’ouest toulousain », Sud-Ouest européen n° 40, 2015",
-     "url": "https://journals.openedition.org/soe/2236"
-    }
-   },
-   "tls-tram-canal": {
-    "classe": "abandonne",
-    "explication": "Tisséo a lancé les études du tram Canal en juin 2013, mais la majorité élue en 2014 l’a abandonné pour financer la troisième ligne de métro, et il ne figure pas dans le plan pluriannuel d’investissement 2023-2030.",
-    "source": {
-     "titre": "Wikipédia, article « Tramway de Toulouse », partie sur les projets annulés, ligne « Canal »",
-     "url": "https://fr.wikipedia.org/wiki/Tramway_de_Toulouse"
-    }
-   }
-  }
- },
- "marseille": {
-  "documents": [
-   {
-    "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030 approuvé le 16 décembre 2021, annexe 5, note financière (coût de chaque action)",
-    "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf",
-    "date": "2021-12-16"
-   },
-   {
-    "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets de mobilité du plan Marseille en Grand, 2 Md€ dont 1 Md€ de l’État",
-    "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf",
-    "date": "2025-05"
-   },
-   {
-    "titre": "Métropole d’Aix-Marseille-Provence, rapport d’orientation budgétaire 2026 : programmation pluriannuelle des investissements fondée sur les autorisations de programme 2020-2026, à redéfinir pour le nouveau mandat (p. 110 et 127)",
-    "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/04/16/ANNEXE/160507_165637_160507%20Annexe%20ROB%202026%20vDEF%20v2.pdf",
-    "date": "2026-04-16"
-   }
-  ],
-  "projets": {
-   "amp-t3-nord-bricarde": {
-    "classe": "programme",
-    "explication": "Inscrite au plan de mobilité 2020-2030 et au plan Marseille en Grand, l’extension nord du T3 a son programme approuvé depuis 2019 et son tracé depuis 2023 ; la Métropole a porté son terminus à La Bricarde le 24 juin 2026, avant une enquête publique à l’automne 2026 et des travaux de 2027 à 2030.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-004-19495/26/CM du 24 juin 2026, déplacement du terminus de l’extension nord du tramway (deuxième phase) à la Bricarde",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/06/24/DECISION/164963.pdf"
-    }
-   },
-   "amp-t2-quatre-septembre": {
-    "classe": "programme",
-    "explication": "Projet du plan Marseille en Grand chiffré à 76 M€ hors taxes, le tramway du 4-Septembre a reçu un avis favorable d’enquête publique en juin 2026, avec des travaux principaux à partir d’avril 2027 et une mise en service à l’été 2030.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets du plan Marseille en Grand, mai 2025",
-     "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
-    }
-   },
-   "amp-tram-belle-de-mai": {
-    "classe": "programme",
-    "explication": "Projet du plan Marseille en Grand, le tramway National, Arenc, Belle de Mai a un programme d’opération annexé à une délibération du 5 décembre 2024, et le rapport d’orientation budgétaire 2026 en lance le projet de 2026 à 2028, pour une mise en service visée en 2030 ; sa branche sud dépend du chantier de la gare souterraine.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, programme de l’opération « Extension du réseau de tramway de Marseille, Arenc, National, Belle de Mai », octobre 2024, annexé à la délibération du 5 décembre 2024",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/12/05/ANNEXE/110783_PJ_Belle%20de%20mai_VDEF.pdf"
-    }
-   },
-   "amp-m2-saint-loup": {
-    "classe": "etude",
-    "explication": "Le métro vers l’est figure au plan de mobilité 2020-2030 pour 806 M€ mais pas parmi les 16 projets du plan Marseille en Grand, et il n’a ni financement ni calendrier : en octobre 2023, la présidente de la Métropole le disait non abandonné mais suspendu à un financement de l’État.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030, annexe 5, note financière (action TC09-4, Métro Est)",
-     "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
-    }
-   },
-   "amp-cable-aeroport": {
-    "classe": "programme",
-    "explication": "Le téléphérique figure au plan de mobilité 2020-2030 et parmi les 16 projets du plan Marseille en Grand cofinancé par l’État, avec une mise en service annoncée en 2029 ; la Métropole a lancé sa concertation préalable le 24 juin 2026, mais son programme n’est pas encore approuvé et seuls 3 M€ d’études lui ont été affectés en 2023.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-001-19492/26/CM du 24 juin 2026, lancement de la concertation préalable du transport par câble vers l’aéroport",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/06/24/DECISION/166535.pdf"
-    }
-   },
-   "amp-aixpress-val-saint-andre": {
-    "classe": "programme",
-    "explication": "Le prolongement de l’Aixpress fait partie des lignes de bus financées par l’État dans le plan Marseille en Grand, et son programme, annexé à une délibération du 22 février 2024, prévoit des travaux à partir de mi-2027 et une livraison fin 2028.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, programme de l’extension du BHNS Aixpress jusqu’à Malacrida et au Val Saint-André, annexé à la délibération du 22 février 2024",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/02/22/ANNEXE/85326_2.1-85326-Programme%20AIXPRESS%20Malacrida%20fevrier2024.pdf"
-    }
-   },
-   "amp-bhns-aix-duranne": {
-    "classe": "programme",
-    "explication": "La Métropole a approuvé le programme le 15 décembre 2025 pour 139 M€ hors taxes, inscrit ses crédits dans une autorisation de programme et fixé la mise en service à fin 2030.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-007-19154/25/CM du 15 décembre 2025, BHNS Aix Centre, pôle d’activités, Duranne, approbation du programme",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2025/12/15/DECISION/147472.pdf"
-    }
-   },
-   "amp-bhns-martigues-port-de-bouc": {
-    "classe": "programme",
-    "explication": "Ce bus à haut niveau de service est l’une des cinq lignes de bus financées par l’État dans le plan Marseille en Grand, pour 17 M€ et une mise en service annoncée en 2027 ; il reste pourtant en études de faisabilité, et son tracé à Port-de-Bouc était encore en discussion en 2025.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets du plan Marseille en Grand, mai 2025",
-     "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
-    }
-   },
-   "amp-bhns-istres": {
-    "classe": "programme",
-    "explication": "La Métropole a approuvé le 5 décembre 2024 le programme modifié du BHNS d’Istres, 15,5 M€ hors taxes inscrits dans une autorisation de programme, avec une mise en service fixée à fin 2028.",
-    "source": {
-     "titre": "Métropole d’Aix-Marseille-Provence, délibération MOB-006-17201/24/CM du 5 décembre 2024, approbation de la modification de programme du BHNS d’Istres",
-     "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/12/05/DECISION/110806.pdf"
-    }
-   }
-  }
- },
- "nice": {
-  "documents": [
-   {
-    "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4 : autorisation de programme n° 4605 de 500 M€ pour l’extension du réseau de tramway, votée le 9 avril 2021 et reconduite à chaque budget, et échéancier de la ligne 4 de 2026 à 2032",
-    "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf",
-    "date": "2025-07"
-   },
-   {
-    "titre": "Métropole Nice Côte d’Azur, rapport sur les orientations budgétaires 2026, délibération du 22 octobre 2025 : poursuite des lignes 4 et 5 du tramway",
-    "url": "https://www.nicecotedazur.org/wp-content/uploads/2026/01/NCA-Rapport-sur-les-orientations-budgetaires-2026.pdf",
-    "date": "2025-10-22"
-   },
-   {
-    "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
-    "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf",
-    "date": "2026-07-27"
-   }
-  ],
-  "projets": {
-   "nca-tram-ligne-5": {
-    "classe": "programme",
-    "explication": "La ligne 5 a été déclarée d’utilité publique le 27 juillet 2026, après que le nouveau conseil métropolitain en a confirmé l’intérêt général le 8 juin 2026, et la Métropole prévoit des mises en service par tronçons vers 2028, 2030 et 2031.",
-    "source": {
-     "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
-     "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf"
-    }
-   },
-   "nca-tram-ligne-4": {
-    "classe": "programme",
-    "explication": "Déclarée d’utilité publique le 26 octobre 2023, ce que le tribunal administratif a confirmé en juillet 2026, la ligne 4 est financée par l’autorisation de programme de 500 M€ des extensions du tramway avec un échéancier jusqu’en 2032 ; mais le nouveau maire de Cagnes-sur-Mer a annoncé son abandon en avril 2026 et la Métropole a déclaré sans suite deux marchés du chantier en juillet et août 2026, sans que nous ayons trouvé de vote d’abandon.",
-    "source": {
-     "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4, modalités de financement, juillet 2025",
-     "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf"
-    }
-   },
-   "nca-telepherique-nice-saint-laurent": {
-    "classe": "etude",
-    "explication": "En janvier 2024, la Métropole a présenté le téléphérique comme décalé derrière la ligne 4, le maire de Saint-Laurent-du-Var l’a dit reporté sans date en mars 2025 et il n’apparaît pas dans le rapport d’orientation budgétaire 2026, même si la page du projet affiche toujours une livraison en 2028.",
-    "source": {
-     "titre": "ICI Azur, « Le projet de téléphérique Nice Saint-Laurent-du-Var reporté sine die », 12 mars 2025",
-     "url": "https://www.ici.fr/emissions/une-commune-une-info/le-projet-de-telepherique-nice-saint-laurent-du-var-reporte-sine-die-7240651"
-    }
-   }
-  }
- },
- "idf": {
-  "documents": [
-   {
-    "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024 adoptant le volet mobilités 2023-2027 du contrat de plan État-Région 2021-2027 : projets inscrits (p. 9 et 10 de l’avenant) et maquette financière (p. 24)",
-    "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf",
-    "date": "2024-09-26"
-   },
-   {
-    "titre": "Île-de-France Mobilités, communiqué sur le conseil d’administration du 2 juillet 2026 (métro 1, T10, T7, Bus EVE)",
-    "url": "https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-poursuit-lagrandissement-du-reseau-francilien/",
-    "date": "2026-07-02"
-   }
-  ],
-  "projets": {
-   "idf-metro-1-val-de-fontenay": {
-    "classe": "etude",
-    "explication": "Le contrat de plan 2023-2027 ne finance que les études d’avant-projet et des mesures conservatoires ; Île-de-France Mobilités a lancé le 2 juillet 2026 une nouvelle concertation pour l’automne 2026, avec une mise en service à l’horizon 2040, sans financement des travaux dans le contrat de plan.",
-    "source": {
-     "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024, volet mobilités 2023-2027 du contrat de plan État-Région (projets inscrits p. 9 et 10 de l’avenant, maquette financière p. 24)",
-     "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf"
-    }
-   },
-   "idf-t1-val-de-fontenay": {
-    "classe": "programme",
-    "explication": "En travaux depuis 2019 et inscrit au contrat de plan 2023-2027 pour 222,7 M€, le prolongement doit atteindre la rue de Rosny, à Montreuil, mi-2028, puis Val de Fontenay mi-2030.",
-    "source": {
-     "titre": "Site du projet T1 Bobigny Val de Fontenay, page calendrier et acteurs",
-     "url": "https://www.t1bobigny-valdefontenay.fr/fr/calendrier-et-acteurs"
-    }
-   },
-   "idf-t1-colombes": {
-    "classe": "programme",
-    "explication": "Déclaré d’utilité publique en 2015 et inscrit au contrat de plan 2023-2027 avec le prolongement vers Rueil (282 M€ pour les deux), le prolongement a ouvert sa première phase en 2019 et sa seconde est en études, sans date de mise en service fixée.",
-    "source": {
-     "titre": "Département des Hauts-de-Seine et RATP, site du projet T1 Asnières Colombes, page le projet",
-     "url": "https://www.t1asnierescolombes.fr/projet/"
-    }
-   },
-   "idf-t1-rueil-malmaison": {
-    "classe": "programme",
-    "explication": "Déclaré d’utilité publique fin 2020 et inscrit au contrat de plan 2023-2027, le prolongement est en études ; la ville de Rueil-Malmaison annonce une mise en service en 2030 et celle de Nanterre une première phase en 2031, après le tram jusqu’à Petit Colombes.",
-    "source": {
-     "titre": "Ville de Rueil-Malmaison, page prolongement de la ligne de tramway T1, mise à jour le 21 juillet 2026",
-     "url": "https://www.villederueil.fr/votre-mairie/grands-projets/ligne-de-tram-t1/"
-    }
-   },
-   "idf-t8-sud": {
-    "classe": "programme",
-    "explication": "Déclaré d’utilité publique par l’arrêté inter-préfectoral du 20 mars 2025 et inscrit au contrat de plan 2023-2027 pour 68 M€ sur cette période, le prolongement doit être achevé vers 2031.",
-    "source": {
-     "titre": "Préfectures de la Seine-Saint-Denis et de Paris, arrêté inter-préfectoral n° 2025-1241 du 20 mars 2025 déclarant d’utilité publique le prolongement du T8 Sud",
-     "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/Z-F4bXdAxsiBv0Xi_2025-03-20_T8S_APDUP_1241.pdf"
-    }
-   },
-   "idf-t10-clamart": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027, qui n’en finance que 38 M€ sur environ 770 M€, le prolongement a son schéma de principe approuvé le 2 juillet 2026, avec une enquête publique début 2027, des travaux vers 2031 et une mise en service vers 2038.",
-    "source": {
-     "titre": "Île-de-France Mobilités, support de la réunion publique du 6 juillet 2026 sur le prolongement du T10 (calendrier p. 52)",
-     "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/7vZsjXKNHEFts1-8_T10-RPJuillet2026-PPT.V06.07.26.pdf"
-    }
-   },
-   "idf-t7-juvisy": {
-    "classe": "programme",
-    "explication": "En travaux et inscrit au contrat de plan 2023-2027 pour 230 M€, le prolongement a reçu le 2 juillet 2026 sa deuxième convention de financement, avec le génie civil du tunnel prévu à partir de fin 2026 et une mise en service à l’horizon 2032.",
-    "source": {
-     "titre": "Île-de-France Mobilités, dépliant du prolongement du tram T7, août 2026",
-     "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/Jee30Ah3GUBnvAO0_SE26000479_IDFM_T7_depliant_A5.pdf"
-    }
-   },
-   "idf-t13-acheres": {
-    "classe": "programme",
-    "explication": "Les travaux ont été lancés le 16 juin 2025, le projet est inscrit au contrat de plan 2023-2027 pour 471 M€ et sa mise en service est prévue à l’été 2028.",
-    "source": {
-     "titre": "DRIEAT Île-de-France, « Prolongement du Tram T13 : les travaux vers Achères sont officiellement lancés », 27 novembre 2025",
-     "url": "https://www.drieat.ile-de-france.developpement-durable.gouv.fr/prolongement-du-tram-t13-les-travaux-vers-acheres-a13251.html"
-    }
-   },
-   "idf-tzen-5": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 5 est en travaux en 2026 et 2027, pour des essais fin 2027 et un coût de 117 M€ hors taxes.",
-    "source": {
-     "titre": "Île-de-France Mobilités, dépliant Tzen 5, juin 2026",
-     "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/ajJIao1P9HI4UmgP_Tzen5_d%C3%A9pliantg%C3%A9n%C3%A9rique_Vdef_WEB.pdf"
-    }
-   },
-   "idf-tzen-3": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 3 a été revu après une concertation close en juin 2025 ; ses études d’avant-projet sont en cours et les travaux sont visés à partir de 2027, sans date de mise en service publiée.",
-    "source": {
-     "titre": "Département de la Seine-Saint-Denis, site du Tzen 3, « Les études se poursuivent », 18 avril 2026",
-     "url": "https://tzen3.fr/fr/actualites/les-etudes-se-poursuivent"
-    }
-   },
-   "idf-tzen-2": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027, le Tzen 2 est en travaux par secteurs depuis mi-2019, pour une mise en service complète en 2031.",
-    "source": {
-     "titre": "Département de Seine-et-Marne, site du Tzen 2, page découvrir le Tzen 2",
-     "url": "https://www.tzen2.com/decouvrir-le-tzen-2"
-    }
-   },
-   "idf-bus-bords-de-marne": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027 et déclaré d’utilité publique par les préfets le 4 août 2025, le Bus Bords de Marne vise une mise en service à l’horizon 2030.",
-    "source": {
-     "titre": "Citoyens.com, « Zoom sur le Bus des bords de Marne qui reliera les RER de Val-de-Fontenay et Chelles-Gournay », 22 août 2025",
-     "url": "https://citoyens.com/2025/zoom-sur-le-bus-des-bords-de-marne-qui-reliera-les-rer-de-val-de-fontenay-et-chelles-gournay,22-08-2025.html"
-    }
-   },
-   "idf-bus-eve": {
-    "classe": "programme",
-    "explication": "Inscrit au contrat de plan 2023-2027, le Bus EVE repasse en concertation en septembre et octobre 2026, avant une enquête publique fin 2027, des travaux de 2030 à 2032 et une mise en service à l’horizon 2032.",
-    "source": {
-     "titre": "Île-de-France Mobilités, lettre d’information n° 2 du Bus EVE, septembre 2026",
-     "url": "https://portail-idfm-projets.cdn.prismic.io/portail-idfm-projets/B5i4TMNqWzg0poxP_SE26000542_IDFM_EVE_Depliant_3volets_A4_web.pdf"
-    }
-   }
-  }
- }
 }

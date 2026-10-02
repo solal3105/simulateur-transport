@@ -48,8 +48,13 @@ export interface Ville {
   /** Le chemin de sa page d'accueil : vide pour Lyon, à la racine du site. */
   chemin: string
   couleurs: Couleurs
-  /** Le titre de la page d'accueil du réseau, dans l'onglet et les moteurs de recherche. */
+  /**
+   * Le titre de la page d'accueil du réseau, dans l'onglet et les moteurs de recherche. Il nomme la ville, que les gens
+   * tapent plus souvent que le nom du réseau ; ce qui précède les deux-points sert de nom au jeu pour les moteurs.
+   */
   titrePage: string
+  /** Le réseau et sa ville dans les titres des autres pages : « TCL à Lyon ». */
+  dansTitre: string
   /** Ce qui suit « le réseau » dans une phrase : « le réseau TCL », « le réseau francilien ». */
   reseau: string
   /** Qui organise les transports, tel qu'on le présente à l'accueil. */
@@ -93,7 +98,8 @@ export const VILLES: Record<IdVille, Ville> = {
     chemin: '',
     // Le rouge et le rouge foncé déclarés par la feuille de style de tcl.fr, relevés le 24 septembre 2026.
     couleurs: { principale: '#e30613', fonce: '#b40014', pale: '#fce9ea', moyen: '#f18289' },
-    titrePage: 'Simulateur transport : construisez le réseau TCL de 2038',
+    titrePage: 'Simulateur TCL 2040 : construisez le réseau de transports de Lyon',
+    dansTitre: 'TCL à Lyon',
     reseau: 'TCL',
     autorite: 'Métropole de Lyon, réseau TCL',
     territoire: 'de la Métropole de Lyon',
@@ -147,7 +153,8 @@ export const VILLES: Record<IdVille, Ville> = {
     chemin: 'toulouse',
     // Le magenta déclaré par la feuille de style de tisseo.fr, relevé le 24 septembre 2026.
     couleurs: { principale: '#e5056e', fonce: '#b30456', pale: '#fde8f2', moyen: '#f282b6' },
-    titrePage: 'Simulateur transport : construisez le réseau Tisséo de 2038',
+    titrePage: 'Simulateur transport de Toulouse : construisez le réseau Tisséo de 2038',
+    dansTitre: 'Tisséo à Toulouse',
     reseau: 'Tisséo',
     autorite: 'Tisséo Collectivités',
     territoire: 'de l’agglomération toulousaine',
@@ -201,7 +208,8 @@ export const VILLES: Record<IdVille, Ville> = {
     // L'ocre de La Métropole Mobilité (#e94e1b) est trop clair pour du texte blanc : on prend la teinte plus
     // soutenue que rtm.fr utilise pour ses onglets actifs, relevée le 24 septembre 2026.
     couleurs: { principale: '#d14415', fonce: '#a33511', pale: '#fbede8', moyen: '#e8a28a' },
-    titrePage: 'Simulateur transport : construisez le réseau d’Aix-Marseille-Provence de 2038',
+    titrePage: 'Simulateur transport d’Aix-Marseille : construisez le réseau de 2038',
+    dansTitre: 'La Métropole Mobilité à Aix-Marseille',
     reseau: 'd’Aix-Marseille-Provence',
     autorite: 'Métropole d’Aix-Marseille-Provence',
     territoire: 'de la métropole Aix-Marseille-Provence',
@@ -254,7 +262,8 @@ export const VILLES: Record<IdVille, Ville> = {
     chemin: 'nice',
     // L'orange de lignesdazur.com (#ec6608), assombri juste assez pour que le texte blanc reste lisible.
     couleurs: { principale: '#c25407', fonce: '#974105', pale: '#f9f0e9', moyen: '#e0a983' },
-    titrePage: 'Simulateur transport : construisez le réseau Lignes d’Azur de 2038',
+    titrePage: 'Simulateur transport de Nice : construisez le réseau Lignes d’Azur de 2038',
+    dansTitre: 'Lignes d’Azur à Nice',
     reseau: 'Lignes d’Azur',
     autorite: 'Métropole Nice Côte d’Azur',
     territoire: 'de la métropole Nice Côte d’Azur',
@@ -304,7 +313,8 @@ export const VILLES: Record<IdVille, Ville> = {
     chemin: 'ile-de-france',
     // Le bleu des boutons du site d'Île-de-France Mobilités, avec son bleu ciel identitaire (#64b5f6) en nuance.
     couleurs: { principale: '#1972d2', fonce: '#1459a4', pale: '#eaf2fb', moyen: '#64b5f6' },
-    titrePage: 'Simulateur transport : construisez le réseau francilien de 2038',
+    titrePage: 'Simulateur transport d’Île-de-France : construisez le réseau de 2038',
+    dansTitre: 'Île-de-France Mobilités',
     reseau: 'francilien',
     autorite: 'Île-de-France Mobilités',
     territoire: 'd’Île-de-France',
