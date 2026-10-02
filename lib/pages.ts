@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { libre } from './budget'
 import { nombreProjets } from './catalogue'
 import { enLettres } from './format'
-import { VILLES, type IdVille } from './villes'
+import { MARQUE, VILLES, type IdVille } from './villes'
 
 /** Le titre, la description et l'aperçu de l'accueil d'un réseau, tirés de ses données. */
 export function metadonnees(id: IdVille): Metadata {
@@ -29,7 +29,7 @@ export const affichage = (id: IdVille): Viewport => ({
 /** Le titre et la description de la page qui explique les calculs d'un réseau. */
 export function metadonneesMethode(id: IdVille): Metadata {
   const ville = VILLES[id]
-  const titre = `Comment nous calculons le budget et les voyageurs, ${ville.nom} | Simulateur transport`
+  const titre = `Comment nous calculons le budget et les voyageurs, ${ville.dansTitre} | ${MARQUE}`
   const description = `D’où vient le budget ${ville.territoire} dans le jeu, ce que rapportent les tarifs, et comment nous estimons les voyageurs d’une ligne, avec nos sources.`
   return {
     title: titre,
@@ -42,7 +42,7 @@ export function metadonneesMethode(id: IdVille): Metadata {
 /** Le titre et la description des réseaux publiés d'un réseau. */
 export function metadonneesCommunaute(id: IdVille): Metadata {
   const ville = VILLES[id]
-  const titre = `Les réseaux imaginés pour ${ville.nom} | Simulateur transport`
+  const titre = `Les réseaux imaginés pour ${ville.dansTitre} | ${MARQUE}`
   const description = `Les réseaux de transport construits par les joueurs ${ville.ou}, avec le vrai budget ou en jeu libre : soutenez-les, comparez-les au vôtre, reprenez-les pour votre partie.`
   return {
     title: titre,
