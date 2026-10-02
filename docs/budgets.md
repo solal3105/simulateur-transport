@@ -38,6 +38,10 @@ Chaque réseau propose les mêmes leviers, calculés à partir de ses propres re
 
 Les montants vont dans le champ `leviers` du fichier du réseau, avec leurs sources. Une mesure qu'on ne sait pas chiffrer pour un réseau est simplement absente : le jeu ne la propose pas. Un réseau sans leviers sourcés n'a pas de bouton « Trouver de l'argent ».
 
+## L'inflation
+
+Le jeu compte une inflation de 2 % par an, l'objectif de la Banque centrale européenne (`prixDuMandat` dans `lib/regles.ts`). Les montants des budgets, des catalogues et des leviers sont en euros d'aujourd'hui et valent tels quels au premier mandat ; chaque mandat suivant les multiplie par six ans d'inflation, soit 1,126 au deuxième, 1,268 au troisième. Cela vaut pour le coût d'un projet ou d'une ligne (aux prix du mandat de sa décision, et une moitié étalée garde ce prix), l'enveloppe, la réserve, l'effet des leviers et l'argent reporté d'un mandat au suivant. Les tarifs suivent l'inflation par défaut (`inflationTarifs`) : leur prix monte avec elle, leurs réglages sont grisés et ils ne rapportent rien de plus. Case décochée, le joueur fixe le prix par rapport à 2026, de -20 % à +200 %, et ce prix rapporte ou coûte sa différence avec l'inflation depuis 2026 (`hausseReelle` dans `lib/leviers.ts`). Une partie d'avant l'inflation n'a pas ce réglage : `normaliserTarifs` le déduit de ses hausses, qui comptaient en plus de l'inflation, en arrondissant vers le haut pour qu'aucun réseau publié ne perde d'argent. Comme pour les autres leviers, une hausse de prix ne fait perdre aucun voyageur.
+
 ## Ajouter une ville
 
 1. Lancer la recherche avec la fiche ci-dessous, en y mettant le nom de l'autorité, le territoire du jeu, les chiffres déjà connus et les lignes que la carte compte comme existantes.

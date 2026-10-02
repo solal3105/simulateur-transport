@@ -21,12 +21,21 @@ const COULEUR_MODERNISATION: Record<string, string> = {
   'modern-d': '#2e9e4f',
 }
 
-export const LEGENDE_MODES: { nom: string; couleur: string }[] = [
-  { nom: 'Métro', couleur: COULEUR_MODE.metro },
-  { nom: 'Tramway', couleur: COULEUR_MODE.tram },
-  { nom: 'Bus rapide', couleur: COULEUR_MODE.bus },
-  { nom: 'Téléphérique', couleur: COULEUR_MODE.cable },
-  { nom: 'Bateau', couleur: COULEUR_MODE.fluvial },
+/**
+ * Les familles de lignes que le filtre de la carte peut cacher : une modernisation compte avec le métro, et le RER avec
+ * les trains.
+ */
+export type ModeCarte = Exclude<Mode, 'renovation'> | 'train'
+
+export const modeCarte = (mode: Mode | ModeLigne | 'rer' | 'train'): ModeCarte =>
+  mode === 'renovation' ? 'metro' : mode === 'rer' ? 'train' : mode
+
+export const LEGENDE_MODES: { nom: string; couleur: string; mode: ModeCarte }[] = [
+  { nom: 'Métro', couleur: COULEUR_MODE.metro, mode: 'metro' },
+  { nom: 'Tramway', couleur: COULEUR_MODE.tram, mode: 'tram' },
+  { nom: 'Bus rapide', couleur: COULEUR_MODE.bus, mode: 'bus' },
+  { nom: 'Téléphérique', couleur: COULEUR_MODE.cable, mode: 'cable' },
+  { nom: 'Bateau', couleur: COULEUR_MODE.fluvial, mode: 'fluvial' },
 ]
 
 export function couleurProjet(id: string, choix?: Pick<Chantier, 'varianteId' | 'option'>): string {

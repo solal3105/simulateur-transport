@@ -1,7 +1,7 @@
 import { MANDATS_DE_BASE, MANDATS_MAX, PROJETS, projetDe } from './catalogue'
-import { leviersPossibles } from './leviers'
+import { BAISSE_MAX, HAUSSE_MAX, leviersPossibles, normaliserTarifs } from './leviers'
 import { estimer, premiereStationPayee, prolongementPossible, type Carreaux } from './modele'
-import { LEVIERS_NEUTRES, leviersDu } from './regles'
+import { LEVIERS_NEUTRES, leviersDu, prixDuMandat } from './regles'
 import type { Chantier, Leviers, LigneJoueur, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -216,8 +216,8 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
   const borne = (v: unknown, min: number, max: number) => Math.max(min, Math.min(max, Math.round(Number(v) || 0)))
   const lire = (l: Partial<Leviers> | undefined): Leviers => ({
     ...LEVIERS_NEUTRES,
-    abonnements: borne(l?.abonnements, -20, 30),
-    tickets: borne(l?.tickets, -20, 30),
+    abonnements: borne(l?.abonnements, BAISSE_MAX, HAUSSE_MAX),
+    tickets: borne(l?.tickets, BAISSE_MAX, HAUSSE_MAX),
     versementMobilite: borne(l?.versementMobilite, 0, 5),
     gratuiteTotale: l?.gratuiteTotale === true,
     gratuiteMoins25: l?.gratuiteMoins25 === true,
@@ -225,10 +225,13 @@ export function normaliserPartie(brut: unknown, carreaux: Carreaux): PartieParta
     suppressionTarifSocial: l?.suppressionTarifSocial === true,
     metroNuit: l?.metroNuit === true,
     tva: l?.tva === true,
+    // Absent dans une partie d'avant l'inflation : normaliserTarifs le déduit des hausses, mandat par mandat.
+    inflationTarifs: typeof l?.inflationTarifs === 'boolean' ? l.inflationTarifs : undefined,
   })
   const f = (b.f ?? {}) as Partial<Record<number, Partial<Leviers>>>
   const parametres = VILLES[ville].budget.leviers
   const leviers: Record<number, Leviers> = {}
-  for (let m = 1; m <= mandats; m += 1) leviers[m] = parametres && !libre ? leviersPossibles(lire(f[m]), parametres) : LEVIERS_NEUTRES
+  for (let m = 1; m <= mandats; m += 1)
+    leviers[m] = parametres && !libre ? leviersPossibles(normaliserTarifs(lire(f[m]), prixDuMandat(m)), parametres) : LEVIERS_NEUTRES
   return { ville, libre, mandats, chantiers: chantiersValides, lignes, leviers }
 }

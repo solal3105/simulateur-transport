@@ -6,7 +6,7 @@ import { useMemo, type ReactNode } from 'react'
 import { catalogueDe, mots } from '@/lib/catalogue'
 import { couleurLigne, couleurProjet } from '@/lib/couleurs'
 import { approx, n } from '@/lib/format'
-import { ouverture, resoudre } from '@/lib/regles'
+import { aPrixDu, coutDeLigne, ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { useJeu, useVille, type TriListe } from '@/lib/store'
 
 import { Icone, ICONE_MODE } from '../ui'
@@ -120,8 +120,15 @@ export function Liste() {
     const faits = new Map(chantiers.map((c) => [c.id, c]))
     const rows = catalogue.map((p) => {
       const c = faits.get(p.id)
-      const r = resoudre(p, c)
-      return { p, r, c, rendement: r.cout > 0 ? r.voyageurs / r.cout : 0, annee: ouverture(c?.mandat ?? mandat, r.duree) }
+      // Un projet décidé coûte ce qu'il valait au mandat de sa décision ; les autres, aux prix du mandat en cours.
+      const r = resoudre(p, c ?? { mandat })
+      return {
+        p,
+        r,
+        c,
+        rendement: r.cout > 0 ? r.voyageurs / r.cout : 0,
+        annee: ouvertureProjet(p, c?.mandat ?? mandat, r.duree, chantiers),
+      }
     })
     rows.sort((a, b) =>
       tri === 'voyageurs'
@@ -138,7 +145,7 @@ export function Liste() {
   // Vos lignes suivent le même tri que les projets du catalogue.
   const lignesTriees = useMemo(() => {
     const valeur = (l: (typeof lignes)[number]) => {
-      const e = l.estimation
+      const e = aPrixDu(l.estimation, l.mandat)
       if (tri === 'voyageurs') return -e.nouveaux
       if (tri === 'rendement') return e.cout > 0 ? -e.nouveaux / e.cout : 0
       if (tri === 'prix') return e.cout
@@ -149,8 +156,7 @@ export function Liste() {
 
   // La barre des voyageurs se rapporte au plus fréquenté de la liste, projets et lignes tracées ensemble.
   const plusFrequente = Math.max(1, ...lignesTableau.map((x) => x.r.voyageurs), ...lignes.map((l) => l.estimation.nouveaux))
-  const echelleRendement =
-    meilleur || Math.max(1, ...lignes.map((l) => (l.estimation.cout > 0 ? l.estimation.nouveaux / l.estimation.cout : 0)))
+  const echelleRendement = meilleur || Math.max(1, ...lignes.map((l) => (coutDeLigne(l) > 0 ? l.estimation.nouveaux / coutDeLigne(l) : 0)))
 
   const tris: { id: Tri; texte: string }[] = [
     { id: 'voyageurs', texte: 'Voyageurs par jour' },
@@ -205,7 +211,7 @@ export function Liste() {
           <>
             {ville.catalogue ? <h3 className="px-4 pt-4 pb-1 text-base font-black lg:px-5">Vos lignes</h3> : null}
             {lignesTriees.map((l) => {
-              const e = l.estimation
+              const e = aPrixDu(l.estimation, l.mandat)
               const rendement = e.cout > 0 ? e.nouveaux / e.cout : 0
               const annee = ouverture(l.mandat, e.duree)
               const detail = `nouveaux, sur ${approx(e.voyageurs)}`

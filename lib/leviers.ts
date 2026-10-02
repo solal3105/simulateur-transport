@@ -30,19 +30,47 @@ export interface ParametresLeviers {
   sources: Source[]
 }
 
-/** Ce que les leviers ajoutent ou retirent à l'enveloppe d'un mandat. */
-export function effetLeviers(l: Leviers, p: ParametresLeviers): number {
+/** Les bornes des tarifs, en pourcentage : une baisse de 20 % au plus, une hausse jusqu'à +200 %. */
+export const BAISSE_MAX = -20
+export const HAUSSE_MAX = 200
+
+/**
+ * La hausse réelle d'un tarif, une fois l'inflation comptée, en points. Nulle quand il suit l'inflation ; sinon, le prix
+ * fixé par le joueur par rapport à 2026, moins la hausse des prix depuis. `prix` vaut 1,126 au deuxième mandat.
+ */
+export const hausseReelle = (hausse: number, prix: number, inflation: boolean | undefined) =>
+  inflation === true ? 0 : inflation === false ? ((1 + hausse / 100) / prix - 1) * 100 : hausse
+
+/**
+ * Une partie d'avant l'inflation n'a pas le réglage, et sa hausse de tarif comptait en plus des prix. Sans hausse, elle
+ * suit l'inflation ; avec une hausse, le joueur fixe le prix, converti par rapport à 2026. L'arrondi se fait vers le haut
+ * et sans borne, pour que le budget d'un réseau déjà publié ne baisse jamais : au pire, il gagne quelques millions.
+ */
+export function normaliserTarifs(l: Leviers, prix: number): Leviers {
+  if (typeof l.inflationTarifs === 'boolean') return l
+  if (l.abonnements === 0 && l.tickets === 0) return { ...l, inflationTarifs: true }
+  const enPrix = (hausse: number) => Math.ceil((prix * (1 + hausse / 100) - 1) * 100 - 1e-9)
+  return { ...l, inflationTarifs: false, abonnements: enPrix(l.abonnements), tickets: enPrix(l.tickets) }
+}
+
+/**
+ * Ce que les leviers ajoutent ou retirent à l'enveloppe d'un mandat, aux prix de ce mandat : les montants, calculés en
+ * euros de 2026, suivent l'inflation comme le reste du budget (`prix`, voir prixDuMandat dans lib/regles.ts).
+ */
+export function effetLeviers(l: Leviers, p: ParametresLeviers, prix = 1): number {
   const fixe = (m: MesureFixe) => (l[m] ? (p.fixes[m] ?? 0) : 0)
   let total = 0
   if (l.gratuiteTotale && p.fixes.gratuiteTotale !== undefined) total += p.fixes.gratuiteTotale
   else {
     // La gratuité totale rend sans objet les autres mesures tarifaires.
     total += fixe('gratuiteMoins25') + fixe('gratuiteJeunesAbonnes') + fixe('suppressionTarifSocial')
-    total += l.abonnements * p.rendement.abonnements + l.tickets * p.rendement.tickets
+    total +=
+      hausseReelle(l.abonnements, prix, l.inflationTarifs) * p.rendement.abonnements +
+      hausseReelle(l.tickets, prix, l.inflationTarifs) * p.rendement.tickets
   }
   total += fixe('metroNuit') + fixe('tva')
   total += l.versementMobilite * p.rendement.versementMobilite
-  return total
+  return total * prix
 }
 
 /** Les leviers qu'un réseau propose : une mesure absente de ses paramètres reste désactivée. */

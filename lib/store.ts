@@ -4,12 +4,14 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { finMandat, projetDe, PROJETS } from './catalogue'
+import type { ModeCarte } from './couleurs'
 import { approx, n } from './format'
+import { normaliserTarifs } from './leviers'
 import { mesurer } from './mesure'
 import { estBoucle, estimer, premiereStationPayee, type Carreaux } from './modele'
 import type { PartiePartagee } from './lien'
 import { nomArret } from './partie'
-import { bilanMandat, LEVIERS_NEUTRES, leviersDu } from './regles'
+import { bilanMandat, LEVIERS_NEUTRES, leviersDu, prixDuMandat } from './regles'
 import type { Chantier, Estimation, Leviers, LigneJoueur, Mandat, ModeLigne } from './types'
 import { estVille, VILLES, type IdVille } from './villes'
 
@@ -117,6 +119,10 @@ interface Etat {
   aerien: boolean
   /** Le tri de la liste des projets, gardé quand on la quitte pour ouvrir ou décider un projet, puis qu'on y revient. */
   triListe: TriListe
+  /** Les familles de lignes cachées sur la carte par son filtre ; le choix vaut pour toutes les parties. */
+  modesCaches: ModeCarte[]
+  /** La densité de population montrée sur la carte même hors du tracé d'une ligne. */
+  densite: boolean
 
   /**
    * Commence une partie : le tutoriel à Lyon, le traceur ouvert là où il n'y a pas de catalogue. Le jeu
@@ -193,6 +199,8 @@ interface Etat {
   effacerMessage: () => void
   setApercu: (v: number) => void
   basculerAerien: () => void
+  basculerMode: (mode: ModeCarte) => void
+  basculerDensite: () => void
   trierListe: (tri: TriListe) => void
 }
 
@@ -221,6 +229,8 @@ export const useJeu = create<Etat>()(
       ...DEPART,
       aerien: false,
       triListe: 'voyageurs',
+      modesCaches: [],
+      densite: false,
       commencer: (ville, libre = false) => {
         mesurer('partie commencée', { reseau: ville, libre })
         set(
@@ -588,6 +598,9 @@ export const useJeu = create<Etat>()(
       effacerMessage: () => set({ message: null }),
       setApercu: (apercu) => set({ apercu }),
       basculerAerien: () => set((s) => ({ aerien: !s.aerien })),
+      basculerMode: (mode) =>
+        set((s) => ({ modesCaches: s.modesCaches.includes(mode) ? s.modesCaches.filter((m) => m !== mode) : [...s.modesCaches, mode] })),
+      basculerDensite: () => set((s) => ({ densite: !s.densite })),
       trierListe: (triListe) => set({ triListe }),
     }),
     {
@@ -604,9 +617,17 @@ export const useJeu = create<Etat>()(
         if (!e || !estVille(e.ville)) return actuel
         const ville = e.ville
         const connu = (c: Chantier) => Boolean(projetDe(ville, c.id))
+        // Les leviers d'une partie d'avant l'inflation prennent le réglage des tarifs, sans changer son budget.
+        const leviers = e.leviers
+          ? (Object.fromEntries(Object.entries(e.leviers).map(([m, l]) => [m, normaliserTarifs(l, prixDuMandat(Number(m)))])) as Record<
+              Mandat,
+              Leviers
+            >)
+          : actuel.leviers
         return {
           ...actuel,
           ...e,
+          leviers,
           chantiers: (e.chantiers ?? []).filter(connu),
           aVenir: e.aVenir ? { ...e.aVenir, chantiers: e.aVenir.chantiers.filter(connu) } : (e.aVenir ?? actuel.aVenir),
         }
@@ -624,6 +645,8 @@ export const useJeu = create<Etat>()(
         inspire: s.inspire,
         publie: s.publie,
         aerien: s.aerien,
+        modesCaches: s.modesCaches,
+        densite: s.densite,
       }),
     },
   ),

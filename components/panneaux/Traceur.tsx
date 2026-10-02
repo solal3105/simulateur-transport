@@ -24,7 +24,7 @@ import {
 import { boutsDeLigne, lignesAProlonger, nomDuDepart, origineDe, type AProlonger } from '@/lib/prolongements'
 import { correspondances, direLignes, nommerTrace, prolongementsDepuis, stationProche } from '@/lib/reseau'
 import { NOM_ARRET_MAX } from '@/lib/partie'
-import { ouverture } from '@/lib/regles'
+import { aPrixDu, coutDeLigne, ouverture } from '@/lib/regles'
 import { useJeu, useVille } from '@/lib/store'
 import type { Estimation, LigneJoueur, Mandat, ModeLigne } from '@/lib/types'
 
@@ -81,22 +81,26 @@ export function useEstimation(): Estimation | null {
   const mandat = useJeu((s) => s.mandat)
   return useMemo(
     () =>
+      // Le coût s'affiche aux prix du mandat en cours : il suit l'inflation comme celui des projets du catalogue.
       donnees && brouillon
-        ? estimer(brouillon.mode, brouillon.arrets, donnees.carreaux, {
-            passages: brouillon.passages,
-            prolonge: Boolean(brouillon.prolonge),
-            // Partir du bout d'une de vos lignes ou d'un prolongement du catalogue d'un mandat précédent, c'est le
-            // continuer : sa station est déjà là.
-            suite:
-              !brouillon.prolonge &&
-              premiereStationPayee(
-                { mode: brouillon.mode, arrets: brouillon.arrets, mandat, aPart: brouillon.aPart, boucle: brouillon.boucle },
-                lignes,
-                chantiers,
-                donnees.carreaux.mx,
-              ),
-            boucle: brouillon.boucle,
-          })
+        ? aPrixDu(
+            estimer(brouillon.mode, brouillon.arrets, donnees.carreaux, {
+              passages: brouillon.passages,
+              prolonge: Boolean(brouillon.prolonge),
+              // Partir du bout d'une de vos lignes ou d'un prolongement du catalogue d'un mandat précédent, c'est le
+              // continuer : sa station est déjà là.
+              suite:
+                !brouillon.prolonge &&
+                premiereStationPayee(
+                  { mode: brouillon.mode, arrets: brouillon.arrets, mandat, aPart: brouillon.aPart, boucle: brouillon.boucle },
+                  lignes,
+                  chantiers,
+                  donnees.carreaux.mx,
+                ),
+              boucle: brouillon.boucle,
+            }),
+            mandat,
+          )
         : null,
     [donnees, brouillon, lignes, chantiers, mandat],
   )
@@ -1296,7 +1300,7 @@ export function MaLigne() {
   // La part payée sur ce mandat ; en modification, l'ancienne version libère la sienne.
   const partDuMandat = (cout: number) => (ancienne?.etale && mandat === 1 ? cout / 2 : cout)
   // En jeu libre, il n'y a pas de budget à tenir, ni de paiement en deux fois.
-  const reste = libre ? Infinity : bilan.reste + (ancienne ? partDuMandat(ancienne.estimation.cout) : 0)
+  const reste = libre ? Infinity : bilan.reste + (ancienne ? partDuMandat(coutDeLigne(ancienne)) : 0)
   const etaler = mandat === 1 && !libre && !ancienne
   const moitie = Math.round(e.cout / 2)
 
@@ -1358,7 +1362,7 @@ export function MaLigne() {
       <ChoixCouleur mode={brouillon.mode} valeur={brouillon.couleur} onChange={(c) => colorer(c)} />
       {ancienne ? (
         <p className="text-[13.5px] leading-normal text-gris">
-          Avant la modification : {n(ancienne.estimation.cout)} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
+          Avant la modification : {n(coutDeLigne(ancienne))} M€ et environ {approx(ancienne.estimation.nouveaux)} nouveaux voyageurs par
           jour.
         </p>
       ) : null}
@@ -1417,7 +1421,7 @@ export function FicheLigne({ id }: { id: string }) {
   const noms = r?.stationsNommees ?? []
   const [confirmer, setConfirmer] = useState(false)
   if (!l) return null
-  const e = l.estimation
+  const e = aPrixDu(l.estimation, l.mandat)
   const annee = ouverture(l.mandat, e.duree)
   // Comme un projet du catalogue, une ligne décidée à un mandat précédent est lancée : on ne la supprime plus.
   const modifiable = l.mandat === mandat

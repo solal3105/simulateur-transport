@@ -6,6 +6,8 @@ export const n = (v: number) => nombre.format(Math.round(v))
 export const km = (v: number) => decimal.format(v)
 /** Arrondi à la centaine, pour les estimations qui ne méritent pas plus de précision. */
 export const approx = (v: number) => nombre.format(Math.round(v / 100) * 100)
+/** Une hausse de prix lue sur un coefficient : 1,126 donne « 12,6 % ». */
+export const hausse = (coefficient: number) => `${decimal.format(Math.round((coefficient - 1) * 1000) / 10)} %`
 export const signe = (v: number) => (v > 0 ? `+${n(v)}` : v < 0 ? `-${n(-v)}` : '0')
 
 const ORDINAUX = ['premier', 'second', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième', 'neuvième', 'dixième']

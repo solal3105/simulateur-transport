@@ -178,4 +178,10 @@ export interface Leviers {
   suppressionTarifSocial: boolean
   metroNuit: boolean
   tva: boolean
+  /**
+   * Le ticket et l'abonnement suivent l'inflation d'eux-mêmes (vrai) : leurs réglages ne comptent pas, et ils ne
+   * rapportent rien de plus. Faux, le joueur fixe leur prix par rapport à 2026. Absent dans une partie d'avant l'inflation,
+   * que normaliserTarifs (lib/leviers.ts) convertit à la lecture.
+   */
+  inflationTarifs?: boolean
 }

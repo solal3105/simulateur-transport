@@ -6,6 +6,7 @@ import {
   Marker,
   Popup,
   setWorkerUrl,
+  type ExpressionSpecification,
   type FilterSpecification,
   type GeoJSONSource,
   type MapLayerMouseEvent,
@@ -17,7 +18,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { CATALOGUES, debutMandat, horizon, mots } from '@/lib/catalogue'
-import { couleurLigne, couleurProjet } from '@/lib/couleurs'
+import { couleurLigne, couleurProjet, modeCarte } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
@@ -25,7 +26,7 @@ import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
 import { estBoucle, rayonBassin, stationsDuTrace, traceFerme } from '@/lib/modele'
 import { nomDuDepart } from '@/lib/prolongements'
 import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
-import { ouverture, resoudre } from '@/lib/regles'
+import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
 import { useJeu } from '@/lib/store'
 import { BOUTS_PROJETS } from '@/lib/terminus'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
@@ -181,6 +182,9 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
             ouvertures: direOuvertures(s.lignes),
             // Une station de métro, de RER ou de train, dessinée plus grande qu'un arrêt de tram.
             grande: s.lignes.some((l) => l.mode === 'metro' || l.mode === 'rer' || l.mode === 'train'),
+            // Les familles de ses lignes, « |metro|tram| », pour que le filtre de la carte cache une station dont toutes
+            // les lignes sont cachées. Un texte plutôt qu'un tableau, que la carte ne garde pas tel quel.
+            modes: `|${[...new Set(s.lignes.map((l) => modeCarte(l.mode)))].join('|')}|`,
             // Une gare ferroviaire, qui a son propre symbole.
             gare: Boolean(s.gare),
           },
@@ -188,7 +192,11 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         }))
       : donnees.arrets
           .filter((a) => a[2] === 1)
-          .map((a) => ({ type: 'Feature', properties: { grande: true }, geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] } })),
+          .map((a) => ({
+            type: 'Feature',
+            properties: { grande: true, modes: '|metro|' },
+            geometry: { type: 'Point', coordinates: [a[0]!, a[1]!] },
+          })),
   }
   // Chaque ligne du réseau actuel, dans sa couleur. Une ligne en chantier n'a pas encore de tracé : le fil de ses
   // gares ne sert qu'à poser son nom, le long du trait gris que le fond de carte dessine pour elle.
@@ -681,6 +689,9 @@ export function Carte({
   const trace = brouillon !== null
   // Le fond en photographies aériennes, choisi pendant la partie ; les cartes de récapitulatif gardent le plan.
   const aerien = jeu.aerien && !decor
+  // Les familles de lignes cachées par le filtre et la densité affichée hors tracé ; les récapitulatifs montrent tout.
+  const modesCaches = useMemo(() => (decor ? [] : jeu.modesCaches), [decor, jeu.modesCaches])
+  const densite = jeu.densite && !decor
   // Ce qui ouvre après la fin de la partie, en 2038 ou à la fin du dernier mandat joué, reste en chantier sur la carte.
   const fin = horizon(partie ? (partie.mandats ?? 2) : jeu.mandat)
 
@@ -711,7 +722,7 @@ export function Carte({
       const c = faits.get(p.id)
       let e: EtatProjet = 'etude'
       if (c) {
-        const annee = ouverture(c.mandat, resoudre(p, c).duree)
+        const annee = ouvertureProjet(p, c.mandat, resoudre(p, c).duree, chantiers)
         // Dans un récapitulatif, un projet apparaît en chantier l'année de sa décision, puis s'allume à son ouverture.
         if (anneeMax !== undefined) e = anneeMax < debutMandat(c.mandat) ? 'etude' : annee <= anneeMax ? 'construit' : 'chantier'
         else e = annee > fin ? 'chantier' : 'construit'
@@ -1027,20 +1038,28 @@ export function Carte({
     if (!m || !donnees) return
     const appliquer = () => {
       if (!pret.current) return
+      // Un projet du catalogue disparaît quand le filtre cache sa famille de lignes, avec son étiquette.
+      const projetCache = (nomTrace: string) => {
+        const projet = catalogue.projets.find((p) => p.trace === nomTrace)
+        const choix = projet && chantiers.find((x) => x.id === projet.id)
+        return Boolean(projet && modesCaches.includes(modeCarte(resoudre(projet, choix).mode)))
+      }
       ;(m.getSource('projets') as GeoJSONSource).setData({
         ...donnees.projets,
-        features: donnees.projets.features.map((f) => {
-          const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
-          const choix = projet && chantiers.find((x) => x.id === projet.id)
-          return {
-            ...f,
-            properties: {
-              ...f.properties,
-              etat: etats.get(f.properties.id) ?? 'etude',
-              couleur: projet ? couleurProjet(projet.id, choix) : '#1b1b1f',
-            },
-          }
-        }),
+        features: donnees.projets.features
+          .filter((f) => !projetCache(f.properties.id))
+          .map((f) => {
+            const projet = catalogue.projets.find((p) => p.trace === f.properties.id)
+            const choix = projet && chantiers.find((x) => x.id === projet.id)
+            return {
+              ...f,
+              properties: {
+                ...f.properties,
+                etat: etats.get(f.properties.id) ?? 'etude',
+                couleur: projet ? couleurProjet(projet.id, choix) : '#1b1b1f',
+              },
+            }
+          }),
       })
 
       // Ce qui vient d'être décidé brille un instant, avec le gain de voyageurs.
@@ -1069,18 +1088,40 @@ export function Carte({
         const projet = catalogue.projets.find((p) => p.trace === nomTrace)
         const c = projet && chantiers.find((x) => x.id === projet.id)
         if (projet) el.style.setProperty('--mode', couleurProjet(projet.id, c))
+        // Le prix d'un projet qu'on n'a pas lancé suit l'inflation : c'est celui du mandat en cours.
+        const cout = projet ? resoudre(projet, c ?? { mandat }).cout : 0
+        if (projet) {
+          el.setAttribute('aria-label', `${projet.nom}, ${n(cout)} millions d'euros`)
+          el.dataset.cout = String(cout)
+        }
         el.textContent =
-          etat === 'construit' && projet
-            ? mots(projet.id).participe
-            : etat === 'chantier'
-              ? 'En chantier'
-              : projet
-                ? n(resoudre(projet, c).cout)
-                : ''
+          etat === 'construit' && projet ? mots(projet.id).participe : etat === 'chantier' ? 'En chantier' : projet ? n(cout) : ''
       }
-      for (const { el } of etiquettes.values()) el.style.display = trace || decor ? 'none' : ''
+      for (const [nomTrace, { el }] of etiquettes) el.style.display = trace || decor || projetCache(nomTrace) ? 'none' : ''
       requestAnimationFrame(() => eviterChevauchements(m, etiquettes))
-      m.setLayoutProperty('densite', 'visibility', trace ? 'visible' : 'none')
+      m.setLayoutProperty('densite', 'visibility', trace || densite ? 'visible' : 'none')
+      // Le réseau actuel : ses lignes, leurs noms, ses stations et les voies grises du fond suivent le filtre.
+      const existantsCaches = modesCaches.flatMap((c) => (c === 'train' ? ['train', 'rer'] : [c]))
+      const ligneVisible: ExpressionSpecification = ['!', ['in', ['get', 'mode'], ['literal', existantsCaches]]]
+      m.setFilter('lignes-bord', ['all', ['get', 'dessinee'], ligneVisible])
+      m.setFilter('lignes-actuelles', ['all', ['get', 'dessinee'], ligneVisible])
+      m.setFilter('lignes-noms-trains', ['all', ['==', ['get', 'mode'], 'train'], ligneVisible])
+      m.setFilter('lignes-noms', ['all', ['!=', ['get', 'mode'], 'train'], ligneVisible])
+      const montres = (['metro', 'tram', 'bus', 'cable', 'fluvial', 'train'] as const).filter((c) => !modesCaches.includes(c))
+      const stationVisible: ExpressionSpecification = [
+        'any',
+        ...montres.map((c): ExpressionSpecification => ['in', `|${c}|`, ['get', 'modes']]),
+      ]
+      m.setFilter('stations', ['all', ['!=', ['get', 'gare'], true], stationVisible])
+      m.setFilter('gares', ['all', ['==', ['get', 'gare'], true], stationVisible])
+      m.setFilter('gares-centre', ['all', ['==', ['get', 'gare'], true], stationVisible])
+      for (const [couche, mode] of [
+        ['tram-bord', 'tram'],
+        ['tram-actuel', 'tram'],
+        ['metro-bord', 'metro'],
+        ['metro-actuel', 'metro'],
+      ] as const)
+        m.setLayoutProperty(couche, 'visibility', modesCaches.includes(mode) ? 'none' : 'visible')
       m.setLayoutProperty('aerien', 'visibility', aerien ? 'visible' : 'none')
       // Sur les photographies, le relief les cacherait : on le montre seulement sur le plan.
       if (m.getLayer('relief')) m.setLayoutProperty('relief', 'visibility', trace && !aerien ? 'visible' : 'none')
@@ -1090,6 +1131,7 @@ export function Carte({
         type: 'FeatureCollection',
         features: lignes
           .filter((l) => anneeMax === undefined || ouverture(l.mandat, l.estimation.duree) <= anneeMax)
+          .filter((l) => !modesCaches.includes(l.mode))
           // La ligne qu'on modifie n'apparaît qu'une fois, sous la forme de son nouveau tracé.
           .filter((l) => l.id !== brouillon?.edition)
           .map((l) => ({
@@ -1173,6 +1215,8 @@ export function Carte({
     fin,
     aerien,
     mandat,
+    modesCaches,
+    densite,
   ])
 
   // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
