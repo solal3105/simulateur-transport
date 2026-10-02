@@ -1,108 +1,111 @@
 {
-  "lyon": {
-    "nom": "le programme voté par Sytral Mobilités",
-    "projets": [
-      "teol",
-      "modern-a",
-      "modern-d",
-      "modern-c",
-      "t8",
-      "bhns-parilly",
-      "t9-final",
-      "t10-final",
-      "t3-renf",
-      "bhns-kimmerling",
-      "electrification-bus"
-    ],
-    "sources": [
-      {
-        "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026 (autorisations de développement et de gestion patrimoniale, crédits de paiement jusqu’en 2035)",
-        "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
-      },
-      {
-        "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026 et prospective 2026-2035 (six enveloppes d’équipement)",
-        "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf"
-      },
-      {
-        "titre": "Sytral Mobilités, délibération n° 26-033 du 24 juin 2026, vote et actualisation des autorisations de programme du budget Transport, qui prolonge d’un an les autorisations patrimoniales dans l’attente du plan de mandat 2026-2031",
-        "url": "https://sytral-mobilites.fr/img_base/documents/371/26-033-delib-actualisation-ap-m43-signe-pref.pdf"
-      },
-      {
-        "titre": "Sytral Mobilités, plan de mobilité des territoires lyonnais à l’horizon 2040, approuvé le 2 octobre 2025",
-        "url": "https://sytral-mobilites.fr/fr/plan-de-mobilite-des-territoires-lyonnais.html"
-      }
-    ]
-  },
-  "marseille": {
-    "nom": "le programme de la Métropole",
-    "projets": [
-      "amp-t3-nord-bricarde",
-      "amp-t2-quatre-septembre",
-      "amp-tram-belle-de-mai",
-      "amp-cable-aeroport",
-      "amp-aixpress-val-saint-andre",
-      "amp-bhns-aix-duranne",
-      "amp-bhns-martigues-port-de-bouc",
-      "amp-bhns-istres"
-    ],
-    "sources": [
-      {
-        "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030 approuvé le 16 décembre 2021, annexe 5, note financière (coût de chaque action)",
-        "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
-      },
-      {
-        "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets de mobilité du plan Marseille en Grand, 2 Md€ dont 1 Md€ de l’État",
-        "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
-      },
-      {
-        "titre": "Métropole d’Aix-Marseille-Provence, rapport d’orientation budgétaire 2026 : programmation pluriannuelle des investissements fondée sur les autorisations de programme 2020-2026, à redéfinir pour le nouveau mandat (p. 110 et 127)",
-        "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/04/16/ANNEXE/160507_165637_160507%20Annexe%20ROB%202026%20vDEF%20v2.pdf"
-      }
-    ]
-  },
-  "nice": {
-    "nom": "le programme de la Métropole",
-    "projets": ["nca-tram-ligne-5", "nca-tram-ligne-4"],
-    "sources": [
-      {
-        "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4 : autorisation de programme n° 4605 de 500 M€ pour l’extension du réseau de tramway, votée le 9 avril 2021 et reconduite à chaque budget, et échéancier de la ligne 4 de 2026 à 2032",
-        "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf"
-      },
-      {
-        "titre": "Métropole Nice Côte d’Azur, rapport sur les orientations budgétaires 2026, délibération du 22 octobre 2025 : poursuite des lignes 4 et 5 du tramway",
-        "url": "https://www.nicecotedazur.org/wp-content/uploads/2026/01/NCA-Rapport-sur-les-orientations-budgetaires-2026.pdf"
-      },
-      {
-        "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
-        "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf"
-      }
-    ]
-  },
-  "idf": {
-    "nom": "le contrat de plan État-Région 2023-2027",
-    "projets": [
-      "idf-t1-val-de-fontenay",
-      "idf-t1-colombes",
-      "idf-t1-rueil-malmaison",
-      "idf-t8-sud",
-      "idf-t10-clamart",
-      "idf-t7-juvisy",
-      "idf-t13-acheres",
-      "idf-tzen-5",
-      "idf-tzen-3",
-      "idf-tzen-2",
-      "idf-bus-bords-de-marne",
-      "idf-bus-eve"
-    ],
-    "sources": [
-      {
-        "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024 adoptant le volet mobilités 2023-2027 du contrat de plan État-Région 2021-2027 : projets inscrits (p. 9 et 10 de l’avenant) et maquette financière (p. 24)",
-        "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf"
-      },
-      {
-        "titre": "Île-de-France Mobilités, communiqué sur le conseil d’administration du 2 juillet 2026 (métro 1, T10, T7, Bus EVE)",
-        "url": "https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-poursuit-lagrandissement-du-reseau-francilien/"
-      }
-    ]
-  }
+ "lyon": {
+  "nom": "le programme voté par Sytral Mobilités",
+  "projets": [
+   "teol",
+   "modern-a",
+   "modern-d",
+   "modern-c",
+   "t8",
+   "bhns-parilly",
+   "t9-final",
+   "t10-final",
+   "t3-renf",
+   "bhns-kimmerling",
+   "electrification-bus"
+  ],
+  "sources": [
+   {
+    "titre": "Sytral Mobilités, délibération n° 25-079 du 18 décembre 2025, actualisation des autorisations de programme 2026 (autorisations de développement et de gestion patrimoniale, crédits de paiement jusqu’en 2035)",
+    "url": "https://sytral-mobilites.fr/img_base/documents/353/25-079-delib-ap-2026-signe-pref.pdf"
+   },
+   {
+    "titre": "Sytral Mobilités, délibération n° 25-068 du 27 novembre 2025, débat d’orientation budgétaire 2026 et prospective 2026-2035 (six enveloppes d’équipement)",
+    "url": "https://sytral-mobilites.fr/img_base/documents/346/25-068-dob-2026-signe-pref.pdf"
+   },
+   {
+    "titre": "Sytral Mobilités, délibération n° 26-033 du 24 juin 2026, vote et actualisation des autorisations de programme du budget Transport, qui prolonge d’un an les autorisations patrimoniales dans l’attente du plan de mandat 2026-2031",
+    "url": "https://sytral-mobilites.fr/img_base/documents/371/26-033-delib-actualisation-ap-m43-signe-pref.pdf"
+   },
+   {
+    "titre": "Sytral Mobilités, plan de mobilité des territoires lyonnais à l’horizon 2040, approuvé le 2 octobre 2025",
+    "url": "https://sytral-mobilites.fr/fr/plan-de-mobilite-des-territoires-lyonnais.html"
+   }
+  ]
+ },
+ "marseille": {
+  "nom": "le programme de la Métropole",
+  "projets": [
+   "amp-t3-nord-bricarde",
+   "amp-t2-quatre-septembre",
+   "amp-tram-belle-de-mai",
+   "amp-cable-aeroport",
+   "amp-aixpress-val-saint-andre",
+   "amp-bhns-aix-duranne",
+   "amp-bhns-martigues-port-de-bouc",
+   "amp-bhns-istres"
+  ],
+  "sources": [
+   {
+    "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030 approuvé le 16 décembre 2021, annexe 5, note financière (coût de chaque action)",
+    "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
+   },
+   {
+    "titre": "Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », dossier des 16 projets de mobilité du plan Marseille en Grand, 2 Md€ dont 1 Md€ de l’État",
+    "url": "https://www.debatpublic.fr/sites/default/files/2025-06/MEG-Dossier-Mai2025.pdf"
+   },
+   {
+    "titre": "Métropole d’Aix-Marseille-Provence, rapport d’orientation budgétaire 2026 : programmation pluriannuelle des investissements fondée sur les autorisations de programme 2020-2026, à redéfinir pour le nouveau mandat (p. 110 et 127)",
+    "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2026/04/16/ANNEXE/160507_165637_160507%20Annexe%20ROB%202026%20vDEF%20v2.pdf"
+   }
+  ]
+ },
+ "nice": {
+  "nom": "le programme de la Métropole",
+  "projets": [
+   "nca-tram-ligne-5",
+   "nca-tram-ligne-4"
+  ],
+  "sources": [
+   {
+    "titre": "Métropole Nice Côte d’Azur, pièce H, complément à l’évaluation socio-économique de la ligne 4 : autorisation de programme n° 4605 de 500 M€ pour l’extension du réseau de tramway, votée le 9 avril 2021 et reconduite à chaque budget, et échéancier de la ligne 4 de 2026 à 2032",
+    "url": "https://www.nicecotedazur.org/wp-content/uploads/2025/07/PIECE-H_Complement_evaluation_socio-eco-Modalites_financement-Tramway_Ligne_4.pdf"
+   },
+   {
+    "titre": "Métropole Nice Côte d’Azur, rapport sur les orientations budgétaires 2026, délibération du 22 octobre 2025 : poursuite des lignes 4 et 5 du tramway",
+    "url": "https://www.nicecotedazur.org/wp-content/uploads/2026/01/NCA-Rapport-sur-les-orientations-budgetaires-2026.pdf"
+   },
+   {
+    "titre": "Préfecture des Alpes-Maritimes, arrêté du 27 juillet 2026 déclarant d’utilité publique la ligne 5 du tramway",
+    "url": "https://www.alpes-maritimes.gouv.fr/contenu/telechargement/60244/459448/file/Arr%C3%AAt%C3%A9%20pr%C3%A9fectoral.pdf"
+   }
+  ]
+ },
+ "idf": {
+  "nom": "le contrat de plan État-Région 2023-2027",
+  "projets": [
+   "idf-t1-val-de-fontenay",
+   "idf-t1-colombes",
+   "idf-t1-rueil-malmaison",
+   "idf-t8-sud",
+   "idf-t10-clamart",
+   "idf-t7-juvisy",
+   "idf-t13-acheres",
+   "idf-tzen-5",
+   "idf-tzen-3",
+   "idf-tzen-2",
+   "idf-bus-bords-de-marne",
+   "idf-bus-eve"
+  ],
+  "sources": [
+   {
+    "titre": "Région Île-de-France, délibération CR 2024-038 du 26 septembre 2024 adoptant le volet mobilités 2023-2027 du contrat de plan État-Région 2021-2027 : projets inscrits (p. 9 et 10 de l’avenant) et maquette financière (p. 24)",
+    "url": "https://www.iledefrance.fr/actes/deliberations/CR2024-038DEL.pdf"
+   },
+   {
+    "titre": "Île-de-France Mobilités, communiqué sur le conseil d’administration du 2 juillet 2026 (métro 1, T10, T7, Bus EVE)",
+    "url": "https://presse.iledefrance-mobilites.fr/ile-de-france-mobilites-poursuit-lagrandissement-du-reseau-francilien/"
+   }
+  ]
+ }
 }

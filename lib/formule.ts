@@ -111,7 +111,9 @@ export const FORMULE: Formule = {
       { ligne: 'Bus B2', reel: 17900, ecart: -27 },
       { ligne: 'Bus B3', reel: 14000, ecart: -37 },
     ],
-    nice: [{ ligne: 'Tram L1', reel: 120000, ecart: -29 }],
+    nice: [
+      { ligne: 'Tram L1', reel: 120000, ecart: -29 },
+    ],
     idf: [
       { ligne: 'Métro 1', reel: 636800, ecart: -33 },
       { ligne: 'Métro 4', reel: 631900, ecart: -53 },
