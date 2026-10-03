@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
   },
   twitter: { card: 'summary_large_image' },
+  // Avec la traduction automatique du navigateur, le premier choix fait planter la page ; voir RootLayout.
+  other: { google: 'notranslate' },
 }
 
 export const viewport: Viewport = {
@@ -35,9 +37,15 @@ export const viewport: Viewport = {
   themeColor: '#e30613',
 }
 
+/**
+ * La page refuse la traduction automatique : Chrome, Edge ou Safari remplacent nos textes par les leurs, et React, qui
+ * ne retrouve plus ses textes, fait planter la page au premier choix du joueur (retour n° 80, un joueur hispanophone).
+ * Laisser traduire sans planter afficherait des budgets figés à leur première valeur traduite : mieux vaut le français
+ * juste.
+ */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={figtree.variable}>
+    <html lang="fr" translate="no" className={figtree.variable}>
       <body>
         {children}
         <Mesure />
