@@ -1,7 +1,8 @@
 import type { FeatureCollection, MultiLineString } from 'geojson'
 
 import { catalogueDe } from './catalogue'
-import type { IdVille } from './villes'
+import { lisser } from './geo'
+import { VILLES, type IdVille } from './villes'
 
 export type TracesProjets = FeatureCollection<MultiLineString, { id: string }>
 
@@ -14,14 +15,26 @@ export function tracesProjets(ville: IdVille, fichier: TracesProjets): TracesPro
   const projets = catalogueDe(ville)
   // Un tracé qu'aucun projet ne porte ne se dessine pas : sans prix ni fiche, on ne pourrait rien en faire.
   const portes = new Set(projets.flatMap((p) => (p.trace ? [p.trace] : [])))
-  const dessines = fichier.features.filter((f) => portes.has(f.properties.id))
+  // Un métro s'arrondit comme une voie réelle, qu'il vienne du fichier ou des stations du catalogue.
+  const metros = new Set(projets.flatMap((p) => (p.trace && p.mode === 'metro' ? [p.trace] : [])))
+  const arrondir = (id: string, parties: number[][][]) =>
+    metros.has(id) ? parties.map((l) => lisser(l as [number, number][], VILLES[ville].latitude)) : parties
+  const dessines = fichier.features
+    .filter((f) => portes.has(f.properties.id))
+    .map((f) => ({ ...f, geometry: { ...f.geometry, coordinates: arrondir(f.properties.id, f.geometry.coordinates) } }))
   const deja = new Set(dessines.map((f) => f.properties.id))
   const parcourus = projets
     .filter((p) => p.trace && p.parcours && !deja.has(p.trace))
     .map((p) => ({
       type: 'Feature' as const,
       properties: { id: p.trace! },
-      geometry: { type: 'MultiLineString' as const, coordinates: p.parcours!.map((b) => b.map((s) => s.pos)) },
+      geometry: {
+        type: 'MultiLineString' as const,
+        coordinates: arrondir(
+          p.trace!,
+          p.parcours!.map((b) => b.map((s) => s.pos)),
+        ),
+      },
     }))
   return { ...fichier, features: [...dessines, ...parcourus] }
 }

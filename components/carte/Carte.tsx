@@ -9,6 +9,7 @@ import {
   type ExpressionSpecification,
   type FilterSpecification,
   type GeoJSONSource,
+  type LayerSpecification,
   type MapLayerMouseEvent,
   type MapMouseEvent,
   type MapTouchEvent,
@@ -22,8 +23,8 @@ import { couleurLigne, couleurProjet, modeCarte } from '@/lib/couleurs'
 import { adresseDonnees, useDonnees, type Donnees } from '@/lib/donnees'
 import { n } from '@/lib/format'
 import { FORMULE } from '@/lib/formule'
-import { carreau, cercle, milieu, pointsLeLong } from '@/lib/geo'
-import { estBoucle, rayonBassin, stationsDuTrace, traceFerme } from '@/lib/modele'
+import { carreau, cercle, dessinLigne, milieu, pointsLeLong } from '@/lib/geo'
+import { distance, estBoucle, rayonBassin, stationsDuTrace } from '@/lib/modele'
 import { nomDuDepart } from '@/lib/prolongements'
 import { direLignes, direOuvertures, nommerTrace, type ModeExistant } from '@/lib/reseau'
 import { ouverture, ouvertureProjet, resoudre } from '@/lib/regles'
@@ -31,22 +32,18 @@ import { useJeu } from '@/lib/store'
 import { BOUTS_PROJETS } from '@/lib/terminus'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
+import PLAN_OSM from '@/lib/plan-osm.json'
+
 import { imagePastille } from './pastilles'
 import { imageRelief } from './relief'
 
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
 if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
 
-/** Les couleurs du fond de carte ; la couleur du réseau (zones denses, dernier arrêt) vient de lib/villes. */
+/** Les couleurs de ce que le jeu dessine sur le plan ; la couleur du réseau (zones denses, dernier arrêt) vient de lib/villes. */
 const COULEURS = {
   encre: '#1b1b1f',
-  sol: '#f4f1ec',
-  parc: '#dfe8d2',
-  eau: '#c6dde9',
-  route: '#ffffff',
-  bordRoute: '#e3ddd4',
-  rail: '#bdb6ac',
-  limite: '#cfc8bd',
+  limite: '#b9b1a5',
   // Chaque ligne du réseau actuel a sa couleur. Le gris reste pour les voies qu'aucune ligne en service n'emprunte
   // encore, comme celles des lignes en chantier, et pour une ligne dont on ne connaît pas la couleur.
   tram: '#9a9288',
@@ -98,18 +95,6 @@ function poserProches(m: CarteMaplibre, reperes: { pos: [number, number]; marker
 const largeur = (base: number) =>
   ['interpolate', ['exponential', 1.5], ['zoom'], 10, base * 0.6, 13, base * 1.4, 15, base * 3] as unknown as number
 
-/** Largeur selon le zoom et le rang de la route : le zoom doit rester l'expression la plus externe. */
-const largeurRang = (grande: number, moyenne: number) =>
-  [
-    'interpolate',
-    ['exponential', 1.5],
-    ['zoom'],
-    ...[10, 13, 15].flatMap((z, i) => {
-      const k = [0.6, 1.4, 3][i]!
-      return [z, ['match', ['get', 'rang'], 1, grande * k, moyenne * k]]
-    }),
-  ] as unknown as number
-
 /** Une largeur par mode pour les lignes existantes ; comme ailleurs, le zoom reste l'expression la plus externe. */
 const largeurMode = (base: Record<ModeExistant, number>) =>
   [
@@ -148,12 +133,13 @@ const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kin
  */
 const TUILES_AERIENNES =
   'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}'
-const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
-  'all',
-  ['==', ['get', 'kind'], 'route'],
-  ['<=', ['get', 'rang'], rangMax],
-  ['>=', ['get', 'rang'], rangMin],
-]
+
+/**
+ * Le plan : OpenStreetMap en détail, rues et noms compris, dessiné par le style Liberty d'OpenFreeMap à partir de tuiles
+ * servies sans clé (lib/plan-osm.json, écrit par scripts/plan-osm.mjs). Les lignes, les stations et les projets du jeu
+ * passent par-dessus.
+ */
+const PLAN = PLAN_OSM as unknown as Pick<StyleSpecification, 'glyphs' | 'sprite' | 'sources'> & { layers: LayerSpecification[] }
 
 function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
   // Les paliers de densité dépendent de la ville : Toulouse est bien moins dense que Lyon.
@@ -223,7 +209,10 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
   return {
     version: 8,
+    glyphs: PLAN.glyphs,
+    sprite: PLAN.sprite,
     sources: {
+      ...PLAN.sources,
       ...(relief ? { relief: { type: 'image' as const, url: relief.url, coordinates: relief.coordinates } } : {}),
       aerien: {
         type: 'raster',
@@ -239,61 +228,20 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       projets: { type: 'geojson', data: donnees.projets },
       densite: { type: 'geojson', data: densite },
       joueur: { type: 'geojson', data: vide() },
+      'joueur-arrets': { type: 'geojson', data: vide() },
       eclat: { type: 'geojson', data: vide() },
       brouillon: { type: 'geojson', data: vide() },
       zones: { type: 'geojson', data: vide() },
     },
     layers: [
-      { id: 'sol', type: 'background', paint: { 'background-color': COULEURS.sol } },
-      { id: 'mer', type: 'fill', source: 'decor', filter: genre('mer'), paint: { 'fill-color': COULEURS.eau } },
-      { id: 'parcs', type: 'fill', source: 'decor', filter: genre('parc'), paint: { 'fill-color': COULEURS.parc } },
-      { id: 'eau', type: 'fill', source: 'decor', filter: genre('eau'), paint: { 'fill-color': COULEURS.eau } },
-      {
-        id: 'fleuves',
-        type: 'line',
-        source: 'fond',
-        filter: genre('fleuve'),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.eau, 'line-width': largeur(7) },
-      },
+      ...PLAN.layers,
+      // Les limites des communes, que le plan ne dessine pas.
       {
         id: 'limites',
         type: 'line',
         source: 'decor',
         filter: genre('limite'),
         paint: { 'line-color': COULEURS.limite, 'line-width': 1, 'line-dasharray': [3, 2] },
-      },
-      {
-        id: 'routes-bord',
-        type: 'line',
-        source: 'decor',
-        filter: routes(2),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.bordRoute, 'line-width': largeurRang(3.6, 2.4) },
-      },
-      {
-        id: 'routes-secondaires',
-        type: 'line',
-        source: 'decor',
-        filter: routes(3, 3),
-        minzoom: 11.5,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.route, 'line-width': largeur(1.1) },
-      },
-      {
-        id: 'routes',
-        type: 'line',
-        source: 'decor',
-        filter: routes(2),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.route, 'line-width': largeurRang(2.4, 1.4) },
-      },
-      {
-        id: 'rail',
-        type: 'line',
-        source: 'decor',
-        filter: genre('rail'),
-        paint: { 'line-color': COULEURS.rail, 'line-width': largeur(1), 'line-dasharray': [4, 2] },
       },
       // Les photographies aériennes recouvrent le plan : les lignes, les stations et les projets restent par-dessus.
       { id: 'aerien', type: 'raster', source: 'aerien', layout: { visibility: 'none' } },
@@ -518,6 +466,18 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
         filter: ['get', 'chantier'],
         paint: { 'line-color': ['get', 'couleur'], 'line-width': largeur(5.5), 'line-dasharray': [0.6, 0.6] },
       },
+      // Les stations de vos lignes, à toutes les échelles : un rond blanc cerclé de la couleur de la ligne.
+      {
+        id: 'joueur-arrets',
+        type: 'circle',
+        source: 'joueur-arrets',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1.6, 10, 2.4, 13, 4.2, 15, 7],
+          'circle-color': '#fff',
+          'circle-stroke-color': ['get', 'couleur'],
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 10, 1.4, 13, 2.2, 15, 3],
+        },
+      },
       // Une bande invisible et large autour des lignes du joueur, pour les toucher facilement au doigt.
       { id: 'joueur-cible', type: 'line', source: 'joueur', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 22 } },
       {
@@ -733,6 +693,35 @@ export function Carte({
     }
     return etat
   }, [catalogue, chantiers, panneau, ecran, tuto, anneeMax, fin])
+
+  // Les stations de vos lignes et leur nom, recalculés quand le réseau change, pas à chaque image d'un tracé : celui qu'on
+  // modifie se dessine avec le tracé en cours.
+  const edition = brouillon?.edition
+  const stationsJoueur = useMemo(() => {
+    const points: Feature<Point, { couleur: string }>[] = []
+    const noms: { nom: string; pos: [number, number] }[] = []
+    if (donnees) {
+      const metres = distance(donnees.carreaux.mx)
+      // Une station posée sur une gare porte déjà le nom de la gare : on ne l'écrit pas deux fois.
+      const gares = donnees.stations.filter((s) => s.gare).map((s) => s.pos)
+      for (const l of lignes) {
+        if (anneeMax !== undefined && ouverture(l.mandat, l.estimation.duree) > anneeMax) continue
+        if (modesCaches.includes(l.mode) || l.id === edition) continue
+        const estStation = stationsDuTrace(l.arrets.length, l.passages)
+        const nomsLigne = nommerTrace(l.arrets, estStation, donnees.lieux, donnees.stations, donnees.carreaux.mx, l.noms)
+        const depuis = nomDuDepart(l, { lignes, chantiers }, donnees)
+        if (depuis && estStation[0] && !l.noms?.[0]) nomsLigne[0] = depuis
+        const couleur = couleurLigne(l.mode, l.couleur)
+        l.arrets.forEach((a, i) => {
+          if (!estStation[i]) return
+          points.push({ type: 'Feature', properties: { couleur }, geometry: { type: 'Point', coordinates: a } })
+          const nom = nomsLigne[i]
+          if (nom && !gares.some((g) => metres(g, a) < 40)) noms.push({ nom, pos: a })
+        })
+      }
+    }
+    return { points: { type: 'FeatureCollection', features: points } as FeatureCollection, noms }
+  }, [anneeMax, chantiers, donnees, edition, lignes, modesCaches])
 
   // Création de la carte.
   useEffect(() => {
@@ -1142,10 +1131,11 @@ export function Carte({
               couleur: couleurLigne(l.mode, l.couleur),
               choisi: !decor && panneau?.type === 'ligne-joueur' && panneau.id === l.id,
             },
-            geometry: { type: 'LineString', coordinates: traceFerme(l.arrets, l.boucle) },
+            geometry: { type: 'LineString', coordinates: dessinLigne(l.mode, l.arrets, ville.latitude, l.boucle) },
           })),
       }
       ;(m.getSource('joueur') as GeoJSONSource).setData(joueur)
+      ;(m.getSource('joueur-arrets') as GeoJSONSource).setData(stationsJoueur.points)
 
       const arrets = brouillon?.arrets ?? []
       const estStation = stationsDuTrace(arrets.length, brouillon?.passages)
@@ -1154,7 +1144,7 @@ export function Carte({
         traits.push({
           type: 'Feature',
           properties: { couleur: couleurLigne(brouillon.mode, brouillon.couleur) },
-          geometry: { type: 'LineString', coordinates: traceFerme(arrets, brouillon.boucle) },
+          geometry: { type: 'LineString', coordinates: dessinLigne(brouillon.mode, arrets, ville.latitude, brouillon.boucle) },
         })
       arrets.forEach((a, i) =>
         traits.push({
@@ -1217,7 +1207,23 @@ export function Carte({
     mandat,
     modesCaches,
     densite,
+    stationsJoueur,
   ])
+
+  // Le nom des stations de vos lignes, qui n'apparaît qu'en zoomant, comme celui des gares. Il suit la carte quand elle
+  // est recréée, pour un récapitulatif ou un changement de réseau.
+  useEffect(() => {
+    const m = carte.current
+    if (!m) return
+    const poses = stationsJoueur.noms.map(({ nom, pos }) => {
+      const el = document.createElement('div')
+      el.className = 'nom-station'
+      el.setAttribute('aria-hidden', 'true')
+      el.textContent = nom
+      return new Marker({ element: el, anchor: 'left', offset: [9, 0] }).setLngLat(pos).addTo(m)
+    })
+    return () => poses.forEach((p) => p.remove())
+  }, [stationsJoueur, cadre, catalogue, decor, donnees, etiquettes, ville])
 
   // Pendant la première étape du tutoriel, la carte montre le projet à toucher.
   useEffect(() => {

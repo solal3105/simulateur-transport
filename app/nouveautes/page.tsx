@@ -22,14 +22,22 @@ const VERSIONS: Version[] = [
   {
     iso: '2026-10-03',
     date: '3 octobre 2026',
-    titre: 'Deux tramways à Marseille, et plus d’écran noir',
+    titre: 'Plan détaillé, métros en courbe et tramways à Marseille',
     texte:
-      'Deux projets de tramway rejoignent le catalogue d’Aix-Marseille-Provence, et le jeu ne plante plus quand le navigateur traduit la page.',
+      'La carte montre toutes les rues, les métros se dessinent en courbes, les stations de vos lignes restent visibles, deux tramways rejoignent le catalogue d’Aix-Marseille-Provence, et le jeu ne plante plus quand le navigateur traduit la page.',
     groupes: [
       {
         titre: 'Nouveau',
         points: [
           'À Aix-Marseille-Provence, le catalogue propose deux tramways inscrits au Plan de mobilité de la Métropole : le prolongement du T1 des Caillols à la gare de La Barasse, pour 216 M€, et un tramway de La Blancarde à Dromel par la voie ferrée du Prado, pour 63 M€. Leurs voyageurs et la place de leurs stations n’ont jamais été publiés : nous les estimons, et leur fiche le dit.',
+        ],
+      },
+      {
+        titre: 'Amélioré',
+        points: [
+          'Le plan de la carte est celui d’OpenStreetMap en détail : toutes les rues et leurs noms, les bâtiments quand on zoome, les parcs et l’eau. Les photos aériennes restent au choix dans « Affichage ».',
+          'Les stations de vos lignes restent sur la carte une fois la ligne construite, dans le jeu comme sur le bilan : un rond sur chacune, et son nom quand on zoome. Pendant le tracé aussi, les noms n’apparaissent qu’en zoomant.',
+          'Les métros que vous tracez, et ceux du catalogue, se dessinent en courbes qui passent par chaque station, au lieu de lignes brisées. Leur prix et leurs voyageurs ne changent pas : ils se calculent toujours sur vos stations.',
         ],
       },
       {

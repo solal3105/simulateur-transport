@@ -2,6 +2,7 @@ import type { FeatureCollection, MultiLineString } from 'geojson'
 
 import { PROJETS } from './catalogue'
 import { couleurLigne, couleurProjet } from './couleurs'
+import { dessinLigne } from './geo'
 import type { PartieCompacte } from './partie'
 import type { ModeLigne } from './types'
 import type { Ville } from './villes'
@@ -55,6 +56,9 @@ export function cheminsReseau(projets: Projets, partie: PartieCompacte, ville: P
       ? [{ d: chemin(geometrie.coordinates), couleur: couleurProjet(id, { varianteId: varianteId || undefined, option: option === 1 }) }]
       : []
   })
-  const lignes = partie.l.map((l) => ({ d: chemin([l.a]), couleur: couleurLigne(l.m as ModeLigne, l.c) }))
+  const lignes = partie.l.map((l) => ({
+    d: chemin([dessinLigne(l.m, l.a, ville.latitude, l.b === 1)]),
+    couleur: couleurLigne(l.m as ModeLigne, l.c),
+  }))
   return [...traces, ...lignes]
 }
