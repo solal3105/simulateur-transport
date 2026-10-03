@@ -9,6 +9,7 @@ import {
   type ExpressionSpecification,
   type FilterSpecification,
   type GeoJSONSource,
+  type LayerSpecification,
   type MapLayerMouseEvent,
   type MapMouseEvent,
   type MapTouchEvent,
@@ -31,22 +32,18 @@ import { useJeu } from '@/lib/store'
 import { BOUTS_PROJETS } from '@/lib/terminus'
 import { VILLES, type IdVille, type Ville } from '@/lib/villes'
 
+import PLAN_OSM from '@/lib/plan-osm.json'
+
 import { imagePastille } from './pastilles'
 import { imageRelief } from './relief'
 
 // Le worker est copié dans public/maplibre par scripts/copier-maplibre.mjs.
 if (typeof window !== 'undefined') setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
 
-/** Les couleurs du fond de carte ; la couleur du réseau (zones denses, dernier arrêt) vient de lib/villes. */
+/** Les couleurs de ce que le jeu dessine sur le plan ; la couleur du réseau (zones denses, dernier arrêt) vient de lib/villes. */
 const COULEURS = {
   encre: '#1b1b1f',
-  sol: '#f4f1ec',
-  parc: '#dfe8d2',
-  eau: '#c6dde9',
-  route: '#ffffff',
-  bordRoute: '#e3ddd4',
-  rail: '#bdb6ac',
-  limite: '#cfc8bd',
+  limite: '#b9b1a5',
   // Chaque ligne du réseau actuel a sa couleur. Le gris reste pour les voies qu'aucune ligne en service n'emprunte
   // encore, comme celles des lignes en chantier, et pour une ligne dont on ne connaît pas la couleur.
   tram: '#9a9288',
@@ -98,18 +95,6 @@ function poserProches(m: CarteMaplibre, reperes: { pos: [number, number]; marker
 const largeur = (base: number) =>
   ['interpolate', ['exponential', 1.5], ['zoom'], 10, base * 0.6, 13, base * 1.4, 15, base * 3] as unknown as number
 
-/** Largeur selon le zoom et le rang de la route : le zoom doit rester l'expression la plus externe. */
-const largeurRang = (grande: number, moyenne: number) =>
-  [
-    'interpolate',
-    ['exponential', 1.5],
-    ['zoom'],
-    ...[10, 13, 15].flatMap((z, i) => {
-      const k = [0.6, 1.4, 3][i]!
-      return [z, ['match', ['get', 'rang'], 1, grande * k, moyenne * k]]
-    }),
-  ] as unknown as number
-
 /** Une largeur par mode pour les lignes existantes ; comme ailleurs, le zoom reste l'expression la plus externe. */
 const largeurMode = (base: Record<ModeExistant, number>) =>
   [
@@ -148,12 +133,13 @@ const genre = (kind: string): FilterSpecification => ['==', ['get', 'kind'], kin
  */
 const TUILES_AERIENNES =
   'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}'
-const routes = (rangMax: number, rangMin = 1): FilterSpecification => [
-  'all',
-  ['==', ['get', 'kind'], 'route'],
-  ['<=', ['get', 'rang'], rangMax],
-  ['>=', ['get', 'rang'], rangMin],
-]
+
+/**
+ * Le plan : OpenStreetMap en détail, rues et noms compris, dessiné par le style Liberty d'OpenFreeMap à partir de tuiles
+ * servies sans clé (lib/plan-osm.json, écrit par scripts/plan-osm.mjs). Les lignes, les stations et les projets du jeu
+ * passent par-dessus.
+ */
+const PLAN = PLAN_OSM as unknown as Pick<StyleSpecification, 'glyphs' | 'sprite' | 'sources'> & { layers: LayerSpecification[] }
 
 function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
   // Les paliers de densité dépendent de la ville : Toulouse est bien moins dense que Lyon.
@@ -223,7 +209,10 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
   const relief = donnees.carreaux.terrain ? imageRelief(donnees.carreaux.terrain) : null
   return {
     version: 8,
+    glyphs: PLAN.glyphs,
+    sprite: PLAN.sprite,
     sources: {
+      ...PLAN.sources,
       ...(relief ? { relief: { type: 'image' as const, url: relief.url, coordinates: relief.coordinates } } : {}),
       aerien: {
         type: 'raster',
@@ -245,56 +234,14 @@ function styleDeBase(donnees: Donnees, ville: Ville): StyleSpecification {
       zones: { type: 'geojson', data: vide() },
     },
     layers: [
-      { id: 'sol', type: 'background', paint: { 'background-color': COULEURS.sol } },
-      { id: 'mer', type: 'fill', source: 'decor', filter: genre('mer'), paint: { 'fill-color': COULEURS.eau } },
-      { id: 'parcs', type: 'fill', source: 'decor', filter: genre('parc'), paint: { 'fill-color': COULEURS.parc } },
-      { id: 'eau', type: 'fill', source: 'decor', filter: genre('eau'), paint: { 'fill-color': COULEURS.eau } },
-      {
-        id: 'fleuves',
-        type: 'line',
-        source: 'fond',
-        filter: genre('fleuve'),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.eau, 'line-width': largeur(7) },
-      },
+      ...PLAN.layers,
+      // Les limites des communes, que le plan ne dessine pas.
       {
         id: 'limites',
         type: 'line',
         source: 'decor',
         filter: genre('limite'),
         paint: { 'line-color': COULEURS.limite, 'line-width': 1, 'line-dasharray': [3, 2] },
-      },
-      {
-        id: 'routes-bord',
-        type: 'line',
-        source: 'decor',
-        filter: routes(2),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.bordRoute, 'line-width': largeurRang(3.6, 2.4) },
-      },
-      {
-        id: 'routes-secondaires',
-        type: 'line',
-        source: 'decor',
-        filter: routes(3, 3),
-        minzoom: 11.5,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.route, 'line-width': largeur(1.1) },
-      },
-      {
-        id: 'routes',
-        type: 'line',
-        source: 'decor',
-        filter: routes(2),
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': COULEURS.route, 'line-width': largeurRang(2.4, 1.4) },
-      },
-      {
-        id: 'rail',
-        type: 'line',
-        source: 'decor',
-        filter: genre('rail'),
-        paint: { 'line-color': COULEURS.rail, 'line-width': largeur(1), 'line-dasharray': [4, 2] },
       },
       // Les photographies aériennes recouvrent le plan : les lignes, les stations et les projets restent par-dessus.
       { id: 'aerien', type: 'raster', source: 'aerien', layout: { visibility: 'none' } },

@@ -116,8 +116,12 @@ export default function Page() {
 
         <Section id="credits" titre="Données et crédits">
           <p>
-            Les cartes viennent d’OpenStreetMap, les habitants et les emplois de l’INSEE, le relief de l’IGN. La police est Figtree, sous
-            licence libre SIL Open Font License.
+            Le plan vient d’OpenStreetMap, dessiné par OpenFreeMap et OpenMapTiles ; les photographies aériennes et le relief viennent de
+            l’IGN, les habitants et les emplois de l’INSEE. La police est Figtree, sous licence libre SIL Open Font License.
+          </p>
+          <p>
+            Pour afficher le plan, votre navigateur le demande à OpenFreeMap, et les photographies aériennes à l’IGN quand vous les
+            choisissez : comme tout service en ligne, ils reçoivent l’adresse de votre connexion.
           </p>
         </Section>
       </div>
