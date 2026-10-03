@@ -20,6 +20,21 @@ type Version = { iso: string; date: string; titre: string; texte: string; groupe
  */
 const VERSIONS: Version[] = [
   {
+    iso: '2026-10-03',
+    date: '3 octobre 2026',
+    titre: 'Plus d’écran noir avec la traduction',
+    texte: 'Le jeu ne plante plus quand le navigateur propose de traduire la page.',
+    groupes: [
+      {
+        titre: 'Corrigé',
+        points: [
+          'Quand le navigateur traduisait la page, chaque projet décidé ou construit affichait un écran noir. Le jeu reste désormais en français et ne se laisse plus traduire, ce qui supprime le plantage.',
+          'Si la page s’arrête malgré tout, un écran en français propose de la recharger pour reprendre la partie là où elle en était.',
+        ],
+      },
+    ],
+  },
+  {
     iso: '2026-10-02',
     date: '2 octobre 2026',
     titre: 'L’inflation et un filtre pour la carte',
