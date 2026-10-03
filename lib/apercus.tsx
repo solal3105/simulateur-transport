@@ -6,6 +6,7 @@ import { catalogueDe, horizon, nombreProjets } from './catalogue'
 import { couleurLigne } from './couleurs'
 import { enLettres, n } from './format'
 import { FORMULE } from './formule'
+import { dessinLigne } from './geo'
 import { cadreMiniature, cheminsFond, cheminsReseau } from './miniature'
 import { stationsDuTrace } from './modele'
 import { polices } from './og'
@@ -350,7 +351,7 @@ export function imageReseau(ville: Ville, r: ReseauApercu) {
     ...cheminsReseau(DONNEES[ville.id].projets, { ...r.partie, l: [] }, ville),
     // Les points de passage guident le tracé sans être des stations : pas de rond pour eux.
     ...r.partie.l.map((l) => ({
-      d: cadreMiniature(ville).chemin([l.a]),
+      d: cadreMiniature(ville).chemin([dessinLigne(l.m, l.a, ville.latitude, l.b === 1)]),
       couleur: couleurLigne(l.m as ModeLigne, l.c),
       arrets: l.a.filter((_, i) => stationsDuTrace(l.a.length, l.p)[i]),
     })),

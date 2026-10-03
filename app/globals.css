@@ -131,8 +131,9 @@
 [data-proche='0'] .quartier {
   display: none;
 }
-/* Le nom d'une gare, à côté de son symbole, quand on zoome. */
-.nom-gare {
+/* Le nom d'une gare ou d'une station de vos lignes, à côté de son symbole, quand on zoome. */
+.nom-gare,
+.nom-station {
   padding: 2px 5px;
   border-radius: 5px;
   background: rgb(255 255 255 / 0.9);
@@ -144,7 +145,10 @@
   pointer-events: none;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
 }
-[data-gares='0'] .nom-gare {
+/* En vue d'ensemble, les noms se cachent : celui d'une station qu'on est en train de renommer reste. */
+[data-gares='0'] .nom-gare,
+[data-gares='0'] .nom-station,
+[data-gares='0'] .nom-arret:not([data-actif]) {
   display: none;
 }
 .bulle-station .maplibregl-popup-content {
