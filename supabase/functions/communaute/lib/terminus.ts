@@ -108,6 +108,12 @@ export const BOUTS_PROJETS: Record<
     depuis: [5.3663, 43.327],
     bouts: [{ nom: 'La Bricarde', pos: [5.3462, 43.369] }],
   },
+  'amp-t1-la-barasse': {
+    ligne: 'tram-T1',
+    mode: 'tram',
+    depuis: [5.4439, 43.2947],
+    bouts: [{ nom: 'Gare de La Barasse', pos: [5.4836, 43.2861] }],
+  },
   'amp-m2-saint-loup': {
     ligne: 'metro-M2',
     mode: 'metro',

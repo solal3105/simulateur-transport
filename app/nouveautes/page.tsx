@@ -22,9 +22,16 @@ const VERSIONS: Version[] = [
   {
     iso: '2026-10-03',
     date: '3 octobre 2026',
-    titre: 'Plus d’écran noir avec la traduction',
-    texte: 'Le jeu ne plante plus quand le navigateur propose de traduire la page.',
+    titre: 'Deux tramways à Marseille, et plus d’écran noir',
+    texte:
+      'Deux projets de tramway rejoignent le catalogue d’Aix-Marseille-Provence, et le jeu ne plante plus quand le navigateur traduit la page.',
     groupes: [
+      {
+        titre: 'Nouveau',
+        points: [
+          'À Aix-Marseille-Provence, le catalogue propose deux tramways inscrits au Plan de mobilité de la Métropole : le prolongement du T1 des Caillols à la gare de La Barasse, pour 216 M€, et un tramway de La Blancarde à Dromel par la voie ferrée du Prado, pour 63 M€. Leurs voyageurs et la place de leurs stations n’ont jamais été publiés : nous les estimons, et leur fiche le dit.',
+        ],
+      },
       {
         titre: 'Corrigé',
         points: [
