@@ -243,6 +243,137 @@ const projets: Projet[] = [
     ],
   },
   {
+    id: 'amp-t1-la-barasse',
+    nom: 'Tramway T1 jusqu’à La Barasse',
+    genre: 'Prolongement de tramway',
+    description:
+      'Le tramway T1 est prolongé des Caillols jusqu’à la gare de La Barasse, sur environ 5 km. Il dessert l’hôpital des Caillols et la zone commerciale de La Valentine.',
+    mode: 'tram',
+    cout: 216,
+    voyageurs: 9200,
+    duree: 5,
+    trace: 'amp-t1-la-barasse',
+    prolonge: 'tram-T1',
+    parcours: [
+      [
+        { nom: 'Les Caillols', pos: [5.4439, 43.2947] },
+        { nom: 'La Moularde', pos: [5.4487, 43.2968] },
+        { pos: [5.4522, 43.2988] },
+        { nom: 'Collet des Comtes', pos: [5.4551, 43.2992] },
+        { pos: [5.458, 43.2997] },
+        { nom: 'Les Caillols Hôpital', pos: [5.4599, 43.2979] },
+        { pos: [5.4613, 43.2948] },
+        { pos: [5.4626, 43.2921] },
+        { pos: [5.4636, 43.2902] },
+        { nom: 'Gare de Saint-Marcel', pos: [5.4664, 43.2893] },
+        { nom: 'La Montre', pos: [5.4719, 43.2907] },
+        { nom: 'Centre commercial La Valentine', pos: [5.4769, 43.2917] },
+        { pos: [5.4778, 43.2905] },
+        { nom: 'Saint-Menet', pos: [5.4812, 43.2894] },
+        { pos: [5.4806, 43.2876] },
+        { nom: 'Gare de La Barasse', pos: [5.4836, 43.2861] },
+      ],
+    ],
+    statut:
+      'La Métropole a annoncé ses études de faisabilité en 2024, sans programme ni calendrier ; la presse parle d’une mise en service vers 2035.',
+    precisions: [
+      'Le coût de 216 M€ vient du Plan de mobilité de 2021, qui visait une mise en service en 2030 et ne dit pas en quelle année ce prix est compté.',
+      'Aucune fréquentation ni durée de chantier n’a été publiée : nous les estimons comme pour les lignes que vous tracez.',
+      'Le Plan de mobilité annonçait plusieurs tracés à étudier, faute de place dans les rues, et aucun n’a été publié : le nôtre suit les rues des bus actuels, avec des stations à leurs arrêts.',
+    ],
+    estime: { voyageurs: true, duree: true },
+    sources: [
+      {
+        titre:
+          'Métropole d’Aix-Marseille-Provence, Plan de mobilité 2020-2030 : T1 prolongé des Caillols à la gare de La Barasse, 5,3 km, 216 M€, mise en service prévue en 2030, plusieurs tracés à étudier',
+        url: 'https://ampmetropole.fr/wp-content/uploads/2022/08/2_Plan_de_Mobilite%CC%81.pdf',
+        pages: 'p. 96, 101 et 106 du PDF',
+      },
+      {
+        titre: 'Métropole d’Aix-Marseille-Provence, Plan de mobilité 2020-2030, note financière : tramway Les Caillols, La Barasse, 216 M€',
+        url: 'https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf',
+        pages: 'p. 5 du PDF',
+      },
+      {
+        titre:
+          'Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », 18 mars 2024 : 5 à 6 km jusqu’à La Valentine et La Barasse, desserte de l’hôpital des Caillols, projet à l’étude',
+        url: 'https://ampmetropole.fr/mobilite-transports/la-metropole-accelere-la-revolution-des-transports-2/',
+      },
+      {
+        titre: 'Made in Marseille, 14 mars 2024 : études de faisabilité à engager, horizon 2035',
+        url: 'https://madeinmarseille.net/actualite/marseille/156993-des-nouveaux-tramways-a-letude-vers-borely-et-la-valentine/',
+      },
+      {
+        titre:
+          'Métropole d’Aix-Marseille-Provence, dossier de presse mobilité, juillet 2025 : la présidente veut un tramway vers La Valentine',
+        url: 'https://ampmetropole.fr/wp-content/uploads/2025/07/DP_Projets-Mobilite_VF.pdf',
+        pages: 'p. 3',
+      },
+    ],
+  },
+  {
+    id: 'amp-tram-blancarde-dromel',
+    nom: 'Tramway de La Blancarde à Dromel',
+    genre: 'Nouvelle ligne de tramway',
+    description:
+      'Un tramway relie La Blancarde, où passent le T1 et le T2, à Sainte-Marguerite Dromel, sur le métro 2 et le T3. Sur ses 3,4 km, il emprunte d’abord 1,4 km de la voie ferrée de marchandises du Prado, près de l’hôpital de la Timone, puis traverse la Capelette.',
+    mode: 'tram',
+    cout: 63,
+    voyageurs: 14000,
+    duree: 5,
+    trace: 'amp-tram-blancarde-dromel',
+    parcours: [
+      [
+        { nom: 'La Blancarde', pos: [5.4062, 43.2958] },
+        { pos: [5.4065, 43.2937] },
+        { nom: 'Hôpital de la Timone', pos: [5.4066, 43.2904] },
+        { pos: [5.4068, 43.2874] },
+        { nom: 'La Capelette', pos: [5.407, 43.2845] },
+        { pos: [5.4057, 43.2827] },
+        { nom: 'Palais Omnisports', pos: [5.4018, 43.2813] },
+        { pos: [5.4004, 43.2797] },
+        { pos: [5.4015, 43.2755] },
+        { nom: 'Sainte-Marguerite Dromel', pos: [5.4021, 43.2712] },
+      ],
+    ],
+    statut: 'À l’étude depuis 2021, sans programme ni calendrier : en 2023, la Métropole n’envisageait pas de travaux avant 2030.',
+    precisions: [
+      'Le coût de 63 M€ vient du Plan de mobilité de 2021, qui visait une mise en service en 2027 et ne dit pas en quelle année ce prix est compté. Reprendre la voie ferrée évite une partie des travaux sur les réseaux souterrains.',
+      'Deux trains de marchandises empruntent encore la voie ferrée chaque jour : en 2023, les études devaient dire si le tram pourrait la partager.',
+      'Aucune fréquentation ni durée de chantier n’a été publiée : nous les estimons comme pour les lignes que vous tracez.',
+      'Ni le tracé après la voie ferrée ni les stations n’ont été publiés : nous les plaçons à quelques centaines de mètres près.',
+      'En 2024, la Métropole a aussi parlé de pousser ce tram jusqu’à l’Escale Borély, sans aucun chiffre.',
+    ],
+    estime: { voyageurs: true, duree: true },
+    sources: [
+      {
+        titre:
+          'Métropole d’Aix-Marseille-Provence, Plan de mobilité 2020-2030 : tramway de La Blancarde à Dromel sur la voie ferrée du Prado, 3,4 km, 63 M€, mise en service prévue en 2027',
+        url: 'https://ampmetropole.fr/wp-content/uploads/2022/08/2_Plan_de_Mobilite%CC%81.pdf',
+        pages: 'p. 96, 101 et 106 du PDF',
+      },
+      {
+        titre: 'Métropole d’Aix-Marseille-Provence, Plan de mobilité 2020-2030, note financière : tramway Blancarde, Dromel, 63 M€',
+        url: 'https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf',
+        pages: 'p. 5 du PDF',
+      },
+      {
+        titre:
+          'Made in Marseille, 26 juin 2023 : 1,4 km sur la voie ferrée, deux trains de marchandises par jour, 63 M€, pas de travaux avant 2030',
+        url: 'https://madeinmarseille.net/urbanisme-marseille/transport-2/139546-le-discret-tramway-entre-la-blancarde-et-dromel-toujours-dans-les-tuyaux/',
+      },
+      {
+        titre: 'Made in Marseille, 4 février 2021 : appel d’offres pour l’étude de faisabilité',
+        url: 'https://madeinmarseille.net/actualite/86787-la-metropole-va-lancer-une-etude-pour-un-tramway-entre-blancarde-et-dromel/',
+      },
+      {
+        titre:
+          'Métropole d’Aix-Marseille-Provence, « La Métropole accélère la révolution des transports », 18 mars 2024 : tramway de La Blancarde vers l’Escale Borély, 5 km, à l’étude',
+        url: 'https://ampmetropole.fr/mobilite-transports/la-metropole-accelere-la-revolution-des-transports-2/',
+      },
+    ],
+  },
+  {
     id: 'amp-m2-saint-loup',
     nom: 'Métro 2 jusqu’à Saint-Loup',
     genre: 'Prolongement de métro',

@@ -276,6 +276,22 @@
      "url": "https://deliberations.ampmetropole.fr/documents/metropole/deliberations/2024/12/05/ANNEXE/110783_PJ_Belle%20de%20mai_VDEF.pdf"
     }
    },
+   "amp-t1-la-barasse": {
+    "classe": "etude",
+    "explication": "Le prolongement du T1 des Caillols à La Barasse figure au plan de mobilité 2020-2030 pour 216 M€, mais ni parmi les 16 projets du plan Marseille en Grand ni dans le rapport d’orientation budgétaire 2026 : la Métropole a annoncé ses études de faisabilité en 2024, sans financement ni calendrier.",
+    "source": {
+     "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030, annexe 5, note financière (action TC09-7, tramway Les Caillols, La Barasse)",
+     "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
+    }
+   },
+   "amp-tram-blancarde-dromel": {
+    "classe": "etude",
+    "explication": "Le tramway de La Blancarde à Dromel figure au plan de mobilité 2020-2030 pour 63 M€, mais ni parmi les 16 projets du plan Marseille en Grand ni dans le rapport d’orientation budgétaire 2026 : étudié depuis 2021, il n’a ni financement ni calendrier, et la Métropole n’envisageait pas de travaux avant 2030.",
+    "source": {
+     "titre": "Métropole d’Aix-Marseille-Provence, plan de mobilité 2020-2030, annexe 5, note financière (action TC09-6, tramway Blancarde, Dromel)",
+     "url": "https://ampmetropole.fr/wp-content/uploads/2022/08/8_Plan_de_Mobilite%CC%81_Annexe_5_note_financiere.pdf"
+    }
+   },
    "amp-m2-saint-loup": {
     "classe": "etude",
     "explication": "Le métro vers l’est figure au plan de mobilité 2020-2030 pour 806 M€ mais pas parmi les 16 projets du plan Marseille en Grand, et il n’a ni financement ni calendrier : en octobre 2023, la présidente de la Métropole le disait non abandonné mais suspendu à un financement de l’État.",
